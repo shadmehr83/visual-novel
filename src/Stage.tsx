@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import type { Project, Scene, Region } from "./model";
+import { sampleMotion } from "./motion";
 import { imageMask } from "./wand";
 import type { RegionEditor } from "./Zones";
 import { animateSprite } from "./animation";
@@ -54,9 +55,11 @@ export function Stage({
     .filter((l) => l.enabled && l.kind === "global")
     .reduce((n, l) => n * l.intensity * zoneLevel(l), 1);
   const activeRegion =
-    regionEditor?.kind === "rain"
-      ? e.rainZones?.find((r) => r.id === regionEditor.id)
-      : e.lights?.find((l) => l.id === regionEditor?.id)?.region;
+    regionEditor?.kind === "motion"
+      ? e.motionZones?.find((w) => w.id === regionEditor.id)?.region
+      : regionEditor?.kind === "rain"
+        ? e.rainZones?.find((r) => r.id === regionEditor.id)
+        : e.lights?.find((l) => l.id === regionEditor?.id)?.region;
   const loopingLight =
     loop.enabled &&
     e.light > 0 &&
@@ -71,7 +74,12 @@ export function Stage({
       !e.glass &&
       !scene.keyframes?.length &&
       !loopingLight &&
-      !zonedAnimation
+      !zonedAnimation &&
+      !(
+        e.motionZones?.some((w) => w.enabled) &&
+        !project.settings.reducedEffects &&
+        !reducedMotion
+      )
     )
       return;
     const origin = performance.now();
@@ -96,6 +104,9 @@ export function Stage({
     loop.values.join(","),
     zonedAnimation,
     e.lights,
+    e.motionZones,
+    reducedMotion,
+    project.settings.reducedEffects,
   ]);
   const points = e.mask.map((p) => `${p.x},${p.y}`).join(" ");
   const asset = project.assets.find((a) => a.id === scene.background);
@@ -265,19 +276,28 @@ export function Stage({
                   <stop offset="1" stopColor="white" stopOpacity="0" />
                 </radialGradient>
                 <mask id={"zone-radius-" + l.id}>
-                  <ellipse
-                    cx={l.x}
-                    cy={l.y}
-                    rx={Math.max(
-                      1,
-                      l.radius * (1 + l.spread * (zoneLevel(l) - 1)),
-                    )}
-                    ry={Math.max(
-                      1,
-                      l.radius * (1 + l.spread * (zoneLevel(l) - 1)),
-                    )}
-                    fill={"url(#zone-falloff-" + l.id + ")"}
-                  />
+                  {l.shape === "region" ? (
+                    <rect
+                      width="1000"
+                      height="563"
+                      fill="white"
+                      fillOpacity={Math.min(1, l.intensity * zoneLevel(l))}
+                    />
+                  ) : (
+                    <ellipse
+                      cx={l.x}
+                      cy={l.y}
+                      rx={Math.max(
+                        1,
+                        l.radius * (1 + l.spread * (zoneLevel(l) - 1)),
+                      )}
+                      ry={Math.max(
+                        1,
+                        l.radius * (1 + l.spread * (zoneLevel(l) - 1)),
+                      )}
+                      fill={"url(#zone-falloff-" + l.id + ")"}
+                    />
+                  )}
                 </mask>
                 <radialGradient id={"zone-gradient-" + l.id}>
                   <stop
@@ -290,7 +310,7 @@ export function Stage({
                   <rect
                     width="1000"
                     height="563"
-                    fill={l.region ? "black" : "white"}
+                    fill={l.region || l.shape === "region" ? "black" : "white"}
                   />
                   {l.region?.enabled &&
                     (l.region.path ? (
@@ -311,6 +331,60 @@ export function Stage({
                 </mask>
               </g>
             ))}
+          {(e.motionZones || []).map((w) => {
+            const offset = sampleMotion(
+              w,
+              time,
+              project.settings.reducedEffects || reducedMotion,
+            );
+            return (
+              <g key={w.id}>
+                <mask id={"motion-mask-" + w.id}>
+                  <rect width="1000" height="563" fill="black" />
+                  {w.region.enabled &&
+                    (w.region.path ? (
+                      <path
+                        transform={transform}
+                        d={w.region.path}
+                        fill="white"
+                      />
+                    ) : (
+                      <polygon
+                        transform={transform}
+                        points={w.region.points
+                          .map((p) => `${p.x},${p.y}`)
+                          .join(" ")}
+                        fill="white"
+                      />
+                    ))}
+                </mask>
+                <filter
+                  id={"motion-filter-" + w.id}
+                  x="-10%"
+                  y="-10%"
+                  width="120%"
+                  height="120%"
+                  colorInterpolationFilters="sRGB"
+                >
+                  <feTurbulence
+                    type="fractalNoise"
+                    baseFrequency="0.012 0.035"
+                    numOctaves="2"
+                    seed="17"
+                    result="noise"
+                  />
+                  <feDisplacementMap
+                    in="SourceGraphic"
+                    in2="noise"
+                    scale={offset.warp}
+                    xChannelSelector="R"
+                    yChannelSelector="G"
+                  />
+                  <feOffset dx={offset.dx} dy={offset.dy} />
+                </filter>
+              </g>
+            );
+          })}
         </defs>
         <g style={{ filter: `brightness(${globalLevel})` }}>
           <g
@@ -414,6 +488,30 @@ export function Stage({
               );
             })}
           </g>
+          <g id="scene-motion">
+            {(e.motionZones || [])
+              .filter((w) => w.enabled)
+              .map((w) => {
+                const offset = sampleMotion(
+                  w,
+                  time,
+                  project.settings.reducedEffects || reducedMotion,
+                );
+                return (
+                  <g
+                    key={w.id}
+                    data-motion-zone={w.id}
+                    data-motion-offset={offset.dx}
+                    mask={"url(#motion-mask-" + w.id + ")"}
+                  >
+                    <g filter={"url(#motion-filter-" + w.id + ")"}>
+                      <use href="#scene-base" />
+                      <use href="#scene-sprites" />
+                    </g>
+                  </g>
+                );
+              })}
+          </g>
         </g>
         {(e.lights || [])
           .filter((l) => l.enabled && l.kind === "local")
@@ -432,6 +530,7 @@ export function Stage({
               >
                 <use href="#scene-base" />
                 <use href="#scene-sprites" />
+                <use href="#scene-motion" />
                 <rect width="1000" height="563" fill={l.color} opacity=".15" />
               </g>
             </g>

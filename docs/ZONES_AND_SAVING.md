@@ -25,3 +25,19 @@ During non-choice dialogue, the player can write and send a custom response alon
 The header save icon now opens a clear project-file save panel. A complete JSON includes original backgrounds/audio and all scene effects; browser autosave alone stays on the current device. File-system saving reports success only after the write/close completes; cancellation and errors are shown. Where the browser does not support a file picker, the app requests a download and tells the user to retain it.
 
 See ../projects/README.md for uploading the project independently of the engine, or enabling the optional authenticated one-button publisher. The GitHub project snapshot moved from `src/saved-project.json` to `projects/published.stillframe.json` without changing the existing authored artwork or settings. Deployments package that file into the normal and single-file editors. A source push and a browser save are different operations; neither transfers uncommitted browser storage automatically.
+
+## Pinned workspace and panel placement
+
+On desktop, the app fits the viewport. The inspector, story/assets library and bottom dialogue editor scroll independently; creating more effects no longer pushes the scene off the page. Collapse the bottom dialogue editor for more stage space. Use the inspector's **Rain**, **Lighting**, **Motion**, **Save**, or **All** panel buttons to shorten the controls you are working with. These are separate views in one inspector window.
+
+**Controls placement** supports right dock, left dock, and a floating window. In floating mode, use **Drag window** to position the inspector; **Reset panels** beside the scene breadcrumb returns it to the right. Placement is local UI state and does not change the authored project. On narrow screens the inspector uses a bounded scrolling section instead of an overlapping floating desktop window.
+
+## Selective depth light without a radius
+
+For a local light, choose **Light coverage → Selected area only (no radius)**. Use **Draw region** or **Magic wand** to define the affected area. That entire shape receives the light intensity, colour and cycle without a circular falloff. This supports selective bright areas and depth against darker global illumination. **Soft radial light** retains the prior radial/expanding behavior and can also be clipped to a selected area. The light wand and rain wand use the same local connected-colour selection; neither is semantic object recognition.
+
+## Wind and cloth / plant motion
+
+Open **Motion → Add motion zone**. Draw the area or select it with **Magic wand**, then **Finish zone editing**. Set sway strength (0–20 scene pixels), seconds per cycle, direction, and additional ripple distortion (0–15). Motion zones are independent and saved with the complete project JSON and published snapshot; they also render in the standalone editor and player. Existing original image files remain unchanged.
+
+The renderer displaces/offsets the underlying background and sprite pixels inside a fixed selected region. It simulates subtle 2D cloth or plant motion; it is not 3D cloth simulation, object extraction, hidden-background reconstruction, or a semantic selection model. Multicoloured objects may require a polygon or several regions. Small motion strengths reduce edge artifacts. Reduced effects or the system reduced-motion preference pauses motion; disabling a motion zone or Disable all effects removes its contribution. The animation loop is cleaned up on scene change/unmount.

@@ -72,7 +72,7 @@ export function ProjectSave({ project }: { project: Project }) {
     }
   }
   return (
-    <section className="property-section">
+    <section className="property-section" data-effect-panel="Save">
       <h3>Save & move your project</h3>
       <p className="small muted">
         Browser autosave stays on this device. A project file includes

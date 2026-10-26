@@ -126,6 +126,30 @@ export default function App() {
   const [runtime, setRuntime] = useState<Runtime | null>(null);
   const [playing, setPlaying] = useState(false);
   const [tab, setTab] = useState("Scenes");
+  const [effectPanel, setEffectPanel] = useState("All");
+  const [placement, setPlacement] = useState(() => {
+    try {
+      return localStorage.getItem("stillframe-controls-placement") || "right";
+    } catch {
+      return "right";
+    }
+  });
+  const [floatPosition, setFloatPosition] = useState({
+    x: Math.max(0, window.innerWidth - 320),
+    y: 80,
+  });
+  const drag = useRef<{
+    x: number;
+    y: number;
+    left: number;
+    top: number;
+  } | null>(null);
+  const [collapseBottom, setCollapseBottom] = useState(false);
+  useEffect(() => {
+    try {
+      localStorage.setItem("stillframe-controls-placement", placement);
+    } catch {}
+  }, [placement]);
   const [inspector, setInspector] = useState("Atmosphere");
   const [bottom, setBottom] = useState("Dialogue");
   const [regionEditor, setRegionEditor] = useState<RegionEditor | null>(null);
@@ -515,7 +539,7 @@ export default function App() {
           </button>
         </div>
       </header>
-      <div className="workspace">
+      <div className={"workspace controls-" + placement}>
         <nav className="rail">
           {[
             [Film, "Scenes"],
@@ -899,6 +923,11 @@ export default function App() {
               Scenes <ChevronRight size={12} />
               <b>{scene.title}</b>
             </div>
+            {placement !== "right" && (
+              <button onClick={() => setPlacement("right")}>
+                Reset panels
+              </button>
+            )}
             <span className="badge">
               {playing ? "PLAYTEST" : "SCENE EDITOR"}
             </span>
@@ -957,143 +986,156 @@ export default function App() {
                 <span className="live-dot" /> <small>LIVE PREVIEW</small>
               </div>
             </div>
-            <Stage
-              project={project}
-              scene={scene}
-              playing={playing}
-              maskMode={maskMode && !playing}
-              onMask={(v) => effect("mask", v)}
-              regionEditor={playing ? null : regionEditor}
-              onRegion={(region) =>
-                updateScene((s) => {
-                  if (regionEditor?.kind === "rain") {
-                    const at =
-                      s.effects.rainZones?.findIndex(
-                        (r) => r.id === region.id,
-                      ) ?? -1;
-                    if (at >= 0) s.effects.rainZones![at] = region;
-                  } else {
-                    const light = s.effects.lights?.find(
-                      (l) => l.id === regionEditor?.id,
-                    );
-                    if (light) light.region = region;
-                  }
-                })
-              }
-            >
-              {playing && <SceneAudio project={project} scene={scene} />}
-              {playing && runtime && node.qte && (
-                <Qte
-                  key={runtime.scene + runtime.node + runtime.history.length}
-                  project={project}
-                  runtime={runtime}
-                  onResolve={setRuntime}
-                />
-              )}
-              {!maskMode && !regionEditor && !(playing && node.qte) && (
-                <div
-                  className={
-                    "dialogue-overlay " +
-                    (!playing && hideDialogue ? "dialogue-hidden" : "")
-                  }
-                >
-                  {(node.portrait ||
-                    (node.speaker === "Mara" &&
-                      project.characters[0]?.portrait)) && (
-                    <img
-                      className="dialogue-portrait"
-                      src={
-                        project.assets.find(
-                          (a) =>
-                            a.id ===
-                            (node.portrait || project.characters[0]?.portrait),
-                        )?.data
-                      }
-                    />
-                  )}
-                  <span className="dialogue-speaker">
-                    {node.speaker === "Mara"
-                      ? project.characters[0]?.name
-                      : node.speaker}
-                  </span>
-                  <p>
-                    {node.text.replace(/\{(\w+)\}/g, (_, key) =>
-                      String(
-                        (playing ? runtime?.values : project.variables)?.[
-                          key
-                        ] || "{" + key + "}",
-                      ),
+            <div className="stage-frame">
+              <Stage
+                project={project}
+                scene={scene}
+                playing={playing}
+                maskMode={maskMode && !playing}
+                onMask={(v) => effect("mask", v)}
+                regionEditor={playing ? null : regionEditor}
+                onRegion={(region) =>
+                  updateScene((s) => {
+                    if (regionEditor?.kind === "rain") {
+                      const at =
+                        s.effects.rainZones?.findIndex(
+                          (r) => r.id === region.id,
+                        ) ?? -1;
+                      if (at >= 0) s.effects.rainZones![at] = region;
+                    } else if (regionEditor?.kind === "motion") {
+                      const motion = s.effects.motionZones?.find(
+                        (w) => w.id === regionEditor.id,
+                      );
+                      if (motion) motion.region = region;
+                    } else {
+                      const light = s.effects.lights?.find(
+                        (l) => l.id === regionEditor?.id,
+                      );
+                      if (light) light.region = region;
+                    }
+                  })
+                }
+              >
+                {playing && <SceneAudio project={project} scene={scene} />}
+                {playing && runtime && node.qte && (
+                  <Qte
+                    key={runtime.scene + runtime.node + runtime.history.length}
+                    project={project}
+                    runtime={runtime}
+                    onResolve={setRuntime}
+                  />
+                )}
+                {!maskMode && !regionEditor && !(playing && node.qte) && (
+                  <div
+                    className={
+                      "dialogue-overlay " +
+                      (!playing && hideDialogue ? "dialogue-hidden" : "")
+                    }
+                  >
+                    {(node.portrait ||
+                      (node.speaker === "Mara" &&
+                        project.characters[0]?.portrait)) && (
+                      <img
+                        className="dialogue-portrait"
+                        src={
+                          project.assets.find(
+                            (a) =>
+                              a.id ===
+                              (node.portrait ||
+                                project.characters[0]?.portrait),
+                          )?.data
+                        }
+                      />
                     )}
-                  </p>
-                  {playing ? (
-                    <>
-                      {runtime?.ended ? (
-                        <button className="continue" onClick={() => play(true)}>
-                          End of opening chapter · Play again{" "}
-                          <RotateCcw size={13} />
-                        </button>
-                      ) : availableChoices.length ? (
-                        <div className="play-choices">
-                          {availableChoices.map((c) => (
-                            <button key={c.id} onClick={() => step(c.id)}>
-                              {c.text}
-                              <ChevronRight size={13} />
-                            </button>
-                          ))}
-                        </div>
-                      ) : (
-                        <button className="continue" onClick={() => step()}>
-                          Continue <ChevronRight size={15} />
-                        </button>
-                      )}
-                      {!runtime?.ended &&
-                        !node.choices.length &&
-                        node.allowCustomResponse !== false && (
-                          <form
-                            className="custom-response"
-                            onSubmit={(ev) => {
-                              ev.preventDefault();
-                              try {
-                                setRuntime((r) =>
-                                  respond(project, r!, customReply),
-                                );
-                                setCustomReply("");
-                              } catch (e) {
-                                setError(String(e));
-                              }
-                            }}
-                          >
-                            <input
-                              aria-label="Custom dialogue response"
-                              placeholder="Or write your own response…"
-                              maxLength={1000}
-                              value={customReply}
-                              onChange={(ev) => setCustomReply(ev.target.value)}
-                            />
-                            <button disabled={!customReply.trim()}>
-                              Send response
-                            </button>
-                            <small>
-                              Recorded in this playthrough; the authored story
-                              path continues.
-                            </small>
-                          </form>
-                        )}
-                    </>
-                  ) : (
-                    <span className="dialogue-hint">
-                      DIALOGUE PREVIEW <span>◇</span>
+                    <span className="dialogue-speaker">
+                      {node.speaker === "Mara"
+                        ? project.characters[0]?.name
+                        : node.speaker}
                     </span>
-                  )}
-                </div>
-              )}
-              {maskMode && (
-                <div className="mask-hint">
-                  Click to add a vertex · use the inspector to remove the last
-                  point
-                </div>
-              )}
-            </Stage>
+                    <p>
+                      {node.text.replace(/\{(\w+)\}/g, (_, key) =>
+                        String(
+                          (playing ? runtime?.values : project.variables)?.[
+                            key
+                          ] || "{" + key + "}",
+                        ),
+                      )}
+                    </p>
+                    {playing ? (
+                      <>
+                        {runtime?.ended ? (
+                          <button
+                            className="continue"
+                            onClick={() => play(true)}
+                          >
+                            End of opening chapter · Play again{" "}
+                            <RotateCcw size={13} />
+                          </button>
+                        ) : availableChoices.length ? (
+                          <div className="play-choices">
+                            {availableChoices.map((c) => (
+                              <button key={c.id} onClick={() => step(c.id)}>
+                                {c.text}
+                                <ChevronRight size={13} />
+                              </button>
+                            ))}
+                          </div>
+                        ) : (
+                          <button className="continue" onClick={() => step()}>
+                            Continue <ChevronRight size={15} />
+                          </button>
+                        )}
+                        {!runtime?.ended &&
+                          !node.choices.length &&
+                          node.allowCustomResponse !== false && (
+                            <form
+                              className="custom-response"
+                              onSubmit={(ev) => {
+                                ev.preventDefault();
+                                try {
+                                  setRuntime((r) =>
+                                    respond(project, r!, customReply),
+                                  );
+                                  setCustomReply("");
+                                } catch (e) {
+                                  setError(String(e));
+                                }
+                              }}
+                            >
+                              <input
+                                aria-label="Custom dialogue response"
+                                placeholder="Or write your own response…"
+                                maxLength={1000}
+                                value={customReply}
+                                onChange={(ev) =>
+                                  setCustomReply(ev.target.value)
+                                }
+                              />
+                              <button disabled={!customReply.trim()}>
+                                Send response
+                              </button>
+                              <small>
+                                Recorded in this playthrough; the authored story
+                                path continues.
+                              </small>
+                            </form>
+                          )}
+                      </>
+                    ) : (
+                      <span className="dialogue-hint">
+                        DIALOGUE PREVIEW <span>◇</span>
+                      </span>
+                    )}
+                  </div>
+                )}
+                {maskMode && (
+                  <div className="mask-hint">
+                    Click to add a vertex · use the inspector to remove the last
+                    point
+                  </div>
+                )}
+              </Stage>
+            </div>
             <div className="stage-footer">
               <div>
                 <span className="live-dot" />{" "}
@@ -1117,8 +1159,20 @@ export default function App() {
               </button>
             </div>
           </section>
-          <section className="bottom-panel">
+          <section
+            className={"bottom-panel " + (collapseBottom ? "collapsed" : "")}
+          >
             <div className="bottom-tabs">
+              <button
+                aria-label={
+                  collapseBottom
+                    ? "Expand dialogue editor"
+                    : "Collapse dialogue editor"
+                }
+                onClick={() => setCollapseBottom((v) => !v)}
+              >
+                {collapseBottom ? "Expand" : "Collapse"}
+              </button>
               {["Dialogue", "State & clues", "Event log"].map((t) => (
                 <button
                   key={t}
@@ -1430,7 +1484,83 @@ export default function App() {
             )}
           </section>
         </main>
-        <aside className="inspector">
+        <aside
+          className="inspector"
+          data-panel={effectPanel}
+          style={
+            placement === "float"
+              ? { left: floatPosition.x, top: floatPosition.y }
+              : undefined
+          }
+        >
+          <div className="panel-layout">
+            <label>
+              Controls placement
+              <select
+                aria-label="Controls placement"
+                value={placement}
+                onChange={(event) => setPlacement(event.target.value)}
+              >
+                <option value="right">Dock right</option>
+                <option value="left">Dock left</option>
+                <option value="float">Floating window</option>
+              </select>
+            </label>
+            {placement === "float" && (
+              <button
+                aria-label="Drag controls"
+                style={{ touchAction: "none" }}
+                onPointerDown={(event) => {
+                  event.currentTarget.setPointerCapture(event.pointerId);
+                  drag.current = {
+                    x: event.clientX,
+                    y: event.clientY,
+                    left: floatPosition.x,
+                    top: floatPosition.y,
+                  };
+                }}
+                onPointerMove={(event) => {
+                  if (!drag.current) return;
+                  setFloatPosition({
+                    x: Math.max(
+                      0,
+                      Math.min(
+                        window.innerWidth - 300,
+                        drag.current.left + event.clientX - drag.current.x,
+                      ),
+                    ),
+                    y: Math.max(
+                      0,
+                      Math.min(
+                        window.innerHeight -
+                          Math.min(window.innerHeight * 0.75, 800),
+                        drag.current.top + event.clientY - drag.current.y,
+                      ),
+                    ),
+                  });
+                }}
+                onPointerUp={() => {
+                  drag.current = null;
+                }}
+              >
+                Drag window
+              </button>
+            )}
+          </div>
+          <div className="effect-tabs" role="group" aria-label="Effect panels">
+            {["All", "Rain", "Lighting", "Motion", "Save"].map((panel) => (
+              <button
+                key={panel}
+                className={effectPanel === panel ? "active" : ""}
+                onClick={() => {
+                  setEffectPanel(panel);
+                  setInspector("Atmosphere");
+                }}
+              >
+                {panel}
+              </button>
+            ))}
+          </div>
           <div className="panel-heading">
             <span>
               <SlidersHorizontal size={15} /> Scene properties
@@ -1474,7 +1604,10 @@ export default function App() {
                     if (v) setMaskMode(false);
                   }}
                 />
-                <section className="property-section">
+                <section
+                  className="property-section"
+                  data-effect-panel="Lighting"
+                >
                   <h3>
                     <Sun size={15} /> Lighting & colour{" "}
                     <span className="tiny-dot" />
@@ -1546,7 +1679,7 @@ export default function App() {
                     />
                   </details>
                 </section>
-                <section className="property-section">
+                <section className="property-section" data-effect-panel="Rain">
                   <h3>
                     <CloudRain size={16} /> Falling rain{" "}
                     <input
@@ -1679,6 +1812,9 @@ export default function App() {
                     className="wide subtle"
                     onClick={() =>
                       updateScene((s) => {
+                        s.effects.motionZones?.forEach(
+                          (w) => (w.enabled = false),
+                        );
                         s.effects.lights?.forEach((l) => (l.enabled = false));
                         s.effects.rain = false;
                         s.effects.glass = false;

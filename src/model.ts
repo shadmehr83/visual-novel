@@ -61,6 +61,7 @@ export const zoneLightSchema = z.object({
   name: z.string(),
   enabled: z.boolean(),
   kind: z.enum(["global", "local"]),
+  shape: z.enum(["radial", "region"]).optional(),
   intensity: z.number().min(0).max(3),
   color: z.string().regex(/^#[0-9a-fA-F]{6}$/),
   x: z.number().min(0).max(1000),
@@ -72,10 +73,22 @@ export const zoneLightSchema = z.object({
 });
 export type Region = z.infer<typeof regionSchema>;
 export type ZoneLight = z.infer<typeof zoneLightSchema>;
+export const motionZoneSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  enabled: z.boolean(),
+  strength: z.number().min(0).max(20),
+  seconds: z.number().min(0.5).max(12),
+  direction: z.number().min(-180).max(180),
+  distortion: z.number().min(0).max(15),
+  region: regionSchema,
+});
+export type MotionZone = z.infer<typeof motionZoneSchema>;
 export const effectsSchema = z.object({
   lightLoop: lightLoopSchema.optional(),
   rainZones: z.array(regionSchema).max(30).optional(),
   lights: z.array(zoneLightSchema).max(20).optional(),
+  motionZones: z.array(motionZoneSchema).max(15).optional(),
   rain: z.boolean(),
   density: z.number().min(0).max(200),
   speed: z.number().min(0).max(3),
