@@ -176,6 +176,7 @@ export default function App() {
     top: number;
   } | null>(null);
   const [collapseBottom, setCollapseBottom] = useState(false);
+  useEffect(()=>setCollapseBottom(false),[workspace.dialogueMode]);
   useEffect(() => {
     try {
       localStorage.setItem("stillframe-controls-placement", placement);

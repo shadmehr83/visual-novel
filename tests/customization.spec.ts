@@ -42,7 +42,9 @@ test("story collapses, dividers resize, layout modes restore page scrolling and 
     "none",
   );
   await inspector.getByLabel("Editor preview zoom", { exact: true }).fill("1");
+  await page.getByRole('button',{name:'Collapse dialogue editor',exact:true}).click();
   await inspector.getByLabel("Dialogue layout").selectOption("page");
+  await expect(page.locator('.node-fields')).toBeVisible();
   await expect(page.locator(".app")).toHaveClass(/page-layout/);
   expect(
     await page.evaluate(
