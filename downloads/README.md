@@ -13,3 +13,7 @@ For future changes: run `npm ci`, then `npm run build`, and replace this ZIP wit
 ## Single-file HTML editor
 
 Open `stillframe-studio.html` on GitHub and choose **Download raw file**, then save it and open it in a modern desktop browser. This is the full authoring editor in one file, with a bundled player exporter. The local file supports the offline preset helper; real provider AI needs the hosted backend. Export/Open project transfers your authored work between browser locations. See ../docs/LOCAL_EDITOR.md for details and My Sites publication limitations.
+
+## Complete handoff document
+
+[Visual_Novel_Studio_Complete_Handoff.docx](Visual_Novel_Studio_Complete_Handoff.docx) collects the original specification, project history, source/HTML/hosting links, implemented features, verification limits, all setup methods, AI and voice configuration, data migration instructions, and a continuation prompt for the destination website-building assistant. Open the file page and select **Download raw file**. No credential values are included.
