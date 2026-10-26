@@ -91,3 +91,9 @@ Click **Download local editor** in the production app, or download `downloads/st
 `src/saved-project.json` preserves the exported **The space between us** project, including its imported Rainy Cafe Conversation background and authored lighting/rain settings. A browser without a local project opens this snapshot. Existing local projects remain in place; **Load GitHub snapshot** loads the bundled snapshot with editor undo available. The source snapshot is the portable authoring file, not an HTML player export.
 
 The downloadable editor and deployment include the same snapshot. Changes after this snapshot continue to save in the current browser only. Export the project and update `src/saved-project.json` in GitHub to publish another snapshot; this is not automatic cloud synchronization.
+
+### Open the published café directly
+
+Use `https://visual-novel-8b9.pages.dev/?snapshot=github` to explicitly open the bundled exported café project rather than an older device-local save. The app saves a recovery copy of any different local project in the same IndexedDB transaction before replacing it. A visible **Load GitHub snapshot** button above the preview does the same. **Restore previous local project** recovers that copy, including after reload. Normal editor undo also remains available for a manual snapshot load.
+
+The URL parameter is removed after a successful load so refreshing does not repeatedly reset subsequent edits. The last selected scene is remembered separately as small local UI state. A failed snapshot write leaves the existing saved project intact. GitHub snapshot loading is explicit; it is not continuous cross-device synchronization. Deployment must finish before these controls/link behavior are available on the public website.

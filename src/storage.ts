@@ -18,6 +18,39 @@ export async function load(): Promise<{
   const v = await (await db()).get("projects", "current");
   return v ? { project: validateProject(v.project), runtime: v.runtime } : null;
 }
+export type Workspace = { project: Project; runtime: Runtime | null };
+export async function loadSnapshotRecovery(): Promise<Workspace | null> {
+  const value = await (await db()).get("projects", "before-github-snapshot");
+  return value ? { ...value, project: validateProject(value.project) } : null;
+}
+// One transaction preserves the previous workspace before replacing current.
+export async function openGithubSnapshot(
+  project: Project,
+  previous?: Workspace,
+) {
+  const snapshot = validateProject(project);
+  const connection = await db();
+  const tx = connection.transaction("projects", "readwrite");
+  try {
+    const old = previous || (await tx.store.get("current"));
+    if (old) {
+      const workspace = {
+        project: validateProject(old.project),
+        runtime: old.runtime,
+      };
+      if (JSON.stringify(workspace.project) !== JSON.stringify(snapshot))
+        await tx.store.put(workspace, "before-github-snapshot");
+    }
+    await tx.store.put({ project: snapshot, runtime: null }, "current");
+    await tx.done;
+  } catch (error) {
+    try {
+      tx.abort();
+    } catch {}
+    await tx.done.catch(() => {});
+    throw error;
+  }
+}
 export function exportProject(p: Project) {
   const b = new Blob([JSON.stringify(validateProject(p), null, 2)], {
     type: "application/json",

@@ -1595,3 +1595,4 @@ button.active {
 .lighting-loop-controls p { line-height: 1.6; }
 .lighting-loop-controls [role="alert"] { color: #edb19d; font-size: 10px; margin: 8px 0; }
 .lighting-loop-controls > input { margin-top: 7px; }
+.snapshot-toolbar{display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding:12px 27px;border-bottom:1px solid #454b43;background:#252e2a;font-size:11px}.snapshot-toolbar>span{flex:1;min-width:160px;color:#c1cbb9}.snapshot-toolbar button{font-size:10px}.snapshot-toolbar button:not(.primary){border:1px solid #56604f}@media(max-width:650px){.snapshot-toolbar{padding:12px;gap:8px}}

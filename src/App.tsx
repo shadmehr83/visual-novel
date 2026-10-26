@@ -43,7 +43,15 @@ import {
   type Runtime,
   type Effects,
 } from "./model";
-import { exportProject, load, save, readImage, readProject } from "./storage";
+import {
+  exportProject,
+  load,
+  save,
+  readImage,
+  readProject,
+  openGithubSnapshot,
+  loadSnapshotRecovery,
+} from "./storage";
 import { Assistant } from "./Assistant";
 import { EngineTools, Qte, SceneAudio } from "./EngineTools";
 import { Stage } from "./Stage";
@@ -119,6 +127,25 @@ export default function App() {
   const [bottom, setBottom] = useState("Dialogue");
   const [maskMode, setMaskMode] = useState(false);
   const [loaded, setLoaded] = useState(false);
+  const [canSave, setCanSave] = useState(false);
+  const [hasRecovery, setHasRecovery] = useState(false);
+  const [snapshotNotice, setSnapshotNotice] = useState(
+    "Your exported café project is available.",
+  );
+  function preferredScene(p: Project) {
+    let previous: string | null = null;
+    try {
+      previous = localStorage.getItem("stillframe-scene:" + p.id);
+    } catch {}
+    return (
+      p.scenes.find((s) => s.id === previous) ||
+      (p.id === project.id
+        ? p.scenes.find((s) => s.id === "cafe")
+        : undefined) ||
+      p.scenes[0]
+    );
+  }
+
   const [status, setStatus] = useState("Opening local project…");
   const [error, setError] = useState("");
   const [modal, setModal] = useState("");
@@ -134,32 +161,114 @@ export default function App() {
   const revision = useRef(0);
   const saveQueue = useRef(Promise.resolve());
   useEffect(() => {
-    load()
-      .then((v) => {
-        if (v) {
-          setProject(v.project);
-          setSceneId(v.project.scenes[0].id);
-          setNodeId(v.project.scenes[0].nodes[0].id);
+    async function initialize() {
+      try {
+        const params = new URLSearchParams(location.search);
+        const explicit = params.get("snapshot") === "github";
+        let workspace;
+        if (explicit) {
+          const snapshot = savedProject();
+          await openGithubSnapshot(snapshot);
+          workspace = { project: snapshot, runtime: null };
+          params.delete("snapshot");
+          const query = params.toString();
+          window.history.replaceState(
+            null,
+            "",
+            location.pathname + (query ? "?" + query : "") + location.hash,
+          );
+          setSnapshotNotice(
+            "Your exported café is loaded. Any different local project has a recovery copy.",
+          );
+        } else workspace = await load();
+        if (workspace) {
+          setProject(workspace.project);
+          const focus = explicit
+            ? workspace.project.scenes.find((s) => s.id === "cafe") ||
+              workspace.project.scenes[0]
+            : preferredScene(workspace.project);
+          setSceneId(focus.id);
+          setNodeId(focus.nodes[0].id);
           if (
-            v.runtime &&
-            v.project.scenes.some(
+            workspace.runtime &&
+            workspace.project.scenes.some(
               (s) =>
-                s.id === v.runtime!.scene &&
-                s.nodes.some((n) => n.id === v.runtime!.node),
+                s.id === workspace.runtime!.scene &&
+                s.nodes.some((n) => n.id === workspace.runtime!.node),
             )
           )
-            setRuntime(v.runtime);
+            setRuntime(workspace.runtime);
         }
+        setHasRecovery(!!(await loadSnapshotRecovery()));
+        setCanSave(true);
         setStatus("Saved on this device");
-      })
-      .catch((e) => {
-        setError("Could not recover local project: " + e.message);
+      } catch (e) {
+        setCanSave(false);
+        setError(
+          "Could not load project safely: " +
+            String(e) +
+            ". Existing saved work was left intact.",
+        );
         setStatus("Recovery failed");
-      })
-      .finally(() => setLoaded(true));
+      } finally {
+        setLoaded(true);
+      }
+    }
+    void initialize();
   }, []);
   useEffect(() => {
-    if (!loaded) return;
+    if (!loaded || !canSave || !project.scenes.some((s) => s.id === sceneId))
+      return;
+    try {
+      localStorage.setItem("stillframe-scene:" + project.id, sceneId);
+    } catch {}
+  }, [loaded, canSave, project.id, sceneId]);
+  async function loadPublishedCafe() {
+    setLoaded(false);
+    try {
+      await saveQueue.current.catch(() => {});
+      const snapshot = savedProject();
+      await openGithubSnapshot(snapshot, { project, runtime });
+      edit((p) => Object.assign(p, snapshot));
+      setSceneId("cafe");
+      setNodeId("arrival");
+      setRuntime(null);
+      setMaskMode(false);
+      setTab("Scenes");
+      setHasRecovery(!!(await loadSnapshotRecovery()));
+      setCanSave(true);
+      setSnapshotNotice(
+        "Your exported café is loaded. Any different local project has a recovery copy.",
+      );
+    } catch (e) {
+      setError("Snapshot was not loaded: " + String(e));
+    } finally {
+      setLoaded(true);
+    }
+  }
+  async function restoreLocalProject() {
+    setLoaded(false);
+    try {
+      await saveQueue.current.catch(() => {});
+      const recovery = await loadSnapshotRecovery();
+      if (!recovery) throw Error("No previous project is available.");
+      edit((p) => Object.assign(p, recovery.project));
+      const focus = preferredScene(recovery.project);
+      setSceneId(focus.id);
+      setNodeId(focus.nodes[0].id);
+      setRuntime(recovery.runtime);
+      setMaskMode(false);
+      setTab("Scenes");
+      setCanSave(true);
+      setSnapshotNotice("Your previous local project has been restored.");
+    } catch (e) {
+      setError("Recovery was not loaded: " + String(e));
+    } finally {
+      setLoaded(true);
+    }
+  }
+  useEffect(() => {
+    if (!loaded || !canSave) return;
     const rev = ++revision.current;
     setStatus("Unsaved changes…");
     const timer = setTimeout(
@@ -179,7 +288,7 @@ export default function App() {
       runtime ? 0 : 600,
     );
     return () => clearTimeout(timer);
-  }, [project, runtime, loaded]);
+  }, [project, runtime, loaded, canSave]);
   useEffect(() => {
     const warn = (e: BeforeUnloadEvent) => {
       if (status === "Unsaved changes…") {
@@ -765,17 +874,6 @@ export default function App() {
             >
               <Download size={15} /> Export playable HTML
             </button>
-            <button disabled={playing || !loaded} onClick={() => {
-              const snapshot = savedProject();
-              edit((p) => Object.assign(p, snapshot));
-              setSceneId("cafe");
-              setNodeId("arrival");
-              setRuntime(null);
-              setMaskMode(false);
-              setTab("Scenes");
-            }}>
-              <FolderOpen size={15} /> Load GitHub snapshot
-            </button>
             <button onClick={() => importInput.current?.click()}>
               <FolderOpen size={15} /> Open project
             </button>
@@ -802,6 +900,26 @@ export default function App() {
               {playing ? "PLAYTEST" : "SCENE EDITOR"}
             </span>
           </div>
+          {!playing && (
+            <div className="snapshot-toolbar">
+              <span>{snapshotNotice}</span>
+              <button
+                className="primary"
+                onClick={() => void loadPublishedCafe()}
+                disabled={!loaded}
+              >
+                Load GitHub snapshot
+              </button>
+              {hasRecovery && (
+                <button
+                  onClick={() => void restoreLocalProject()}
+                  disabled={!loaded}
+                >
+                  Restore previous local project
+                </button>
+              )}
+            </div>
+          )}
           <section className="preview-area">
             <div className="preview-header">
               <div>
@@ -1465,7 +1583,10 @@ export default function App() {
                         s.effects.rain = false;
                         s.effects.glass = false;
                         s.effects.light = 0;
-                        s.effects.lightLoop = { ...sceneLightLoop(s), enabled: false };
+                        s.effects.lightLoop = {
+                          ...sceneLightLoop(s),
+                          enabled: false,
+                        };
                         s.effects.tintOpacity = 0;
                         s.effects.vignette = false;
                         s.effects.brightness = 1;
@@ -1496,6 +1617,7 @@ export default function App() {
                 <label>
                   Source
                   <select
+                    aria-label="Background source"
                     value={selected.background || ""}
                     onChange={(ev) =>
                       updateScene((s) => {
@@ -1657,7 +1779,12 @@ export default function App() {
                   saved in this browser’s IndexedDB. Export regularly to back up
                   your work or move between devices.
                 </p>
-                <p className="muted">Load GitHub snapshot restores the project included with this release. Later edits save on this device; they do not update GitHub automatically. Undo can restore your local project after loading the snapshot.</p>
+                <p className="muted">
+                  Load GitHub snapshot restores the project included with this
+                  release. Later edits save on this device; they do not update
+                  GitHub automatically. Undo can restore your local project
+                  after loading the snapshot.
+                </p>
                 <Toggle
                   label="Reduced effects"
                   value={project.settings.reducedEffects}
