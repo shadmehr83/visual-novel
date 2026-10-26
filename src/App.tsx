@@ -1,3 +1,4 @@
+import { SelectionToolbar } from "./SelectionToolbar";
 import { useWorkspace, contrast } from "./workspace";
 import { WorkspaceControls } from "./WorkspaceSettings";
 import { ResizeHandle } from "./ResizeHandle";
@@ -176,7 +177,7 @@ export default function App() {
     top: number;
   } | null>(null);
   const [collapseBottom, setCollapseBottom] = useState(false);
-  useEffect(()=>setCollapseBottom(false),[workspace.dialogueMode]);
+  useEffect(() => setCollapseBottom(false), [workspace.dialogueMode]);
   useEffect(() => {
     try {
       localStorage.setItem("stillframe-controls-placement", placement);
@@ -484,6 +485,30 @@ export default function App() {
     (a) => a.id === (assetId || selected.background),
   );
   const e = selected.effects;
+  const selectedRegion =
+    regionEditor?.kind === "rain"
+      ? e.rainZones?.find((r) => r.id === regionEditor.id)
+      : regionEditor?.kind === "light"
+        ? e.lights?.find((l) => l.id === regionEditor.id)?.region
+        : e.motionZones?.find((w) => w.id === regionEditor?.id)?.region;
+  useEffect(() => {
+    if (regionEditor && !selectedRegion) setRegionEditor(null);
+  }, [regionEditor, selectedRegion]);
+  const changeSelectedRegion = (region: import("./model").Region) =>
+    updateScene((s) => {
+      if (regionEditor?.kind === "rain") {
+        const at =
+          s.effects.rainZones?.findIndex((r) => r.id === region.id) ?? -1;
+        if (at >= 0) s.effects.rainZones![at] = region;
+      } else if (regionEditor?.kind === "light") {
+        const l = s.effects.lights?.find((l) => l.id === regionEditor.id);
+        if (l) l.region = region;
+      } else {
+        const w = s.effects.motionZones?.find((w) => w.id === regionEditor?.id);
+        if (w) w.region = region;
+      }
+    });
+
   const availableChoices = node.choices.filter(
     (c) =>
       !playing ||
@@ -1087,27 +1112,7 @@ export default function App() {
                 onMask={(v) => effect("mask", v)}
                 previewTick={cameraPreview}
                 regionEditor={playing ? null : regionEditor}
-                onRegion={(region) =>
-                  updateScene((s) => {
-                    if (regionEditor?.kind === "rain") {
-                      const at =
-                        s.effects.rainZones?.findIndex(
-                          (r) => r.id === region.id,
-                        ) ?? -1;
-                      if (at >= 0) s.effects.rainZones![at] = region;
-                    } else if (regionEditor?.kind === "motion") {
-                      const motion = s.effects.motionZones?.find(
-                        (w) => w.id === regionEditor.id,
-                      );
-                      if (motion) motion.region = region;
-                    } else {
-                      const light = s.effects.lights?.find(
-                        (l) => l.id === regionEditor?.id,
-                      );
-                      if (light) light.region = region;
-                    }
-                  })
-                }
+                onRegion={changeSelectedRegion}
               >
                 {playing && <SceneAudio project={project} scene={scene} />}
                 {playing && runtime && node.qte && (
@@ -1708,7 +1713,55 @@ export default function App() {
               </button>
             ))}
           </div>
-          <fieldset disabled={playing && (inspector==='Atmosphere'||inspector==='Background')}>
+          {regionEditor && selectedRegion && !playing && (
+            <SelectionToolbar
+              editor={regionEditor}
+              region={selectedRegion}
+              setEditor={(next) => {
+                if (
+                  next?.kind === "light" &&
+                  !e.lights?.find((l) => l.id === next.id)?.region
+                )
+                  updateScene((s) => {
+                    const l = s.effects.lights?.find((l) => l.id === next.id);
+                    if (l)
+                      l.region = {
+                        id: l.id,
+                        name: l.name + " affected area",
+                        enabled: true,
+                        points: [],
+                      };
+                  });
+                setRegionEditor(next);
+              }}
+              change={changeSelectedRegion}
+              targets={[
+                ...(e.rainZones || []).map((r) => ({
+                  kind: "rain" as const,
+                  id: r.id,
+                  name: r.name,
+                })),
+                ...(e.lights || [])
+                  .filter((l) => l.kind === "local")
+                  .map((l) => ({
+                    kind: "light" as const,
+                    id: l.id,
+                    name: l.name,
+                  })),
+                ...(e.motionZones || []).map((w) => ({
+                  kind: "motion" as const,
+                  id: w.id,
+                  name: w.name,
+                })),
+              ]}
+            />
+          )}
+          <fieldset
+            disabled={
+              playing &&
+              (inspector === "Atmosphere" || inspector === "Background")
+            }
+          >
             {inspector === "Workspace" ? (
               <WorkspaceControls value={workspace} onChange={setWorkspace} />
             ) : inspector === "Appearance" ? (

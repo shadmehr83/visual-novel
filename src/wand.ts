@@ -7,6 +7,7 @@ export function connectedMask(
   x: number,
   y: number,
   tolerance: number,
+  edgeAware = false,
 ) {
   const seed = Math.floor(y) * width + Math.floor(x);
   if (seed < 0 || seed >= width * height) throw Error("Click inside the image");
@@ -23,7 +24,7 @@ export function connectedMask(
         (data[p + 1] - data[start + 1]) ** 2 +
         (data[p + 2] - data[start + 2]) ** 2,
     );
-    if (distance > tolerance || data[p + 3] < 20) continue;
+    if ((!edgeAware && distance > tolerance) || data[p + 3] < 20) continue;
     selected[at] = 1;
     const col = at % width;
     for (const n of [
@@ -33,6 +34,15 @@ export function connectedMask(
       at + width,
     ])
       if (n >= 0 && n < seen.length && !seen[n]) {
+        if (
+          edgeAware &&
+          Math.hypot(
+            data[n * 4] - data[p],
+            data[n * 4 + 1] - data[p + 1],
+            data[n * 4 + 2] - data[p + 2],
+          ) > tolerance
+        )
+          continue;
         seen[n] = 1;
         queue.push(n);
       }
@@ -65,6 +75,7 @@ export async function imageMask(
   x: number,
   y: number,
   tolerance: number,
+  edgeAware = false,
 ) {
   const img = new Image();
   img.src = data;
@@ -87,5 +98,6 @@ export async function imageMask(
     Math.max(0, Math.min(223, Math.floor((x * 224) / 1000))),
     Math.max(0, Math.min(125, Math.floor((y * 126) / 563))),
     tolerance,
+    edgeAware,
   );
 }

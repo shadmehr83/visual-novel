@@ -5,7 +5,8 @@ import { LightingLoopControls } from "./LightingLoopControls";
 export type RegionEditor = {
   kind: "rain" | "light" | "motion";
   id: string;
-  mode: "polygon" | "wand";
+  mode: "polygon" | "wand" | "edge" | "brush" | "erase";
+  radius?: number;
   tolerance: number;
 };
 export function Zones({
@@ -45,6 +46,43 @@ export function Zones({
         </button>
         <button
           onClick={() =>
+            setEditor({ kind, id, mode: "brush", tolerance, radius: 25 })
+          }
+        >
+          Edit selection / brush
+        </button>
+        <button
+          disabled={!region.path && region.points.length < 3}
+          onClick={() =>
+            change({
+              ...region,
+              boundary: {
+                points: structuredClone(region.points),
+                path: region.path,
+              },
+            })
+          }
+        >
+          Lock outer boundary
+        </button>
+        {region.boundary && (
+          <>
+            <button onClick={() => change({ ...region, points: [], path: "" })}>
+              Start empty inside boundary
+            </button>
+            <button
+              onClick={() => {
+                const next = { ...region };
+                delete next.boundary;
+                change(next);
+              }}
+            >
+              Unlock boundary
+            </button>
+          </>
+        )}
+        <button
+          onClick={() =>
             change({
               ...region,
               path: undefined,
@@ -75,31 +113,36 @@ export function Zones({
         imported artwork. The wand is local automatic selection, not semantic
         AI; adjust tolerance for more or less coverage.
       </p>
-      <label>
-        Wand tolerance {tolerance}
-        <input
-          aria-label="Wand tolerance"
-          type="range"
-          min="5"
-          max="180"
-          value={tolerance}
-          onChange={(ev) => {
-            setTolerance(+ev.target.value);
-            if (editor) setEditor({ ...editor, tolerance: +ev.target.value });
-          }}
-        />
-      </label>
-      {editor && (
-        <div className="clue">
-          {editor.mode === "wand"
-            ? "Click the image to replace this zone with a connected-colour selection."
-            : "Click to add polygon vertices."}
-          <button className="wide primary" onClick={() => setEditor(null)}>
-            Finish zone editing
-          </button>
-        </div>
-      )}
       <div data-effect-panel="Rain">
+        {e.mask.length >= 3 && !e.rainZones?.length && (
+          <button
+            className="wide primary"
+            onClick={() => {
+              const id = crypto.randomUUID();
+              update((s) => {
+                s.effects.rainZones = [
+                  {
+                    id,
+                    name: "Original window",
+                    enabled: true,
+                    points: structuredClone(s.effects.mask),
+                  },
+                ];
+                s.effects.mask = [];
+              });
+              setEditor({
+                kind: "rain",
+                id,
+                mode: "brush",
+                tolerance,
+                radius: 25,
+              });
+            }}
+          >
+            Edit existing rain selection
+          </button>
+        )}
+
         <button
           className="wide"
           disabled={(e.rainZones?.length || 0) >= 30}

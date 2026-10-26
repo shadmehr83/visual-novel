@@ -52,3 +52,7 @@ The story library now collapses and resizes; the dialogue divider and Layout con
 Per-scene camera settings provide bounded focal zoom/pan approaches, walking bob/sway, preview replay, reduced-motion framing and optional synthetic or imported footsteps after sound consent. Camera settings serialize in project JSON and render in standalone players; the AI allowlist can propose camera settings for approval. This remains 2D camera motion, without new geometry generation or a full cinematic cut/fade sequencer. Local tests cover the UI, camera math/data, effect summary, synthetic audio scheduling and AI proposals. Final recorded sound quality and real provider/hosting configuration require independent checks.
 
 Validation for the depth/workspace release: 49 automated tests and 16 browser workflows passed, along with the production build and offline editor/player checks. Live deployment and final audio quality remain separate checks.
+
+## Shared brush-selection refinement
+
+Rain, local-light and motion regions share an inspector selection toolbar with target switching, polygon, connected-colour wand, approximate local-edge snapping, circular brush and eraser. Locked outer boundaries constrain fine painting and automatic results. Stroke previews/cursors update during dragging, completed strokes create one editor undo step, and masks/boundaries serialize with the project. Original artwork remains unchanged. This does not implement semantic AI object segmentation, alpha/opacity painting or automatic hidden-object reconstruction.

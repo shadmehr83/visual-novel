@@ -38,7 +38,23 @@ export const lightLoopSchema = z.object({
   values: z.array(z.number().finite().min(0).max(2)).min(2).max(32),
   stepSeconds: z.number().finite().min(0.5).max(20),
 });
+const geometrySchema = z.object({
+  points: z
+    .array(
+      z.object({
+        x: z.number().min(0).max(1000),
+        y: z.number().min(0).max(563),
+      }),
+    )
+    .max(200),
+  path: z
+    .string()
+    .max(200000)
+    .regex(/^[MmLlHhVvZz0-9., +\-]*$/)
+    .optional(),
+});
 export const regionSchema = z.object({
+  boundary: geometrySchema.optional(),
   id: z.string(),
   name: z.string(),
   enabled: z.boolean(),

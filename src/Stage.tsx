@@ -1,3 +1,4 @@
+import { createBrush, dab, maskPath, clipToBoundary } from "./brush";
 import { useEffect, useRef, useState } from "react";
 import type { Project, Scene, Region } from "./model";
 import { sampleMotion } from "./motion";
@@ -28,6 +29,17 @@ export function Stage({
   onRegion?: (r: Region) => void;
   previewTick?: number;
 }) {
+  const stroke = useRef<{
+    canvas: HTMLCanvasElement;
+    ctx: CanvasRenderingContext2D;
+    region: Region;
+    last: { x: number; y: number };
+  } | null>(null);
+  const [strokePreview, setStrokePreview] = useState<string | null>(null);
+  const [brushCursor, setBrushCursor] = useState<{
+    x: number;
+    y: number;
+  } | null>(null);
   const [wandError, setWandError] = useState("");
   const [wandBusy, setWandBusy] = useState(false);
   const [time, setTime] = useState(0);
@@ -57,12 +69,16 @@ export function Stage({
   const globalLevel = (e.lights || [])
     .filter((l) => l.enabled && l.kind === "global")
     .reduce((n, l) => n * l.intensity * zoneLevel(l), 1);
-  const activeRegion =
+  const storedRegion =
     regionEditor?.kind === "motion"
       ? e.motionZones?.find((w) => w.id === regionEditor.id)?.region
       : regionEditor?.kind === "rain"
         ? e.rainZones?.find((r) => r.id === regionEditor.id)
         : e.lights?.find((l) => l.id === regionEditor?.id)?.region;
+  const activeRegion =
+    storedRegion && strokePreview !== null
+      ? { ...storedRegion, points: [], path: strokePreview }
+      : storedRegion;
   const camera = scene.camera?.enabled
     ? sampleCamera(
         scene.camera,
@@ -138,6 +154,48 @@ export function Stage({
   const count = project.settings.reducedEffects
     ? Math.min(35, e.density)
     : e.density;
+  function pointAt(clientX: number, clientY: number) {
+    const p = new DOMPoint(clientX, clientY).matrixTransform(
+      svg.current!.getScreenCTM()!.inverse(),
+    );
+    return {
+      x: Math.max(
+        0,
+        Math.min(
+          1000,
+          asset ? (p.x - scene.x * 10 - 500) / scene.scale + 500 : p.x,
+        ),
+      ),
+      y: Math.max(
+        0,
+        Math.min(
+          563,
+          asset ? (p.y - scene.y * 5.63 - 281.5) / scene.scale + 281.5 : p.y,
+        ),
+      ),
+    };
+  }
+  function paint(clientX: number, clientY: number) {
+    if (!stroke.current || !regionEditor) return;
+    const p = pointAt(clientX, clientY);
+    try {
+      dab(
+        stroke.current.ctx,
+        stroke.current.region,
+        p.x,
+        p.y,
+        regionEditor.radius || 25,
+        regionEditor.mode === "erase",
+        stroke.current.last,
+      );
+      stroke.current.last = p;
+      setStrokePreview(maskPath(stroke.current.canvas));
+    } catch (error) {
+      setWandError(String(error));
+      stroke.current = null;
+      setStrokePreview(null);
+    }
+  }
   return (
     <div className={"stage " + (maskMode || regionEditor ? "masking" : "")}>
       <svg
@@ -147,7 +205,53 @@ export function Stage({
         aria-label={scene.title + " live stage"}
         data-light-level={lightLevel}
         data-global-light-level={globalLevel}
+        style={{ touchAction: regionEditor ? "none" : undefined }}
+        onPointerDown={(event) => {
+          if (
+            !storedRegion ||
+            !regionEditor ||
+            !["brush", "erase"].includes(regionEditor.mode)
+          )
+            return;
+          event.preventDefault();
+          event.currentTarget.setPointerCapture(event.pointerId);
+          setWandError("");
+          const p = pointAt(event.clientX, event.clientY);
+          stroke.current = {
+            ...createBrush(storedRegion),
+            region: storedRegion,
+            last: p,
+          };
+          paint(event.clientX, event.clientY);
+        }}
+        onPointerMove={(event) => {
+          if (regionEditor && ["brush", "erase"].includes(regionEditor.mode)) {
+            setBrushCursor(pointAt(event.clientX, event.clientY));
+            paint(event.clientX, event.clientY);
+          }
+        }}
+        onPointerLeave={() => {
+          if (!stroke.current) setBrushCursor(null);
+        }}
+        onPointerUp={() => {
+          if (!stroke.current) return;
+          try {
+            const path = maskPath(stroke.current.canvas);
+            onRegion?.({ ...stroke.current.region, points: [], path });
+          } catch (error) {
+            setWandError(String(error));
+          } finally {
+            stroke.current = null;
+            setStrokePreview(null);
+          }
+        }}
+        onPointerCancel={() => {
+          stroke.current = null;
+          setStrokePreview(null);
+        }}
         onClick={async (event) => {
+          if (regionEditor && ["brush", "erase"].includes(regionEditor.mode))
+            return;
           if (regionEditor && activeRegion && svg.current && onRegion) {
             const point = new DOMPoint(
               event.clientX,
@@ -192,17 +296,20 @@ export function Stage({
               if (wandBusy) return;
               setWandBusy(true);
               try {
-                onRegion({
-                  ...activeRegion,
-                  points: [],
-                  path: await imageMask(
-                    asset.data,
-                    scene.fit,
-                    x,
-                    y,
-                    regionEditor.tolerance,
-                  ),
-                });
+                onRegion(
+                  clipToBoundary({
+                    ...activeRegion,
+                    points: [],
+                    path: await imageMask(
+                      asset.data,
+                      scene.fit,
+                      x,
+                      y,
+                      regionEditor.tolerance,
+                      regionEditor.mode === "edge",
+                    ),
+                  }),
+                );
               } catch (error) {
                 setWandError(String(error));
               } finally {
@@ -604,6 +711,42 @@ export function Stage({
             ))}
           </g>
         )}
+        {activeRegion?.boundary && regionEditor && (
+          <g transform={transform} pointerEvents="none">
+            {activeRegion.boundary.path ? (
+              <path
+                d={activeRegion.boundary.path}
+                fill="none"
+                stroke="#aee8ff"
+                strokeDasharray="5 5"
+              />
+            ) : (
+              <polygon
+                points={activeRegion.boundary.points
+                  .map((p) => `${p.x},${p.y}`)
+                  .join(" ")}
+                fill="none"
+                stroke="#aee8ff"
+                strokeDasharray="5 5"
+              />
+            )}
+          </g>
+        )}
+        {brushCursor &&
+          regionEditor &&
+          ["brush", "erase"].includes(regionEditor.mode) && (
+            <g transform={transform} pointerEvents="none">
+              <circle
+                data-brush-cursor
+                cx={brushCursor.x}
+                cy={brushCursor.y}
+                r={regionEditor.radius || 25}
+                fill="none"
+                stroke={regionEditor.mode === "erase" ? "#ff9292" : "#ffe4a7"}
+                strokeWidth="2"
+              />
+            </g>
+          )}
         {maskMode && (
           <g transform={transform}>
             <polygon

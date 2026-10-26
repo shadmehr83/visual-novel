@@ -41,3 +41,20 @@ For a local light, choose **Light coverage → Selected area only (no radius)**.
 Open **Motion → Add motion zone**. Draw the area or select it with **Magic wand**, then **Finish zone editing**. Set sway strength (0–20 scene pixels), seconds per cycle, direction, and additional ripple distortion (0–15). Motion zones are independent and saved with the complete project JSON and published snapshot; they also render in the standalone editor and player. Existing original image files remain unchanged.
 
 The renderer displaces/offsets the underlying background and sprite pixels inside a fixed selected region. It simulates subtle 2D cloth or plant motion; it is not 3D cloth simulation, object extraction, hidden-background reconstruction, or a semantic selection model. Multicoloured objects may require a polygon or several regions. Small motion strengths reduce edge artifacts. Reduced effects or the system reduced-motion preference pauses motion; disabling a motion zone or Disable all effects removes its contribution. The animation loop is cleaned up on scene change/unmount.
+
+## Unified selection tools and confined painting
+
+Choose **Edit existing rain selection**, **Edit selection / brush**, Draw region, or Magic wand on any named rain/local-light/motion region. The shared **Selection tools** toolbar appears in the inspector and keeps the scene visible. Its target selector switches between region-based effects; global illumination and camera framing remain whole-scene operations.
+
+Tools in that single toolbar:
+- **Polygon:** add vertices for an outer or affected area.
+- **Colour wand:** select pixels connected to the clicked colour.
+- **Snap to edges:** locally grow a connected region until stronger neighbouring colour boundaries are encountered. This is approximate image processing, not a semantic AI object model; gradients/open boundaries can leak.
+- **Paint brush:** drag a circular brush to add affected pixels. Radius uses scene pixels, scales with the background transform and has a visible cursor.
+- **Eraser:** remove affected pixels with the same radius control.
+
+Selection reach presets replace numeric tolerance as the main automatic-tool control: Strict stays closer to the clicked colours/boundaries; Broad includes more differences and may select too much. Nothing changes in the original artwork and no image is uploaded for these tools.
+
+For fine tuning without overpainting: draw/select an outer region → **Lock selection as outer boundary** → optionally **Start empty inside boundary** → paint the desired affected areas. Brush additions and erasing stay inside the locked boundary. The dashed blue outline shows the limit. Automatic results are clipped to the same boundary. Unlock removes the restriction; Clear affected area empties the mask while retaining the boundary. Painting uses a bounded-resolution local raster mask converted into portable numeric SVG paths. Very detailed selections are rejected with guidance rather than silently dropping data. Each completed stroke is one undoable edit; a cancelled pointer stroke is discarded.
+
+Masks and locked boundaries are included in project JSON, browser saves, published snapshots and standalone exports. Shapes are binary affected areas, not an opacity-painting or semantic segmentation system. Use the existing light/rain intensity and opacity controls for effect strength. Complex multicoloured objects may need a polygon or brush correction.
