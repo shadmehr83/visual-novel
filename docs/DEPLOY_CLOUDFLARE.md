@@ -1,6 +1,6 @@
 # Publish Stillframe on Cloudflare Pages
 
-This app requires no server-side services or API keys. No Cloudflare account is connected to the development session, so publication must be completed in your account.
+Core editing and authored playback require no API keys. The optional AI helper requires the Cloudflare worker and secrets described in AI_SETUP.md. No Cloudflare account is connected to the development session, so publication must be completed in your account.
 
 ## Fastest: Direct Upload
 

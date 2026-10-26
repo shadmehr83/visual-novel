@@ -29,6 +29,7 @@ import {
   X,
   FolderOpen,
 } from "lucide-react";
+import { exportPlayer } from "./playerExport";
 import { demo } from "./demo";
 import {
   advance,
@@ -41,6 +42,8 @@ import {
   type Effects,
 } from "./model";
 import { exportProject, load, save, readImage, readProject } from "./storage";
+import { Assistant } from "./Assistant";
+import { EngineTools, Qte, SceneAudio } from "./EngineTools";
 import { Stage } from "./Stage";
 const clone = <T,>(v: T): T => structuredClone(v);
 function Slider({
@@ -404,6 +407,7 @@ export default function App() {
             [BookOpen, "Characters"],
             [Code2, "State"],
             [Sparkles, "Assistant"],
+            [Volume2, "Tools"],
           ].map(([Icon, label]) => {
             const I = Icon as typeof Film;
             return (
@@ -723,81 +727,28 @@ export default function App() {
             </div>
           )}
           {tab === "Assistant" && (
-            <div className="library-body">
-              <span className="badge">LOCAL PRESET · NO AI CONNECTED</span>
-              <h3>An atmospheric adjustment</h3>
-              <p className="muted small">
-                This offline helper recognises rain and dimming requests. It
-                does not call an AI provider or send your work anywhere.
-              </p>
-              <textarea
-                rows={6}
-                aria-label="Atmosphere request"
-                value={prompt}
-                onChange={(e) => {
-                  setPrompt(e.target.value);
-                  setProposal(false);
-                }}
-              />
-              <button
-                className="wide"
-                onClick={() => {
-                  if (!/rain|dim/i.test(prompt)) {
-                    setError(
-                      "This local helper supports rain or dimming only. Other requests need a future provider adapter.",
-                    );
-                    return;
-                  }
-                  setProposal(true);
-                }}
-              >
-                Review proposal
-              </button>
-              {proposal && (
-                <div className="clue">
-                  <b>Proposed changes · {selected.title}</b>
-                  <p>Target: {selected.id}</p>
-                  {/rain/i.test(prompt) && (
-                    <p>
-                      Enable rain, density 65, opacity 0.3. Use a window polygon
-                      covering the left side.
-                    </p>
-                  )}
-                  {/dim/i.test(prompt) && <p>Set brightness to 0.85.</p>}
-                  <small>
-                    Assumption: the window is on the left. Adjust the region
-                    manually if needed.
-                  </small>
-                  <button
-                    className="wide primary"
-                    onClick={() => {
-                      updateScene((s) => {
-                        if (/rain/i.test(prompt)) {
-                          s.effects.rain = true;
-                          s.effects.density = 65;
-                          s.effects.opacity = 0.3;
-                          s.effects.mask = [
-                            { x: 60, y: 30 },
-                            { x: 590, y: 30 },
-                            { x: 590, y: 370 },
-                            { x: 60, y: 370 },
-                          ];
-                        }
-                        if (/dim/i.test(prompt)) s.effects.brightness = 0.85;
-                      });
-                      setProposal(false);
-                    }}
-                  >
-                    Apply changes
-                  </button>
-                  <button className="wide" onClick={() => setProposal(false)}>
-                    Reject
-                  </button>
-                </div>
-              )}
-            </div>
+            <Assistant
+              project={project}
+              sceneId={sceneId}
+              apply={(next) => edit((p) => Object.assign(p, next))}
+            />
+          )}
+          {tab === "Tools" && (
+            <EngineTools
+              project={project}
+              scene={selected}
+              nodeId={nodeId}
+              edit={edit}
+            />
           )}
           <div className="library-footer">
+            <button
+              onClick={() =>
+                exportPlayer(project).catch((e) => setError(String(e)))
+              }
+            >
+              <Download size={15} /> Export playable HTML
+            </button>
             <button onClick={() => importInput.current?.click()}>
               <FolderOpen size={15} /> Open project
             </button>
@@ -854,19 +805,31 @@ export default function App() {
               maskMode={maskMode && !playing}
               onMask={(v) => effect("mask", v)}
             >
-              {!maskMode && (
+              {playing && <SceneAudio project={project} scene={scene} />}
+              {playing && runtime && node.qte && (
+                <Qte
+                  key={runtime.scene + runtime.node + runtime.history.length}
+                  project={project}
+                  runtime={runtime}
+                  onResolve={setRuntime}
+                />
+              )}
+              {!maskMode && !(playing && node.qte) && (
                 <div className="dialogue-overlay">
-                  {node.speaker === "Mara" &&
-                    project.characters[0]?.portrait && (
-                      <img
-                        className="dialogue-portrait"
-                        src={
-                          project.assets.find(
-                            (a) => a.id === project.characters[0].portrait,
-                          )?.data
-                        }
-                      />
-                    )}
+                  {(node.portrait ||
+                    (node.speaker === "Mara" &&
+                      project.characters[0]?.portrait)) && (
+                    <img
+                      className="dialogue-portrait"
+                      src={
+                        project.assets.find(
+                          (a) =>
+                            a.id ===
+                            (node.portrait || project.characters[0]?.portrait),
+                        )?.data
+                      }
+                    />
+                  )}
                   <span className="dialogue-speaker">
                     {node.speaker === "Mara"
                       ? project.characters[0]?.name

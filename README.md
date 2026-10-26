@@ -34,9 +34,9 @@ npm run test:e2e
 - **Edit polygon mask** shows the region. Click to append vertices; clear to redraw, remove last to erase a vertex, invert for the complement. Three points activate clipping. The region follows background position/scale; mask handles are hidden during play. Vertex dragging and brush painting are future work.
 - Author dialogue below the stage. Add nodes and choices, select target nodes/scenes, and edit speaker/text. State actions and choice conditions are editable as validated JSON under each choice. Actions accept only existing state keys and correct types. Example action: `[{"key":"trust","op":"add","value":1}]`. Example condition: `{"key":"messageOpened","equals":true}`. Text may interpolate existing variables with `{outfit}`. No expression evaluation or arbitrary code runs.
 - Play from the beginning or resume the saved playthrough. The left scene buttons act as debug jumps while playing. Inspect state, clues and event history below the stage. Restart clears playthrough state; jumping retains state and applies entry actions only on first visit.
-- **Characters** edits Mara's name and voice/knowledge notes. Import a portrait in Assets and assign it to Mara. The current portrait support is a dialogue portrait, not a full sprite/expression system.
+- **Characters** edits Mara's name and voice/knowledge notes. Import a portrait in Assets and assign it to Mara. Use Tools → Cast for expression images and Tools → Sprites for stage layers.
 - Common project edits have 40-step undo/redo. Playthrough advancement has its own restart mechanism, not editor undo.
-- The offline assistant is explicitly a local rain/dimming preset parser. It presents target and parameter changes for Apply/Reject; edits are undoable. There is no AI provider integration and no content leaves the browser.
+- The Assistant provides an optional server AI connection and an offline rain/dimming fallback. All edits require Apply/Reject and support undo. Text is shared with the provider only after consent; artwork/audio bytes are excluded. See docs/AI_SETUP.md for voice support and server setup.
 
 ## Persistence and portability
 
@@ -65,3 +65,17 @@ The production build creates a versioned service worker that caches the applicat
 Native browser SVG is the compositing engine, rather than a custom canvas renderer. It supplies image fit, transforms, clipping masks, colour filters and alpha compositing, with capped deterministic particle placement driven by requestAnimationFrame (approximately 30 updates/sec). Layers explicitly order background, tint/light, weather, vignette, then HTML portrait/dialogue/choices. Animation callbacks are cleaned up on unmount or disable. Effects are bounded for this MVP; profiling/texture-based rendering may justify PixiJS later. The current stage illustrations are original vector placeholders, not production artwork.
 
 See [PROJECT_PLAN.md](PROJECT_PLAN.md) for specification coverage and remaining milestones.
+
+## Extended engine release
+
+The previous Phase 1 limitations are superseded where noted here:
+
+- **Assistant:** a real server-side OpenAI adapter, review/apply/reject workflow, voice dictation, read-aloud, stale-proposal protection, and an offline fallback. See [AI setup](docs/AI_SETUP.md). There are no secrets in the browser bundle. AI is optional; it is not active until the Cloudflare server secrets are supplied.
+- **Tools → Sprites / Cast:** image-backed layers with X/Y/scale/opacity/flip, ordering and removal; character creation and expression-image mapping; expression assignment to the selected dialogue or stage.
+- **Tools → Audio:** import/decode MP3/WAV/OGG/M4A/WebM up to 20 MB, preview, reuse, per-scene volume/loop/removal. Players explicitly enable scene sound. Original audio bytes are included in IndexedDB saves and JSON export.
+- **Tools → QTE:** timed scene-node prompts, authored success/timeout targets, monotonic clock, exactly-once resolution, focus pause, keyboard/mouse/touch action, pause, skip, timing adjustment and debug outcomes. A saved playthrough at a QTE restarts its timer on reload.
+- **Tools → Timeline:** sprite position/opacity keyframes over up to 120 seconds; linear interpolation and final-frame hold. This is a basic keyframe editor, not a multitrack animation/audio timeline.
+- **Tools → Graph / State:** inspect route connections; author variables and clue records as validated JSON. Choice events now retain knowledge snapshots in playthrough memory.
+- **Export playable HTML:** available in the production app. Downloads one HTML file with the story, imported image/audio assets, renderer, effects, QTEs, and player runtime. Open it in a modern browser to play without the editor or AI. Browser audio policies still require a click. The editor project export remains separate.
+
+Existing schema-v1 projects load without new fields; these are backward-compatible optional additions. The updated Direct Upload ZIP includes a Cloudflare worker, whereas the original static-only package did not.

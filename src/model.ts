@@ -17,7 +17,15 @@ const choice = z.object({
     .optional(),
   note: z.string().default(""),
 });
+export const qteSchema = z.object({
+  prompt: z.string().max(500),
+  seconds: z.number().min(1).max(120),
+  success: z.string(),
+  timeout: z.string(),
+});
 const node = z.object({
+  qte: qteSchema.optional(),
+  portrait: z.string().nullable().optional(),
   id: z.string(),
   speaker: z.string(),
   text: z.string(),
@@ -72,7 +80,40 @@ export const defaultEffects = () =>
     invert: false,
     vignette: true,
   });
+export const spriteSchema = z.object({
+  id: z.string(),
+  asset: z.string(),
+  name: z.string(),
+  x: z.number().min(0).max(1000),
+  y: z.number().min(0).max(563),
+  scale: z.number().min(0.1).max(3),
+  opacity: z.number().min(0).max(1),
+  flip: z.boolean(),
+  expression: z.string(),
+});
 const scene = z.object({
+  sprites: z.array(spriteSchema).max(30).optional(),
+  keyframes: z
+    .array(
+      z.object({
+        sprite: z.string(),
+        time: z.number().min(0).max(120),
+        x: z.number().min(0).max(1000),
+        y: z.number().min(0).max(563),
+        opacity: z.number().min(0).max(1),
+      }),
+    )
+    .max(200)
+    .optional(),
+  audio: z
+    .array(
+      z.object({
+        id: z.string(),
+        volume: z.number().min(0).max(1),
+        loop: z.boolean(),
+      }),
+    )
+    .optional(),
   id: z.string(),
   title: z.string(),
   subtitle: z.string(),
@@ -100,6 +141,17 @@ const asset = z.object({
 });
 export const projectSchema = z.object({
   schemaVersion: z.literal(1),
+  audioAssets: z
+    .array(
+      z.object({
+        id: z.string(),
+        name: z.string(),
+        data: z
+          .string()
+          .regex(/^data:audio\/(mpeg|wav|ogg|mp4|x-wav|webm);base64,/),
+      }),
+    )
+    .optional(),
   id: z.string(),
   title: z.string().min(1).max(150),
   scenes: z.array(scene).min(1).max(100),
@@ -110,6 +162,7 @@ export const projectSchema = z.object({
       name: z.string(),
       notes: z.string(),
       portrait: z.string().nullable(),
+      expressions: z.record(z.string()).optional(),
     }),
   ),
   variables: z.record(z.union([z.string(), z.number(), z.boolean()])),
@@ -121,7 +174,12 @@ export const projectSchema = z.object({
       source: z.string(),
     }),
   ),
-  settings: z.object({ reducedEffects: z.boolean(), guides: z.boolean() }),
+  settings: z.object({
+    reducedEffects: z.boolean(),
+    guides: z.boolean(),
+    skipQte: z.boolean().optional(),
+    timing: z.number().min(0.5).max(3).optional(),
+  }),
   metadata: z.object({ created: z.string() }),
 });
 export type Project = z.infer<typeof projectSchema>;
@@ -137,6 +195,12 @@ export type Runtime = {
   history: string[];
   choices: string[];
   ended: boolean;
+  memories?: {
+    scene: string;
+    node: string;
+    choice: string;
+    knowledge: Project["variables"];
+  }[];
 };
 export function validateProject(input: unknown): Project {
   const p = projectSchema.parse(input);
@@ -147,7 +211,22 @@ export function validateProject(input: unknown): Project {
     const nodes = new Set(s.nodes.map((n) => n.id));
     if (nodes.size !== s.nodes.length)
       throw Error("Duplicate dialogue node in " + s.title);
+    for (const frame of s.keyframes || [])
+      if (!s.sprites?.some((x) => x.id === frame.sprite))
+        throw Error("Missing keyframe sprite");
+    for (const sprite of s.sprites || [])
+      if (!p.assets.some((a) => a.id === sprite.asset))
+        throw Error("Missing sprite asset");
+    for (const track of s.audio || [])
+      if (!p.audioAssets?.some((a) => a.id === track.id))
+        throw Error("Missing audio asset");
     for (const n of s.nodes) {
+      if (n.portrait && !p.assets.some((a) => a.id === n.portrait))
+        throw Error("Missing dialogue portrait");
+      if (n.qte)
+        for (const target of [n.qte.success, n.qte.timeout])
+          if (!nodes.has(target) && !p.scenes.some((s) => s.id === target))
+            throw Error("Missing QTE target");
       if (n.next && !nodes.has(n.next))
         throw Error("Missing next dialogue: " + n.next);
       for (const c of n.choices) {
@@ -218,6 +297,15 @@ export function advance(p: Project, r: Runtime, choiceId?: string): Runtime {
     let next = actions(p, r, c.actions);
     next = {
       ...next,
+      memories: [
+        ...(r.memories || []),
+        {
+          scene: r.scene,
+          node: r.node,
+          choice: c.text,
+          knowledge: { ...r.values },
+        },
+      ],
       choices: [...next.choices, c.id],
       history: [...next.history, `Choice: ${c.text}`].slice(-200),
     };
@@ -229,4 +317,23 @@ export function advance(p: Project, r: Runtime, choiceId?: string): Runtime {
   return n.next
     ? { ...r, node: n.next }
     : { ...r, ended: true, history: [...r.history, "Demo complete"] };
+}
+
+export function resolveQte(
+  p: Project,
+  r: Runtime,
+  outcome: "success" | "timeout",
+): Runtime {
+  const n = p.scenes
+    .find((s) => s.id === r.scene)
+    ?.nodes.find((n) => n.id === r.node);
+  if (!n?.qte || r.ended) throw Error("No active QTE");
+  const target = n.qte[outcome];
+  const next = {
+    ...r,
+    history: [...r.history, `QTE ${outcome}: ${n.qte.prompt}`],
+  };
+  return p.scenes.some((s) => s.id === target)
+    ? enter(p, next, target)
+    : { ...next, node: target };
 }

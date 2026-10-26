@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite --host 0.0.0.0",
-    "build": "tsc -b && vite build && node scripts/offline.mjs",
+    "build": "tsc -b && tsc -p tsconfig.worker.json && vite build && node scripts/worker.mjs && node scripts/offline.mjs",
     "test": "vitest run",
     "preview": "vite preview --host 0.0.0.0",
     "test:e2e": "playwright test",
@@ -27,6 +27,7 @@
     "vitest": "^3.0.0",
     "@testing-library/react": "^16.1.0",
     "jsdom": "^26.0.0",
-    "@playwright/test": "^1.50.0"
+    "@playwright/test": "^1.50.0",
+    "esbuild": "^0.25.0"
   }
 }

@@ -56,14 +56,19 @@ test("author, import, mask, undo, persist, export and play opening", async ({
     .getByRole("button", { name: "Export project", exact: true })
     .click();
   const bundle = await download;
-  await expect(bundle.suggestedFilename()).toContain(
-    ".stillframe.json",
-  );
+  await expect(bundle.suggestedFilename()).toContain(".stillframe.json");
   const bundlePath = await bundle.path();
-  await page.locator('input[type=file]').nth(1).setInputFiles(bundlePath!);
-  await page.getByRole('button', {name: /A table by the window.*dialogue nodes/}).click();
-  await expect(page.getByLabel('Dialogue text')).toHaveValue('A line authored in the browser.');
-  await expect(page.locator('.stage svg image')).toHaveAttribute('href', /^data:image\/png;base64,/);
+  await page.locator("input[type=file]").nth(1).setInputFiles(bundlePath!);
+  await page
+    .getByRole("button", { name: /A table by the window.*dialogue nodes/ })
+    .click();
+  await expect(page.getByLabel("Dialogue text")).toHaveValue(
+    "A line authored in the browser.",
+  );
+  await expect(page.locator(".stage svg image")).toHaveAttribute(
+    "href",
+    /^data:image\/png;base64,/,
+  );
   await page.getByRole("button", { name: "Play from beginning" }).click();
   await page.getByRole("button", { name: "Continue", exact: true }).click();
   await page

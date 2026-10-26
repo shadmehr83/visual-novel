@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import type { Project, Scene } from "./model";
+import { animateSprite } from "./animation";
 import { Artwork } from "./Artwork";
 export function Stage({
   project,
@@ -20,19 +21,20 @@ export function Stage({
   const svg = useRef<SVGSVGElement>(null);
   const e = scene.effects;
   useEffect(() => {
-    if (!e.rain && !e.glass) return;
+    if (!e.rain && !e.glass && !scene.keyframes?.length) return;
+    const origin = performance.now();
     let frame = 0;
     let previous = 0;
     const tick = (t: number) => {
       if (t - previous > 32) {
-        setTime(t / 1000);
+        setTime((t - origin) / 1000);
         previous = t;
       }
       frame = requestAnimationFrame(tick);
     };
     frame = requestAnimationFrame(tick);
     return () => cancelAnimationFrame(frame);
-  }, [e.rain, e.glass]);
+  }, [e.rain, e.glass, scene.id, JSON.stringify(scene.keyframes)]);
   const points = e.mask.map((p) => `${p.x},${p.y}`).join(" ");
   const asset = project.assets.find((a) => a.id === scene.background);
   const transform = asset
@@ -166,6 +168,28 @@ export function Stage({
               />
             ))}
         </g>
+        {(scene.sprites || []).map((original) => {
+          const sprite = animateSprite(original, scene.keyframes || [], time);
+          const image = project.assets.find((a) => a.id === sprite.asset);
+          return (
+            image && (
+              <image
+                key={sprite.id}
+                href={image.data}
+                x={-150}
+                y={-300}
+                width="300"
+                height="300"
+                opacity={sprite.opacity}
+                transform={`translate(${sprite.x} ${sprite.y}) scale(${sprite.flip ? -sprite.scale : sprite.scale} ${sprite.scale})`}
+              >
+                <title>
+                  {sprite.name} · {sprite.expression}
+                </title>
+              </image>
+            )
+          );
+        })}
         {e.vignette && <rect width="1000" height="563" fill="url(#vignette)" />}
         {project.settings.guides && !playing && (
           <rect
