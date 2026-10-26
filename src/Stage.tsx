@@ -1,5 +1,7 @@
 import { useEffect, useRef, useState } from "react";
-import type { Project, Scene } from "./model";
+import type { Project, Scene, Region } from "./model";
+import { imageMask } from "./wand";
+import type { RegionEditor } from "./Zones";
 import { animateSprite } from "./animation";
 import { Artwork } from "./Artwork";
 import { sampleLightLoop, sceneLightLoop } from "./lighting";
@@ -10,6 +12,8 @@ export function Stage({
   onMask,
   playing,
   children,
+  regionEditor = null,
+  onRegion,
 }: {
   project: Project;
   scene: Scene;
@@ -17,13 +21,20 @@ export function Stage({
   onMask: (v: Scene["effects"]["mask"]) => void;
   playing: boolean;
   children?: React.ReactNode;
+  regionEditor?: RegionEditor | null;
+  onRegion?: (r: Region) => void;
 }) {
+  const [wandError, setWandError] = useState("");
+  const [wandBusy, setWandBusy] = useState(false);
   const [time, setTime] = useState(0);
   const svg = useRef<SVGSVGElement>(null);
   const e = scene.effects;
   const loop = sceneLightLoop(scene);
-  const [reducedMotion, setReducedMotion] = useState(() =>
-    typeof matchMedia === "function" && matchMedia("(prefers-reduced-motion: reduce)").matches);
+  const [reducedMotion, setReducedMotion] = useState(
+    () =>
+      typeof matchMedia === "function" &&
+      matchMedia("(prefers-reduced-motion: reduce)").matches,
+  );
   useEffect(() => {
     const media = matchMedia("(prefers-reduced-motion: reduce)");
     const update = () => setReducedMotion(media.matches);
@@ -31,12 +42,38 @@ export function Stage({
     media.addEventListener("change", update);
     return () => media.removeEventListener("change", update);
   }, []);
-  const loopingLight = loop.enabled && e.light > 0 && !project.settings.reducedEffects && !reducedMotion;
+  const zonedAnimation =
+    e.lights?.some((l) => l.enabled && l.cycle.enabled) &&
+    !project.settings.reducedEffects &&
+    !reducedMotion;
+  const zoneLevel = (l: NonNullable<typeof e.lights>[number]) =>
+    l.cycle.enabled && !project.settings.reducedEffects && !reducedMotion
+      ? sampleLightLoop(l.cycle, time)
+      : 1;
+  const globalLevel = (e.lights || [])
+    .filter((l) => l.enabled && l.kind === "global")
+    .reduce((n, l) => n * l.intensity * zoneLevel(l), 1);
+  const activeRegion =
+    regionEditor?.kind === "rain"
+      ? e.rainZones?.find((r) => r.id === regionEditor.id)
+      : e.lights?.find((l) => l.id === regionEditor?.id)?.region;
+  const loopingLight =
+    loop.enabled &&
+    e.light > 0 &&
+    !project.settings.reducedEffects &&
+    !reducedMotion;
   const lightLevel = loopingLight ? sampleLightLoop(loop, time) : 1;
   const lightIntensity = Math.min(1, e.light * lightLevel);
   useEffect(() => {
     setTime(0);
-    if (!e.rain && !e.glass && !scene.keyframes?.length && !loopingLight) return;
+    if (
+      !e.rain &&
+      !e.glass &&
+      !scene.keyframes?.length &&
+      !loopingLight &&
+      !zonedAnimation
+    )
+      return;
     const origin = performance.now();
     let frame = 0;
     let previous = 0;
@@ -49,7 +86,17 @@ export function Stage({
     };
     frame = requestAnimationFrame(tick);
     return () => cancelAnimationFrame(frame);
-  }, [e.rain, e.glass, scene.id, JSON.stringify(scene.keyframes), loopingLight, loop.stepSeconds, loop.values.join(",")]);
+  }, [
+    e.rain,
+    e.glass,
+    scene.id,
+    JSON.stringify(scene.keyframes),
+    loopingLight,
+    loop.stepSeconds,
+    loop.values.join(","),
+    zonedAnimation,
+    e.lights,
+  ]);
   const points = e.mask.map((p) => `${p.x},${p.y}`).join(" ");
   const asset = project.assets.find((a) => a.id === scene.background);
   const transform = asset
@@ -59,14 +106,78 @@ export function Stage({
     ? Math.min(35, e.density)
     : e.density;
   return (
-    <div className={"stage " + (maskMode ? "masking" : "")}>
+    <div className={"stage " + (maskMode || regionEditor ? "masking" : "")}>
       <svg
         ref={svg}
         viewBox="0 0 1000 563"
         role="img"
         aria-label={scene.title + " live stage"}
         data-light-level={lightLevel}
-        onClick={(event) => {
+        data-global-light-level={globalLevel}
+        onClick={async (event) => {
+          if (regionEditor && activeRegion && svg.current && onRegion) {
+            const point = new DOMPoint(
+              event.clientX,
+              event.clientY,
+            ).matrixTransform(svg.current.getScreenCTM()!.inverse());
+            const x = Math.max(
+              0,
+              Math.min(
+                1000,
+                asset
+                  ? (point.x - scene.x * 10 - 500) / scene.scale + 500
+                  : point.x,
+              ),
+            );
+            const y = Math.max(
+              0,
+              Math.min(
+                563,
+                asset
+                  ? (point.y - scene.y * 5.63 - 281.5) / scene.scale + 281.5
+                  : point.y,
+              ),
+            );
+            setWandError("");
+            if (regionEditor.mode === "polygon") {
+              if (activeRegion.points.length >= 200) {
+                setWandError("Maximum 200 points per region.");
+                return;
+              }
+              onRegion({
+                ...activeRegion,
+                path: undefined,
+                points: [...activeRegion.points, { x, y }],
+              });
+            } else {
+              if (!asset) {
+                setWandError(
+                  "Import a background image before using the magic wand.",
+                );
+                return;
+              }
+              if (wandBusy) return;
+              setWandBusy(true);
+              try {
+                onRegion({
+                  ...activeRegion,
+                  points: [],
+                  path: await imageMask(
+                    asset.data,
+                    scene.fit,
+                    x,
+                    y,
+                    regionEditor.tolerance,
+                  ),
+                });
+              } catch (error) {
+                setWandError(String(error));
+              } finally {
+                setWandBusy(false);
+              }
+            }
+            return;
+          }
           if (!maskMode || !svg.current) return;
           const pt = new DOMPoint(event.clientX, event.clientY).matrixTransform(
             svg.current.getScreenCTM()!.inverse(),
@@ -109,8 +220,31 @@ export function Stage({
             <rect
               width="1000"
               height="563"
-              fill={e.mask.length < 3 || e.invert ? "white" : "black"}
+              fill={
+                e.invert || (!e.rainZones?.length && e.mask.length < 3)
+                  ? "white"
+                  : "black"
+              }
             />
+            {e.rainZones
+              ?.filter((r) => r.enabled)
+              .map((r) =>
+                r.path ? (
+                  <path
+                    key={r.id}
+                    transform={transform}
+                    d={r.path}
+                    fill={e.invert ? "black" : "white"}
+                  />
+                ) : r.points.length >= 3 ? (
+                  <polygon
+                    key={r.id}
+                    transform={transform}
+                    points={r.points.map((p) => `${p.x},${p.y}`).join(" ")}
+                    fill={e.invert ? "black" : "white"}
+                  />
+                ) : null,
+              )}
             {e.mask.length >= 3 && (
               <polygon
                 transform={transform}
@@ -119,93 +253,189 @@ export function Stage({
               />
             )}
           </mask>
+          {(e.lights || [])
+            .filter((l) => l.kind === "local")
+            .map((l) => (
+              <g key={l.id}>
+                <radialGradient id={"zone-falloff-" + l.id}>
+                  <stop
+                    stopColor="white"
+                    stopOpacity={Math.min(1, l.intensity * zoneLevel(l))}
+                  />
+                  <stop offset="1" stopColor="white" stopOpacity="0" />
+                </radialGradient>
+                <mask id={"zone-radius-" + l.id}>
+                  <ellipse
+                    cx={l.x}
+                    cy={l.y}
+                    rx={Math.max(
+                      1,
+                      l.radius * (1 + l.spread * (zoneLevel(l) - 1)),
+                    )}
+                    ry={Math.max(
+                      1,
+                      l.radius * (1 + l.spread * (zoneLevel(l) - 1)),
+                    )}
+                    fill={"url(#zone-falloff-" + l.id + ")"}
+                  />
+                </mask>
+                <radialGradient id={"zone-gradient-" + l.id}>
+                  <stop
+                    stopColor={l.color}
+                    stopOpacity={Math.min(1, l.intensity * zoneLevel(l))}
+                  />
+                  <stop offset="1" stopColor={l.color} stopOpacity="0" />
+                </radialGradient>
+                <mask id={"zone-mask-" + l.id}>
+                  <rect
+                    width="1000"
+                    height="563"
+                    fill={l.region ? "black" : "white"}
+                  />
+                  {l.region?.enabled &&
+                    (l.region.path ? (
+                      <path
+                        transform={transform}
+                        d={l.region.path}
+                        fill="white"
+                      />
+                    ) : (
+                      <polygon
+                        transform={transform}
+                        points={l.region.points
+                          .map((p) => `${p.x},${p.y}`)
+                          .join(" ")}
+                        fill="white"
+                      />
+                    ))}
+                </mask>
+              </g>
+            ))}
         </defs>
-        <g
-          style={{
-            filter: `brightness(${e.brightness * (loopingLight ? 0.85 + lightLevel * 0.15 : 1)}) contrast(${e.contrast})`,
-          }}
-        >
-          {asset ? (
-            <g
-              transform={`translate(${scene.x * 10} ${scene.y * 5.63}) translate(500 281.5) scale(${scene.scale}) translate(-500 -281.5)`}
-            >
-              <image
-                href={asset.data}
-                width="1000"
-                height="563"
-                preserveAspectRatio={
-                  scene.fit === "stretch"
-                    ? "none"
-                    : scene.fit === "cover"
-                      ? "xMidYMid slice"
-                      : "xMidYMid meet"
-                }
-              />
-            </g>
-          ) : (
-            <Artwork kind={scene.art} dynamicLight={loopingLight} />
-          )}
-        </g>
-        <rect width="1000" height="563" fill={e.tint} opacity={e.tintOpacity} />
-        <ellipse
-          cx={e.lightX * 10}
-          cy={e.lightY * 5.63}
-          rx="380"
-          ry="320"
-          fill="url(#softLight)"
-        />
-        <g
-          mask="url(#rainMask)"
-          fill="none"
-          stroke={e.color}
-          opacity={e.opacity}
-          strokeWidth="1.3"
-        >
-          {e.rain &&
-            Array.from({ length: Math.round(count) }, (_, i) => {
-              const x =
-                ((i * 137.13 + (i % 5) * 27 + time * e.speed * e.angle * 2) %
-                  1100) -
-                50;
-              const y =
-                ((i * 79.31 + time * e.speed * (220 + (i % 7) * 17)) % 650) -
-                45;
+        <g style={{ filter: `brightness(${globalLevel})` }}>
+          <g
+            id="scene-base"
+            style={{
+              filter: `brightness(${e.brightness * (loopingLight ? 0.85 + lightLevel * 0.15 : 1)}) contrast(${e.contrast})`,
+            }}
+          >
+            {asset ? (
+              <g
+                transform={`translate(${scene.x * 10} ${scene.y * 5.63}) translate(500 281.5) scale(${scene.scale}) translate(-500 -281.5)`}
+              >
+                <image
+                  href={asset.data}
+                  width="1000"
+                  height="563"
+                  preserveAspectRatio={
+                    scene.fit === "stretch"
+                      ? "none"
+                      : scene.fit === "cover"
+                        ? "xMidYMid slice"
+                        : "xMidYMid meet"
+                  }
+                />
+              </g>
+            ) : (
+              <Artwork kind={scene.art} dynamicLight={loopingLight} />
+            )}
+          </g>
+          <rect
+            width="1000"
+            height="563"
+            fill={e.tint}
+            opacity={e.tintOpacity}
+          />
+          <ellipse
+            cx={e.lightX * 10}
+            cy={e.lightY * 5.63}
+            rx="380"
+            ry="320"
+            fill="url(#softLight)"
+          />
+          <g
+            mask="url(#rainMask)"
+            fill="none"
+            stroke={e.color}
+            opacity={e.opacity}
+            strokeWidth="1.3"
+          >
+            {e.rain &&
+              Array.from({ length: Math.round(count) }, (_, i) => {
+                const x =
+                  ((i * 137.13 + (i % 5) * 27 + time * e.speed * e.angle * 2) %
+                    1100) -
+                  50;
+                const y =
+                  ((i * 79.31 + time * e.speed * (220 + (i % 7) * 17)) % 650) -
+                  45;
+                return (
+                  <path
+                    key={i}
+                    d={`M${x} ${y}l${e.angle * 0.35} ${e.length}`}
+                  />
+                );
+              })}
+            {e.glass &&
+              Array.from({ length: 28 }, (_, i) => (
+                <path
+                  key={"g" + i}
+                  strokeWidth={2 + (i % 3)}
+                  opacity=".5"
+                  d={`M${(i * 179) % 1000} ${(i * 89 + time * e.speed * 8) % 563}q-6 15 0 ${12 + (i % 7) * 5}`}
+                />
+              ))}
+          </g>
+          <g id="scene-sprites">
+            {(scene.sprites || []).map((original) => {
+              const sprite = animateSprite(
+                original,
+                scene.keyframes || [],
+                time,
+              );
+              const image = project.assets.find((a) => a.id === sprite.asset);
               return (
-                <path key={i} d={`M${x} ${y}l${e.angle * 0.35} ${e.length}`} />
+                image && (
+                  <image
+                    key={sprite.id}
+                    href={image.data}
+                    x={-150}
+                    y={-300}
+                    width="300"
+                    height="300"
+                    opacity={sprite.opacity}
+                    transform={`translate(${sprite.x} ${sprite.y}) scale(${sprite.flip ? -sprite.scale : sprite.scale} ${sprite.scale})`}
+                  >
+                    <title>
+                      {sprite.name} · {sprite.expression}
+                    </title>
+                  </image>
+                )
               );
             })}
-          {e.glass &&
-            Array.from({ length: 28 }, (_, i) => (
-              <path
-                key={"g" + i}
-                strokeWidth={2 + (i % 3)}
-                opacity=".5"
-                d={`M${(i * 179) % 1000} ${(i * 89 + time * e.speed * 8) % 563}q-6 15 0 ${12 + (i % 7) * 5}`}
-              />
-            ))}
+          </g>
         </g>
-        {(scene.sprites || []).map((original) => {
-          const sprite = animateSprite(original, scene.keyframes || [], time);
-          const image = project.assets.find((a) => a.id === sprite.asset);
-          return (
-            image && (
-              <image
-                key={sprite.id}
-                href={image.data}
-                x={-150}
-                y={-300}
-                width="300"
-                height="300"
-                opacity={sprite.opacity}
-                transform={`translate(${sprite.x} ${sprite.y}) scale(${sprite.flip ? -sprite.scale : sprite.scale} ${sprite.scale})`}
+        {(e.lights || [])
+          .filter((l) => l.enabled && l.kind === "local")
+          .map((l) => (
+            <g
+              key={l.id}
+              data-light-zone={l.id}
+              mask={"url(#zone-mask-" + l.id + ")"}
+              style={{ mixBlendMode: "screen" }}
+            >
+              <g
+                mask={"url(#zone-radius-" + l.id + ")"}
+                style={{
+                  filter: `brightness(${1 + l.intensity * zoneLevel(l)})`,
+                }}
               >
-                <title>
-                  {sprite.name} · {sprite.expression}
-                </title>
-              </image>
-            )
-          );
-        })}
+                <use href="#scene-base" />
+                <use href="#scene-sprites" />
+                <rect width="1000" height="563" fill={l.color} opacity=".15" />
+              </g>
+            </g>
+          ))}
         {e.vignette && <rect width="1000" height="563" fill="url(#vignette)" />}
         {project.settings.guides && !playing && (
           <rect
@@ -218,6 +448,25 @@ export function Stage({
             strokeDasharray="7 8"
             opacity=".5"
           />
+        )}
+        {regionEditor && activeRegion && (
+          <g transform={transform} pointerEvents="none">
+            {activeRegion.path ? (
+              <path d={activeRegion.path} fill="#ffc8a7" fillOpacity=".25" />
+            ) : (
+              <polygon
+                points={activeRegion.points
+                  .map((p) => `${p.x},${p.y}`)
+                  .join(" ")}
+                fill="#ffc8a7"
+                fillOpacity=".15"
+                stroke="#ffc8a7"
+              />
+            )}
+            {activeRegion.points.map((p, i) => (
+              <circle key={i} cx={p.x} cy={p.y} r="5" fill="#ffc8a7" />
+            ))}
+          </g>
         )}
         {maskMode && (
           <g transform={transform}>
@@ -236,6 +485,14 @@ export function Stage({
           </g>
         )}
       </svg>
+      {wandError && (
+        <div className="mask-hint" role="alert">
+          {wandError}
+        </div>
+      )}
+      {wandBusy && (
+        <div className="mask-hint">Selecting connected colours…</div>
+      )}
       {children}
     </div>
   );

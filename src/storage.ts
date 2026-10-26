@@ -51,14 +51,15 @@ export async function openGithubSnapshot(
     throw error;
   }
 }
-export function exportProject(p: Project) {
+export function exportProject(p: Project, filename?: string) {
   const b = new Blob([JSON.stringify(validateProject(p), null, 2)], {
     type: "application/json",
   });
   const url = URL.createObjectURL(b);
   const link = document.createElement("a");
   link.href = url;
-  link.download = p.title.replace(/[^a-z0-9]/gi, "-") + ".stillframe.json";
+  link.download =
+    filename || p.title.replace(/[^a-z0-9]/gi, "-") + ".stillframe.json";
   link.click();
   setTimeout(() => URL.revokeObjectURL(url), 1000);
 }

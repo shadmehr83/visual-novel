@@ -31,3 +31,12 @@ Future work should extend these real workflows with tests, preserve originals, a
 ## Portable HTML edition
 
 The full editor now also builds as a self-contained `stillframe-studio.html`, available as a download from the production app and in `downloads/`. The player-export bundle is embedded, so it works offline. Production tests cover offline editing/import/save/reload/undo/player export with external assets blocked. My Sites publication and real local-file storage behavior on the user’s device remain unverified; provider AI needs a hosted server. See docs/LOCAL_EDITOR.md.
+
+## Multiple regions and portable authored projects
+
+- Named enabled rain regions combine as a union. Existing legacy polygons are preserved on migration to named regions. A bounded connected-colour wand selects regions locally in imported art; it is not semantic AI segmentation.
+- Independent global illumination multipliers and local coloured lights have their own intensity cycles. Local radii expand/contract with cycle values; optional polygon/wand affected areas clip the contribution. Lighting uses 2D compositing and preserves image originals.
+- Hide/show dialogue is available while editing. Non-choice dialogue optionally accepts player-written responses, records them in playthrough history and follows the authored next transition. It does not generate a new NPC reply or replace authored choices.
+- Header save opens complete-project file saving, with Save As and truthful cancellation/error/download messages. The project JSON includes original images/audio and all regions/settings.
+- Authored snapshot moved intact to `projects/published.stillframe.json`, separate from engine files. Manual GitHub file upload is supported. Optional authenticated `/api/project` publishes only that fixed file and requires a server GitHub token; real publishing through that endpoint has not been tested with live credentials.
+- Latest validation includes 43 unit/API tests, 12 browser workflows, production build, and offline/local HTML editor/player checks. Provider, GitHub publish and file-picker integrations use controlled test doubles where real credentials or desktop file selection are unavailable. Cloudflare deployment success is checked separately from a GitHub push.

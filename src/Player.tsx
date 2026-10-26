@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { createRoot } from "react-dom/client";
-import { start, advance, validateProject } from "./model";
+import { start, advance, respond, validateProject } from "./model";
 import { Stage } from "./Stage";
 import { Qte, SceneAudio } from "./EngineTools";
 function Player() {
@@ -9,6 +9,7 @@ function Player() {
       JSON.parse(document.getElementById("story-data")!.textContent!),
     ),
   );
+  const [reply, setReply] = useState("");
   const [runtime, setRuntime] = useState(() => start(project));
   const scene = project.scenes.find((s) => s.id === runtime.scene)!;
   const node = scene.nodes.find((n) => n.id === runtime.node)!;
@@ -66,6 +67,27 @@ function Player() {
                 Continue
               </button>
             )}
+            {!runtime.ended &&
+              !node.choices.length &&
+              node.allowCustomResponse !== false && (
+                <form
+                  className="custom-response"
+                  onSubmit={(event) => {
+                    event.preventDefault();
+                    setRuntime((r) => respond(project, r, reply));
+                    setReply("");
+                  }}
+                >
+                  <input
+                    aria-label="Custom dialogue response"
+                    maxLength={1000}
+                    placeholder="Write your own response…"
+                    value={reply}
+                    onChange={(e) => setReply(e.target.value)}
+                  />
+                  <button disabled={!reply.trim()}>Send response</button>
+                </form>
+              )}
           </div>
         )}
       </Stage>

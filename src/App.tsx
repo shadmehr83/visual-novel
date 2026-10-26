@@ -35,6 +35,7 @@ import { demo } from "./demo";
 import { savedProject } from "./savedProject";
 import {
   advance,
+  respond,
   enter,
   start,
   validateProject,
@@ -54,6 +55,8 @@ import {
 } from "./storage";
 import { Assistant } from "./Assistant";
 import { EngineTools, Qte, SceneAudio } from "./EngineTools";
+import { Zones, type RegionEditor } from "./Zones";
+import { ProjectSave } from "./ProjectSave";
 import { Stage } from "./Stage";
 import { LightingLoopControls } from "./LightingLoopControls";
 import { sceneLightLoop } from "./lighting";
@@ -125,6 +128,9 @@ export default function App() {
   const [tab, setTab] = useState("Scenes");
   const [inspector, setInspector] = useState("Atmosphere");
   const [bottom, setBottom] = useState("Dialogue");
+  const [regionEditor, setRegionEditor] = useState<RegionEditor | null>(null);
+  const [hideDialogue, setHideDialogue] = useState(false);
+  const [customReply, setCustomReply] = useState("");
   const [maskMode, setMaskMode] = useState(false);
   const [loaded, setLoaded] = useState(false);
   const [canSave, setCanSave] = useState(false);
@@ -234,6 +240,7 @@ export default function App() {
       setNodeId("arrival");
       setRuntime(null);
       setMaskMode(false);
+      setRegionEditor(null);
       setTab("Scenes");
       setHasRecovery(!!(await loadSnapshotRecovery()));
       setCanSave(true);
@@ -258,6 +265,7 @@ export default function App() {
       setNodeId(focus.nodes[0].id);
       setRuntime(recovery.runtime);
       setMaskMode(false);
+      setRegionEditor(null);
       setTab("Scenes");
       setCanSave(true);
       setSnapshotNotice("Your previous local project has been restored.");
@@ -341,6 +349,7 @@ export default function App() {
     setSceneId(id);
     setNodeId(project.scenes.find((s) => s.id === id)!.nodes[0].id);
     setMaskMode(false);
+    setRegionEditor(null);
   }
   function play(restart = false) {
     try {
@@ -348,6 +357,7 @@ export default function App() {
       if (restart || !runtime) setRuntime(start(project));
       setPlaying(true);
       setMaskMode(false);
+      setRegionEditor(null);
     } catch (e) {
       setError(String(e));
     }
@@ -466,16 +476,9 @@ export default function App() {
             {status}
           </span>
           <button
-            title="Save now"
-            aria-label="Save now"
-            onClick={() => {
-              saveQueue.current = saveQueue.current
-                .catch(() => {})
-                .then(() => save(project, runtime));
-              saveQueue.current
-                .then(() => setStatus("Saved on this device"))
-                .catch((err) => setError(String(err)));
-            }}
+            title="Save project file"
+            aria-label="Save project file"
+            onClick={() => setModal("save")}
           >
             <Save size={16} />
           </button>
@@ -927,6 +930,17 @@ export default function App() {
                 <h1>{scene.title}</h1>
               </div>
               <div className="preview-tools">
+                {!playing && (
+                  <button
+                    aria-label={
+                      hideDialogue ? "Show dialogue" : "Hide dialogue"
+                    }
+                    onClick={() => setHideDialogue((v) => !v)}
+                  >
+                    <Eye size={15} />
+                    {hideDialogue ? "Show dialogue" : "Hide dialogue"}
+                  </button>
+                )}
                 <button
                   title="Toggle safe area"
                   aria-label="Toggle safe area"
@@ -949,6 +963,23 @@ export default function App() {
               playing={playing}
               maskMode={maskMode && !playing}
               onMask={(v) => effect("mask", v)}
+              regionEditor={playing ? null : regionEditor}
+              onRegion={(region) =>
+                updateScene((s) => {
+                  if (regionEditor?.kind === "rain") {
+                    const at =
+                      s.effects.rainZones?.findIndex(
+                        (r) => r.id === region.id,
+                      ) ?? -1;
+                    if (at >= 0) s.effects.rainZones![at] = region;
+                  } else {
+                    const light = s.effects.lights?.find(
+                      (l) => l.id === regionEditor?.id,
+                    );
+                    if (light) light.region = region;
+                  }
+                })
+              }
             >
               {playing && <SceneAudio project={project} scene={scene} />}
               {playing && runtime && node.qte && (
@@ -959,8 +990,13 @@ export default function App() {
                   onResolve={setRuntime}
                 />
               )}
-              {!maskMode && !(playing && node.qte) && (
-                <div className="dialogue-overlay">
+              {!maskMode && !regionEditor && !(playing && node.qte) && (
+                <div
+                  className={
+                    "dialogue-overlay " +
+                    (!playing && hideDialogue ? "dialogue-hidden" : "")
+                  }
+                >
                   {(node.portrait ||
                     (node.speaker === "Mara" &&
                       project.characters[0]?.portrait)) && (
@@ -1010,6 +1046,39 @@ export default function App() {
                           Continue <ChevronRight size={15} />
                         </button>
                       )}
+                      {!runtime?.ended &&
+                        !node.choices.length &&
+                        node.allowCustomResponse !== false && (
+                          <form
+                            className="custom-response"
+                            onSubmit={(ev) => {
+                              ev.preventDefault();
+                              try {
+                                setRuntime((r) =>
+                                  respond(project, r!, customReply),
+                                );
+                                setCustomReply("");
+                              } catch (e) {
+                                setError(String(e));
+                              }
+                            }}
+                          >
+                            <input
+                              aria-label="Custom dialogue response"
+                              placeholder="Or write your own response…"
+                              maxLength={1000}
+                              value={customReply}
+                              onChange={(ev) => setCustomReply(ev.target.value)}
+                            />
+                            <button disabled={!customReply.trim()}>
+                              Send response
+                            </button>
+                            <small>
+                              Recorded in this playthrough; the authored story
+                              path continues.
+                            </small>
+                          </form>
+                        )}
                     </>
                   ) : (
                     <span className="dialogue-hint">
@@ -1146,6 +1215,22 @@ export default function App() {
                       </select>
                     </label>
                   </div>
+                  <label className="consent">
+                    <input
+                      type="checkbox"
+                      disabled={playing}
+                      checked={node.allowCustomResponse !== false}
+                      onChange={(ev) =>
+                        updateScene(
+                          (s) =>
+                            (s.nodes.find(
+                              (n) => n.id === node.id,
+                            )!.allowCustomResponse = ev.target.checked),
+                        )
+                      }
+                    />
+                    Allow custom response during non-choice dialogue
+                  </label>
                   <textarea
                     disabled={playing}
                     aria-label="Dialogue text"
@@ -1379,6 +1464,16 @@ export default function App() {
           <fieldset disabled={playing}>
             {inspector === "Atmosphere" ? (
               <>
+                <ProjectSave project={project} />
+                <Zones
+                  scene={selected}
+                  update={updateScene}
+                  editor={regionEditor}
+                  setEditor={(v) => {
+                    setRegionEditor(v);
+                    if (v) setMaskMode(false);
+                  }}
+                />
                 <section className="property-section">
                   <h3>
                     <Sun size={15} /> Lighting & colour{" "}
@@ -1515,7 +1610,11 @@ export default function App() {
                     <div>
                       <MousePointer2 size={14} /> Effect region{" "}
                       <span className="badge">
-                        {e.mask.length >= 3 ? "MASKED" : "FULL STAGE"}
+                        {e.rainZones?.length
+                          ? "MULTI ZONE"
+                          : e.mask.length >= 3
+                            ? "MASKED"
+                            : "FULL STAGE"}
                       </span>
                     </div>
                     <p>Rain stays inside the selected region.</p>
@@ -1580,6 +1679,7 @@ export default function App() {
                     className="wide subtle"
                     onClick={() =>
                       updateScene((s) => {
+                        s.effects.lights?.forEach((l) => (l.enabled = false));
                         s.effects.rain = false;
                         s.effects.glass = false;
                         s.effects.light = 0;
@@ -1758,7 +1858,13 @@ export default function App() {
             className="modal"
             role="dialog"
             aria-modal="true"
-            aria-label={modal === "settings" ? "Project settings" : "Projects"}
+            aria-label={
+              modal === "save"
+                ? "Save project"
+                : modal === "settings"
+                  ? "Project settings"
+                  : "Projects"
+            }
             onClick={(ev) => ev.stopPropagation()}
           >
             <button
@@ -1770,9 +1876,15 @@ export default function App() {
             </button>
             <Layers size={28} />
             <h2>
-              {modal === "settings" ? "Your workspace" : "A new beginning"}
+              {modal === "save"
+                ? "Save your project"
+                : modal === "settings"
+                  ? "Your workspace"
+                  : "A new beginning"}
             </h2>
-            {modal === "settings" ? (
+            {modal === "save" ? (
+              <ProjectSave project={project} />
+            ) : modal === "settings" ? (
               <>
                 <p>
                   This is a local-first studio. Projects and original images are

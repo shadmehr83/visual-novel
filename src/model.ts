@@ -25,6 +25,7 @@ export const qteSchema = z.object({
 });
 const node = z.object({
   qte: qteSchema.optional(),
+  allowCustomResponse: z.boolean().optional(),
   portrait: z.string().nullable().optional(),
   id: z.string(),
   speaker: z.string(),
@@ -37,8 +38,44 @@ export const lightLoopSchema = z.object({
   values: z.array(z.number().finite().min(0).max(2)).min(2).max(32),
   stepSeconds: z.number().finite().min(0.5).max(20),
 });
+export const regionSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  enabled: z.boolean(),
+  points: z
+    .array(
+      z.object({
+        x: z.number().min(0).max(1000),
+        y: z.number().min(0).max(563),
+      }),
+    )
+    .max(200),
+  path: z
+    .string()
+    .max(200000)
+    .regex(/^[MmLlHhVvZz0-9., +\-]*$/)
+    .optional(),
+});
+export const zoneLightSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  enabled: z.boolean(),
+  kind: z.enum(["global", "local"]),
+  intensity: z.number().min(0).max(3),
+  color: z.string().regex(/^#[0-9a-fA-F]{6}$/),
+  x: z.number().min(0).max(1000),
+  y: z.number().min(0).max(563),
+  radius: z.number().min(10).max(800),
+  spread: z.number().min(0).max(1),
+  cycle: lightLoopSchema,
+  region: regionSchema.optional(),
+});
+export type Region = z.infer<typeof regionSchema>;
+export type ZoneLight = z.infer<typeof zoneLightSchema>;
 export const effectsSchema = z.object({
   lightLoop: lightLoopSchema.optional(),
+  rainZones: z.array(regionSchema).max(30).optional(),
+  lights: z.array(zoneLightSchema).max(20).optional(),
   rain: z.boolean(),
   density: z.number().min(0).max(200),
   speed: z.number().min(0).max(3),
@@ -201,6 +238,7 @@ export type Runtime = {
   history: string[];
   choices: string[];
   ended: boolean;
+  responses?: { scene: string; node: string; text: string }[];
   memories?: {
     scene: string;
     node: string;
@@ -342,4 +380,30 @@ export function resolveQte(
   return p.scenes.some((s) => s.id === target)
     ? enter(p, next, target)
     : { ...next, node: target };
+}
+
+export function respond(p: Project, r: Runtime, text: string): Runtime {
+  const node = p.scenes
+    .find((s) => s.id === r.scene)
+    ?.nodes.find((n) => n.id === r.node);
+  if (
+    !node ||
+    node.choices.length ||
+    node.qte ||
+    node.allowCustomResponse === false ||
+    r.ended
+  )
+    throw Error("Custom reply unavailable here");
+  const reply = text.trim();
+  if (!reply || reply.length > 1000)
+    throw Error("Enter a reply of 1–1000 characters");
+  const next = advance(p, r);
+  return {
+    ...next,
+    responses: [
+      ...(r.responses || []),
+      { scene: r.scene, node: r.node, text: reply },
+    ],
+    history: [...next.history, `Custom reply: ${reply}`].slice(-200),
+  };
 }
