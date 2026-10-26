@@ -127,7 +127,7 @@ export function Stage({
               />
             </g>
           ) : (
-            <Artwork kind={scene.art} />
+            <Artwork kind={scene.art} dynamicLight={scene.effects.light > 0 && !project.settings.reducedEffects} />
           )}
         </g>
         <rect width="1000" height="563" fill={e.tint} opacity={e.tintOpacity} />

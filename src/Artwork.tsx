@@ -1,8 +1,22 @@
-export function Artwork({ kind }: { kind: string }) {
+export function Artwork({ kind, dynamicLight = true }: { kind: string; dynamicLight?: boolean }) {
   const cafe = kind === "cafe";
   return (
-    <g>
+    <g className={cafe && dynamicLight ? "cafe-dynamic-light" : undefined}>
       <defs>
+        <linearGradient id="cafeMovingShade" x1="0" y1="0" x2="0" y2="1">
+          <stop stopColor="#101923" stopOpacity="0" />
+          <stop offset=".48" stopColor="#101923" stopOpacity=".22" />
+          <stop offset="1" stopColor="#101923" stopOpacity="0" />
+        </linearGradient>
+        <clipPath id="cafePersonShade">
+          <path d="M38 220Q0 160 48 121H116Q170 161 145 240Z" />
+          <ellipse cx="83" cy="71" rx="45" ry="60" />
+          <path d="M38 85Q13 4 80 3Q150 4 132 102L116 88L108 37Q83 65 43 63Z" />
+        </clipPath>
+        <clipPath id="cafePlantShade">
+          <path d="M-23 0q-50-75-22-88q40 5 45 77Q15-85 40-67q13 35-40 67Q65-40 65-10Q42 15 0 13Z" />
+          <path d="M-35 5h68l-12 60h-46z" />
+        </clipPath>
         <linearGradient id="wall" x2="1" y2="1">
           <stop stopColor={cafe ? "#70685e" : "#323947"} />
           <stop offset="1" stopColor={cafe ? "#393d3f" : "#1c2330"} />
@@ -76,7 +90,7 @@ export function Artwork({ kind }: { kind: string }) {
           <path d="M681 0v112" stroke="#282a29" strokeWidth="4" />
           <path d="M631 145Q680 75 732 145Z" fill="#b99b69" />
           <ellipse cx="681" cy="152" rx="38" ry="6" fill="#f3d4a0" />
-          <circle cx="681" cy="182" r="150" fill="url(#lamp)" />
+          <circle className="cafe-lamp-glow" cx="681" cy="182" r="150" fill="url(#lamp)" />
           <rect
             x="770"
             y="70"
@@ -115,7 +129,7 @@ export function Artwork({ kind }: { kind: string }) {
             strokeWidth="10"
           />
           <ellipse cx="872" cy="370" rx="139" ry="24" fill="#7a6654" />
-          <g transform="translate(280,210)">
+          <g className="cafe-person-light" transform="translate(280,210)">
             <path d="M38 220Q0 160 48 121H116Q170 161 145 240" fill="#423c43" />
             <path d="M54 125L77 160L108 125" fill="#c1a397" />
             <ellipse cx="83" cy="71" rx="45" ry="60" fill="#b99687" />
@@ -130,6 +144,9 @@ export function Artwork({ kind }: { kind: string }) {
               stroke="#765553"
               strokeWidth="2"
             />
+            {dynamicLight && <g clipPath="url(#cafePersonShade)" pointerEvents="none">
+              <rect className="cafe-person-shade" x="-20" y="-80" width="210" height="360" fill="url(#cafeMovingShade)" />
+            </g>}
           </g>
           <ellipse cx="472" cy="508" rx="236" ry="62" fill="#312d2d" />
           <ellipse cx="472" cy="488" rx="236" ry="57" fill="#8c7760" />
@@ -144,12 +161,15 @@ export function Artwork({ kind }: { kind: string }) {
             strokeWidth="6"
           />
           <path d="M340 488l45-22l33 28l-45 20z" fill="#d0bea2" />
-          <g transform="translate(940 315)">
+          <g className="cafe-plant-light" transform="translate(940 315)">
             <path
               d="M-23 0q-50-75-22-88q40 5 45 77Q15-85 40-67q13 35-40 67Q65-40 65-10Q42 15 0 13"
               fill="#465448"
             />
             <path d="M-35 5h68l-12 60h-46z" fill="#896b55" />
+            {dynamicLight && <g clipPath="url(#cafePlantShade)" pointerEvents="none">
+              <rect className="cafe-plant-shade" x="-85" y="-160" width="170" height="300" fill="url(#cafeMovingShade)" />
+            </g>}
           </g>
         </>
       ) : (
