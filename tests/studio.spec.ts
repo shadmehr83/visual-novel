@@ -1,3 +1,4 @@
+import { clickScenePoint } from "./stagePoint";
 import { test, expect } from "@playwright/test";
 test("author, import, mask, undo, persist, export and play opening", async ({
   page,
@@ -15,9 +16,9 @@ test("author, import, mask, undo, persist, export and play opening", async ({
   const stage = page.getByRole("img", {
     name: "A table by the window live stage",
   });
-  await stage.click({ position: { x: 30, y: 20 } });
-  await stage.click({ position: { x: 160, y: 20 } });
-  await stage.click({ position: { x: 160, y: 100 } });
+  await clickScenePoint(stage, 0.075, 0.0888889);
+  await clickScenePoint(stage, 0.4, 0.0888889);
+  await clickScenePoint(stage, 0.4, 0.444444);
   await expect(page.getByText("MASKED", { exact: true })).toBeVisible();
   await page.getByRole("button", { name: "Finish region" }).click();
   await page.getByRole("button", { name: "Undo", exact: true }).click();

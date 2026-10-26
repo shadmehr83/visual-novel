@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import type { Project, Scene, Region } from "./model";
 import { sampleMotion } from "./motion";
+import { sampleCamera } from "./camera";
 import { imageMask } from "./wand";
 import type { RegionEditor } from "./Zones";
 import { animateSprite } from "./animation";
@@ -15,6 +16,7 @@ export function Stage({
   children,
   regionEditor = null,
   onRegion,
+  previewTick = 0,
 }: {
   project: Project;
   scene: Scene;
@@ -24,6 +26,7 @@ export function Stage({
   children?: React.ReactNode;
   regionEditor?: RegionEditor | null;
   onRegion?: (r: Region) => void;
+  previewTick?: number;
 }) {
   const [wandError, setWandError] = useState("");
   const [wandBusy, setWandBusy] = useState(false);
@@ -60,6 +63,17 @@ export function Stage({
       : regionEditor?.kind === "rain"
         ? e.rainZones?.find((r) => r.id === regionEditor.id)
         : e.lights?.find((l) => l.id === regionEditor?.id)?.region;
+  const camera = scene.camera?.enabled
+    ? sampleCamera(
+        scene.camera,
+        time,
+        project.settings.reducedEffects || reducedMotion,
+      )
+    : null;
+  const cameraTransform =
+    camera && !maskMode && !regionEditor
+      ? `translate(${camera.x} ${camera.y}) scale(${camera.zoom})`
+      : undefined;
   const loopingLight =
     loop.enabled &&
     e.light > 0 &&
@@ -75,6 +89,11 @@ export function Stage({
       !scene.keyframes?.length &&
       !loopingLight &&
       !zonedAnimation &&
+      !(
+        scene.camera?.enabled &&
+        !project.settings.reducedEffects &&
+        !reducedMotion
+      ) &&
       !(
         e.motionZones?.some((w) => w.enabled) &&
         !project.settings.reducedEffects &&
@@ -104,6 +123,9 @@ export function Stage({
     loop.values.join(","),
     zonedAnimation,
     e.lights,
+    scene.camera,
+    playing,
+    previewTick,
     e.motionZones,
     reducedMotion,
     project.settings.reducedEffects,
@@ -386,156 +408,171 @@ export function Stage({
             );
           })}
         </defs>
-        <g style={{ filter: `brightness(${globalLevel})` }}>
-          <g
-            id="scene-base"
-            style={{
-              filter: `brightness(${e.brightness * (loopingLight ? 0.85 + lightLevel * 0.15 : 1)}) contrast(${e.contrast})`,
-            }}
-          >
-            {asset ? (
-              <g
-                transform={`translate(${scene.x * 10} ${scene.y * 5.63}) translate(500 281.5) scale(${scene.scale}) translate(-500 -281.5)`}
-              >
-                <image
-                  href={asset.data}
-                  width="1000"
-                  height="563"
-                  preserveAspectRatio={
-                    scene.fit === "stretch"
-                      ? "none"
-                      : scene.fit === "cover"
-                        ? "xMidYMid slice"
-                        : "xMidYMid meet"
-                  }
-                />
-              </g>
-            ) : (
-              <Artwork kind={scene.art} dynamicLight={loopingLight} />
-            )}
-          </g>
-          <rect
-            width="1000"
-            height="563"
-            fill={e.tint}
-            opacity={e.tintOpacity}
-          />
-          <ellipse
-            cx={e.lightX * 10}
-            cy={e.lightY * 5.63}
-            rx="380"
-            ry="320"
-            fill="url(#softLight)"
-          />
-          <g
-            mask="url(#rainMask)"
-            fill="none"
-            stroke={e.color}
-            opacity={e.opacity}
-            strokeWidth="1.3"
-          >
-            {e.rain &&
-              Array.from({ length: Math.round(count) }, (_, i) => {
-                const x =
-                  ((i * 137.13 + (i % 5) * 27 + time * e.speed * e.angle * 2) %
-                    1100) -
-                  50;
-                const y =
-                  ((i * 79.31 + time * e.speed * (220 + (i % 7) * 17)) % 650) -
-                  45;
-                return (
-                  <path
-                    key={i}
-                    d={`M${x} ${y}l${e.angle * 0.35} ${e.length}`}
-                  />
-                );
-              })}
-            {e.glass &&
-              Array.from({ length: 28 }, (_, i) => (
-                <path
-                  key={"g" + i}
-                  strokeWidth={2 + (i % 3)}
-                  opacity=".5"
-                  d={`M${(i * 179) % 1000} ${(i * 89 + time * e.speed * 8) % 563}q-6 15 0 ${12 + (i % 7) * 5}`}
-                />
-              ))}
-          </g>
-          <g id="scene-sprites">
-            {(scene.sprites || []).map((original) => {
-              const sprite = animateSprite(
-                original,
-                scene.keyframes || [],
-                time,
-              );
-              const image = project.assets.find((a) => a.id === sprite.asset);
-              return (
-                image && (
-                  <image
-                    key={sprite.id}
-                    href={image.data}
-                    x={-150}
-                    y={-300}
-                    width="300"
-                    height="300"
-                    opacity={sprite.opacity}
-                    transform={`translate(${sprite.x} ${sprite.y}) scale(${sprite.flip ? -sprite.scale : sprite.scale} ${sprite.scale})`}
-                  >
-                    <title>
-                      {sprite.name} · {sprite.expression}
-                    </title>
-                  </image>
-                )
-              );
-            })}
-          </g>
-          <g id="scene-motion">
-            {(e.motionZones || [])
-              .filter((w) => w.enabled)
-              .map((w) => {
-                const offset = sampleMotion(
-                  w,
-                  time,
-                  project.settings.reducedEffects || reducedMotion,
-                );
-                return (
-                  <g
-                    key={w.id}
-                    data-motion-zone={w.id}
-                    data-motion-offset={offset.dx}
-                    mask={"url(#motion-mask-" + w.id + ")"}
-                  >
-                    <g filter={"url(#motion-filter-" + w.id + ")"}>
-                      <use href="#scene-base" />
-                      <use href="#scene-sprites" />
-                    </g>
-                  </g>
-                );
-              })}
-          </g>
-        </g>
-        {(e.lights || [])
-          .filter((l) => l.enabled && l.kind === "local")
-          .map((l) => (
+        <g
+          data-camera-transform={cameraTransform || "none"}
+          transform={cameraTransform}
+        >
+          <g style={{ filter: `brightness(${globalLevel})` }}>
             <g
-              key={l.id}
-              data-light-zone={l.id}
-              mask={"url(#zone-mask-" + l.id + ")"}
-              style={{ mixBlendMode: "screen" }}
+              id="scene-base"
+              style={{
+                filter: `brightness(${e.brightness * (loopingLight ? 0.85 + lightLevel * 0.15 : 1)}) contrast(${e.contrast})`,
+              }}
             >
-              <g
-                mask={"url(#zone-radius-" + l.id + ")"}
-                style={{
-                  filter: `brightness(${1 + l.intensity * zoneLevel(l)})`,
-                }}
-              >
-                <use href="#scene-base" />
-                <use href="#scene-sprites" />
-                <use href="#scene-motion" />
-                <rect width="1000" height="563" fill={l.color} opacity=".15" />
-              </g>
+              {asset ? (
+                <g
+                  transform={`translate(${scene.x * 10} ${scene.y * 5.63}) translate(500 281.5) scale(${scene.scale}) translate(-500 -281.5)`}
+                >
+                  <image
+                    href={asset.data}
+                    width="1000"
+                    height="563"
+                    preserveAspectRatio={
+                      scene.fit === "stretch"
+                        ? "none"
+                        : scene.fit === "cover"
+                          ? "xMidYMid slice"
+                          : "xMidYMid meet"
+                    }
+                  />
+                </g>
+              ) : (
+                <Artwork kind={scene.art} dynamicLight={loopingLight} />
+              )}
             </g>
-          ))}
-        {e.vignette && <rect width="1000" height="563" fill="url(#vignette)" />}
+            <rect
+              width="1000"
+              height="563"
+              fill={e.tint}
+              opacity={e.tintOpacity}
+            />
+            <ellipse
+              cx={e.lightX * 10}
+              cy={e.lightY * 5.63}
+              rx="380"
+              ry="320"
+              fill="url(#softLight)"
+            />
+            <g
+              mask="url(#rainMask)"
+              fill="none"
+              stroke={e.color}
+              opacity={e.opacity}
+              strokeWidth="1.3"
+            >
+              {e.rain &&
+                Array.from({ length: Math.round(count) }, (_, i) => {
+                  const x =
+                    ((i * 137.13 +
+                      (i % 5) * 27 +
+                      time * e.speed * e.angle * 2) %
+                      1100) -
+                    50;
+                  const y =
+                    ((i * 79.31 + time * e.speed * (220 + (i % 7) * 17)) %
+                      650) -
+                    45;
+                  return (
+                    <path
+                      key={i}
+                      d={`M${x} ${y}l${e.angle * 0.35} ${e.length}`}
+                    />
+                  );
+                })}
+              {e.glass &&
+                Array.from({ length: 28 }, (_, i) => (
+                  <path
+                    key={"g" + i}
+                    strokeWidth={2 + (i % 3)}
+                    opacity=".5"
+                    d={`M${(i * 179) % 1000} ${(i * 89 + time * e.speed * 8) % 563}q-6 15 0 ${12 + (i % 7) * 5}`}
+                  />
+                ))}
+            </g>
+            <g id="scene-sprites">
+              {(scene.sprites || []).map((original) => {
+                const sprite = animateSprite(
+                  original,
+                  scene.keyframes || [],
+                  time,
+                );
+                const image = project.assets.find((a) => a.id === sprite.asset);
+                return (
+                  image && (
+                    <image
+                      key={sprite.id}
+                      href={image.data}
+                      x={-150}
+                      y={-300}
+                      width="300"
+                      height="300"
+                      opacity={sprite.opacity}
+                      transform={`translate(${sprite.x} ${sprite.y}) scale(${sprite.flip ? -sprite.scale : sprite.scale} ${sprite.scale})`}
+                    >
+                      <title>
+                        {sprite.name} · {sprite.expression}
+                      </title>
+                    </image>
+                  )
+                );
+              })}
+            </g>
+            <g id="scene-motion">
+              {(e.motionZones || [])
+                .filter((w) => w.enabled)
+                .map((w) => {
+                  const offset = sampleMotion(
+                    w,
+                    time,
+                    project.settings.reducedEffects || reducedMotion,
+                  );
+                  return (
+                    <g
+                      key={w.id}
+                      data-motion-zone={w.id}
+                      data-motion-offset={offset.dx}
+                      mask={"url(#motion-mask-" + w.id + ")"}
+                    >
+                      <g filter={"url(#motion-filter-" + w.id + ")"}>
+                        <use href="#scene-base" />
+                        <use href="#scene-sprites" />
+                      </g>
+                    </g>
+                  );
+                })}
+            </g>
+          </g>
+          {(e.lights || [])
+            .filter((l) => l.enabled && l.kind === "local")
+            .map((l) => (
+              <g
+                key={l.id}
+                data-light-zone={l.id}
+                mask={"url(#zone-mask-" + l.id + ")"}
+                style={{ mixBlendMode: "screen" }}
+              >
+                <g
+                  mask={"url(#zone-radius-" + l.id + ")"}
+                  style={{
+                    filter: `brightness(${1 + l.intensity * zoneLevel(l)})`,
+                  }}
+                >
+                  <use href="#scene-base" />
+                  <use href="#scene-sprites" />
+                  <use href="#scene-motion" />
+                  <rect
+                    width="1000"
+                    height="563"
+                    fill={l.color}
+                    opacity=".15"
+                  />
+                </g>
+              </g>
+            ))}
+          {e.vignette && (
+            <rect width="1000" height="563" fill="url(#vignette)" />
+          )}
+        </g>
         {project.settings.guides && !playing && (
           <rect
             x="50"

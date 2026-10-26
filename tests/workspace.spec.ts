@@ -1,3 +1,4 @@
+import { clickScenePoint } from "./stagePoint";
 import { test, expect } from "@playwright/test";
 test("inspector scroll stays independent, panels filter and dock, and floating window can move", async ({
   page,
@@ -68,7 +69,7 @@ test("light wand supports full selected-area coverage and motion zones animate, 
   const stage = page.getByRole("img", {
     name: "A table by the window live stage",
   });
-  await stage.click({ position: { x: 150, y: 80 } });
+  await clickScenePoint(stage, 0.375, 0.355556);
   await expect(
     light.getByText("Auto-selected region", { exact: true }),
   ).toBeVisible();
@@ -79,7 +80,7 @@ test("light wand supports full selected-area coverage and motion zones animate, 
   await page.getByRole("button", { name: "Add motion zone" }).click();
   const motion = page.locator('[data-effect-panel="Motion"] .clue');
   await motion.getByRole("button", { name: "Magic wand", exact: true }).click();
-  await stage.click({ position: { x: 180, y: 100 } });
+  await clickScenePoint(stage, 0.45, 0.444444);
   await expect(
     motion.getByText("Auto-selected region", { exact: true }),
   ).toBeVisible();

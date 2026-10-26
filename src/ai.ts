@@ -3,6 +3,7 @@ import {
   defaultEffects,
   spriteSchema,
   qteSchema,
+  cameraSchema,
   validateProject,
   type Project,
 } from "./model";
@@ -13,6 +14,13 @@ export const proposalSchema = z
     operations: z
       .array(
         z.discriminatedUnion("type", [
+          z
+            .object({
+              type: z.literal("camera"),
+              scene: z.string(),
+              camera: cameraSchema,
+            })
+            .strict(),
           z
             .object({
               type: z.literal("sprite"),
@@ -108,6 +116,7 @@ export function applyProposal(project: Project, input: unknown): Project {
     }
     const scene = next.scenes.find((s) => s.id === op.scene);
     if (!scene) throw Error("Unknown target scene");
+    if (op.type === "camera") scene.camera = op.camera;
     if (op.type === "sprite") {
       const index =
         scene.sprites?.findIndex((s) => s.id === op.sprite.id) ?? -1;
@@ -172,13 +181,16 @@ export function aiContext(p: Project) {
       name,
       notes,
     })),
-    scenes: p.scenes.map(({ id, title, effects, nodes, sprites, audio }) => ({
-      id,
-      title,
-      effects,
-      sprites,
-      audio,
-      nodes: nodes.map(({ id, speaker, text }) => ({ id, speaker, text })),
-    })),
+    scenes: p.scenes.map(
+      ({ id, title, effects, nodes, sprites, audio, camera }) => ({
+        id,
+        title,
+        effects,
+        camera,
+        sprites,
+        audio,
+        nodes: nodes.map(({ id, speaker, text }) => ({ id, speaker, text })),
+      }),
+    ),
   };
 }

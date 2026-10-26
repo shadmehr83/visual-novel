@@ -1605,3 +1605,407 @@ button.active {
 html:has(.app),body:has(.app),#root:has(.app){height:100%;overflow:hidden}.app{height:100dvh;display:flex;flex-direction:column;overflow:hidden}.app>header,.app-footer{flex-shrink:0}.workspace{flex:1;min-height:0;height:0;grid-template-columns:57px 233px minmax(0,1fr) 290px;overflow:hidden}.workspace>.rail{grid-column:1;grid-row:1}.workspace>.library{grid-column:2;grid-row:1;overflow-y:auto;min-height:0;overscroll-behavior:contain}.workspace>main{grid-column:3;grid-row:1;display:flex;flex-direction:column;min-height:0;overflow:hidden}.workspace>.inspector{grid-column:4;grid-row:1}.workspace-toolbar,.snapshot-toolbar{flex-shrink:0}.workspace .preview-area{flex:1;display:flex;flex-direction:column;min-height:0;padding-top:14px}.preview-header,.stage-footer{flex-shrink:0}.preview-header{margin-bottom:10px}.stage-frame{flex:1;min-height:60px;container-type:size;display:grid;place-items:center}.stage-frame>.stage{width:min(100cqw,calc(100cqh * 1000 / 563));height:auto;aspect-ratio:1000/563;flex:none;min-width:0}.bottom-panel{height:clamp(150px,24dvh,260px);min-height:0;flex-shrink:0;overflow:auto;overscroll-behavior:contain}.bottom-panel .dialogue-editor{min-height:0;height:calc(100% - 46px)}.bottom-panel .node-list,.bottom-panel .node-fields{max-height:none;min-height:0;overflow:auto}.bottom-panel.collapsed{height:46px;overflow:hidden}.bottom-panel.collapsed>:not(.bottom-tabs){display:none}.library-body{max-height:none}.story-note{flex-shrink:0}.library-footer{flex-shrink:0}.controls-left{grid-template-columns:57px 290px minmax(0,1fr) 233px}.controls-left>.inspector{grid-column:2}.controls-left>.library{grid-column:4}.controls-float{grid-template-columns:57px 233px minmax(0,1fr) 0}.controls-float>.inspector{position:fixed;width:300px;height:min(75dvh,800px);z-index:25;box-shadow:0 15px 60px #0009;border:1px solid #80725d;border-radius:8px}.controls-float .panel-layout{position:sticky;top:0;z-index:8}.controls-float .effect-tabs{top:76px}
 }
 @media(max-width:950px){.inspector{max-height:60dvh}.controls-float>.inspector{position:static!important}.stage-frame{min-width:0}.effect-tabs{position:sticky}.panel-layout>button{display:none}}
+
+/* Workspace preferences change the editor only; scene SVG colours are authored. */
+.workspace-toolbar {
+  gap: 7px;
+}
+.workspace-toolbar > button {
+  font-size: 10px;
+  padding: 6px;
+  white-space: nowrap;
+}
+.workspace-toolbar .breadcrumb {
+  flex: 1;
+  min-width: 0;
+}
+.library,
+.bottom-panel {
+  position: relative;
+}
+.resize-handle {
+  position: absolute;
+  z-index: 9;
+  touch-action: none;
+  background: transparent;
+  outline-offset: -2px;
+}
+.resize-handle:hover,
+.resize-handle:focus {
+  background: #c9a88a88;
+}
+.library-resize {
+  right: 0;
+  top: 0;
+  bottom: 0;
+  width: 7px;
+  cursor: ew-resize;
+}
+.dialogue-resize {
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 7px;
+  cursor: ns-resize;
+}
+.controls-left .library-resize {
+  left: 0;
+  right: auto;
+}
+.bottom-panel.bottom-hidden {
+  display: none !important;
+}
+.inspector-tabs {
+  flex-wrap: wrap;
+}
+.inspector-tabs button {
+  flex: 1 1 68px;
+}
+.hover-help {
+  position: fixed;
+  width: 275px;
+  max-width: calc(100vw - 16px);
+  z-index: 110;
+  background: var(--panel, #24302d);
+  color: var(--ui-text, #e4e5dd);
+  border: 1px solid var(--line, #677361);
+  box-shadow: 0 8px 30px #0005;
+  padding: 13px;
+  border-radius: 7px;
+  font-size: 11px;
+  line-height: 1.65;
+  pointer-events: none;
+}
+.hover-help p {
+  margin: 7px 0 0;
+}
+.hover-help svg {
+  width: 100%;
+  height: 60px;
+  margin-top: 8px;
+}
+.inspector[data-panel="Camera"]
+  [data-effect-panel]:not([data-effect-panel="Camera"]) {
+  display: none;
+}
+.app[data-theme="light"] {
+  --ui-bg: #e8edf1;
+  --panel: #f7f9fb;
+  --ui-text: #243640;
+  --line: #bac5cb;
+  --muted: #485f69;
+  --accent: #865b39;
+}
+.app[data-theme="warm"] {
+  --ui-bg: #e4dac7;
+  --panel: #f5eddc;
+  --ui-text: #3f382e;
+  --line: #c3b59d;
+  --muted: #685944;
+  --accent: #865a36;
+}
+.app:is([data-theme="light"], [data-theme="warm"]) {
+  background: var(--ui-bg);
+  color: var(--ui-text);
+}
+.app:is([data-theme="light"], [data-theme="warm"])
+  :is(
+    header,
+    .library,
+    .inspector,
+    .bottom-panel,
+    .rail,
+    .workspace-toolbar,
+    .snapshot-toolbar,
+    .effect-tabs,
+    .panel-layout,
+    .inspector-tabs,
+    .app-footer
+  ) {
+  background: var(--panel);
+  color: var(--ui-text);
+  border-color: var(--line);
+}
+.app:is([data-theme="light"], [data-theme="warm"]) :is(main, .preview-area) {
+  background: var(--ui-bg);
+}
+.app:is([data-theme="light"], [data-theme="warm"])
+  :is(input, textarea, select) {
+  background: #fff9;
+  color: var(--ui-text);
+  border-color: var(--line);
+}
+.app:is([data-theme="light"], [data-theme="warm"])
+  :is(
+    label,
+    h1,
+    h3,
+    .scene-title,
+    .node-list button,
+    .section-label,
+    .brand,
+    .breadcrumb b,
+    .choices-heading
+  ) {
+  color: var(--ui-text);
+}
+.app:is([data-theme="light"], [data-theme="warm"])
+  :is(
+    .muted,
+    .help,
+    .small,
+    .scene-title > span,
+    .node-list small,
+    .story-note small,
+    .save-status
+  ) {
+  color: var(--muted);
+}
+.app:is([data-theme="light"], [data-theme="warm"])
+  :is(
+    .clue,
+    .state-grid > div,
+    .choice-editor,
+    .region-box,
+    .scene-card.selected,
+    .node-list button.active,
+    .inspector-tabs button.active
+  ) {
+  background: #c4bca633;
+  border-color: var(--line);
+  color: var(--ui-text);
+}
+.app:is([data-theme="light"], [data-theme="warm"]) .slider output {
+  background: #fff9;
+  color: var(--ui-text);
+}
+.app .ui-pane[style*="--pane-bg"] {
+  background: var(--pane-bg) !important;
+  color: var(--pane-fg) !important;
+}
+.app
+  .ui-pane[style*="--pane-bg"]
+  :is(
+    .panel-heading,
+    .effect-tabs,
+    .panel-layout,
+    .inspector-tabs,
+    .workspace-toolbar,
+    .snapshot-toolbar,
+    .preview-area
+  ) {
+  background: var(--pane-bg) !important;
+  color: var(--pane-fg) !important;
+}
+.app
+  .ui-pane[style*="--pane-bg"]
+  :is(
+    label,
+    h1,
+    h3,
+    .muted,
+    .small,
+    .help,
+    .section-label,
+    .scene-title,
+    .node-list button,
+    .breadcrumb b
+  ) {
+  color: var(--pane-fg) !important;
+}
+.app .ui-pane[style*="--pane-bg"] :is(input, textarea, select) {
+  background: var(--pane-bg) !important;
+  color: var(--pane-fg) !important;
+  border-color: currentColor;
+}
+.app
+  .ui-pane[style*="--pane-bg"]
+  :is(
+    .clue,
+    .region-box,
+    .choice-editor,
+    .node-list button.active,
+    .scene-card.selected,
+    .slider output
+  ) {
+  background: var(--pane-bg) !important;
+  color: var(--pane-fg) !important;
+  border-color: currentColor;
+}
+@media (min-width: 951px) {
+  .workspace {
+    grid-template-columns: 57px var(--library-size, 233px) minmax(0, 1fr) var(
+        --controls-size,
+        290px
+      );
+  }
+  .controls-left {
+    grid-template-columns: 57px var(--controls-size, 290px) minmax(0, 1fr) var(
+        --library-size,
+        233px
+      );
+  }
+  .controls-float {
+    grid-template-columns: 57px var(--library-size, 233px) minmax(0, 1fr) 0;
+  }
+  .library-collapsed > .library {
+    display: none;
+  }
+  .bottom-panel:not(.collapsed) {
+    height: var(--bottom-size, 200px);
+    max-height: 65dvh;
+  }
+  .controls-float > .inspector {
+    width: var(--controls-size, 300px);
+  }
+  html:has(.app.page-layout),
+  body:has(.app.page-layout),
+  #root:has(.app.page-layout) {
+    height: auto;
+    overflow: visible;
+  }
+  .app.page-layout {
+    height: auto;
+    min-height: 100dvh;
+    overflow: visible;
+  }
+  .app.page-layout .workspace {
+    height: auto;
+    min-height: calc(100dvh - 101px);
+    overflow: visible;
+    flex: initial;
+    align-items: start;
+  }
+  .app.page-layout .workspace > main {
+    display: block;
+    overflow: visible;
+  }
+  .app.page-layout .preview-area {
+    display: block;
+    padding-bottom: 0;
+  }
+  .app.page-layout .stage-frame {
+    container-type: normal;
+    display: block;
+  }
+  .app.page-layout .stage-frame > .stage {
+    width: 100%;
+    height: auto;
+  }
+  .app.page-layout .bottom-panel:not(.collapsed) {
+    height: auto;
+    max-height: none;
+    min-height: 300px;
+    overflow: visible;
+  }
+  .app.page-layout .bottom-panel .dialogue-editor {
+    height: auto;
+    min-height: 260px;
+  }
+  .app.page-layout .node-fields,
+  .app.page-layout .node-list {
+    max-height: none;
+    overflow: visible;
+  }
+  .app.page-layout .inspector:not([style*="left"]) {
+    position: sticky;
+    top: 0;
+    max-height: 95dvh;
+  }
+  .app.page-layout .library {
+    position: sticky;
+    top: 0;
+    max-height: 95dvh;
+  }
+  .app.page-layout .dialogue-resize {
+    display: none;
+  }
+}
+@media (max-width: 950px) {
+  .library-collapsed > .library {
+    display: none;
+  }
+  .workspace-toolbar {
+    flex-wrap: wrap;
+    height: auto;
+    min-height: 55px;
+    padding: 8px;
+  }
+  .resize-handle {
+    display: none;
+  }
+  .workspace-toolbar .breadcrumb {
+    flex-basis: 100%;
+  }
+  .bottom-panel.bottom-hidden {
+    display: none;
+  }
+}
+@media (min-width: 951px) {
+  .stage-frame {
+    display: flex;
+    align-items: flex-start;
+    justify-content: flex-start;
+    overflow: auto;
+    overscroll-behavior: contain;
+  }
+  .stage-frame > .stage {
+    width: calc(min(100cqw, 100cqh * 1000 / 563) * var(--preview-scale, 1));
+    margin: auto;
+    flex-shrink: 0;
+  }
+}
+.app:is([data-theme="light"], [data-theme="warm"]) .modal {
+  background: var(--panel);
+  color: var(--ui-text);
+}
+.app:is([data-theme="light"], [data-theme="warm"]) button:not(.primary):hover {
+  background: #9eacb144;
+}
+.app:is([data-theme="light"], [data-theme="warm"])
+  :is(.effect-tabs button.active, .tool-tabs button.active) {
+  background: #c4bca655;
+  color: var(--ui-text);
+}
+.app .ui-pane[style*="--pane-bg"] button:not(.primary) {
+  color: var(--pane-fg);
+}
+.app
+  .ui-pane[style*="--pane-bg"]
+  :is(.effect-tabs button.active, .inspector-tabs button.active) {
+  background: var(--pane-bg);
+  color: var(--pane-fg);
+  border: 1px solid currentColor;
+}
+.app:is([data-theme="light"], [data-theme="warm"]) {
+  color-scheme: light;
+}
+.inspector[data-panel="Camera"] .zone-tools,
+.inspector[data-panel="Save"] .zone-tools {
+  display: none;
+}
+.app:is([data-theme="light"], [data-theme="warm"])
+  :is(.story-note p, .app-footer > span) {
+  color: var(--ui-text);
+}
+.app .ui-pane[style*="--pane-bg"] :is(.story-note p, .node-list small) {
+  color: var(--pane-fg) !important;
+}
+.app:is([data-theme="light"], [data-theme="warm"])
+  :is(
+    .snapshot-toolbar > span,
+    .library-footer button,
+    .bottom-tabs button,
+    .stage-footer,
+    .stage-footer button,
+    .preview-tools,
+    .eyebrow,
+    .workspace-toolbar .badge,
+    .inspector-tabs button,
+    .inspector-foot
+  ) {
+  color: var(--muted);
+}
+.app:is([data-theme="light"], [data-theme="warm"]) .bottom-tabs button.active {
+  color: var(--accent);
+}

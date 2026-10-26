@@ -147,7 +147,21 @@ export const spriteSchema = z.object({
   flip: z.boolean(),
   expression: z.string(),
 });
+export const cameraSchema = z.object({
+  enabled: z.boolean(),
+  x: z.number().min(0).max(1000),
+  y: z.number().min(0).max(563),
+  zoom: z.number().min(1).max(3),
+  duration: z.number().min(0.2).max(30),
+  bob: z.number().min(0).max(15),
+  shake: z.number().min(0).max(15),
+  stepSeconds: z.number().min(0.2).max(2),
+  footsteps: z.boolean(),
+  footstepVolume: z.number().min(0).max(1),
+  footstepAsset: z.string().optional(),
+});
 const scene = z.object({
+  camera: cameraSchema.optional(),
   sprites: z.array(spriteSchema).max(30).optional(),
   keyframes: z
     .array(
@@ -277,6 +291,11 @@ export function validateProject(input: unknown): Project {
     for (const track of s.audio || [])
       if (!p.audioAssets?.some((a) => a.id === track.id))
         throw Error("Missing audio asset");
+    if (
+      s.camera?.footstepAsset &&
+      !p.audioAssets?.some((a) => a.id === s.camera!.footstepAsset)
+    )
+      throw Error("Missing footstep audio");
     for (const n of s.nodes) {
       if (n.portrait && !p.assets.some((a) => a.id === n.portrait))
         throw Error("Missing dialogue portrait");

@@ -1,3 +1,9 @@
+import { useWorkspace, contrast } from "./workspace";
+import { WorkspaceControls } from "./WorkspaceSettings";
+import { ResizeHandle } from "./ResizeHandle";
+import { CameraControls } from "./CameraControls";
+import { HoverHelp } from "./HoverHelp";
+import { EffectSummary, effectSummary } from "./EffectSummary";
 import { useEffect, useRef, useState } from "react";
 import {
   Layers,
@@ -120,6 +126,18 @@ function Toggle({
   );
 }
 export default function App() {
+  const [workspace, setWorkspace] = useWorkspace();
+  const [cameraPreview, setCameraPreview] = useState(0);
+  const paneStyle = (key: string) =>
+    workspace.panels[key]
+      ? ({
+          "--pane-bg": workspace.panels[key],
+          "--pane-fg": contrast(workspace.panels[key]),
+          colorScheme:
+            contrast(workspace.panels[key]) === "#17242e" ? "light" : "dark",
+        } as React.CSSProperties)
+      : undefined;
+
   const [project, setProject] = useState<Project>(() => savedProject());
   const [sceneId, setSceneId] = useState("cafe");
   const [nodeId, setNodeId] = useState("arrival");
@@ -138,6 +156,19 @@ export default function App() {
     x: Math.max(0, window.innerWidth - 320),
     y: 80,
   });
+  useEffect(() => {
+    const fit = () =>
+      setFloatPosition((p) => ({
+        x: Math.max(0, Math.min(innerWidth - workspace.controlsWidth, p.x)),
+        y: Math.max(
+          0,
+          Math.min(innerHeight - Math.min(innerHeight * 0.75, 800), p.y),
+        ),
+      }));
+    fit();
+    window.addEventListener("resize", fit);
+    return () => window.removeEventListener("resize", fit);
+  }, [workspace.controlsWidth]);
   const drag = useRef<{
     x: number;
     y: number;
@@ -466,7 +497,23 @@ export default function App() {
       </div>
     );
   return (
-    <div className={"app " + (playing ? "is-playing" : "")}>
+    <div
+      data-theme={workspace.theme}
+      className={
+        "app " +
+        (playing ? "is-playing " : "") +
+        (workspace.dialogueMode === "page" ? "page-layout" : "")
+      }
+      style={
+        {
+          "--library-size":
+            (workspace.libraryCollapsed ? 0 : workspace.libraryWidth) + "px",
+          "--controls-size": workspace.controlsWidth + "px",
+          "--bottom-size": workspace.bottomHeight + "px",
+          "--preview-scale": workspace.previewScale,
+        } as React.CSSProperties
+      }
+    >
       <header>
         <a
           className="brand"
@@ -539,7 +586,13 @@ export default function App() {
           </button>
         </div>
       </header>
-      <div className={"workspace controls-" + placement}>
+      <div
+        className={
+          "workspace controls-" +
+          placement +
+          (workspace.libraryCollapsed ? " library-collapsed" : "")
+        }
+      >
         <nav className="rail">
           {[
             [Film, "Scenes"],
@@ -556,7 +609,10 @@ export default function App() {
                 title={String(label)}
                 aria-label={String(label)}
                 className={tab === label ? "active" : ""}
-                onClick={() => setTab(String(label))}
+                onClick={() => {
+                  setTab(String(label));
+                  setWorkspace((s) => ({ ...s, libraryCollapsed: false }));
+                }}
               >
                 <I size={20} />
               </button>
@@ -572,7 +628,16 @@ export default function App() {
           </button>
           <span className="avatar">Y</span>
         </nav>
-        <aside className="library">
+        <aside className="library ui-pane" style={paneStyle("library")}>
+          <ResizeHandle
+            label="Resize story library"
+            className="library-resize"
+            value={workspace.libraryWidth}
+            min={160}
+            max={400}
+            reverse={placement === "left"}
+            onChange={(n) => setWorkspace((s) => ({ ...s, libraryWidth: n }))}
+          />
           <div className="panel-heading">
             <span>{tab === "Scenes" ? "Your story" : tab}</span>
             {tab === "Scenes" && (
@@ -917,8 +982,34 @@ export default function App() {
             </button>
           </div>
         </aside>
-        <main>
+        <main className="ui-pane" style={paneStyle("workspace")}>
           <div className="workspace-toolbar">
+            <button
+              aria-label={
+                workspace.libraryCollapsed
+                  ? "Expand story library"
+                  : "Collapse story library"
+              }
+              onClick={() =>
+                setWorkspace((s) => ({
+                  ...s,
+                  libraryCollapsed: !s.libraryCollapsed,
+                }))
+              }
+            >
+              {workspace.libraryCollapsed ? "Show story" : "Hide story"}
+            </button>
+            <button onClick={() => setInspector("Workspace")}>Layout</button>
+            <button onClick={() => setInspector("Appearance")}>
+              Appearance
+            </button>
+            <button
+              aria-label="Enabled effects"
+              onClick={() => setInspector("Active")}
+            >
+              {effectSummary(scene, project.settings.reducedEffects).length}{" "}
+              effects
+            </button>
             <div className="breadcrumb">
               Scenes <ChevronRight size={12} />
               <b>{scene.title}</b>
@@ -993,6 +1084,7 @@ export default function App() {
                 playing={playing}
                 maskMode={maskMode && !playing}
                 onMask={(v) => effect("mask", v)}
+                previewTick={cameraPreview}
                 regionEditor={playing ? null : regionEditor}
                 onRegion={(region) =>
                   updateScene((s) => {
@@ -1160,8 +1252,23 @@ export default function App() {
             </div>
           </section>
           <section
-            className={"bottom-panel " + (collapseBottom ? "collapsed" : "")}
+            className={
+              "bottom-panel ui-pane " +
+              (collapseBottom ? "collapsed " : "") +
+              (workspace.dialogueMode === "hidden" ? "bottom-hidden" : "")
+            }
+            style={{ ...paneStyle("dialogue") }}
           >
+            <ResizeHandle
+              label="Resize dialogue panel"
+              className="dialogue-resize"
+              value={workspace.bottomHeight}
+              min={100}
+              max={600}
+              axis="y"
+              reverse
+              onChange={(n) => setWorkspace((s) => ({ ...s, bottomHeight: n }))}
+            />
             <div className="bottom-tabs">
               <button
                 aria-label={
@@ -1485,13 +1592,14 @@ export default function App() {
           </section>
         </main>
         <aside
-          className="inspector"
+          className="inspector ui-pane"
           data-panel={effectPanel}
-          style={
-            placement === "float"
+          style={{
+            ...paneStyle("inspector"),
+            ...(placement === "float"
               ? { left: floatPosition.x, top: floatPosition.y }
-              : undefined
-          }
+              : {}),
+          }}
         >
           <div className="panel-layout">
             <label>
@@ -1525,7 +1633,7 @@ export default function App() {
                     x: Math.max(
                       0,
                       Math.min(
-                        window.innerWidth - 300,
+                        window.innerWidth - workspace.controlsWidth,
                         drag.current.left + event.clientX - drag.current.x,
                       ),
                     ),
@@ -1548,18 +1656,20 @@ export default function App() {
             )}
           </div>
           <div className="effect-tabs" role="group" aria-label="Effect panels">
-            {["All", "Rain", "Lighting", "Motion", "Save"].map((panel) => (
-              <button
-                key={panel}
-                className={effectPanel === panel ? "active" : ""}
-                onClick={() => {
-                  setEffectPanel(panel);
-                  setInspector("Atmosphere");
-                }}
-              >
-                {panel}
-              </button>
-            ))}
+            {["All", "Rain", "Lighting", "Motion", "Camera", "Save"].map(
+              (panel) => (
+                <button
+                  key={panel}
+                  className={effectPanel === panel ? "active" : ""}
+                  onClick={() => {
+                    setEffectPanel(panel);
+                    setInspector("Atmosphere");
+                  }}
+                >
+                  {panel}
+                </button>
+              ),
+            )}
           </div>
           <div className="panel-heading">
             <span>
@@ -1581,7 +1691,13 @@ export default function App() {
             </button>
           </div>
           <div className="inspector-tabs">
-            {["Atmosphere", "Background"].map((t) => (
+            {[
+              "Atmosphere",
+              "Background",
+              "Workspace",
+              "Appearance",
+              "Active",
+            ].map((t) => (
               <button
                 key={t}
                 className={inspector === t ? "active" : ""}
@@ -1591,9 +1707,25 @@ export default function App() {
               </button>
             ))}
           </div>
-          <fieldset disabled={playing}>
-            {inspector === "Atmosphere" ? (
+          <fieldset disabled={playing && (inspector==='Atmosphere'||inspector==='Background')}>
+            {inspector === "Workspace" ? (
+              <WorkspaceControls value={workspace} onChange={setWorkspace} />
+            ) : inspector === "Appearance" ? (
+              <WorkspaceControls
+                value={workspace}
+                onChange={setWorkspace}
+                appearance
+              />
+            ) : inspector === "Active" ? (
+              <EffectSummary scene={scene} project={project} />
+            ) : inspector === "Atmosphere" ? (
               <>
+                <CameraControls
+                  scene={selected}
+                  project={project}
+                  update={updateScene}
+                  restart={() => setCameraPreview((n) => n + 1)}
+                />
                 <ProjectSave project={project} />
                 <Zones
                   scene={selected}
@@ -1812,6 +1944,7 @@ export default function App() {
                     className="wide subtle"
                     onClick={() =>
                       updateScene((s) => {
+                        if (s.camera) s.camera.enabled = false;
                         s.effects.motionZones?.forEach(
                           (w) => (w.enabled = false),
                         );
@@ -1980,6 +2113,7 @@ export default function App() {
           ev.target.value = "";
         }}
       />
+      <HoverHelp enabled={workspace.help} />
       {error && (
         <div className="error-toast" role="alert">
           <span>{error}</span>

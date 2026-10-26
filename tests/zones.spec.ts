@@ -1,3 +1,4 @@
+import { clickScenePoint } from "./stagePoint";
 import { test, expect } from "@playwright/test";
 test("multiple rain masks, local wand selection, animated dedicated light and complete saving", async ({
   page,
@@ -31,9 +32,9 @@ test("multiple rain masks, local wand selection, animated dedicated light and co
   const stage = page.getByRole("img", {
     name: "A table by the window live stage",
   });
-  await stage.click({ position: { x: 100, y: 50 } });
-  await stage.click({ position: { x: 180, y: 50 } });
-  await stage.click({ position: { x: 180, y: 140 } });
+  await clickScenePoint(stage, 0.25, 0.222222);
+  await clickScenePoint(stage, 0.45, 0.222222);
+  await clickScenePoint(stage, 0.45, 0.622222);
   await page.getByRole("button", { name: "Finish zone editing" }).click();
   await expect(page.getByLabel("Rain zone name")).toHaveCount(2);
   await page
@@ -46,7 +47,7 @@ test("multiple rain masks, local wand selection, animated dedicated light and co
     .filter({ has: page.getByLabel("Rain zone name") })
     .last();
   await latest.getByRole("button", { name: "Magic wand", exact: true }).click();
-  await stage.click({ position: { x: 200, y: 110 } });
+  await clickScenePoint(stage, 0.5, 0.488889);
   await expect(
     latest.getByText("Auto-selected region", { exact: true }),
   ).toBeVisible();
@@ -65,18 +66,20 @@ test("multiple rain masks, local wand selection, animated dedicated light and co
   await local
     .getByRole("checkbox", { name: "Loop lighting", exact: true })
     .check();
-  const radius=page.locator('mask[id^="zone-radius-"] ellipse');
-  const firstRadius=await radius.getAttribute('rx');
-  await expect.poll(()=>radius.getAttribute('rx')).not.toBe(firstRadius);
-  await page.getByLabel('Global illumination intensity',{exact:true}).fill('0.55');
-  await expect(stage).toHaveAttribute('data-global-light-level','0.55');
+  const radius = page.locator('mask[id^="zone-radius-"] ellipse');
+  const firstRadius = await radius.getAttribute("rx");
+  await expect.poll(() => radius.getAttribute("rx")).not.toBe(firstRadius);
+  await page
+    .getByLabel("Global illumination intensity", { exact: true })
+    .fill("0.55");
+  await expect(stage).toHaveAttribute("data-global-light-level", "0.55");
   await local
     .getByRole("button", { name: "Add dedicated affected area" })
     .click();
   await local.getByRole("button", { name: "Draw region", exact: true }).click();
-  await stage.click({ position: { x: 200, y: 100 } });
-  await stage.click({ position: { x: 260, y: 100 } });
-  await stage.click({ position: { x: 260, y: 180 } });
+  await clickScenePoint(stage, 0.5, 0.444444);
+  await clickScenePoint(stage, 0.65, 0.444444);
+  await clickScenePoint(stage, 0.65, 0.8);
   await page.getByRole("button", { name: "Finish zone editing" }).click();
   await expect(page.locator("[data-light-zone]")).toHaveCount(1);
   await page

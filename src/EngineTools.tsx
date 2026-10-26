@@ -1,3 +1,4 @@
+import {useFootsteps} from "./Footsteps";
 import { useEffect, useRef, useState } from "react";
 import {
   validateProject,
@@ -107,6 +108,7 @@ export function SceneAudio({
 }) {
   const [enabled, setEnabled] = useState(false);
   const [error, setError] = useState("");
+  useFootsteps(project,scene,enabled,setError);
   useEffect(() => {
     if (!enabled) return;
     const tracks = (scene.audio || []).map((t) => {
@@ -128,7 +130,7 @@ export function SceneAudio({
         if (a) a.src = "";
       });
   }, [enabled, scene.id, JSON.stringify(scene.audio)]);
-  if (!scene.audio?.length) return null;
+  if (!scene.audio?.length&&!(scene.camera?.enabled&&scene.camera.footsteps)) return null;
   return (
     <div className="sound-control">
       <button

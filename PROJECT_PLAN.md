@@ -19,8 +19,8 @@ The app implements the end-to-end authoring engine and the requested AI/voice, Q
 ## Still outside the current implementation
 
 - Live provider response, real microphone performance and Cloudflare deployment health cannot be verified without credentials / the actual deployment URL. Browser voice support varies.
-- The graph is an inspectable connection list, not a draggable node canvas. Keyframes use basic linear interpolation; audio waveform tracks, camera/parallax and multitrack timelines are not implemented.
-- There is no AI image-generation/editing provider, automatic art production, full sprite rigging, multiple dynamic lights, brush masks, fog/snow/fireflies shaders or production art pipeline.
+- The graph is an inspectable connection list, not a draggable node canvas. Keyframes use basic linear interpolation; audio waveform tracks, multi-plane parallax and multitrack timelines are not implemented.
+- There is no AI image-generation/editing provider, automatic art production, full sprite rigging, physically based lighting, brush masks, fog/snow/fireflies shaders or production art pipeline.
 - There is no general object-interaction/inventory authoring UI, complete inference/evidence investigator, advanced memory-callback authoring, route/ending eligibility analysis or New Game+ system.
 - Version history uses bounded in-session undo; durable named versions, shared authenticated cloud sync, multiple concurrent projects, collaboration and account management remain future work.
 - IndexedDB bundles retain original assets as base64 data URLs. Binary/ZIP streaming, thumbnails, quota forecasts and large-project profiling remain improvements.
@@ -44,3 +44,11 @@ The full editor now also builds as a self-contained `stillframe-studio.html`, av
 ## Workspace and masked motion refinement
 
 Desktop controls now scroll independently of the fitted stage; rain/lighting/motion/save views share a left/right-dockable or draggable floating inspector. The dialogue editor can collapse for stage space. Local lights support full selected-region illumination without radial falloff, with existing polygon/wand selection. New independent motion zones provide bounded 2D pixel sway and ripple on selected art/sprites, respect reduced-motion settings, and persist in project files. This does not add semantic segmentation, true object extraction, or physical cloth simulation. Targeted tests cover pane scrolling/docking/dragging, light-wand region mode, motion animation/pause/reload, and schema roundtrips.
+
+## Depth, sizing, help and appearance refinement
+
+The story library now collapses and resizes; the dialogue divider and Layout controls adjust workspace proportions, preview zoom and pinned/page/hidden dialogue modes. Global dark/light/warm themes and custom panel backgrounds use browser-local preferences with automatic text contrast. Delayed pointer/focus help explains main controls, including a camera focal-frame diagram. An enabled-effects summary lists configured layers/zones and paused visual motion, rather than claiming to profile GPU usage.
+
+Per-scene camera settings provide bounded focal zoom/pan approaches, walking bob/sway, preview replay, reduced-motion framing and optional synthetic or imported footsteps after sound consent. Camera settings serialize in project JSON and render in standalone players; the AI allowlist can propose camera settings for approval. This remains 2D camera motion, without new geometry generation or a full cinematic cut/fade sequencer. Local tests cover the UI, camera math/data, effect summary, synthetic audio scheduling and AI proposals. Final recorded sound quality and real provider/hosting configuration require independent checks.
+
+Validation for the depth/workspace release: 49 automated tests and 16 browser workflows passed, along with the production build and offline editor/player checks. Live deployment and final audio quality remain separate checks.

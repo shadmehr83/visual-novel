@@ -101,3 +101,7 @@ The URL parameter is removed after a successful load so refreshing does not repe
 ## Regions and project publishing
 
 See [zones, light cycles, custom replies and saving](docs/ZONES_AND_SAVING.md). Authored artwork and scene settings now live separately from the engine in [projects/](projects/README.md). Save a complete project file and upload it there, or configure the optional server-side GitHub publisher. Browser autosave remains local.
+
+## Camera and workspace customization
+
+[Camera and workspace guide](docs/CAMERA_AND_WORKSPACE.md) covers the collapsible/resizable library, adjustable preview/dialogue sizing, pinned/page/hidden layouts, delayed hover explanations, global/per-panel appearance, enabled-effect counts, zoom/pan approaches, walking bob and optional generated/imported footsteps. Interface preferences are local UI state; camera settings travel with your project and exports.
