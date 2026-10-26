@@ -79,3 +79,7 @@ The previous Phase 1 limitations are superseded where noted here:
 - **Export playable HTML:** available in the production app. Downloads one HTML file with the story, imported image/audio assets, renderer, effects, QTEs, and player runtime. Open it in a modern browser to play without the editor or AI. Browser audio policies still require a click. The editor project export remains separate.
 
 Existing schema-v1 projects load without new fields; these are backward-compatible optional additions. The updated Direct Upload ZIP includes a Cloudflare worker, whereas the original static-only package did not.
+
+## Full editor as one HTML file
+
+Click **Download local editor** in the production app, or download `downloads/stillframe-studio.html` from GitHub using **Download raw file**. The generated file contains the full authoring editor and can export playable stories offline. No install is needed to use it. See [local editor instructions](docs/LOCAL_EDITOR.md) for moving projects, local browser storage, AI limitations and My Sites publication status.

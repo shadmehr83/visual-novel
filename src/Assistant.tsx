@@ -23,6 +23,12 @@ export function Assistant({
   const [listening, setListening] = useState(false);
   const recognition = useRef<any>(null);
   useEffect(() => {
+    if (location.protocol === "file:") {
+      setStatus(
+        "Local HTML mode. The offline helper works here. Use your hosted studio for provider AI; never put an API key into this file.",
+      );
+      return;
+    }
     fetch("/api/assistant")
       .then((r) => r.json())
       .then((v) => {

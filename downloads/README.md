@@ -9,3 +9,7 @@ If you prefer no downloads, connect this repository directly through Cloudflare 
 Projects are stored in each browser's local database. Use **Export project** regularly for backups and **Open project** to move work to another device. This deployment does not provide shared cloud storage.
 
 For future changes: run `npm ci`, then `npm run build`, and replace this ZIP with a ZIP of the contents of `dist`.
+
+## Single-file HTML editor
+
+Open `stillframe-studio.html` on GitHub and choose **Download raw file**, then save it and open it in a modern desktop browser. This is the full authoring editor in one file, with a bundled player exporter. The local file supports the offline preset helper; real provider AI needs the hosted backend. Export/Open project transfers your authored work between browser locations. See ../docs/LOCAL_EDITOR.md for details and My Sites publication limitations.

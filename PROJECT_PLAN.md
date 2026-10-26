@@ -27,3 +27,7 @@ The app implements the end-to-end authoring engine and the requested AI/voice, Q
 - Accessibility uses native controls and adjustable QTE timing; full assistive-technology and cross-device audits remain.
 
 Future work should extend these real workflows with tests, preserve originals, and keep AI approval and protected narrative state intact. Do not label deferred features as implemented.
+
+## Portable HTML edition
+
+The full editor now also builds as a self-contained `stillframe-studio.html`, available as a download from the production app and in `downloads/`. The player-export bundle is embedded, so it works offline. Production tests cover offline editing/import/save/reload/undo/player export with external assets blocked. My Sites publication and real local-file storage behavior on the user’s device remain unverified; provider AI needs a hosted server. See docs/LOCAL_EDITOR.md.

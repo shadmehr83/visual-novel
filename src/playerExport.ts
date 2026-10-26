@@ -1,15 +1,21 @@
 import { validateProject, type Project } from "./model";
 export async function exportPlayer(project: Project) {
   validateProject(project);
-  const script = await fetch("/player.js");
-  if (
-    !script.ok ||
-    !(script.headers.get("content-type") || "").includes("javascript")
-  )
-    throw Error(
-      "Standalone export is available from a production build. Run npm run build and use the production app.",
-    );
-  const code = await script.text();
+  const embedded = document.getElementById("bundled-player")?.textContent;
+  let code: string;
+  if (embedded) {
+    code = JSON.parse(embedded);
+  } else {
+    const script = await fetch("/player.js");
+    if (
+      !script.ok ||
+      !(script.headers.get("content-type") || "").includes("javascript")
+    )
+      throw Error(
+        "Standalone player export is available from a production build or the downloadable local editor.",
+      );
+    code = await script.text();
+  }
   const style = Array.from(document.styleSheets)
     .flatMap((sheet) => {
       try {

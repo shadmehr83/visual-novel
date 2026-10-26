@@ -29,6 +29,7 @@ import {
   X,
   FolderOpen,
 } from "lucide-react";
+import { downloadLocalEditor } from "./localEditor";
 import { exportPlayer } from "./playerExport";
 import { demo } from "./demo";
 import {
@@ -742,6 +743,18 @@ export default function App() {
             />
           )}
           <div className="library-footer">
+            {!document.documentElement.hasAttribute(
+              "data-stillframe-standalone",
+            ) && (
+              <button
+                onClick={() =>
+                  downloadLocalEditor().catch((e) => setError(String(e)))
+                }
+              >
+                <Download size={15} /> Download local editor
+              </button>
+            )}
+
             <button
               onClick={() =>
                 exportPlayer(project).catch((e) => setError(String(e)))
@@ -1643,10 +1656,11 @@ export default function App() {
                   }
                 />
                 <p className="muted">
-                  No AI provider, cloud account, or analytics is connected.
-                  Offline editing works after this page loads. The production
-                  build caches the app for offline reloads once its service
-                  worker installs over HTTPS.
+                  {document.documentElement.hasAttribute(
+                    "data-stillframe-standalone",
+                  )
+                    ? "This single-file editor includes its own code and styles for offline use. Local-file storage support varies by browser; export backups regularly. Use the hosted studio for provider AI."
+                    : "Projects are saved in this browser. The production app caches its shell for offline reloads after its service worker installs. Provider AI is optional and requires server configuration plus your consent."}
                 </p>
                 <button
                   className="wide"
