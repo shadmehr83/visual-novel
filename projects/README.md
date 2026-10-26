@@ -22,3 +22,9 @@ Configure these server secrets, then redeploy:
 POST `/api/project` requires that password and the same-origin browser request. It validates the project and writes only `projects/published.stillframe.json` on `main`, using the file's SHA to detect concurrent changes. It cannot choose an arbitrary repository or edit engine files. Direct publishing is limited to 20 MB; save/download the project file for larger exports. A successful commit triggers the connected Cloudflare build; it does not itself prove deployment success. Original artwork/audio becomes part of the repository and follows its visibility. No live GitHub write was performed by automated tests; mocked tests check the fixed path, authentication, encoding and response handling.
 
 Other project JSON backups can be kept in this folder using distinct filenames. Only `published.stillframe.json` is loaded by the engine. Use **Open project** for other backups. Source history keeps older committed versions available.
+
+## Latest uploaded checkpoint
+
+On 27 October 2026, `published.stillframe_4.json` was saved here as `published.stillframe.json` without changing its contents. It includes four scenes, the embedded 1536 × 1024 café PNG, two café rain zones, two café lights, café motion settings, and bedroom lighting/motion/camera settings. Empty motion selections are preserved as authored; they require an affected area before they visibly move anything.
+
+After deployment, open **https://visual-novel-8b9.pages.dev/?snapshot=github** to explicitly load this published checkpoint on any computer. Existing different local work receives a recovery copy. Opening the normal website preserves that browser's autosaved project instead. The engine is maintained in this same repository; the checkpoint file stores the editable project and its embedded assets. Later changes require another export/publish to update the checkpoint.

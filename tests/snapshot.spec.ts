@@ -5,15 +5,17 @@ test("new laptops open the GitHub snapshot and existing local work can restore o
 }) => {
   await page.goto("/");
   await expect(page.getByLabel("Brightness", { exact: true })).toHaveValue(
-    "0.78",
+    "1",
   );
   await page.getByText("Light position", { exact: true }).click();
-  await expect(page.getByLabel("Light X", { exact: true })).toHaveValue("53");
-  await expect(page.getByLabel("Light Y", { exact: true })).toHaveValue("77");
+  await expect(page.getByLabel("Light X", { exact: true })).toHaveValue("68");
+  await expect(page.getByLabel("Light Y", { exact: true })).toHaveValue("85");
   await expect(page.locator(".stage svg image")).toHaveAttribute(
     "href",
     /^data:image\/png;base64,/,
   );
+  await expect(page.getByLabel("Rain zone name")).toHaveCount(2);
+  await expect(page.getByLabel("Rain zone name").first()).toHaveValue("right window");
   await page.getByLabel("Brightness", { exact: true }).fill("0.66");
   await expect(
     page.getByText("Saved on this device", { exact: true }),
@@ -29,11 +31,11 @@ test("new laptops open the GitHub snapshot and existing local work can restore o
     .getByRole("button", { name: "Load GitHub snapshot", exact: true })
     .click();
   await expect(page.getByLabel("Brightness", { exact: true })).toHaveValue(
-    "0.78",
+    "1",
   );
   await expect(
-    page.getByLabel("Intensity sequence", { exact: true }),
-  ).toHaveValue("0, 1, 1.5, 0, 1, 0, 1.5, 1");
+    page.locator(".lighting-loop-controls").last().getByLabel("Intensity sequence", { exact: true }),
+  ).toHaveValue("0, 1, 1.5, 0, 1, 0, 1.75, 1");
   await page.getByRole("button", { name: "Undo", exact: true }).click();
   await expect(page.getByLabel("Brightness", { exact: true })).toHaveValue(
     "0.66",
@@ -45,7 +47,7 @@ test("direct snapshot link loads the exported cafe over old local work and prese
 }) => {
   await page.goto("/");
   await expect(page.getByLabel("Brightness", { exact: true })).toHaveValue(
-    "0.78",
+    "1",
   );
   await page.getByLabel("Project title").fill("My older local project");
   await page.getByLabel("Brightness", { exact: true }).fill("0.66");
@@ -66,15 +68,15 @@ test("direct snapshot link loads the exported cafe over old local work and prese
     "The space between us",
   );
   await expect(page.getByLabel("Brightness", { exact: true })).toHaveValue(
-    "0.78",
+    "1",
   );
   await expect(page.locator(".stage svg image")).toHaveAttribute(
     "href",
     /^data:image\/png;base64,/,
   );
   await page.getByText("Light position", { exact: true }).click();
-  await expect(page.getByLabel("Light X", { exact: true })).toHaveValue("53");
-  await expect(page.getByLabel("Light Y", { exact: true })).toHaveValue("77");
+  await expect(page.getByLabel("Light X", { exact: true })).toHaveValue("68");
+  await expect(page.getByLabel("Light Y", { exact: true })).toHaveValue("85");
   await expect(page).not.toHaveURL(/snapshot=github/);
   await expect(
     page.getByRole("button", { name: "Restore previous local project" }),

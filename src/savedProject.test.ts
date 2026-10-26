@@ -1,16 +1,26 @@
 import { expect, it } from "vitest";
 import { savedProject } from "./savedProject";
 
-it("preserves the exported background and authored cafe lighting as independent copies", () => {
+it("loads the complete uploaded artwork and authored rain, lighting, motion and camera settings as independent copies", () => {
   const project = savedProject();
   const cafe = project.scenes.find(scene => scene.id === "cafe")!;
   const background = project.assets.find(asset => asset.id === cafe.background)!;
-  expect(background.name).toBe("Rainy Caf\u00e9 Conversation.png");
-  expect(background.data).toMatch(/^data:image\/png;base64,/);
-  expect(cafe.effects).toMatchObject({ brightness: .78, light: .04, lightX: 53, lightY: 77,
-    density: 200, speed: 1.1, angle: 0, length: 8, opacity: .15,
-    lightLoop: { enabled: true, values: [0, 1, 1.5, 0, 1, 0, 1.5, 1], stepSeconds: 1 } });
-  expect(cafe.effects.mask).toHaveLength(8);
+  expect(background.name).toBe("Rainy Café Conversation.png");
+  expect(background.data).toMatch(/^data:image\/png;base64,iVBORw0KGgo/);
+  expect(background.width).toBe(1536);
+  expect(background.height).toBe(1024);
+  expect(cafe.effects).toMatchObject({ brightness: 1, light: .22, lightX: 68, lightY: 85,
+    density: 56, speed: 1, angle: -2, length: 6, opacity: .14,
+    lightLoop: { enabled: true, values: [0, 1, 1.5, 0, 1, 0, 1.75, 1], stepSeconds: 2.5 } });
+  expect(cafe.effects.rainZones?.map(r => r.points.length)).toEqual([23, 4]);
+  expect(cafe.effects.rainZones?.[0].name).toBe("right window");
+  expect(cafe.effects.lights).toHaveLength(2);
+  expect(cafe.effects.lights?.[0]).toMatchObject({ x: 902, y: 140, radius: 51, intensity: 1.9 });
+  expect(cafe.effects.motionZones?.[0]).toMatchObject({ strength: 2, direction: -62 });
+  expect(project.scenes.find(s => s.id === "bedroom")?.camera).toMatchObject({ enabled: true, zoom: 1.4, bob: 3 });
+  cafe.effects.rainZones![0].points[0].x = 0;
   cafe.effects.lightX = 0;
-  expect(savedProject().scenes.find(scene => scene.id === "cafe")!.effects.lightX).toBe(53);
+  const fresh = savedProject().scenes.find(scene => scene.id === "cafe")!;
+  expect(fresh.effects.lightX).toBe(68);
+  expect(fresh.effects.rainZones![0].points[0].x).not.toBe(0);
 });

@@ -1,9 +1,21 @@
 {
   "schemaVersion": 1,
-  "id": "2b06a2e0-1087-4982-ad87-bf31be857b10",
+  "id": "97ac1ecf-8e93-4b10-a4e3-802021aa6cf2",
   "title": "The space between us",
   "scenes": [
     {
+      "camera": {
+        "enabled": true,
+        "x": 500,
+        "y": 281.5,
+        "zoom": 1.4,
+        "duration": 4,
+        "bob": 3,
+        "shake": 1,
+        "stepSeconds": 0.6,
+        "footsteps": false,
+        "footstepVolume": 0.2
+      },
       "id": "bedroom",
       "title": "Another evening",
       "subtitle": "BEDROOM · 18:42",
@@ -14,6 +26,48 @@
       "y": 0,
       "scale": 1,
       "effects": {
+        "lights": [
+          {
+            "id": "83aebd57-6e24-4f49-95d8-85c81d1a9066",
+            "name": "Local TV",
+            "enabled": true,
+            "kind": "local",
+            "shape": "radial",
+            "intensity": 0.7,
+            "color": "#95b3c6",
+            "x": 881,
+            "y": 318,
+            "radius": 311,
+            "spread": 0.05,
+            "cycle": {
+              "enabled": true,
+              "values": [
+                0.3,
+                1,
+                0.6,
+                1.5
+              ],
+              "stepSeconds": 3
+            }
+          }
+        ],
+        "motionZones": [
+          {
+            "id": "227e0e6c-fcce-4cbb-94ab-47eb5daa1b0e",
+            "name": "Gentle sway",
+            "enabled": true,
+            "strength": 4,
+            "seconds": 3,
+            "direction": 0,
+            "distortion": 2,
+            "region": {
+              "id": "227e0e6c-fcce-4cbb-94ab-47eb5daa1b0e",
+              "name": "Motion area",
+              "enabled": true,
+              "points": []
+            }
+          }
+        ],
         "rain": true,
         "density": 45,
         "speed": 1,
@@ -29,7 +83,24 @@
         "light": 0.22,
         "lightX": 68,
         "lightY": 36,
-        "mask": [],
+        "mask": [
+          {
+            "x": 65.52778010383531,
+            "y": 33.18975046055937
+          },
+          {
+            "x": 589.0206623681127,
+            "y": 33.18975046055937
+          },
+          {
+            "x": 589.0206623681127,
+            "y": 368.1045051080221
+          },
+          {
+            "x": 61.001905041031705,
+            "y": 368.1045051080221
+          }
+        ],
         "invert": false,
         "vignette": true
       },
@@ -353,7 +424,7 @@
       "title": "A table by the window",
       "subtitle": "CAFÉ · 19:16",
       "art": "cafe",
-      "background": "90c6b3c1-f095-46bd-a8f3-2b04cc5650ce",
+      "background": "2021e333-3387-4b6e-ad86-281b140a8cca",
       "fit": "cover",
       "x": 0,
       "y": 0,
@@ -368,60 +439,214 @@
             0,
             1,
             0,
-            1.5,
+            1.75,
             1
           ],
-          "stepSeconds": 1
+          "stepSeconds": 2.5
         },
-        "rain": true,
-        "density": 200,
-        "speed": 1.1,
-        "angle": 0,
-        "length": 8,
-        "opacity": 0.15,
-        "color": "#b7d1dc",
-        "glass": false,
-        "brightness": 0.78,
-        "contrast": 1,
-        "tint": "#7c6689",
-        "tintOpacity": 0,
-        "light": 0.04,
-        "lightX": 53,
-        "lightY": 77,
-        "mask": [
+        "rainZones": [
           {
-            "x": 310.4032260852716,
-            "y": 1.005918227611403
+            "id": "original-window",
+            "name": "right window",
+            "enabled": true,
+            "points": [
+              {
+                "x": 313.5640202781265,
+                "y": 2.5137435468117246
+              },
+              {
+                "x": 352.10808799590717,
+                "y": 41.05781126459232
+              },
+              {
+                "x": 368.02846379238173,
+                "y": 62.843588670294366
+              },
+              {
+                "x": 379.7592670108367,
+                "y": 98.03599832565925
+              },
+              {
+                "x": 384.7867541044603,
+                "y": 139.93172410585555
+              },
+              {
+                "x": 362.1630621831543,
+                "y": 169.2587321519929
+              },
+              {
+                "x": 338.70145574624433,
+                "y": 181.8274498860518
+              },
+              {
+                "x": 347.0806009022836,
+                "y": 199.4236547137342
+              },
+              {
+                "x": 366.3526347611739,
+                "y": 215.34403051020882
+              },
+              {
+                "x": 379.7592670108367,
+                "y": 247.184782103158
+              },
+              {
+                "x": 390.6521557136877,
+                "y": 263.9430724152365
+              },
+              {
+                "x": 425.00665085344866,
+                "y": 269.808474024464
+              },
+              {
+                "x": 445.9545137435468,
+                "y": 262.26724338402863
+              },
+              {
+                "x": 445.1165992279428,
+                "y": 248.86061113436585
+              },
+              {
+                "x": 464.3886330868332,
+                "y": 260.5914143528208
+              },
+              {
+                "x": 474.4436072740802,
+                "y": 252.2122691967815
+              },
+              {
+                "x": 476.95735082089203,
+                "y": 237.12980791591087
+              },
+              {
+                "x": 492.0398121017627,
+                "y": 245.50895307195015
+              },
+              {
+                "x": 492.8777266173666,
+                "y": 257.23975629040507
+              },
+              {
+                "x": 505.44644435142544,
+                "y": 257.23975629040507
+              },
+              {
+                "x": 508.79810241384115,
+                "y": 275.6738756336914
+              },
+              {
+                "x": 537.2871959443746,
+                "y": 273.9980466024836
+              },
+              {
+                "x": 533.9355378819589,
+                "y": 5.027487093623563
+              }
+            ]
           },
           {
-            "x": 531.7010443486802,
-            "y": 5.584493777888838
-          },
-          {
-            "x": 542.3843872993274,
-            "y": 277.2466430943489
-          },
-          {
-            "x": 391.29139414017266,
-            "y": 266.56330014370155
-          },
-          {
-            "x": 340.92706308712116,
-            "y": 191.77989948917048
-          },
-          {
-            "x": 362.2937489884157,
-            "y": 162.78225433741346
-          },
-          {
-            "x": 379.08185933943287,
-            "y": 136.83699288584143
-          },
-          {
-            "x": 372.97709193906303,
-            "y": 68.15835963168018
+            "id": "e4ec9f37-227e-41cc-bc12-52d259bbcaa6",
+            "name": "Rain zone 2",
+            "enabled": true,
+            "points": [
+              {
+                "x": 575.8312636621552,
+                "y": 280.701362727315
+              },
+              {
+                "x": 569.9658620529278,
+                "y": 57.81610157667083
+              },
+              {
+                "x": 590.0758104274219,
+                "y": 61.16775963908654
+              },
+              {
+                "x": 594.2653830054417,
+                "y": 175.96204827682433
+              }
+            ]
           }
         ],
+        "lights": [
+          {
+            "id": "781532e6-eecd-4810-a24a-9961e4675999",
+            "name": "Local candle light",
+            "enabled": true,
+            "kind": "local",
+            "intensity": 1.9,
+            "color": "#747372",
+            "x": 902,
+            "y": 140,
+            "radius": 51,
+            "spread": 0.05,
+            "cycle": {
+              "enabled": false,
+              "values": [
+                0.3,
+                1,
+                0.6,
+                1.5
+              ],
+              "stepSeconds": 2.5
+            }
+          },
+          {
+            "id": "c96f0639-a347-4a71-b884-2a79200138c4",
+            "name": "Local candle light",
+            "enabled": true,
+            "kind": "local",
+            "intensity": 0.7,
+            "color": "#ffd5a1",
+            "x": 607,
+            "y": 419,
+            "radius": 71,
+            "spread": 0.05,
+            "cycle": {
+              "enabled": true,
+              "values": [
+                0.1,
+                1,
+                0.6,
+                1.5
+              ],
+              "stepSeconds": 1
+            }
+          }
+        ],
+        "motionZones": [
+          {
+            "id": "90303e38-a278-4814-a302-7b29fbf19bc7",
+            "name": "Gentle sway",
+            "enabled": true,
+            "strength": 2,
+            "seconds": 3,
+            "direction": -62,
+            "distortion": 0,
+            "region": {
+              "id": "90303e38-a278-4814-a302-7b29fbf19bc7",
+              "name": "Motion area",
+              "enabled": true,
+              "points": []
+            }
+          }
+        ],
+        "rain": true,
+        "density": 56,
+        "speed": 1,
+        "angle": -2,
+        "length": 6,
+        "opacity": 0.14,
+        "color": "#b7d1dc",
+        "glass": false,
+        "brightness": 1,
+        "contrast": 1,
+        "tint": "#7c6689",
+        "tintOpacity": 0.08,
+        "light": 0.22,
+        "lightX": 68,
+        "lightY": 85,
+        "mask": [],
         "invert": false,
         "vignette": true
       },
@@ -549,7 +774,7 @@
   ],
   "assets": [
     {
-      "id": "90c6b3c1-f095-46bd-a8f3-2b04cc5650ce",
+      "id": "2021e333-3387-4b6e-ad86-281b140a8cca",
       "name": "Rainy Café Conversation.png",
       "mime": "image/png",
       "width": 1536,
@@ -605,6 +830,6 @@
     "guides": false
   },
   "metadata": {
-    "created": "2026-10-26T08:16:18.815Z"
+    "created": "2026-10-26T06:55:49.441Z"
   }
 }
