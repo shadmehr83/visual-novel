@@ -85,3 +85,9 @@ Existing schema-v1 projects load without new fields; these are backward-compatib
 ## Full editor as one HTML file
 
 Click **Download local editor** in the production app, or download `downloads/stillframe-studio.html` from GitHub using **Download raw file**. The generated file contains the full authoring editor and can export playable stories offline. No install is needed to use it. See [local editor instructions](docs/LOCAL_EDITOR.md) for moving projects, local browser storage, AI limitations and My Sites publication status.
+
+## Saved authoring snapshot
+
+`src/saved-project.json` preserves the exported **The space between us** project, including its imported Rainy Cafe Conversation background and authored lighting/rain settings. A browser without a local project opens this snapshot. Existing local projects remain in place; **Load GitHub snapshot** loads the bundled snapshot with editor undo available. The source snapshot is the portable authoring file, not an HTML player export.
+
+The downloadable editor and deployment include the same snapshot. Changes after this snapshot continue to save in the current browser only. Export the project and update `src/saved-project.json` in GitHub to publish another snapshot; this is not automatic cloud synchronization.

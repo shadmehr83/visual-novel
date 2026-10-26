@@ -32,6 +32,7 @@ import {
 import { downloadLocalEditor } from "./localEditor";
 import { exportPlayer } from "./playerExport";
 import { demo } from "./demo";
+import { savedProject } from "./savedProject";
 import {
   advance,
   enter,
@@ -108,7 +109,7 @@ function Toggle({
   );
 }
 export default function App() {
-  const [project, setProject] = useState<Project>(() => demo());
+  const [project, setProject] = useState<Project>(() => savedProject());
   const [sceneId, setSceneId] = useState("cafe");
   const [nodeId, setNodeId] = useState("arrival");
   const [runtime, setRuntime] = useState<Runtime | null>(null);
@@ -763,6 +764,17 @@ export default function App() {
               }
             >
               <Download size={15} /> Export playable HTML
+            </button>
+            <button disabled={playing || !loaded} onClick={() => {
+              const snapshot = savedProject();
+              edit((p) => Object.assign(p, snapshot));
+              setSceneId("cafe");
+              setNodeId("arrival");
+              setRuntime(null);
+              setMaskMode(false);
+              setTab("Scenes");
+            }}>
+              <FolderOpen size={15} /> Load GitHub snapshot
             </button>
             <button onClick={() => importInput.current?.click()}>
               <FolderOpen size={15} /> Open project
@@ -1645,6 +1657,7 @@ export default function App() {
                   saved in this browser’s IndexedDB. Export regularly to back up
                   your work or move between devices.
                 </p>
+                <p className="muted">Load GitHub snapshot restores the project included with this release. Later edits save on this device; they do not update GitHub automatically. Undo can restore your local project after loading the snapshot.</p>
                 <Toggle
                   label="Reduced effects"
                   value={project.settings.reducedEffects}

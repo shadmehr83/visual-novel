@@ -2,6 +2,8 @@ import { test, expect } from "@playwright/test";
 
 test("cafe light moves over the person and plant and respects reduced effects", async ({ page }) => {
   await page.goto("/");
+  await page.getByRole("link", { name: /stillframe/i }).click();
+  await page.getByRole("button", { name: "Load opening demo", exact: true }).click();
   const person = page.locator(".cafe-person-shade");
   const plant = page.locator(".cafe-plant-shade");
   await expect(person).toBeVisible();

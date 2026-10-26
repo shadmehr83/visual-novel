@@ -36,19 +36,19 @@ test("AI proposal is reviewed, applied, undone, and dictated without automatical
   await page.getByLabel(/Share this request/).check();
   await page.getByRole("button", { name: "Ask AI", exact: true }).click();
   await expect(page.getByText("Dim the café.", { exact: true })).toBeVisible();
-  await expect(page.getByLabel("Brightness", { exact: true })).toHaveValue("1");
+  await expect(page.getByLabel("Brightness", { exact: true })).toHaveValue("0.78");
   await page.getByRole("button", { name: "Apply approved changes" }).click();
   await expect(page.getByLabel("Brightness", { exact: true })).toHaveValue(
     "0.6",
   );
   await page.getByRole("button", { name: "Undo", exact: true }).click();
-  await expect(page.getByLabel("Brightness", { exact: true })).toHaveValue("1");
+  await expect(page.getByLabel("Brightness", { exact: true })).toHaveValue("0.78");
   page.on("dialog", (d) => d.accept());
   await page.getByRole("button", { name: "Speak your request" }).click();
   await expect(page.getByLabel("Assistant request")).toHaveValue(
     /Make the scene gentler/,
   );
-  await expect(page.getByLabel("Brightness", { exact: true })).toHaveValue("1");
+  await expect(page.getByLabel("Brightness", { exact: true })).toHaveValue("0.78");
 });
 test("sprite and audio import, QTE authoring and play", async ({ page }) => {
   await page.goto("/");
