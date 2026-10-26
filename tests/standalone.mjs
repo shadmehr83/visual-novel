@@ -73,6 +73,10 @@ try {
     await page.getByLabel("Brightness", { exact: true }).inputValue(),
     "1",
   );
+  await page.getByRole("checkbox", { name: "Loop lighting", exact: true }).check();
+  await page.getByLabel("Intensity sequence", { exact: true }).fill("0, 2, 1");
+  await page.getByRole("button", { name: "Apply light sequence" }).click();
+  await page.getByLabel("Seconds per step", { exact: true }).fill("0.5");
   await page.getByText("Saved on this device").waitFor();
   await page.reload();
   await page
@@ -90,6 +94,7 @@ try {
     await page.locator(".stage svg image").first().getAttribute("href"),
     /^data:image\/png;base64,/,
   );
+  assert.equal(await page.getByLabel("Intensity sequence", { exact: true }).inputValue(), "0, 2, 1");
   const playerDownload = page.waitForEvent("download");
   await page
     .getByRole("button", { name: "Export playable HTML", exact: true })
@@ -100,6 +105,8 @@ try {
     route.fulfill({ contentType: "text/html", body: playerHtml }),
   );
   await page.goto(base + "/offline-player");
+  await page.waitForFunction(() => Number(document.querySelector(".stage svg")?.getAttribute("data-light-level")) > 1.5);
+  await page.waitForFunction(() => Number(document.querySelector(".stage svg")?.getAttribute("data-light-level")) < .3);
   await page.getByRole("button", { name: "Continue", exact: true }).click();
   await page
     .getByRole("button", { name: "Open the message", exact: true })

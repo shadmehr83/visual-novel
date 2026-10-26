@@ -46,6 +46,8 @@ import { exportProject, load, save, readImage, readProject } from "./storage";
 import { Assistant } from "./Assistant";
 import { EngineTools, Qte, SceneAudio } from "./EngineTools";
 import { Stage } from "./Stage";
+import { LightingLoopControls } from "./LightingLoopControls";
+import { sceneLightLoop } from "./lighting";
 const clone = <T,>(v: T): T => structuredClone(v);
 function Slider({
   label,
@@ -1296,6 +1298,11 @@ export default function App() {
                     step={0.01}
                     onChange={(v) => effect("light", v)}
                   />
+                  <LightingLoopControls
+                    key={selected.id}
+                    value={sceneLightLoop(selected)}
+                    onChange={(value) => effect("lightLoop", value)}
+                  />
                   <details>
                     <summary>Light position</summary>
                     <Slider
@@ -1446,6 +1453,7 @@ export default function App() {
                         s.effects.rain = false;
                         s.effects.glass = false;
                         s.effects.light = 0;
+                        s.effects.lightLoop = { ...sceneLightLoop(s), enabled: false };
                         s.effects.tintOpacity = 0;
                         s.effects.vignette = false;
                         s.effects.brightness = 1;

@@ -32,7 +32,13 @@ const node = z.object({
   next: z.string().optional(),
   choices: z.array(choice).default([]),
 });
+export const lightLoopSchema = z.object({
+  enabled: z.boolean(),
+  values: z.array(z.number().finite().min(0).max(2)).min(2).max(32),
+  stepSeconds: z.number().finite().min(0.5).max(20),
+});
 export const effectsSchema = z.object({
+  lightLoop: lightLoopSchema.optional(),
   rain: z.boolean(),
   density: z.number().min(0).max(200),
   speed: z.number().min(0).max(3),

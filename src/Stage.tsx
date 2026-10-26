@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import type { Project, Scene } from "./model";
 import { animateSprite } from "./animation";
 import { Artwork } from "./Artwork";
+import { sampleLightLoop, sceneLightLoop } from "./lighting";
 export function Stage({
   project,
   scene,
@@ -20,8 +21,22 @@ export function Stage({
   const [time, setTime] = useState(0);
   const svg = useRef<SVGSVGElement>(null);
   const e = scene.effects;
+  const loop = sceneLightLoop(scene);
+  const [reducedMotion, setReducedMotion] = useState(() =>
+    typeof matchMedia === "function" && matchMedia("(prefers-reduced-motion: reduce)").matches);
   useEffect(() => {
-    if (!e.rain && !e.glass && !scene.keyframes?.length) return;
+    const media = matchMedia("(prefers-reduced-motion: reduce)");
+    const update = () => setReducedMotion(media.matches);
+    update();
+    media.addEventListener("change", update);
+    return () => media.removeEventListener("change", update);
+  }, []);
+  const loopingLight = loop.enabled && e.light > 0 && !project.settings.reducedEffects && !reducedMotion;
+  const lightLevel = loopingLight ? sampleLightLoop(loop, time) : 1;
+  const lightIntensity = Math.min(1, e.light * lightLevel);
+  useEffect(() => {
+    setTime(0);
+    if (!e.rain && !e.glass && !scene.keyframes?.length && !loopingLight) return;
     const origin = performance.now();
     let frame = 0;
     let previous = 0;
@@ -34,7 +49,7 @@ export function Stage({
     };
     frame = requestAnimationFrame(tick);
     return () => cancelAnimationFrame(frame);
-  }, [e.rain, e.glass, scene.id, JSON.stringify(scene.keyframes)]);
+  }, [e.rain, e.glass, scene.id, JSON.stringify(scene.keyframes), loopingLight, loop.stepSeconds, loop.values.join(",")]);
   const points = e.mask.map((p) => `${p.x},${p.y}`).join(" ");
   const asset = project.assets.find((a) => a.id === scene.background);
   const transform = asset
@@ -50,6 +65,7 @@ export function Stage({
         viewBox="0 0 1000 563"
         role="img"
         aria-label={scene.title + " live stage"}
+        data-light-level={lightLevel}
         onClick={(event) => {
           if (!maskMode || !svg.current) return;
           const pt = new DOMPoint(event.clientX, event.clientY).matrixTransform(
@@ -82,7 +98,7 @@ export function Stage({
       >
         <defs>
           <radialGradient id="softLight">
-            <stop stopColor="#ffdfab" stopOpacity={e.light} />
+            <stop stopColor="#ffdfab" stopOpacity={lightIntensity} />
             <stop offset="1" stopColor="#ffdfab" stopOpacity="0" />
           </radialGradient>
           <radialGradient id="vignette">
@@ -106,7 +122,7 @@ export function Stage({
         </defs>
         <g
           style={{
-            filter: `brightness(${e.brightness}) contrast(${e.contrast})`,
+            filter: `brightness(${e.brightness * (loopingLight ? 0.85 + lightLevel * 0.15 : 1)}) contrast(${e.contrast})`,
           }}
         >
           {asset ? (
@@ -127,7 +143,7 @@ export function Stage({
               />
             </g>
           ) : (
-            <Artwork kind={scene.art} dynamicLight={scene.effects.light > 0 && !project.settings.reducedEffects} />
+            <Artwork kind={scene.art} dynamicLight={loopingLight} />
           )}
         </g>
         <rect width="1000" height="563" fill={e.tint} opacity={e.tintOpacity} />
