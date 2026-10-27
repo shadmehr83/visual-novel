@@ -1,3 +1,5 @@
+import { deviceScreen } from "./interactions";
+import { PlaybackControls } from "./PlaybackControls";
 import { ItemOverlay } from "./ItemOverlay";
 import { SceneTransition } from "./SceneTransition";
 import { PhoneUI } from "./PhoneUI";
@@ -9,7 +11,7 @@ import { start, advance, respond, validateProject } from "./model";
 import { Stage } from "./Stage";
 import { Qte, SceneAudio } from "./EngineTools";
 function Player() {
-  const [project] = useState(() =>
+  const [project, setProject] = useState(() =>
     validateProject(
       JSON.parse(document.getElementById("story-data")!.textContent!),
     ),
@@ -33,6 +35,18 @@ function Player() {
     >
       <h1>{project.title}</h1>
       <FullscreenButton />
+      <PlaybackControls
+        mode={project.settings.progression || "continue"}
+        onMode={(mode) =>
+          setProject((p) => ({
+            ...p,
+            settings: { ...p.settings, progression: mode },
+          }))
+        }
+        advance={() => setRuntime((r) => advance(project, r))}
+        canAdvance={!runtime.ended && !node.choices.length && !node.qte}
+      />
+
       <SceneTransition
         scene={scene}
         playing
@@ -42,6 +56,9 @@ function Player() {
         }
       >
         <Stage
+          visits={runtime.nodeVisits
+            ?.filter((v) => v.scene === scene.id)
+            .map((v) => v.node)}
           itemFocus={
             !!scene.items?.enabled &&
             scene.items.options.some((i) =>
@@ -67,7 +84,13 @@ function Player() {
               runtime={runtime}
               onStep={(id) => setRuntime((r) => advance(project, r, id))}
             />
-          ) : scene.phone?.enabled ? (
+          ) : deviceScreen(
+              scene,
+              node,
+              runtime.nodeVisits
+                ?.filter((v) => v.scene === scene.id)
+                .map((v) => v.node),
+            ) !== "off" ? (
             <PhoneUI
               onRestart={() => setRuntime(start(project))}
               project={project}

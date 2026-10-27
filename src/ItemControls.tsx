@@ -13,8 +13,8 @@ export function ItemControls({
 }) {
   const node = scene.nodes.find((n) => n.id === nodeId)!;
   return (
-    <section className="property-section" data-effect-panel="Cinematics">
-      <h3>Item picker overlay</h3>
+    <section className="property-section" data-effect-panel="Outfits & Items">
+      <h3>Outfits & Items · inspect and choose</h3><p>Clothing and book cards live here. Choose a dialogue with choices, add items, then link each confirmation to its choice. Inspecting does not commit the choice.</p>
       <button
         onClick={() =>
           update((s) => {

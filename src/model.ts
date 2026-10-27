@@ -39,6 +39,8 @@ export const poseSchema = z.object({
   asset: z.string().optional(),
 });
 const node = z.object({
+  deviceScreen: z.enum(["off", "home", "feed", "chat"]).optional(),
+  phoneNotice: z.string().max(300).optional(),
   notes: z.string().max(10000).optional(),
   qte: qteSchema.optional(),
   allowCustomResponse: z.boolean().optional(),
@@ -193,6 +195,13 @@ export const cameraSchema = z.object({
   footstepAsset: z.string().optional(),
 });
 export const jointSchema = z.object({
+  range: z
+    .object({
+      start: z.string(),
+      end: z.string(),
+      after: z.enum(["hide", "hold"]),
+    })
+    .optional(),
   id: z.string(),
   name: z.string(),
   enabled: z.boolean(),
@@ -210,6 +219,8 @@ export const jointSchema = z.object({
 export type Joint = z.infer<typeof jointSchema>;
 export type Pose = z.infer<typeof poseSchema>;
 export const deviceSchema = z.object({
+  mode: z.enum(["chat-only", "phone-system"]).optional(),
+  defaultScreen: z.enum(["home", "feed", "chat"]).optional(),
   enabled: z.boolean(),
   device: z.enum(["phone", "desktop"]),
   contact: z.string().max(100),
@@ -342,7 +353,14 @@ export const projectSchema = z.object({
     )
     .max(100)
     .optional(),
+  lightPresets: z
+    .array(
+      z.object({ id: z.string(), name: z.string(), light: zoneLightSchema }),
+    )
+    .max(100)
+    .optional(),
   settings: z.object({
+    progression: z.enum(["continue", "enter", "screen"]).optional(),
     dialogueFont: z
       .enum(["Georgia", "Arial", "Verdana", "Trebuchet MS", "monospace"])
       .optional(),
@@ -367,6 +385,7 @@ export type Runtime = {
   history: string[];
   choices: string[];
   ended: boolean;
+  nodeVisits?: { scene: string; node: string }[];
   phoneMessages?: {
     scene: string;
     node: string;
@@ -413,6 +432,11 @@ export function validateProject(input: unknown): Project {
     if (s.phone?.avatar && !p.assets.some((a) => a.id === s.phone!.avatar))
       throw Error("Missing device avatar");
     for (const joint of s.joints || []) {
+      if (
+        joint.range &&
+        (!nodes.has(joint.range.start) || !nodes.has(joint.range.end))
+      )
+        throw Error("Missing hinge range dialogue");
       if (joint.source && !p.assets.some((a) => a.id === joint.source))
         throw Error("Missing joint source image");
       if (new Set(joint.poses.map((x) => x.node)).size !== joint.poses.length)
@@ -526,6 +550,13 @@ function advanceCore(p: Project, r: Runtime, choiceId?: string): Runtime {
 }
 
 function recordPhone(p: Project, r: Runtime): Runtime {
+  const visits = r.nodeVisits || [],
+    lastVisit = visits[visits.length - 1];
+  if (lastVisit?.scene !== r.scene || lastVisit?.node !== r.node)
+    r = {
+      ...r,
+      nodeVisits: [...visits, { scene: r.scene, node: r.node }].slice(-1000),
+    };
   const s = p.scenes.find((s) => s.id === r.scene)!;
   const n = s.nodes.find((n) => n.id === r.node)!;
   if (
@@ -577,9 +608,9 @@ export function resolveQte(
     ...r,
     history: [...r.history, `QTE ${outcome}: ${n.qte.prompt}`],
   };
-  return p.scenes.some((s) => s.id === target)
+  return recordPhone(p,p.scenes.some((s) => s.id === target)
     ? enter(p, next, target)
-    : { ...next, node: target };
+    : { ...next, node: target });
 }
 
 export function respond(

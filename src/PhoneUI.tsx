@@ -1,3 +1,5 @@
+import { PhoneApps } from "./PhoneApps";
+import { deviceScreen } from "./interactions";
 import { useEffect, useRef, useState } from "react";
 import type { Project, Scene, Runtime, Node } from "./model";
 import { SelfReply } from "./SelfReply";
@@ -19,6 +21,17 @@ export function PhoneUI({
   onRestart?: () => void;
 }) {
   const config = scene.phone!;
+  const effective = deviceScreen(
+    scene,
+    node,
+    runtime?.nodeVisits?.filter((v) => v.scene === scene.id).map((v) => v.node),
+  );
+  const [screen, setScreen] = useState<"home" | "feed" | "chat">(
+    effective === "off" ? "home" : effective,
+  );
+  useEffect(() => {
+    if (effective !== "off") setScreen(effective);
+  }, [effective, scene.id, node.deviceScreen ? node.id : ""]);
   const [typing, setTyping] = useState(false);
   const feed = useRef<HTMLDivElement>(null);
   const reduced =
@@ -27,6 +40,7 @@ export function PhoneUI({
   useEffect(() => {
     setTyping(
       !!runtime &&
+        screen === "chat" &&
         node.speaker === config.contact &&
         config.typingSeconds > 0 &&
         !reduced,
@@ -36,7 +50,7 @@ export function PhoneUI({
       config.typingSeconds * 1000,
     );
     return () => clearTimeout(timer);
-  }, [node.id, config.typingSeconds, reduced]);
+  }, [node.id, config.typingSeconds, reduced, screen]);
   const messages = runtime
     ? runtime.phoneMessages || []
     : [config.contact, "You"].includes(node.speaker)
@@ -92,7 +106,14 @@ export function PhoneUI({
           <span>◔ ▰</span>
         </div>
         <header className="device-contact">
-          <span aria-hidden>‹</span>
+          <button
+            type="button"
+            aria-label="Back to phone home"
+            data-help="Return to the phone home screen. This does not undo a story choice or delete messages."
+            onClick={() => setScreen("home")}
+          >
+            ‹
+          </button>
           {avatar ? (
             <img src={avatar.data} alt="" />
           ) : (
@@ -101,40 +122,80 @@ export function PhoneUI({
             </span>
           )}
           <div>
-            <b>{config.contact}</b>
-            <small>{config.title}</small>
+            <b>
+              {screen === "chat"
+                ? config.contact
+                : screen === "feed"
+                  ? "Loop"
+                  : "Phone"}
+            </b>
+            <small>
+              {screen === "chat"
+                ? config.title
+                : screen === "feed"
+                  ? "Fictional offline feed"
+                  : "Local device"}
+            </small>
           </div>
           <span>···</span>
         </header>
-        <div className="device-feed" ref={feed} aria-live="polite">
-          <p className="device-date">Today · Nearside</p>
-          {messages.map((m, i) =>
-            typing && m.node === node.id && m.scene === scene.id ? null : (
+        {screen !== "home" && (
+          <nav className="phone-app-nav" data-no-advance>
+            <button onClick={() => setScreen("home")}>Home</button>
+            <button onClick={() => setScreen("chat")}>Nearside</button>
+            <button onClick={() => setScreen("feed")}>Loop</button>
+          </nav>
+        )}
+        {node.phoneNotice && (
+          <button
+            className="phone-notification"
+            data-help="Open this story notification. If an authored Open reply is available, its branch is followed; otherwise this opens the chat app."
+            onClick={() => {
+              const c = choices.find((c) => /open|read.*message/i.test(c.text));
+              if (c) onStep(c.id);
+              else setScreen("chat");
+            }}
+          >
+            {node.phoneNotice}
+            <small>Open notification</small>
+          </button>
+        )}
+        {screen !== "chat" ? (
+          <PhoneApps screen={screen} onOpen={setScreen} />
+        ) : (
+          <div className="device-feed" ref={feed} aria-live="polite">
+            <p className="device-date">Today · Nearside</p>
+            {messages.map((m, i) =>
+              typing && m.node === node.id && m.scene === scene.id ? null : (
+                <div
+                  key={i}
+                  className={
+                    "message-bubble " +
+                    (m.sender === "You" ? "message-you" : "message-contact")
+                  }
+                >
+                  <span>{m.text}</span>
+                  <small>{m.sender === "You" ? "You" : config.contact}</small>
+                </div>
+              ),
+            )}
+            {typing && (
               <div
-                key={i}
-                className={
-                  "message-bubble " +
-                  (m.sender === "You" ? "message-you" : "message-contact")
-                }
+                className="typing-bubble"
+                aria-label={config.contact + " is typing"}
               >
-                <span>{m.text}</span>
-                <small>{m.sender === "You" ? "You" : config.contact}</small>
+                <i />
+                <i />
+                <i />
               </div>
-            ),
-          )}
-          {typing && (
-            <div
-              className="typing-bubble"
-              aria-label={config.contact + " is typing"}
-            >
-              <i />
-              <i />
-              <i />
-            </div>
-          )}
-          {!currentIsMessage && <p className="device-narration">{node.text}</p>}
-        </div>
+            )}
+            {!currentIsMessage && (
+              <p className="device-narration">{node.text}</p>
+            )}
+          </div>
+        )}
         <div className="device-actions">
+          {screen !== "chat" && <p className="device-narration">{node.text}</p>}
           {runtime?.ended ? (
             <div>
               <p>End of conversation</p>
@@ -167,25 +228,33 @@ export function PhoneUI({
             </>
           )}
         </div>
-        {config.keyboard && choices.length > 0 && !typing && (
-          <div className="device-keyboard" aria-hidden>
-            {[
-              "Q W E R T Y U I O P",
-              "A S D F G H J K L",
-              "⇧ Z X C V B N M ⌫",
-            ].map((row) => (
-              <div key={row}>
-                {row.split(" ").map((key) => (
-                  <span key={key}>{key}</span>
-                ))}
+        {screen === "chat" &&
+          config.keyboard &&
+          choices.length > 0 &&
+          !typing && (
+            <div className="device-keyboard" aria-hidden>
+              {[
+                "Q W E R T Y U I O P",
+                "A S D F G H J K L",
+                "⇧ Z X C V B N M ⌫",
+              ].map((row) => (
+                <div key={row}>
+                  {row.split(" ").map((key) => (
+                    <span key={key}>{key}</span>
+                  ))}
+                </div>
+              ))}
+              <div>
+                <span className="space-key">space</span>
               </div>
-            ))}
-            <div>
-              <span className="space-key">space</span>
             </div>
-          </div>
-        )}
-        <div className="device-home" />
+          )}
+        <button
+          className="device-home"
+          aria-label="Phone home"
+          data-help="Return to the home screen without deleting messages or rewinding the story."
+          onClick={() => setScreen("home")}
+        />
       </div>
     </section>
   );

@@ -1,3 +1,4 @@
+import {specificHelp} from "./controlHelp";
 import { useEffect, useState } from "react";
 export function describeControl(el: HTMLElement) {
   const name =
@@ -8,7 +9,7 @@ export function describeControl(el: HTMLElement) {
       : el.textContent) ||
     "Control";
   const label = name.trim().replace(/\s+/g, " ").slice(0, 100);
-  const help = el.dataset.help;
+  const help = el.dataset.help || specificHelp(label,el);
   if (help) return { label, text: help };
   const rules: [RegExp, string][] = [
     [/hinge|pivot|pose|expression replacement/i,"Select the affected pixels, choose the hinge pivot, and save a pose on each desired dialogue slide. Position, angle, scale and opacity interpolate between poses. Separate transparent artwork avoids leaving the original object behind."],
@@ -80,7 +81,7 @@ export function describeControl(el: HTMLElement) {
       match?.[1] ||
       (el instanceof HTMLInputElement && el.type === "range"
         ? "Drag to adjust this value. The preview updates immediately; project properties support Undo."
-        : "Use this control to edit or select the named setting. Scene changes preview immediately; interface preferences stay on this browser."),
+        : `Edit ${label}. ${el instanceof HTMLSelectElement ? "Choose one of the listed options." : el instanceof HTMLInputElement && el.type === "checkbox" ? "Turn this named feature on or off." : "Changes to project content support Undo; workspace preferences stay in this browser."}`),
   };
 }
 export function HoverHelp({ enabled }: { enabled: boolean }) {

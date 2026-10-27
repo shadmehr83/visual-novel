@@ -16,7 +16,7 @@ export function EffectPresets({
       "lighting",
     );
   return (
-    <section className="property-section" data-effect-panel="Presets">
+    <section className="property-section" data-effect-panel="Effect Presets">
       <h3>Reusable effect presets</h3>
       <label>
         Preset name

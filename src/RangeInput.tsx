@@ -1,10 +1,13 @@
 import type { InputHTMLAttributes } from "react";
-export function RangeInput(props: InputHTMLAttributes<HTMLInputElement>) {
+export function RangeInput(
+  props: InputHTMLAttributes<HTMLInputElement> & { "data-help"?: string },
+) {
   return (
     <>
       <input {...props} />
       <input
         className="exact-range"
+        data-help={props["data-help"]}
         type="number"
         aria-label={(props["aria-label"] || "Slider") + " exact value"}
         min={props.min}

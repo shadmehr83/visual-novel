@@ -1,8 +1,10 @@
+import { hingeWindow } from "./interactions";
 import { useEffect, useRef, useState } from "react";
 import type { Joint, Pose, Project, Scene } from "./model";
 import { restingPose, samplePose } from "./cinematics";
 function MovingPatch({
   joint,
+  visits,
   idPrefix,
   scene,
   project,
@@ -11,6 +13,7 @@ function MovingPatch({
   reduced,
 }: {
   joint: Joint;
+  visits: string[];
   idPrefix: string;
   scene: Scene;
   project: Project;
@@ -21,28 +24,40 @@ function MovingPatch({
   const [pose, setPose] = useState<Pose>(restingPose());
   const latest = useRef(pose);
   const destination = useRef(pose);
-  const chosen =
-    joint.poses.find((p) => p.node === nodeId) ||
-    (!playing
-      ? [...joint.poses]
-          .filter(
-            (p) =>
-              scene.nodes.findIndex((n) => n.id === p.node) <=
-              scene.nodes.findIndex((n) => n.id === nodeId),
-          )
-          .sort(
-            (a, b) =>
-              scene.nodes.findIndex((n) => n.id === a.node) -
-              scene.nodes.findIndex((n) => n.id === b.node),
-          )
-          .pop()
-      : undefined);
+  const window = hingeWindow(
+    joint,
+    nodeId,
+    playing
+      ? visits
+      : scene.nodes
+          .slice(0, scene.nodes.findIndex((n) => n.id === nodeId) + 1)
+          .map((n) => n.id),
+    scene,
+  );
+  const chosen = window.ended
+    ? undefined
+    : joint.poses.find((p) => p.node === nodeId) ||
+      (!playing
+        ? [...joint.poses]
+            .filter(
+              (p) =>
+                scene.nodes.findIndex((n) => n.id === p.node) <=
+                scene.nodes.findIndex((n) => n.id === nodeId),
+            )
+            .sort(
+              (a, b) =>
+                scene.nodes.findIndex((n) => n.id === a.node) -
+                scene.nodes.findIndex((n) => n.id === b.node),
+            )
+            .pop()
+        : undefined);
   useEffect(() => {
     if (chosen) destination.current = chosen;
     const to = destination.current,
       from = latest.current;
     if (
       reduced ||
+      window.ended ||
       joint.transition.style === "cut" ||
       joint.transition.style === "snappy"
     ) {
@@ -72,6 +87,7 @@ function MovingPatch({
   const source = project.assets.find(
     (a) => a.id === (pose.asset || joint.source),
   );
+  if (!window.visible) return null;
   return (
     <g data-joint-layer={joint.id} data-joint-angle={pose.angle}>
       <defs>
@@ -122,6 +138,7 @@ function MovingPatch({
   );
 }
 export function JointLayers(props: {
+  visits: string[];
   idPrefix: string;
   scene: Scene;
   project: Project;

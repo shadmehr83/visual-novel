@@ -23,6 +23,8 @@ export function Stage({
   idPrefix = "",
   itemFocus = false,
   onPivot,
+  onPlaceLight,
+  visits = [],
 }: {
   project: Project;
   scene: Scene;
@@ -36,6 +38,8 @@ export function Stage({
   nodeId?: string;
   idPrefix?: string;
   itemFocus?: boolean;
+  visits?: string[];
+  onPlaceLight?: (x: number, y: number) => void;
   onPivot?: (x: number, y: number) => void;
 }) {
   const stroke = useRef<{
@@ -98,7 +102,7 @@ export function Stage({
       )
     : null;
   const cameraTransform =
-    camera && !maskMode && !regionEditor
+    camera && !maskMode && !regionEditor && !onPlaceLight
       ? `translate(${camera.x} ${camera.y}) scale(${camera.zoom})`
       : undefined;
   const loopingLight =
@@ -208,7 +212,18 @@ export function Stage({
     }
   }
   return (
-    <div className={"stage " + (itemFocus?"item-focus ":"") + (maskMode || regionEditor ? "masking" : "")} style={{"--item-blur":(scene.items?.blur||0)+"px"} as React.CSSProperties}>
+    <div
+      className={
+        "stage " +
+        (itemFocus ? "item-focus " : "") +
+        (maskMode || regionEditor ? "masking" : "")
+      }
+      style={
+        {
+          "--item-blur": (scene.items?.blur || 0) + "px",
+        } as React.CSSProperties
+      }
+    >
       <svg
         ref={svg}
         viewBox="0 0 1000 563"
@@ -261,6 +276,17 @@ export function Stage({
           setStrokePreview(null);
         }}
         onClick={async (event) => {
+          if (onPlaceLight) {
+            const p = new DOMPoint(
+              event.clientX,
+              event.clientY,
+            ).matrixTransform(svg.current!.getScreenCTM()!.inverse());
+            onPlaceLight(
+              Math.max(0, Math.min(1000, p.x)),
+              Math.max(0, Math.min(563, p.y)),
+            );
+            return;
+          }
           if (regionEditor?.mode === "pivot") {
             const p = pointAt(event.clientX, event.clientY);
             onPivot?.(p.x, p.y);
@@ -665,6 +691,7 @@ export function Stage({
               })}
             </g>
             <JointLayers
+              visits={visits}
               idPrefix={idPrefix}
               key={scene.id}
               scene={scene}

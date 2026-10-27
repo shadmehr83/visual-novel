@@ -1,3 +1,7 @@
+import { deviceScreen } from "./interactions";
+import { PlaybackControls } from "./PlaybackControls";
+import { InteractionControls } from "./InteractionControls";
+import { LightLibrary, makePlacedLight } from "./LightLibrary";
 import { RangeInput } from "./RangeInput";
 import { ItemOverlay } from "./ItemOverlay";
 import { ItemControls } from "./ItemControls";
@@ -154,6 +158,7 @@ export default function App() {
   const [nodeId, setNodeId] = useState("arrival");
   const [runtime, setRuntime] = useState<Runtime | null>(null);
   const [playing, setPlaying] = useState(false);
+  const [placingLight, setPlacingLight] = useState<string | null>(null);
   const [tab, setTab] = useState("Scenes");
   const [effectPanel, setEffectPanel] = useState("All");
   const [placement, setPlacement] = useState(() => {
@@ -414,12 +419,14 @@ export default function App() {
   }
   function selectScene(id: string) {
     if (playing) setRuntime((r) => (r ? enter(project, r, id) : r));
+    setPlacingLight(null);
     setSceneId(id);
     setNodeId(project.scenes.find((s) => s.id === id)!.nodes[0].id);
     setMaskMode(false);
     setRegionEditor(null);
   }
   function play(restart = false) {
+    setPlacingLight(null);
     try {
       validateProject(project);
       if (restart || !runtime) setRuntime(start(project));
@@ -1119,6 +1126,20 @@ export default function App() {
                 >
                   <Square size={15} />
                 </button>
+                {playing && (
+                  <PlaybackControls
+                    mode={project.settings.progression || "continue"}
+                    onMode={(mode) =>
+                      edit((p) => {
+                        p.settings.progression = mode;
+                      })
+                    }
+                    advance={() => step()}
+                    canAdvance={
+                      !runtime?.ended && !node.choices.length && !node.qte
+                    }
+                  />
+                )}
                 {playing && <FullscreenButton />}
                 <span>16:9</span>
                 <span className="live-dot" /> <small>LIVE PREVIEW</small>
@@ -1134,6 +1155,30 @@ export default function App() {
                 }
               >
                 <Stage
+                  visits={
+                    playing
+                      ? runtime?.nodeVisits
+                          ?.filter((v) => v.scene === scene.id)
+                          .map((v) => v.node)
+                      : undefined
+                  }
+                  onPlaceLight={
+                    !playing && placingLight !== null
+                      ? (x, y) =>
+                          updateScene((s) => {
+                            if ((s.effects.lights?.length || 0) < 20)
+                              (s.effects.lights ??= []).push(
+                                makePlacedLight(
+                                  project.lightPresets?.find(
+                                    (p) => p.id === placingLight,
+                                  )?.light,
+                                  x,
+                                  y,
+                                ),
+                              );
+                          })
+                      : undefined
+                  }
                   itemFocus={
                     !!scene.items?.enabled &&
                     scene.items.options.some((i) =>
@@ -1181,28 +1226,48 @@ export default function App() {
                       onStep={(id) => playing && step(id)}
                     />
                   )}
-                  {scene.phone?.enabled && !maskMode && !regionEditor && (
-                    <PhoneUI
-                      onRestart={() => play(true)}
-                      key={scene.phone.contact}
-                      project={project}
-                      scene={scene}
-                      node={node}
-                      runtime={playing ? runtime : null}
-                      onStep={(id) => playing && step(id)}
-                      onReply={(text, branch) => {
-                        try {
-                          setRuntime((r) => respond(project, r!, text, branch));
-                        } catch (e) {
-                          setError(String(e));
-                        }
-                      }}
-                    />
-                  )}
+                  {deviceScreen(
+                    scene,
+                    node,
+                    playing
+                      ? runtime?.nodeVisits
+                          ?.filter((v) => v.scene === scene.id)
+                          .map((v) => v.node)
+                      : undefined,
+                  ) !== "off" &&
+                    !maskMode &&
+                    !regionEditor && (
+                      <PhoneUI
+                        onRestart={() => play(true)}
+                        key={scene.phone?.contact}
+                        project={project}
+                        scene={scene}
+                        node={node}
+                        runtime={playing ? runtime : null}
+                        onStep={(id) => playing && step(id)}
+                        onReply={(text, branch) => {
+                          try {
+                            setRuntime((r) =>
+                              respond(project, r!, text, branch),
+                            );
+                          } catch (e) {
+                            setError(String(e));
+                          }
+                        }}
+                      />
+                    )}
                   {!maskMode &&
                     !regionEditor &&
                     !(playing && node.qte) &&
-                    !scene.phone?.enabled &&
+                    deviceScreen(
+                      scene,
+                      node,
+                      playing
+                        ? runtime?.nodeVisits
+                            ?.filter((v) => v.scene === scene.id)
+                            .map((v) => v.node)
+                        : undefined,
+                    ) === "off" &&
                     !(
                       scene.items?.enabled &&
                       scene.items.options.some((i) =>
@@ -1584,8 +1649,13 @@ export default function App() {
                         aria-label={"Delete choice " + (i + 1)}
                         onClick={() =>
                           updateScene((s) => {
-                            const removed=s.nodes.find(n=>n.id===node.id)!.choices.splice(i,1)[0];
-                            if(s.items)s.items.options=s.items.options.filter(item=>item.choice!==removed.id);
+                            const removed = s.nodes
+                              .find((n) => n.id === node.id)!
+                              .choices.splice(i, 1)[0];
+                            if (s.items)
+                              s.items.options = s.items.options.filter(
+                                (item) => item.choice !== removed.id,
+                              );
                           })
                         }
                       >
@@ -1770,7 +1840,10 @@ export default function App() {
               "Lighting",
               "Motion",
               "Cinematics",
-              "Presets",
+              "Outfits & Items",
+              "Phone",
+              "Light Library",
+              "Effect Presets",
               "Camera",
               "Save",
             ].map((panel) => (
@@ -1891,6 +1964,23 @@ export default function App() {
               <EffectSummary scene={scene} project={project} />
             ) : inspector === "Atmosphere" ? (
               <>
+                <LightLibrary
+                  project={project}
+                  scene={selected}
+                  edit={edit}
+                  placing={placingLight}
+                  onPlace={(id) => {
+                    setPlacingLight(id);
+                    setRegionEditor(null);
+                    setMaskMode(false);
+                  }}
+                />
+                <InteractionControls
+                  project={project}
+                  scene={selected}
+                  nodeId={node.id}
+                  update={updateScene}
+                />
                 <EffectPresets project={project} scene={selected} edit={edit} />
                 <ItemControls
                   project={project}

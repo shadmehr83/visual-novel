@@ -1,4 +1,4 @@
-import {RangeInput} from "./RangeInput";
+import { RangeInput } from "./RangeInput";
 import type { Project, Scene } from "./model";
 import { restingPose } from "./cinematics";
 import type { RegionEditor } from "./Zones";
@@ -127,6 +127,68 @@ export function CinematicControls({
         return (
           <details key={joint.id} open className="clue">
             <summary>{joint.name}</summary>
+            <fieldset>
+              <legend>Dialogue activation range (optional)</legend>
+              <label>
+                <input
+                  type="checkbox"
+                  checked={!!joint.range}
+                  onChange={(e) =>
+                    patch((j) => {
+                      j.range = e.target.checked
+                        ? {
+                            start: scene.nodes[0].id,
+                            end: scene.nodes[scene.nodes.length - 1].id,
+                            after: "hide",
+                          }
+                        : undefined;
+                    })
+                  }
+                />{" "}
+                Restrict hinge to a dialogue range
+              </label>
+              {joint.range && (
+                <>
+                  {(["start", "end"] as const).map((key) => (
+                    <label key={key}>
+                      {key === "start"
+                        ? "Start on dialogue"
+                        : "End on dialogue"}
+                      <select
+                        aria-label={joint.name + " " + key + " dialogue"}
+                        value={joint.range![key]}
+                        onChange={(e) =>
+                          patch((j) => {
+                            j.range![key] = e.target.value;
+                          })
+                        }
+                      >
+                        {scene.nodes.map((n, i) => (
+                          <option key={n.id} value={n.id}>
+                            {i + 1}. {n.speaker}: {n.text.slice(0, 30)}
+                          </option>
+                        ))}
+                      </select>
+                    </label>
+                  ))}
+                  <label>
+                    After end dialogue
+                    <select
+                      value={joint.range.after}
+                      onChange={(e) =>
+                        patch((j) => {
+                          j.range!.after = e.target.value as "hide" | "hold";
+                        })
+                      }
+                    >
+                      <option value="hide">Hide moved layer</option>
+                      <option value="hold">Hold final pose</option>
+                    </select>
+                  </label>
+                </>
+              )}
+            </fieldset>
+
             <label>
               Name
               <input

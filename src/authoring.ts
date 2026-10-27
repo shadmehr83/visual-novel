@@ -24,8 +24,11 @@ export function removeDialogue(scene: Scene, id: string) {
       } else delete n.qte;
     }
   }
-  for (const joint of scene.joints || [])
+  for (const joint of scene.joints || []) {
     joint.poses = joint.poses.filter((p) => p.node !== id);
+    if (joint.range && (joint.range.start === id || joint.range.end === id))
+      delete joint.range;
+  }
   if (scene.items)
     scene.items.options = scene.items.options.filter((item) =>
       scene.nodes.some((n) => n.choices.some((c) => c.id === item.choice)),

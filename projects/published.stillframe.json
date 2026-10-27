@@ -139,7 +139,8 @@
           "text": "For a few seconds, I don’t remember what I was supposed to do today.",
           "choices": [],
           "allowCustomResponse": true,
-          "next": "vibrate"
+          "next": "vibrate",
+          "deviceScreen": "off"
         },
         {
           "id": "vibrate",
@@ -147,7 +148,8 @@
           "text": "Then my phone vibrates, and the day remembers me first.",
           "choices": [],
           "allowCustomResponse": true,
-          "next": "room"
+          "next": "room",
+          "deviceScreen": "off"
         },
         {
           "id": "room",
@@ -201,7 +203,8 @@
               "note": ""
             }
           ],
-          "allowCustomResponse": true
+          "allowCustomResponse": true,
+          "deviceScreen": "off"
         },
         {
           "id": "window",
@@ -209,7 +212,8 @@
           "text": "The glass reflects more of the room than the view outside. The street is carrying on without me.",
           "choices": [],
           "allowCustomResponse": true,
-          "next": "room"
+          "next": "room",
+          "deviceScreen": "off"
         },
         {
           "id": "monitor",
@@ -217,7 +221,8 @@
           "text": "Black screen. A faint reflection of the bed. Whatever I was doing last night can wait.",
           "choices": [],
           "allowCustomResponse": true,
-          "next": "room"
+          "next": "room",
+          "deviceScreen": "off"
         },
         {
           "id": "clothes",
@@ -225,7 +230,8 @@
           "text": "A chair has become a wardrobe by administrative default.",
           "choices": [],
           "allowCustomResponse": true,
-          "next": "room"
+          "next": "room",
+          "deviceScreen": "off"
         },
         {
           "id": "notification",
@@ -233,7 +239,8 @@
           "text": "Nearside — Someone liked you.",
           "choices": [],
           "allowCustomResponse": true,
-          "next": "first-decision"
+          "next": "first-decision",
+          "deviceScreen": "home"
         },
         {
           "id": "first-decision",
@@ -260,7 +267,7 @@
             },
             {
               "id": "wait-21",
-              "text": "Ignore it for a while",
+              "text": "Keep scrolling for a while",
               "target": "wait",
               "actions": [
                 {
@@ -285,7 +292,9 @@
               "note": ""
             }
           ],
-          "allowCustomResponse": true
+          "allowCustomResponse": true,
+          "deviceScreen": "home",
+          "phoneNotice": "Nearside — Someone liked you."
         },
         {
           "id": "cycle",
@@ -293,7 +302,8 @@
           "text": "There was a time when a match felt like something had happened. Now it’s mostly a tiny administrative task that might eventually become disappointment.",
           "choices": [],
           "allowCustomResponse": true,
-          "next": "cycle2"
+          "next": "cycle2",
+          "deviceScreen": "chat"
         },
         {
           "id": "cycle2",
@@ -301,7 +311,8 @@
           "text": "Say hello. Ask a question. Try not to sound like you’re asking for an interview. Wait. Pretend you didn’t check.",
           "choices": [],
           "allowCustomResponse": true,
-          "next": "second"
+          "next": "second",
+          "deviceScreen": "chat"
         },
         {
           "id": "wait",
@@ -309,7 +320,8 @@
           "text": "The room settles back into its small noises. A little later, the screen lights again.",
           "choices": [],
           "allowCustomResponse": true,
-          "next": "second"
+          "next": "second",
+          "deviceScreen": "feed"
         },
         {
           "id": "dismiss",
@@ -317,7 +329,8 @@
           "text": "I turn the phone face down. The street carries on without needing an answer from me.",
           "choices": [],
           "allowCustomResponse": true,
-          "next": "second"
+          "next": "second",
+          "deviceScreen": "feed"
         },
         {
           "id": "second",
@@ -325,7 +338,9 @@
           "text": "Nearside — New message.",
           "choices": [],
           "allowCustomResponse": true,
-          "next": "discover"
+          "next": "discover",
+          "deviceScreen": "feed",
+          "phoneNotice": "Nearside — New message from Maria."
         },
         {
           "id": "discover",
@@ -347,14 +362,17 @@
               "note": ""
             }
           ],
-          "allowCustomResponse": true
+          "allowCustomResponse": true,
+          "deviceScreen": "feed",
+          "phoneNotice": "Nearside — New message from Maria."
         },
         {
           "id": "stay",
           "speaker": "Narrator",
           "text": "The message can wait. I put the phone away. Nothing has to happen today.\n\nEND OF DEMO — THE FIRST MATCH",
           "choices": [],
-          "allowCustomResponse": true
+          "allowCustomResponse": true,
+          "deviceScreen": "off"
         }
       ],
       "entry": [],
@@ -373,6 +391,24 @@
         "stepSeconds": 0.6,
         "footsteps": false,
         "footstepVolume": 0.2
+      },
+      "phone": {
+        "enabled": true,
+        "device": "phone",
+        "contact": "Maria",
+        "title": "Nearside · Online",
+        "avatar": null,
+        "x": 67,
+        "y": 50,
+        "width": 44,
+        "entrance": {
+          "style": "slide",
+          "seconds": 0.75
+        },
+        "typingSeconds": 0.65,
+        "keyboard": false,
+        "mode": "phone-system",
+        "defaultScreen": "home"
       }
     },
     {
@@ -911,7 +947,9 @@
           "seconds": 0.75
         },
         "typingSeconds": 0.65,
-        "keyboard": true
+        "keyboard": true,
+        "mode": "phone-system",
+        "defaultScreen": "chat"
       }
     },
     {
@@ -1323,7 +1361,9 @@
           "seconds": 0.75
         },
         "typingSeconds": 0.65,
-        "keyboard": true
+        "keyboard": true,
+        "mode": "phone-system",
+        "defaultScreen": "chat"
       }
     },
     {
@@ -3878,7 +3918,8 @@
   ],
   "settings": {
     "reducedEffects": false,
-    "guides": false
+    "guides": false,
+    "progression": "continue"
   },
   "metadata": {
     "created": "2026-10-26T06:55:49.441Z"

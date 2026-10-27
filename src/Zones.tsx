@@ -1,4 +1,4 @@
-import {RangeInput} from "./RangeInput";
+import { RangeInput } from "./RangeInput";
 import { useState } from "react";
 import type { Scene, Region, ZoneLight } from "./model";
 import { WindTools } from "./WindTools";
@@ -301,6 +301,17 @@ export function Zones({
                 {k} {l[k]}
                 <RangeInput
                   aria-label={l.name + " " + k}
+                  data-help={
+                    k === "x"
+                      ? "Horizontal centre of this local lamp in scene units (0–1000). Use Light Library click placement instead of guessing a coordinate."
+                      : k === "y"
+                        ? "Vertical centre of this local lamp in scene units (0–563). This moves the light, not the background."
+                        : k === "intensity"
+                          ? "Base strength of this lamp. Its loop values multiply this amount; small changes create restrained illumination."
+                          : k === "radius"
+                            ? "Radius of the soft local light footprint. This changes its size, not its brightness."
+                            : "How much this lamp’s radius grows or shrinks with its intensity loop. Zero keeps the footprint fixed."
+                  }
                   type="range"
                   min={k === "radius" ? 10 : 0}
                   max={

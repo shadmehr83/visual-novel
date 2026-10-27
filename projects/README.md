@@ -36,3 +36,7 @@ The published project now adapts **The First Match** story bible through the ful
 ## Cinematic/device revision
 
 The current checkpoint uses Maria, three refreshed environment paintings and a reusable phone UI in place of the phone screenshot. Hinge/foreground poses, scene transitions, self-replies and fullscreen are available in the engine. Café visual settings and original PNG remain unchanged. See [cinematics and device guide](../docs/CINEMATICS_AND_DEVICES.md).
+
+## Phone system and scheduled interactions
+
+The current checkpoint adds a local Home/Nearside/Loop phone system in the opening and retains the original chat-only option. Hinge activation ranges, per-dialogue screen schedules, individual light favourites, click placement and progression shortcuts are available in the engine. See [phone system and navigation guide](../docs/PHONE_SYSTEM_AND_SCHEDULING.md). The named tabs are Outfits & Items, Phone, Cinematics, Light Library and Effect Presets.
