@@ -1,6 +1,10 @@
 import { z } from "zod";
 import { useState, useEffect } from "react";
 export const workspaceSchema = z.object({
+  font: z
+    .enum(["Arial", "Verdana", "Trebuchet MS", "Georgia", "monospace"])
+    .default("Arial"),
+  fontSize: z.number().min(10).max(20).default(12),
   libraryCollapsed: z.boolean().default(false),
   libraryWidth: z.number().min(160).max(400).default(233),
   controlsWidth: z.number().min(250).max(450).default(290),

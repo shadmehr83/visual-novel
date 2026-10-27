@@ -1,3 +1,4 @@
+import {RangeInput} from "./RangeInput";
 import {useFootsteps} from "./Footsteps";
 import { useEffect, useRef, useState } from "react";
 import {
@@ -271,7 +272,7 @@ export function EngineTools({
               {(["x", "y", "scale", "opacity"] as const).map((k) => (
                 <label key={k}>
                   {k}: {sprite[k]}
-                  <input
+                  <RangeInput
                     aria-label={"Sprite " + k}
                     type="range"
                     min={0}
@@ -511,7 +512,7 @@ export function EngineTools({
               <b>{project.audioAssets?.find((a) => a.id === track.id)?.name}</b>
               <label>
                 Volume {Math.round(track.volume * 100)}%
-                <input
+                <RangeInput
                   type="range"
                   min="0"
                   max="1"
@@ -642,7 +643,7 @@ export function EngineTools({
           </label>
           <label>
             Timing multiplier
-            <input
+            <RangeInput
               type="range"
               min=".5"
               max="3"

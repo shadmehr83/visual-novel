@@ -1,3 +1,4 @@
+import {RangeInput} from "./RangeInput";
 import type { RegionEditor } from "./Zones";
 import type { Region } from "./model";
 export function SelectionToolbar({
@@ -63,7 +64,7 @@ export function SelectionToolbar({
       {editor.mode === "brush" || editor.mode === "erase" ? (
         <label>
           Brush radius {editor.radius || 25} px
-          <input
+          <RangeInput
             aria-label="Brush radius"
             type="range"
             min="4"

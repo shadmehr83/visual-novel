@@ -109,13 +109,13 @@ test("hinge editing, pivot selection, live phone replies, fullscreen and self-re
     .click();
   const stage = page.getByRole("img", { name: "Another evening live stage" });
   await clickScenePoint(stage, 0.3, 0.4);
-  await expect(page.getByLabel("Finger pivotY")).toHaveValue("225");
+  await expect(page.getByLabel("Finger pivotY", {exact:true})).toHaveValue("225");
   await page.getByRole("button", { name: "Finish zone editing" }).click();
   await expect(
     page.getByText("Saved on this device", { exact: true }),
   ).toBeVisible();
   await page.reload();
-  await expect(page.getByLabel("Finger pivotY")).toHaveValue("225");
+  await expect(page.getByLabel("Finger pivotY", {exact:true})).toHaveValue("225");
   await page.getByRole("button", { name: "Play story", exact: true }).click();
   await page
     .locator(".dialogue-overlay")

@@ -1,3 +1,4 @@
+import {RangeInput} from "./RangeInput";
 import type { Scene, Project } from "./model";
 export const defaultCamera = () => ({
   enabled: true,
@@ -72,7 +73,7 @@ export function CameraControls({
                 }
                 <output>{c[key]}</output>
               </span>
-              <input
+              <RangeInput
                 aria-label={"Camera " + key}
                 data-help={
                   key === "x" || key === "y"
@@ -147,7 +148,7 @@ export function CameraControls({
           </label>
           <label className="slider">
             Footstep volume
-            <input
+            <RangeInput
               aria-label="Footstep volume"
               type="range"
               min="0"

@@ -21,6 +21,7 @@ export function Stage({
   previewTick = 0,
   nodeId = scene.nodes[0].id,
   idPrefix = "",
+  itemFocus = false,
   onPivot,
 }: {
   project: Project;
@@ -34,6 +35,7 @@ export function Stage({
   previewTick?: number;
   nodeId?: string;
   idPrefix?: string;
+  itemFocus?: boolean;
   onPivot?: (x: number, y: number) => void;
 }) {
   const stroke = useRef<{
@@ -206,7 +208,7 @@ export function Stage({
     }
   }
   return (
-    <div className={"stage " + (maskMode || regionEditor ? "masking" : "")}>
+    <div className={"stage " + (itemFocus?"item-focus ":"") + (maskMode || regionEditor ? "masking" : "")} style={{"--item-blur":(scene.items?.blur||0)+"px"} as React.CSSProperties}>
       <svg
         ref={svg}
         viewBox="0 0 1000 563"

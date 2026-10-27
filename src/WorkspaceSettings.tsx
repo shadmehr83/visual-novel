@@ -1,3 +1,4 @@
+import { RangeInput } from "./RangeInput";
 import type { Dispatch, SetStateAction } from "react";
 import { defaults, type WorkspaceSettings } from "./workspace";
 export function WorkspaceControls({
@@ -18,6 +19,33 @@ export function WorkspaceControls({
       <h3>{appearance ? "Interface appearance" : "Workspace sizing"}</h3>
       {appearance ? (
         <>
+          <label>
+            Interface font
+            <select
+              aria-label="Interface font"
+              value={value.font}
+              onChange={(e) =>
+                set("font", e.target.value as WorkspaceSettings["font"])
+              }
+            >
+              {["Arial", "Verdana", "Trebuchet MS", "Georgia", "monospace"].map(
+                (f) => (
+                  <option key={f}>{f}</option>
+                ),
+              )}
+            </select>
+          </label>
+          <label>
+            Interface font size {value.fontSize}px
+            <RangeInput
+              aria-label="Interface font size"
+              type="range"
+              min="10"
+              max="20"
+              value={value.fontSize}
+              onChange={(e) => set("fontSize", +e.target.value)}
+            />
+          </label>
           <label>
             Interface theme
             <select
@@ -94,7 +122,7 @@ export function WorkspaceControls({
                       : "Dialogue panel height"}
                   <output>{value[key]} px</output>
                 </span>
-                <input
+                <RangeInput
                   aria-label={
                     key === "libraryWidth"
                       ? "Story library width"
@@ -125,7 +153,7 @@ export function WorkspaceControls({
           )}
           <label className="slider">
             Editor preview zoom {value.previewScale}×
-            <input
+            <RangeInput
               aria-label="Editor preview zoom"
               data-help="Enlarge the editing preview without changing your story camera. If the image exceeds the available view, scroll inside the scene view."
               type="range"

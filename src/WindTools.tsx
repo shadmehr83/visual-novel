@@ -1,3 +1,4 @@
+import {RangeInput} from "./RangeInput";
 import type { ReactNode } from "react";
 import type { Scene, Region, MotionZone } from "./model";
 import type { RegionEditor } from "./Zones";
@@ -74,7 +75,7 @@ export function WindTools({
             (k) => (
               <label key={k}>
                 {k} {w[k]}
-                <input
+                <RangeInput
                   aria-label={w.name + " " + k}
                   type="range"
                   min={k === "seconds" ? 0.5 : k === "direction" ? -180 : 0}

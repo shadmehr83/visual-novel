@@ -1,3 +1,4 @@
+import {RangeInput} from "./RangeInput";
 import { useEffect, useId, useState } from "react";
 import { lightLoopSchema } from "./model";
 import type { LightLoop } from "./lighting";
@@ -40,7 +41,7 @@ export function LightingLoopControls({ value, onChange }: {
     <button className="wide" onClick={applySequence}>Apply light sequence</button>
     <label className="slider">
       <span>Seconds per step <output>{value.stepSeconds}s</output></span>
-      <input aria-label="Seconds per step" type="range" min="0.5" max="20" step="0.5"
+      <RangeInput aria-label="Seconds per step" type="range" min="0.5" max="20" step="0.5"
         value={value.stepSeconds} onChange={event => onChange({ ...value, stepSeconds: +event.target.value })} />
     </label>
     <p className="small muted">The last value fades back to the first. One loop takes {value.values.length * value.stepSeconds} seconds. Reduced effects or reduced motion pauses lighting at its base intensity.</p>

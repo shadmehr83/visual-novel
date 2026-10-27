@@ -1,3 +1,4 @@
+import {RangeInput} from "./RangeInput";
 import type { Project, Scene } from "./model";
 import { restingPose } from "./cinematics";
 import type { RegionEditor } from "./Zones";
@@ -178,7 +179,7 @@ export function CinematicControls({
             {(["pivotX", "pivotY"] as const).map((key) => (
               <label key={key}>
                 {key}
-                <input
+                <RangeInput
                   aria-label={joint.name + " " + key}
                   type="range"
                   min="0"
@@ -303,7 +304,7 @@ export function CinematicControls({
               (key) => (
                 <label key={key}>
                   {key} {pose[key]}
-                  <input
+                  <RangeInput
                     aria-label={joint.name + " pose " + key}
                     type="range"
                     min={
@@ -479,7 +480,7 @@ export function CinematicControls({
           {(["x", "y", "width", "typingSeconds"] as const).map((key) => (
             <label key={key}>
               Device {key}
-              <input
+              <RangeInput
                 aria-label={"Device " + key}
                 type="range"
                 min={key === "width" ? 20 : 0}

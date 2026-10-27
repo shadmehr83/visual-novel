@@ -15,7 +15,7 @@ export function PhoneUI({
   node: Node;
   runtime: Runtime | null;
   onStep: (id?: string) => void;
-  onReply: (text: string) => void;
+  onReply: (text: string, choiceId?: string) => void;
   onRestart?: () => void;
 }) {
   const config = scene.phone!;
@@ -76,6 +76,8 @@ export function PhoneUI({
           left: config.x + "%",
           top: config.y + "%",
           width: config.width + "%",
+          "--phone-height":
+            Math.min(96, Math.max(40, (config.width / 44) * 94)) + "%",
           "--device-duration": `${config.entrance.seconds}s`,
         } as React.CSSProperties
       }
@@ -155,8 +157,12 @@ export function PhoneUI({
                   Continue
                 </button>
               )}
-              {!node.choices.length && node.allowCustomResponse !== false && (
-                <SelfReply nodeId={node.id} onSend={onReply} />
+              {node.allowCustomResponse !== false && (
+                <SelfReply
+                  choices={choices}
+                  nodeId={node.id}
+                  onSend={onReply}
+                />
               )}
             </>
           )}

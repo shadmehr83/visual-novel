@@ -39,6 +39,7 @@ export const poseSchema = z.object({
   asset: z.string().optional(),
 });
 const node = z.object({
+  notes: z.string().max(10000).optional(),
   qte: qteSchema.optional(),
   allowCustomResponse: z.boolean().optional(),
   portrait: z.string().nullable().optional(),
@@ -222,6 +223,24 @@ export const deviceSchema = z.object({
   keyboard: z.boolean(),
 });
 const scene = z.object({
+  items: z
+    .object({
+      enabled: z.boolean(),
+      title: z.string(),
+      blur: z.number().min(0).max(15),
+      options: z
+        .array(
+          z.object({
+            id: z.string(),
+            label: z.string(),
+            description: z.string(),
+            asset: z.string().nullable(),
+            choice: z.string(),
+          }),
+        )
+        .max(40),
+    })
+    .optional(),
   joints: z.array(jointSchema).max(20).optional(),
   transition: transitionSchema.optional(),
   phone: deviceSchema.optional(),
@@ -292,6 +311,10 @@ export const projectSchema = z.object({
   assets: z.array(asset).max(100),
   characters: z.array(
     z.object({
+      color: z
+        .string()
+        .regex(/^#[0-9a-fA-F]{6}$/)
+        .optional(),
       id: z.string(),
       name: z.string(),
       notes: z.string(),
@@ -308,7 +331,22 @@ export const projectSchema = z.object({
       source: z.string(),
     }),
   ),
+  presets: z
+    .array(
+      z.object({
+        id: z.string(),
+        name: z.string(),
+        kind: z.enum(["rain", "lighting", "motion", "all"]),
+        effects: effectsSchema,
+      }),
+    )
+    .max(100)
+    .optional(),
   settings: z.object({
+    dialogueFont: z
+      .enum(["Georgia", "Arial", "Verdana", "Trebuchet MS", "monospace"])
+      .optional(),
+    dialogueSize: z.number().min(10).max(30).optional(),
     reducedEffects: z.boolean(),
     guides: z.boolean(),
     skipQte: z.boolean().optional(),
@@ -366,6 +404,12 @@ export function validateProject(input: unknown): Project {
       !p.audioAssets?.some((a) => a.id === s.camera!.footstepAsset)
     )
       throw Error("Missing footstep audio");
+    for (const item of s.items?.options || []) {
+      if (item.asset && !p.assets.some((a) => a.id === item.asset))
+        throw Error("Missing item image");
+      if (!s.nodes.some((n) => n.choices.some((c) => c.id === item.choice)))
+        throw Error("Missing item choice");
+    }
     if (s.phone?.avatar && !p.assets.some((a) => a.id === s.phone!.avatar))
       throw Error("Missing device avatar");
     for (const joint of s.joints || []) {
@@ -538,13 +582,18 @@ export function resolveQte(
     : { ...next, node: target };
 }
 
-export function respond(p: Project, r: Runtime, text: string): Runtime {
+export function respond(
+  p: Project,
+  r: Runtime,
+  text: string,
+  choiceId?: string,
+): Runtime {
   const node = p.scenes
     .find((s) => s.id === r.scene)
     ?.nodes.find((n) => n.id === r.node);
   if (
     !node ||
-    node.choices.length ||
+    (node.choices.length > 0 && !choiceId) ||
     node.qte ||
     node.allowCustomResponse === false ||
     r.ended
@@ -553,7 +602,7 @@ export function respond(p: Project, r: Runtime, text: string): Runtime {
   const reply = text.trim();
   if (!reply || reply.length > 1000)
     throw Error("Enter a reply of 1–1000 characters");
-  const next = advance(p, r);
+  const next = advance(p, r, choiceId);
   return {
     ...next,
     ...(p.scenes.find((s) => s.id === r.scene)?.phone?.enabled
@@ -561,7 +610,14 @@ export function respond(p: Project, r: Runtime, text: string): Runtime {
           phoneMessages: [
             ...(r.phoneMessages || []),
             { scene: r.scene, node: r.node, sender: "You", text: reply },
-            ...(next.phoneMessages || []).slice((r.phoneMessages || []).length),
+            ...(next.phoneMessages || []).slice(
+              (r.phoneMessages || []).length +
+                (choiceId &&
+                node.choices.find((c) => c.id === choiceId)?.sendAsMessage !==
+                  false
+                  ? 1
+                  : 0),
+            ),
           ],
         }
       : {}),

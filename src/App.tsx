@@ -1,3 +1,8 @@
+import { RangeInput } from "./RangeInput";
+import { ItemOverlay } from "./ItemOverlay";
+import { ItemControls } from "./ItemControls";
+import { EffectPresets, StoryAppearance } from "./AuthoringExtras";
+import { removeDialogue, dialogueLabel } from "./authoring";
 import { CinematicControls } from "./CinematicControls";
 import { SceneTransition } from "./SceneTransition";
 import { PhoneUI } from "./PhoneUI";
@@ -99,7 +104,7 @@ function Slider({
           {suffix}
         </output>
       </span>
-      <input
+      <RangeInput
         aria-label={label}
         type="range"
         min={min}
@@ -548,6 +553,10 @@ export default function App() {
           "--controls-size": workspace.controlsWidth + "px",
           "--bottom-size": workspace.bottomHeight + "px",
           "--preview-scale": workspace.previewScale,
+          "--ui-font": workspace.font,
+          "--ui-font-size": workspace.fontSize + "px",
+          "--story-font": project.settings.dialogueFont || "Georgia",
+          "--story-size": (project.settings.dialogueSize || 17) + "px",
         } as React.CSSProperties
       }
     >
@@ -1125,6 +1134,12 @@ export default function App() {
                 }
               >
                 <Stage
+                  itemFocus={
+                    !!scene.items?.enabled &&
+                    scene.items.options.some((i) =>
+                      node.choices.some((c) => c.id === i.choice),
+                    )
+                  }
                   project={project}
                   scene={scene}
                   playing={playing}
@@ -1157,6 +1172,15 @@ export default function App() {
                       onResolve={setRuntime}
                     />
                   )}
+                  {scene.items?.enabled && (
+                    <ItemOverlay
+                      project={project}
+                      scene={scene}
+                      node={node}
+                      runtime={runtime}
+                      onStep={(id) => playing && step(id)}
+                    />
+                  )}
                   {scene.phone?.enabled && !maskMode && !regionEditor && (
                     <PhoneUI
                       onRestart={() => play(true)}
@@ -1166,9 +1190,9 @@ export default function App() {
                       node={node}
                       runtime={playing ? runtime : null}
                       onStep={(id) => playing && step(id)}
-                      onReply={(text) => {
+                      onReply={(text, branch) => {
                         try {
-                          setRuntime((r) => respond(project, r!, text));
+                          setRuntime((r) => respond(project, r!, text, branch));
                         } catch (e) {
                           setError(String(e));
                         }
@@ -1178,7 +1202,13 @@ export default function App() {
                   {!maskMode &&
                     !regionEditor &&
                     !(playing && node.qte) &&
-                    !scene.phone?.enabled && (
+                    !scene.phone?.enabled &&
+                    !(
+                      scene.items?.enabled &&
+                      scene.items.options.some((i) =>
+                        node.choices.some((c) => c.id === i.choice),
+                      )
+                    ) && (
                       <div
                         className={
                           "dialogue-overlay " +
@@ -1200,7 +1230,14 @@ export default function App() {
                             }
                           />
                         )}
-                        <span className="dialogue-speaker">
+                        <span
+                          className="dialogue-speaker"
+                          style={{
+                            color: project.characters.find(
+                              (c) => c.name === node.speaker,
+                            )?.color,
+                          }}
+                        >
                           {node.speaker === project.characters[0]?.name
                             ? project.characters[0]?.name
                             : node.speaker}
@@ -1242,14 +1279,14 @@ export default function App() {
                               </button>
                             )}
                             {!runtime?.ended &&
-                              !node.choices.length &&
                               node.allowCustomResponse !== false && (
                                 <SelfReply
+                                  choices={availableChoices}
                                   nodeId={node.id}
-                                  onSend={(text) => {
+                                  onSend={(text, branch) => {
                                     try {
                                       setRuntime((r) =>
-                                        respond(project, r!, text),
+                                        respond(project, r!, text, branch),
                                       );
                                     } catch (e) {
                                       setError(String(e));
@@ -1416,12 +1453,38 @@ export default function App() {
                           .filter((n) => n.id !== node.id)
                           .map((n) => (
                             <option key={n.id} value={n.id}>
-                              {n.speaker}: {n.text.slice(0, 25)}
+                              {dialogueLabel(project, scene, n.id)}
                             </option>
                           ))}
                       </select>
                     </label>
                   </div>
+                  <label>
+                    Author note
+                    <textarea
+                      aria-label="Dialogue author note"
+                      disabled={playing}
+                      value={node.notes || ""}
+                      onChange={(e) =>
+                        updateScene((s) => {
+                          s.nodes.find((n) => n.id === node.id)!.notes =
+                            e.target.value;
+                        })
+                      }
+                    />
+                  </label>
+                  <button
+                    disabled={playing || scene.nodes.length <= 1}
+                    onClick={() => {
+                      const copy = structuredClone(selected);
+                      const next = removeDialogue(copy, node.id);
+                      updateScene((s) => Object.assign(s, copy));
+                      setNodeId(next);
+                      setRegionEditor(null);
+                    }}
+                  >
+                    Delete dialogue node
+                  </button>
                   <label className="consent">
                     <input
                       type="checkbox"
@@ -1504,14 +1567,14 @@ export default function App() {
                         <optgroup label="Dialogue">
                           {scene.nodes.map((n) => (
                             <option key={n.id} value={n.id}>
-                              {n.text.slice(0, 24)}
+                              {dialogueLabel(project, scene, n.id)}
                             </option>
                           ))}
                         </optgroup>
                         <optgroup label="Scenes">
                           {project.scenes.map((s) => (
                             <option key={s.id} value={s.id}>
-                              {s.title}
+                              {`Scene ${project.scenes.indexOf(s) + 1} · ${s.title}`}
                             </option>
                           ))}
                         </optgroup>
@@ -1521,9 +1584,8 @@ export default function App() {
                         aria-label={"Delete choice " + (i + 1)}
                         onClick={() =>
                           updateScene((s) => {
-                            s.nodes
-                              .find((n) => n.id === node.id)!
-                              .choices.splice(i, 1);
+                            const removed=s.nodes.find(n=>n.id===node.id)!.choices.splice(i,1)[0];
+                            if(s.items)s.items.options=s.items.options.filter(item=>item.choice!==removed.id);
                           })
                         }
                       >
@@ -1708,6 +1770,7 @@ export default function App() {
               "Lighting",
               "Motion",
               "Cinematics",
+              "Presets",
               "Camera",
               "Save",
             ].map((panel) => (
@@ -1816,15 +1879,25 @@ export default function App() {
             {inspector === "Workspace" ? (
               <WorkspaceControls value={workspace} onChange={setWorkspace} />
             ) : inspector === "Appearance" ? (
-              <WorkspaceControls
-                value={workspace}
-                onChange={setWorkspace}
-                appearance
-              />
+              <>
+                <WorkspaceControls
+                  value={workspace}
+                  onChange={setWorkspace}
+                  appearance
+                />
+                <StoryAppearance project={project} edit={edit} />
+              </>
             ) : inspector === "Active" ? (
               <EffectSummary scene={scene} project={project} />
             ) : inspector === "Atmosphere" ? (
               <>
+                <EffectPresets project={project} scene={selected} edit={edit} />
+                <ItemControls
+                  project={project}
+                  scene={selected}
+                  nodeId={node.id}
+                  update={updateScene}
+                />
                 <CinematicControls
                   scene={selected}
                   project={project}

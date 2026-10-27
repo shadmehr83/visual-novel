@@ -1,3 +1,4 @@
+import {RangeInput} from "./RangeInput";
 import { useState } from "react";
 import type { Scene, Region, ZoneLight } from "./model";
 import { WindTools } from "./WindTools";
@@ -298,7 +299,7 @@ export function Zones({
             ).map((k) => (
               <label key={k}>
                 {k} {l[k]}
-                <input
+                <RangeInput
                   aria-label={l.name + " " + k}
                   type="range"
                   min={k === "radius" ? 10 : 0}
