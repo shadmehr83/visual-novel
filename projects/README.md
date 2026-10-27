@@ -32,3 +32,7 @@ After deployment, open **https://visual-novel-8b9.pages.dev/?snapshot=github** t
 ## Current story adaptation
 
 The published project now adapts **The First Match** story bible through the full first café date, with six scenes and four new mood-matched placeholder backgrounds. The original café photograph and all its visual settings are preserved. Dialogue replaces the previous sample script. See [adaptation details and limitations](../docs/story/IMPLEMENTATION.md). The previous unmodified uploaded checkpoint remains available in commit `35de011`.
+
+## Cinematic/device revision
+
+The current checkpoint uses Maria, three refreshed environment paintings and a reusable phone UI in place of the phone screenshot. Hinge/foreground poses, scene transitions, self-replies and fullscreen are available in the engine. Café visual settings and original PNG remain unchanged. See [cinematics and device guide](../docs/CINEMATICS_AND_DEVICES.md).

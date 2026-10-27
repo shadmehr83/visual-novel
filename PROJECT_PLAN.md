@@ -56,3 +56,8 @@ Validation for the depth/workspace release: 49 automated tests and 16 browser wo
 ## Shared brush-selection refinement
 
 Rain, local-light and motion regions share an inspector selection toolbar with target switching, polygon, connected-colour wand, approximate local-edge snapping, circular brush and eraser. Locked outer boundaries constrain fine painting and automatic results. Stroke previews/cursors update during dragging, completed strokes create one editor undo step, and masks/boundaries serialize with the project. Original artwork remains unchanged. This does not implement semantic AI object segmentation, alpha/opacity painting or automatic hidden-object reconstruction.
+
+
+## Articulated regions and reusable devices
+
+Implemented per-dialogue 2D hinge poses with shared brush/wand selection, pivot placement, offsets/rotation/scale/opacity, expression-image replacement and foreground objects. Added cut/snappy, smooth, slide and fade scene/object transitions, reusable phone/desktop UI with authored message history and typing/keyboard presentation, compact self-replies and fullscreen playback. Maria replaces Mara in the published script. Three refreshed environments follow the supplied reference board; café visuals remain protected. See `docs/CINEMATICS_AND_DEVICES.md` for the flat-image limitations, workflow and AI configuration distinction.

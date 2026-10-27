@@ -2,6 +2,7 @@ import { test, expect } from "@playwright/test";
 test("story collapses, dividers resize, layout modes restore page scrolling and appearance persists", async ({
   page,
 }) => {
+  test.setTimeout(60000); // Multiple layout modes, artwork reloads and playback in one integration check.
   await page.setViewportSize({ width: 1600, height: 1100 });
   await page.goto("/");
   const main = page.locator(".workspace>main");

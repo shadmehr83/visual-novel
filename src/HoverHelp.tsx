@@ -11,6 +11,11 @@ export function describeControl(el: HTMLElement) {
   const help = el.dataset.help;
   if (help) return { label, text: help };
   const rules: [RegExp, string][] = [
+    [/hinge|pivot|pose|expression replacement/i,"Select the affected pixels, choose the hinge pivot, and save a pose on each desired dialogue slide. Position, angle, scale and opacity interpolate between poses. Separate transparent artwork avoids leaving the original object behind."],
+    [/device|typing|keyboard/i,"The device UI uses real dialogue and chosen replies over one background. Typing dots and keyboard movement are presentation; no messages are sent to a real person."],
+    [/transition|entrance/i,"Cut/snappy switches immediately; smooth blends; slide moves across the frame; fade passes through darkness. Duration is in seconds. Reduced motion skips animation."],
+    [/fullscreen/i,"Expand playback to the screen. Press Escape or Exit fullscreen to return to the editor layout."],
+    [/self-reply/i,"Expand a small input to record your own response. It follows the authored next line; it does not generate a live AI reply."],
     [
       /hide dialogue|show dialogue/i,
       "Move the story dialogue overlay out of the way while editing artwork. Toggle it back whenever needed; the authored text is unchanged.",

@@ -46,6 +46,9 @@ export function SelectionToolbar({
             ["edge", "Snap to edges"],
             ["brush", "Paint brush"],
             ["erase", "Eraser"],
+            ...(editor.kind === "joint"
+              ? [["pivot", "Place pivot"] as const]
+              : []),
           ] as const
         ).map(([mode, label]) => (
           <button

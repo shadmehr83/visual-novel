@@ -4,6 +4,9 @@ import {
   spriteSchema,
   qteSchema,
   cameraSchema,
+  jointSchema,
+  transitionSchema,
+  deviceSchema,
   validateProject,
   type Project,
 } from "./model";
@@ -14,6 +17,27 @@ export const proposalSchema = z
     operations: z
       .array(
         z.discriminatedUnion("type", [
+          z
+            .object({
+              type: z.literal("joint"),
+              scene: z.string(),
+              joint: jointSchema,
+            })
+            .strict(),
+          z
+            .object({
+              type: z.literal("transition"),
+              scene: z.string(),
+              transition: transitionSchema,
+            })
+            .strict(),
+          z
+            .object({
+              type: z.literal("device"),
+              scene: z.string(),
+              device: deviceSchema,
+            })
+            .strict(),
           z
             .object({
               type: z.literal("camera"),
@@ -117,6 +141,13 @@ export function applyProposal(project: Project, input: unknown): Project {
     const scene = next.scenes.find((s) => s.id === op.scene);
     if (!scene) throw Error("Unknown target scene");
     if (op.type === "camera") scene.camera = op.camera;
+    if (op.type === "transition") scene.transition = op.transition;
+    if (op.type === "device") scene.phone = op.device;
+    if (op.type === "joint") {
+      const index = scene.joints?.findIndex((j) => j.id === op.joint.id) ?? -1;
+      if (index < 0) (scene.joints ??= []).push(op.joint);
+      else scene.joints![index] = op.joint;
+    }
     if (op.type === "sprite") {
       const index =
         scene.sprites?.findIndex((s) => s.id === op.sprite.id) ?? -1;
@@ -182,10 +213,24 @@ export function aiContext(p: Project) {
       notes,
     })),
     scenes: p.scenes.map(
-      ({ id, title, effects, nodes, sprites, audio, camera }) => ({
+      ({
         id,
         title,
         effects,
+        nodes,
+        sprites,
+        audio,
+        camera,
+        joints,
+        phone,
+        transition,
+      }) => ({
+        id,
+        title,
+        effects,
+        joints,
+        phone,
+        transition,
         camera,
         sprites,
         audio,

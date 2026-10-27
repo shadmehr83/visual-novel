@@ -1,0 +1,44 @@
+import { chromium } from 'playwright';
+import { readFile } from 'node:fs/promises';
+import assert from 'node:assert/strict';
+const browser = await chromium.launch({ executablePath: process.env.CHROMIUM_PATH || undefined, headless:true });
+try {
+  const html = await readFile('dist/stillframe-studio.html','utf8');
+  const context=await browser.newContext({serviceWorkers:'block',viewport:{width:1500,height:1100}});
+  const page=await context.newPage(), errors=[];
+  page.on('pageerror',e=>errors.push(e.message));
+  await page.route('https://cinematic-offline.test/**',r=>r.fulfill({contentType:'text/html',body:html}));
+  await context.setOffline(true);
+  await page.goto('https://cinematic-offline.test/?snapshot=github');
+  await page.getByRole('button',{name:'Play story',exact:true}).waitFor();
+  assert.equal(await page.getByLabel('Project title').inputValue(),'The First Match');
+  await page.getByRole('button',{name:/A small possibility.*dialogue nodes/}).click();
+  await page.getByRole('region',{name:'Phone conversation'}).waitFor();
+  await page.locator('.device-shell').evaluate(el=>Promise.all(el.getAnimations().map(animation=>animation.finished)));
+  await page.screenshot({path:'/tmp/stillframe-device-preview.png'});
+  const p=JSON.parse(await readFile('projects/published.stillframe.json','utf8'));
+  p.id='offline-cinematic-fixture';p.assets=[];
+  const a=p.scenes[0],b=p.scenes[1];p.scenes=[a,b];
+  for(const s of p.scenes){s.background=null;s.effects.rain=false;s.effects.glass=false;delete s.camera;s.joints=[];}
+  a.nodes=[{id:'a',speaker:'Narrator',text:'Resting hand',choices:[],next:'b'},{id:'b',speaker:'Narrator',text:'Moved hand',choices:[{id:'open',text:'Open phone',target:b.id,actions:[],note:''}]}];
+  const pose=node=>({node,x:0,y:0,angle:0,scaleX:1,scaleY:1,opacity:1});
+  a.joints=[{id:'hand',name:'Hand',enabled:true,pivotX:300,pivotY:200,transition:{style:'smooth',seconds:.15},region:{id:'r',name:'Hand',enabled:true,points:[{x:200,y:200},{x:400,y:200},{x:350,y:300}]},poses:[pose('a'),{...pose('b'),angle:25}]}];
+  b.phone.typingSeconds=.1;
+  b.nodes=[{id:'hello',speaker:'Maria',text:'Hello.',choices:[{id:'hi',text:'Hello Maria.',target:'reply',actions:[],note:''}]},{id:'reply',speaker:'Maria',text:'Nice to meet you.',choices:[],next:'end'},{id:'end',speaker:'Narrator',text:'Goodbye',choices:[]}];
+  await page.locator('input[type=file][accept=".json"]').setInputFiles({name:'cinematics.json',mimeType:'application/json',buffer:Buffer.from(JSON.stringify(p))});
+  const download=page.waitForEvent('download');
+  await page.getByRole('button',{name:'Export playable HTML',exact:true}).click();
+  const playerHtml=await readFile(await (await download).path(),'utf8');
+  await page.route('https://exported-cinematic.test/**',r=>r.fulfill({contentType:'text/html',body:playerHtml}));
+  await page.goto('https://exported-cinematic.test/');
+  await page.getByRole('button',{name:'Continue',exact:true}).click();
+  await page.waitForFunction(()=>Number(document.querySelector('.scene-in [data-joint-angle]')?.getAttribute('data-joint-angle'))===25);
+  await page.getByRole('button',{name:'Open phone',exact:true}).click();
+  await page.getByRole('button',{name:'Hello Maria.',exact:true}).click();
+  await page.getByRole('button',{name:'Self-reply',exact:true}).click();
+  await page.getByLabel('Custom dialogue response').fill('My offline reply');
+  await page.getByRole('button',{name:'Send response',exact:true}).click();
+  await page.waitForFunction(()=>document.querySelector('.scene-in .message-you:last-of-type')?.textContent?.includes('My offline reply'));
+  assert.deepEqual(errors,[]);
+  console.log('PASS: offline editor contains the new phone UI; its exported player animates a hinge, posts authored replies, and records a self-reply without a network connection or page errors.');
+} finally { await browser.close(); }

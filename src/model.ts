@@ -16,12 +16,27 @@ const choice = z.object({
     })
     .optional(),
   note: z.string().default(""),
+  sendAsMessage: z.boolean().optional(),
 });
 export const qteSchema = z.object({
   prompt: z.string().max(500),
   seconds: z.number().min(1).max(120),
   success: z.string(),
   timeout: z.string(),
+});
+export const transitionSchema = z.object({
+  style: z.enum(["cut", "snappy", "smooth", "slide", "fade"]),
+  seconds: z.number().min(0.05).max(10),
+});
+export const poseSchema = z.object({
+  node: z.string(),
+  x: z.number().min(-1000).max(1000),
+  y: z.number().min(-563).max(563),
+  angle: z.number().min(-180).max(180),
+  scaleX: z.number().min(0.05).max(4),
+  scaleY: z.number().min(0.05).max(4),
+  opacity: z.number().min(0).max(1),
+  asset: z.string().optional(),
 });
 const node = z.object({
   qte: qteSchema.optional(),
@@ -176,7 +191,40 @@ export const cameraSchema = z.object({
   footstepVolume: z.number().min(0).max(1),
   footstepAsset: z.string().optional(),
 });
+export const jointSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  enabled: z.boolean(),
+  region: regionSchema,
+  pivotX: z.number().min(0).max(1000),
+  pivotY: z.number().min(0).max(563),
+  transition: transitionSchema,
+  poses: z.array(poseSchema).max(200),
+  coverColor: z
+    .string()
+    .regex(/^#[0-9a-fA-F]{6}$/)
+    .optional(),
+  source: z.string().optional(),
+});
+export type Joint = z.infer<typeof jointSchema>;
+export type Pose = z.infer<typeof poseSchema>;
+export const deviceSchema = z.object({
+  enabled: z.boolean(),
+  device: z.enum(["phone", "desktop"]),
+  contact: z.string().max(100),
+  title: z.string().max(100),
+  avatar: z.string().nullable(),
+  x: z.number().min(0).max(100),
+  y: z.number().min(0).max(100),
+  width: z.number().min(20).max(90),
+  entrance: transitionSchema,
+  typingSeconds: z.number().min(0).max(5),
+  keyboard: z.boolean(),
+});
 const scene = z.object({
+  joints: z.array(jointSchema).max(20).optional(),
+  transition: transitionSchema.optional(),
+  phone: deviceSchema.optional(),
   camera: cameraSchema.optional(),
   sprites: z.array(spriteSchema).max(30).optional(),
   keyframes: z
@@ -281,6 +329,12 @@ export type Runtime = {
   history: string[];
   choices: string[];
   ended: boolean;
+  phoneMessages?: {
+    scene: string;
+    node: string;
+    sender: string;
+    text: string;
+  }[];
   responses?: { scene: string; node: string; text: string }[];
   memories?: {
     scene: string;
@@ -312,6 +366,19 @@ export function validateProject(input: unknown): Project {
       !p.audioAssets?.some((a) => a.id === s.camera!.footstepAsset)
     )
       throw Error("Missing footstep audio");
+    if (s.phone?.avatar && !p.assets.some((a) => a.id === s.phone!.avatar))
+      throw Error("Missing device avatar");
+    for (const joint of s.joints || []) {
+      if (joint.source && !p.assets.some((a) => a.id === joint.source))
+        throw Error("Missing joint source image");
+      if (new Set(joint.poses.map((x) => x.node)).size !== joint.poses.length)
+        throw Error("Duplicate joint pose for dialogue");
+      for (const pose of joint.poses) {
+        if (!nodes.has(pose.node)) throw Error("Missing joint pose dialogue");
+        if (pose.asset && !p.assets.some((a) => a.id === pose.asset))
+          throw Error("Missing expression image");
+      }
+    }
     for (const n of s.nodes) {
       if (n.portrait && !p.assets.some((a) => a.id === n.portrait))
         throw Error("Missing dialogue portrait");
@@ -363,21 +430,24 @@ export function enter(p: Project, r: Runtime, id: string): Runtime {
   return { ...n, history: [...n.history, `Entered ${s.title}`].slice(-200) };
 }
 export function start(p: Project): Runtime {
-  return enter(
+  return recordPhone(
     p,
-    {
-      scene: "",
-      node: "",
-      values: { ...p.variables },
-      visited: [],
-      history: [],
-      choices: [],
-      ended: false,
-    },
-    p.scenes[0].id,
+    enter(
+      p,
+      {
+        scene: "",
+        node: "",
+        values: { ...p.variables },
+        visited: [],
+        history: [],
+        choices: [],
+        ended: false,
+      },
+      p.scenes[0].id,
+    ),
   );
 }
-export function advance(p: Project, r: Runtime, choiceId?: string): Runtime {
+function advanceCore(p: Project, r: Runtime, choiceId?: string): Runtime {
   if (r.ended) return r;
   const s = p.scenes.find((s) => s.id === r.scene)!;
   const n = s.nodes.find((n) => n.id === r.node);
@@ -409,6 +479,44 @@ export function advance(p: Project, r: Runtime, choiceId?: string): Runtime {
   return n.next
     ? { ...r, node: n.next }
     : { ...r, ended: true, history: [...r.history, "Demo complete"] };
+}
+
+function recordPhone(p: Project, r: Runtime): Runtime {
+  const s = p.scenes.find((s) => s.id === r.scene)!;
+  const n = s.nodes.find((n) => n.id === r.node)!;
+  if (
+    !s.phone?.enabled ||
+    ![s.phone.contact, "You", "Mara", "Maria"].includes(n.speaker)
+  )
+    return r;
+  const rows = r.phoneMessages || [];
+  const last = rows[rows.length - 1];
+  if (last?.scene === s.id && last.node === n.id && last.text === n.text)
+    return r;
+  return {
+    ...r,
+    phoneMessages: [
+      ...rows,
+      { scene: s.id, node: n.id, sender: n.speaker, text: n.text },
+    ].slice(-100),
+  };
+}
+export function advance(p: Project, r: Runtime, choiceId?: string): Runtime {
+  let next = advanceCore(p, r, choiceId);
+  if (next === r) return r;
+  const s = p.scenes.find((s) => s.id === r.scene)!;
+  const c = s.nodes
+    .find((n) => n.id === r.node)
+    ?.choices.find((c) => c.id === choiceId);
+  if (s.phone?.enabled && c && c.sendAsMessage !== false)
+    next = {
+      ...next,
+      phoneMessages: [
+        ...(r.phoneMessages || []),
+        { scene: s.id, node: r.node, sender: "You", text: c.text },
+      ].slice(-100),
+    };
+  return recordPhone(p, next);
 }
 
 export function resolveQte(
@@ -448,6 +556,15 @@ export function respond(p: Project, r: Runtime, text: string): Runtime {
   const next = advance(p, r);
   return {
     ...next,
+    ...(p.scenes.find((s) => s.id === r.scene)?.phone?.enabled
+      ? {
+          phoneMessages: [
+            ...(r.phoneMessages || []),
+            { scene: r.scene, node: r.node, sender: "You", text: reply },
+            ...(next.phoneMessages || []).slice((r.phoneMessages || []).length),
+          ],
+        }
+      : {}),
     responses: [
       ...(r.responses || []),
       { scene: r.scene, node: r.node, text: reply },

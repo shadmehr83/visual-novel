@@ -26,6 +26,8 @@ export function effectSummary(scene: Scene, reduced = false) {
   for (const wind of e.motionZones || [])
     if (wind.enabled)
       items.push({ name: wind.name + " (motion)", paused: reduced });
+  for(const joint of scene.joints||[]) if(joint.enabled)items.push({name:joint.name+" (hinge / object)",paused:reduced});
+  if(scene.phone?.enabled)items.push({name:"Device conversation UI"});
   if (scene.keyframes?.length)
     items.push({ name: "Sprite keyframe animation" });
   if (scene.camera?.enabled) {

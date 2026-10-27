@@ -1,3 +1,4 @@
+import { JointLayers } from "./JointLayers";
 import { createBrush, dab, maskPath, clipToBoundary } from "./brush";
 import { useEffect, useRef, useState } from "react";
 import type { Project, Scene, Region } from "./model";
@@ -18,6 +19,9 @@ export function Stage({
   regionEditor = null,
   onRegion,
   previewTick = 0,
+  nodeId = scene.nodes[0].id,
+  idPrefix = "",
+  onPivot,
 }: {
   project: Project;
   scene: Scene;
@@ -28,6 +32,9 @@ export function Stage({
   regionEditor?: RegionEditor | null;
   onRegion?: (r: Region) => void;
   previewTick?: number;
+  nodeId?: string;
+  idPrefix?: string;
+  onPivot?: (x: number, y: number) => void;
 }) {
   const stroke = useRef<{
     canvas: HTMLCanvasElement;
@@ -70,11 +77,13 @@ export function Stage({
     .filter((l) => l.enabled && l.kind === "global")
     .reduce((n, l) => n * l.intensity * zoneLevel(l), 1);
   const storedRegion =
-    regionEditor?.kind === "motion"
-      ? e.motionZones?.find((w) => w.id === regionEditor.id)?.region
-      : regionEditor?.kind === "rain"
-        ? e.rainZones?.find((r) => r.id === regionEditor.id)
-        : e.lights?.find((l) => l.id === regionEditor?.id)?.region;
+    regionEditor?.kind === "joint"
+      ? scene.joints?.find((j) => j.id === regionEditor.id)?.region
+      : regionEditor?.kind === "motion"
+        ? e.motionZones?.find((w) => w.id === regionEditor.id)?.region
+        : regionEditor?.kind === "rain"
+          ? e.rainZones?.find((r) => r.id === regionEditor.id)
+          : e.lights?.find((l) => l.id === regionEditor?.id)?.region;
   const activeRegion =
     storedRegion && strokePreview !== null
       ? { ...storedRegion, points: [], path: strokePreview }
@@ -250,6 +259,11 @@ export function Stage({
           setStrokePreview(null);
         }}
         onClick={async (event) => {
+          if (regionEditor?.mode === "pivot") {
+            const p = pointAt(event.clientX, event.clientY);
+            onPivot?.(p.x, p.y);
+            return;
+          }
           if (regionEditor && ["brush", "erase"].includes(regionEditor.mode))
             return;
           if (regionEditor && activeRegion && svg.current && onRegion) {
@@ -348,15 +362,35 @@ export function Stage({
         }}
       >
         <defs>
-          <radialGradient id="softLight">
+          {!!scene.joints?.length && (
+            <g id={idPrefix + "joint-source"}>
+              {asset ? (
+                <image
+                  href={asset.data}
+                  width="1000"
+                  height="563"
+                  preserveAspectRatio={
+                    scene.fit === "stretch"
+                      ? "none"
+                      : scene.fit === "cover"
+                        ? "xMidYMid slice"
+                        : "xMidYMid meet"
+                  }
+                />
+              ) : (
+                <Artwork idPrefix={idPrefix + "joint-art-"} kind={scene.art} />
+              )}
+            </g>
+          )}
+          <radialGradient id={idPrefix + "softLight"}>
             <stop stopColor="#ffdfab" stopOpacity={lightIntensity} />
             <stop offset="1" stopColor="#ffdfab" stopOpacity="0" />
           </radialGradient>
-          <radialGradient id="vignette">
+          <radialGradient id={idPrefix + "vignette"}>
             <stop offset=".45" stopColor="#0b0f15" stopOpacity="0" />
             <stop offset="1" stopColor="#0b0f15" stopOpacity=".65" />
           </radialGradient>
-          <mask id="rainMask">
+          <mask id={idPrefix + "rainMask"}>
             <rect
               width="1000"
               height="563"
@@ -397,14 +431,14 @@ export function Stage({
             .filter((l) => l.kind === "local")
             .map((l) => (
               <g key={l.id}>
-                <radialGradient id={"zone-falloff-" + l.id}>
+                <radialGradient id={idPrefix + "zone-falloff-" + l.id}>
                   <stop
                     stopColor="white"
                     stopOpacity={Math.min(1, l.intensity * zoneLevel(l))}
                   />
                   <stop offset="1" stopColor="white" stopOpacity="0" />
                 </radialGradient>
-                <mask id={"zone-radius-" + l.id}>
+                <mask id={idPrefix + "zone-radius-" + l.id}>
                   {l.shape === "region" ? (
                     <rect
                       width="1000"
@@ -424,18 +458,18 @@ export function Stage({
                         1,
                         l.radius * (1 + l.spread * (zoneLevel(l) - 1)),
                       )}
-                      fill={"url(#zone-falloff-" + l.id + ")"}
+                      fill={"url(#" + idPrefix + "zone-falloff-" + l.id + ")"}
                     />
                   )}
                 </mask>
-                <radialGradient id={"zone-gradient-" + l.id}>
+                <radialGradient id={idPrefix + "zone-gradient-" + l.id}>
                   <stop
                     stopColor={l.color}
                     stopOpacity={Math.min(1, l.intensity * zoneLevel(l))}
                   />
                   <stop offset="1" stopColor={l.color} stopOpacity="0" />
                 </radialGradient>
-                <mask id={"zone-mask-" + l.id}>
+                <mask id={idPrefix + "zone-mask-" + l.id}>
                   <rect
                     width="1000"
                     height="563"
@@ -468,7 +502,7 @@ export function Stage({
             );
             return (
               <g key={w.id}>
-                <mask id={"motion-mask-" + w.id}>
+                <mask id={idPrefix + "motion-mask-" + w.id}>
                   <rect width="1000" height="563" fill="black" />
                   {w.region.enabled &&
                     (w.region.path ? (
@@ -488,7 +522,7 @@ export function Stage({
                     ))}
                 </mask>
                 <filter
-                  id={"motion-filter-" + w.id}
+                  id={idPrefix + "motion-filter-" + w.id}
                   x="-10%"
                   y="-10%"
                   width="120%"
@@ -521,7 +555,7 @@ export function Stage({
         >
           <g style={{ filter: `brightness(${globalLevel})` }}>
             <g
-              id="scene-base"
+              id={idPrefix + "scene-base"}
               style={{
                 filter: `brightness(${e.brightness * (loopingLight ? 0.85 + lightLevel * 0.15 : 1)}) contrast(${e.contrast})`,
               }}
@@ -544,7 +578,11 @@ export function Stage({
                   />
                 </g>
               ) : (
-                <Artwork kind={scene.art} dynamicLight={loopingLight} />
+                <Artwork
+                  idPrefix={idPrefix}
+                  kind={scene.art}
+                  dynamicLight={loopingLight}
+                />
               )}
             </g>
             <rect
@@ -558,10 +596,10 @@ export function Stage({
               cy={e.lightY * 5.63}
               rx="380"
               ry="320"
-              fill="url(#softLight)"
+              fill={"url(#" + idPrefix + "softLight)"}
             />
             <g
-              mask="url(#rainMask)"
+              mask={"url(#" + idPrefix + "rainMask)"}
               fill="none"
               stroke={e.color}
               opacity={e.opacity}
@@ -596,7 +634,7 @@ export function Stage({
                   />
                 ))}
             </g>
-            <g id="scene-sprites">
+            <g id={idPrefix + "scene-sprites"}>
               {(scene.sprites || []).map((original) => {
                 const sprite = animateSprite(
                   original,
@@ -624,7 +662,20 @@ export function Stage({
                 );
               })}
             </g>
-            <g id="scene-motion">
+            <JointLayers
+              idPrefix={idPrefix}
+              key={scene.id}
+              scene={scene}
+              project={project}
+              nodeId={nodeId}
+              playing={playing}
+              reduced={
+                project.settings.reducedEffects ||
+                reducedMotion ||
+                !!regionEditor
+              }
+            />
+            <g id={idPrefix + "scene-motion"}>
               {(e.motionZones || [])
                 .filter((w) => w.enabled)
                 .map((w) => {
@@ -638,11 +689,15 @@ export function Stage({
                       key={w.id}
                       data-motion-zone={w.id}
                       data-motion-offset={offset.dx}
-                      mask={"url(#motion-mask-" + w.id + ")"}
+                      mask={"url(#" + idPrefix + "motion-mask-" + w.id + ")"}
                     >
-                      <g filter={"url(#motion-filter-" + w.id + ")"}>
-                        <use href="#scene-base" />
-                        <use href="#scene-sprites" />
+                      <g
+                        filter={
+                          "url(#" + idPrefix + "motion-filter-" + w.id + ")"
+                        }
+                      >
+                        <use href={"#" + idPrefix + "scene-base"} />
+                        <use href={"#" + idPrefix + "scene-sprites"} />
                       </g>
                     </g>
                   );
@@ -655,18 +710,18 @@ export function Stage({
               <g
                 key={l.id}
                 data-light-zone={l.id}
-                mask={"url(#zone-mask-" + l.id + ")"}
+                mask={"url(#" + idPrefix + "zone-mask-" + l.id + ")"}
                 style={{ mixBlendMode: "screen" }}
               >
                 <g
-                  mask={"url(#zone-radius-" + l.id + ")"}
+                  mask={"url(#" + idPrefix + "zone-radius-" + l.id + ")"}
                   style={{
                     filter: `brightness(${1 + l.intensity * zoneLevel(l)})`,
                   }}
                 >
-                  <use href="#scene-base" />
-                  <use href="#scene-sprites" />
-                  <use href="#scene-motion" />
+                  <use href={"#" + idPrefix + "scene-base"} />
+                  <use href={"#" + idPrefix + "scene-sprites"} />
+                  <use href={"#" + idPrefix + "scene-motion"} />
                   <rect
                     width="1000"
                     height="563"
@@ -677,7 +732,11 @@ export function Stage({
               </g>
             ))}
           {e.vignette && (
-            <rect width="1000" height="563" fill="url(#vignette)" />
+            <rect
+              width="1000"
+              height="563"
+              fill={"url(#" + idPrefix + "vignette)"}
+            />
           )}
         </g>
         {project.settings.guides && !playing && (
@@ -692,6 +751,24 @@ export function Stage({
             opacity=".5"
           />
         )}
+        {regionEditor?.kind === "joint" &&
+          scene.joints
+            ?.filter((j) => j.id === regionEditor.id)
+            .map((j) => (
+              <g key={j.id} transform={transform} pointerEvents="none">
+                <circle
+                  cx={j.pivotX}
+                  cy={j.pivotY}
+                  r="8"
+                  fill="none"
+                  stroke="#ffda82"
+                />
+                <path
+                  d={`M${j.pivotX - 14} ${j.pivotY}h28M${j.pivotX} ${j.pivotY - 14}v28`}
+                  stroke="#ffda82"
+                />
+              </g>
+            ))}
         {regionEditor && activeRegion && (
           <g transform={transform} pointerEvents="none">
             {activeRegion.path ? (

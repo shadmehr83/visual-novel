@@ -1,39 +1,39 @@
-export function Artwork({ kind, dynamicLight = true }: { kind: string; dynamicLight?: boolean }) {
+export function Artwork({ kind, dynamicLight = true, idPrefix = "" }: { kind: string; dynamicLight?: boolean; idPrefix?: string }) {
   const cafe = kind === "cafe";
   return (
     <g className={cafe && dynamicLight ? "cafe-dynamic-light" : undefined}>
       <defs>
-        <linearGradient id="cafeMovingShade" x1="0" y1="0" x2="0" y2="1">
+        <linearGradient id={idPrefix + "cafeMovingShade"} x1="0" y1="0" x2="0" y2="1">
           <stop stopColor="#101923" stopOpacity="0" />
           <stop offset=".48" stopColor="#101923" stopOpacity=".22" />
           <stop offset="1" stopColor="#101923" stopOpacity="0" />
         </linearGradient>
-        <clipPath id="cafePersonShade">
+        <clipPath id={idPrefix + "cafePersonShade"}>
           <path d="M38 220Q0 160 48 121H116Q170 161 145 240Z" />
           <ellipse cx="83" cy="71" rx="45" ry="60" />
           <path d="M38 85Q13 4 80 3Q150 4 132 102L116 88L108 37Q83 65 43 63Z" />
         </clipPath>
-        <clipPath id="cafePlantShade">
+        <clipPath id={idPrefix + "cafePlantShade"}>
           <path d="M-23 0q-50-75-22-88q40 5 45 77Q15-85 40-67q13 35-40 67Q65-40 65-10Q42 15 0 13Z" />
           <path d="M-35 5h68l-12 60h-46z" />
         </clipPath>
-        <linearGradient id="wall" x2="1" y2="1">
+        <linearGradient id={idPrefix + "wall"} x2="1" y2="1">
           <stop stopColor={cafe ? "#70685e" : "#323947"} />
           <stop offset="1" stopColor={cafe ? "#393d3f" : "#1c2330"} />
         </linearGradient>
-        <linearGradient id="sky" x2="0" y2="1">
+        <linearGradient id={idPrefix + "sky"} x2="0" y2="1">
           <stop stopColor="#6c818a" />
           <stop offset="1" stopColor="#a9a9a0" />
         </linearGradient>
-        <linearGradient id="floor" x2="0" y2="1">
+        <linearGradient id={idPrefix + "floor"} x2="0" y2="1">
           <stop stopColor="#5c514b" />
           <stop offset="1" stopColor="#2f3035" />
         </linearGradient>
-        <radialGradient id="lamp">
+        <radialGradient id={idPrefix + "lamp"}>
           <stop stopColor="#ffda9c" stopOpacity=".6" />
           <stop offset="1" stopColor="#ffda9c" stopOpacity="0" />
         </radialGradient>
-        <filter id="texture">
+        <filter id={idPrefix + "texture"}>
           <feTurbulence baseFrequency=".6" numOctaves="3" seed="7" />
           <feColorMatrix type="saturate" values="0" />
           <feComponentTransfer>
@@ -42,8 +42,8 @@ export function Artwork({ kind, dynamicLight = true }: { kind: string; dynamicLi
           <feBlend in="SourceGraphic" mode="soft-light" />
         </filter>
       </defs>
-      <rect width="1000" height="563" fill="url(#wall)" />
-      <path d="M0 395H1000V563H0Z" fill="url(#floor)" />
+      <rect width="1000" height="563" fill={"url(#" + idPrefix + "wall)"} />
+      <path d="M0 395H1000V563H0Z" fill={"url(#" + idPrefix + "floor)"} />
       {[0, 1, 2, 3, 4, 5].map((i) => (
         <path
           key={i}
@@ -53,7 +53,7 @@ export function Artwork({ kind, dynamicLight = true }: { kind: string; dynamicLi
         />
       ))}
       <rect x="46" y="23" width="560" height="368" fill="#292d2d" />
-      <rect x="62" y="34" width="528" height="335" fill="url(#sky)" />
+      <rect x="62" y="34" width="528" height="335" fill={"url(#" + idPrefix + "sky)"} />
       <g opacity=".55" fill="#586875">
         <path d="M60 270V160L115 140V80H210V200H260V115H330V180H380V90H450V165H590V370H60Z" />
         <path
@@ -90,7 +90,7 @@ export function Artwork({ kind, dynamicLight = true }: { kind: string; dynamicLi
           <path d="M681 0v112" stroke="#282a29" strokeWidth="4" />
           <path d="M631 145Q680 75 732 145Z" fill="#b99b69" />
           <ellipse cx="681" cy="152" rx="38" ry="6" fill="#f3d4a0" />
-          <circle className="cafe-lamp-glow" cx="681" cy="182" r="150" fill="url(#lamp)" />
+          <circle className="cafe-lamp-glow" cx="681" cy="182" r="150" fill={"url(#" + idPrefix + "lamp)"} />
           <rect
             x="770"
             y="70"
@@ -144,8 +144,8 @@ export function Artwork({ kind, dynamicLight = true }: { kind: string; dynamicLi
               stroke="#765553"
               strokeWidth="2"
             />
-            {dynamicLight && <g clipPath="url(#cafePersonShade)" pointerEvents="none">
-              <rect className="cafe-person-shade" x="-20" y="-80" width="210" height="360" fill="url(#cafeMovingShade)" />
+            {dynamicLight && <g clipPath={"url(#" + idPrefix + "cafePersonShade)"} pointerEvents="none">
+              <rect className="cafe-person-shade" x="-20" y="-80" width="210" height="360" fill={"url(#" + idPrefix + "cafeMovingShade)"} />
             </g>}
           </g>
           <ellipse cx="472" cy="508" rx="236" ry="62" fill="#312d2d" />
@@ -167,8 +167,8 @@ export function Artwork({ kind, dynamicLight = true }: { kind: string; dynamicLi
               fill="#465448"
             />
             <path d="M-35 5h68l-12 60h-46z" fill="#896b55" />
-            {dynamicLight && <g clipPath="url(#cafePlantShade)" pointerEvents="none">
-              <rect className="cafe-plant-shade" x="-85" y="-160" width="170" height="300" fill="url(#cafeMovingShade)" />
+            {dynamicLight && <g clipPath={"url(#" + idPrefix + "cafePlantShade)"} pointerEvents="none">
+              <rect className="cafe-plant-shade" x="-85" y="-160" width="170" height="300" fill={"url(#" + idPrefix + "cafeMovingShade)"} />
             </g>}
           </g>
         </>
@@ -191,7 +191,7 @@ export function Artwork({ kind, dynamicLight = true }: { kind: string; dynamicLi
             stroke="#333342"
             strokeWidth="10"
           />
-          <circle cx="820" cy="280" r="110" fill="url(#lamp)" opacity=".2" />
+          <circle cx="820" cy="280" r="110" fill={"url(#" + idPrefix + "lamp)"} opacity=".2" />
           <path d="M105 440L330 355L625 423L510 563H105Z" fill="#76727a" />
           <path d="M105 440L350 415L625 423L510 563H105Z" fill="#555766" />
           <path d="M150 430l120-50l92 30l-115 46z" fill="#b1a3a0" />
@@ -294,7 +294,7 @@ export function Artwork({ kind, dynamicLight = true }: { kind: string; dynamicLi
         width="1000"
         height="563"
         fill="transparent"
-        filter="url(#texture)"
+        filter={"url(#" + idPrefix + "texture)"}
       />
     </g>
   );

@@ -3,9 +3,9 @@ import type { Scene, Region, ZoneLight } from "./model";
 import { WindTools } from "./WindTools";
 import { LightingLoopControls } from "./LightingLoopControls";
 export type RegionEditor = {
-  kind: "rain" | "light" | "motion";
+  kind: "rain" | "light" | "motion" | "joint";
   id: string;
-  mode: "polygon" | "wand" | "edge" | "brush" | "erase";
+  mode: "polygon" | "wand" | "edge" | "brush" | "erase" | "pivot";
   radius?: number;
   tolerance: number;
 };
@@ -27,7 +27,7 @@ export function Zones({
   const patchLight = (i: number, fn: (l: ZoneLight) => void) =>
     update((s) => fn(s.effects.lights![i]));
   function tools(
-    kind: "rain" | "light" | "motion",
+    kind: "rain" | "light" | "motion" | "joint",
     id: string,
     region: Region,
     change: (r: Region) => void,
