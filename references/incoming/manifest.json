@@ -1,0 +1,76 @@
+{
+  "source": "references.zip",
+  "purpose": "Reference images only; await user instructions before applying to scenes.",
+  "images": [
+    {
+      "file": "03_empty_bedroom_at_night.png",
+      "width": 542,
+      "height": 249,
+      "bytes": 210535,
+      "sha256": "d08103db51150a33ff93795316d1e23a8ffb2bb2baad254341a6897237fea33d"
+    },
+    {
+      "file": "05_rainy_cafe_interior.png",
+      "width": 639,
+      "height": 253,
+      "bytes": 293928,
+      "sha256": "5d9360f01cfb4546b6d5e64831f3b8c0f5a3a397de1ad147cc82b952fcc5dfa9"
+    },
+    {
+      "file": "08_ferris_wheel_exterior.png",
+      "width": 455,
+      "height": 234,
+      "bytes": 195333,
+      "sha256": "f6ffbeb58eb612b8832ccd285ebdc8431bbc32ed5b50a2df59c1c923d53a65cd"
+    },
+    {
+      "file": "10_city_from_above.png",
+      "width": 416,
+      "height": 233,
+      "bytes": 174940,
+      "sha256": "6bd9c610eafc1a6a4ef892d9f58a35d1064c2800de590179bbe0e5692e1a4cb6"
+    },
+    {
+      "file": "12_rainy_night_street.png",
+      "width": 467,
+      "height": 246,
+      "bytes": 210133,
+      "sha256": "1de2e047ce0882cfb4b742a0c7aef89afac3310c7b018f0227b65ead3b41bb14"
+    },
+    {
+      "file": "file_000000003878820b957d8b998c14a8d9.png",
+      "width": 1536,
+      "height": 1024,
+      "bytes": 2029102,
+      "sha256": "e65011ce37bb14d3da967c4080181ea5e350db34f8d999b07fb7bebacde75eb9"
+    },
+    {
+      "file": "moodboard_01_overall.png",
+      "width": 1536,
+      "height": 1024,
+      "bytes": 2778005,
+      "sha256": "9f4d954ff5ec1c513a773f4e4d0b255d3e812184e085fffa11988af88303662c"
+    },
+    {
+      "file": "moodboard_02_character_and_environment.png",
+      "width": 1536,
+      "height": 1024,
+      "bytes": 2692358,
+      "sha256": "2db1398b3c80aa6daa050059941864079d1ea2aae60d19fc9cd7fd8278af7bfa"
+    },
+    {
+      "file": "moodboard_03_cinematic_studies.png",
+      "width": 1536,
+      "height": 1024,
+      "bytes": 2642816,
+      "sha256": "988482988acadb58efba07527b55fc52b2590d1db0aaf65f31bec97effcb10f7"
+    },
+    {
+      "file": "Rainy Café Conversation.png",
+      "width": 1536,
+      "height": 1024,
+      "bytes": 1961747,
+      "sha256": "ceead27ef6f872db13d53b5d282053961cd0a0079928894b7051c902a349a6a6"
+    }
+  ]
+}
