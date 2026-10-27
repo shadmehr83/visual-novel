@@ -1,0 +1,107 @@
+A WORLD THAT FEELSBEAUTIFUL, BUT UNCERTAIN
+Visual Novel Aesthetic & Mood-Board Brief
+
+CORE DIRECTION: Painterly atmospheric realism blended with abstract, stylised visual-novel art. Detailed enough to feel inhabitable; abstract enough to feel uncertain. Cozy first, quietly unnerving underneath.
+
+This hand-off brief is intended for an image-generation model to create a coherent mood board and visual reference library. It focuses on aesthetics, composition, lighting, texture and emotional atmosphere—not gameplay mechanics or plot exposition.
+
+1. The visual identity
+The target is neither conventional anime nor realistic Western concept art. It is a fusion: painterly environmental art, slightly stylised character illustration, loose brushwork, selective detail and restrained visual-novel framing. The world should feel hand-painted and emotionally subjective, as if memory has softened some edges and darkness has swallowed others.
+Painterly detail with deliberate ambiguity
+Use broad, visible brushstrokes and grouped shapes for walls, furniture, foliage, buildings and distant figures. Reserve crisp detail for emotionally important focal points: a face, a hand around a warm cup, a lit window, rain on glass or a Ferris-wheel cabin against the night. Do not make every surface equally sharp. Some environments should be richly observed; other areas may reduce to broad fields of charcoal, dusty mauve, brown or blue-grey with soft tonal shifts. Simplification should feel intentional, not unfinished.
+Character rendering
+Characters should fit the painted environment rather than look pasted on top. Use stylised but plausible proportions, softly constructed faces, restrained expressions, textured hair and clothing, and subtle asymmetry. Avoid glossy anime eyes, heavy cel-shading, sharp vector outlines, exaggerated expressions or polished 3D skin. The girl can have a quiet gothic influence—shadowed hair, a high collar or oversized knitwear, a posture that partly conceals her face, and an expression that is shy, nonchalant or difficult to read. Intriguing, not immediately monstrous.
+Palette
+Core colours: charcoal and ink black for shadow; smoky blue-grey for night and rain; dusty mauve and faded rose for textiles and intimate spaces; weathered umber for wood and domestic interiors; restrained amber for lamps and moments of connection; desaturated teal or moss for foliage, damp surfaces and reflected light. Colours should be muted and slightly dirty, not sugary pastels. Let warm amber coexist with blue-black rain. Avoid saturated neon, candy colours, pure-white highlights and a uniform purple filter.
+Lighting and depth
+Lighting should feel painted into the image, even when the engine adds dynamic effects. Use soft pools of illumination, broad falloff, gentle gradients, reflected colour and deep shadow shapes. Brightness should be adjustable without washing out the palette. Some backgrounds may use simple colour fields with subtle tonal shifts; others can support more visible light sources, masks, soft shadows, rain reflections and parallax. Avoid photorealistic ray tracing, hard game-engine spotlights, excessive bloom and dramatic horror-red lighting.
+Composition and negative space
+Use empty space as an emotional tool. A character may occupy only a small part of a large room; a long table can separate two people; a window can place the city between the characters and viewer. Doorways, curtains, reflections and dark foreground shapes can create intimacy or unease without explicit threats. Prefer quiet cinematic compositions over constant close-ups.
+2. Emotional rules
+Cozy before frightening
+The first impression should be inviting: warm drinks, rain against glass, quiet music, soft fabric, amber lamps, late-night streets and intimate spaces. Unease comes from darkness, composition, stillness, distance, ambiguous expressions and subtle mismatches—not obvious monsters or horror clichés.
+Let beauty survive the reveal
+The café, Ferris wheel, night walk and home should be genuinely beautiful and emotionally meaningful. Later scenes can reuse the same compositions with colder colours, deeper shadows, emptier framing or altered sound. The player should remember why they loved a place, even after its meaning changes.
+Small shifts, not a horror filter
+For more threatening variations, cool the shadows, reduce warmth, leave more of the frame unlit, move a character farther away or let a familiar object sit alone in the foreground. Do not simply lower brightness until the artwork becomes unreadable.
+
+3. Location mood-board briefs
+For each location, request a coordinated set: a wide establishing view, a medium composition, one or two detail studies, and—where useful—a second version with altered lighting. Keep character design, architecture, palette and brushwork consistent.
+A. Bedroom — Another Evening
+Emotional tone: Habitual, private, slightly stale and quietly lonely; not melodramatically sad.
+Visual interpretation: A modest bedroom at night. The protagonist sits on an unmade bed with a phone. A gaming PC and monitor glow in the background; clothes hang over a chair and a forgotten drink sits nearby. Cool blue-grey screen light mixes with weak amber from a small lamp or hallway. Much of the room falls into soft shadow.
+Composition and variations: Wide shot with the protagonist small in the frame; close-up of hand, phone and rumpled bedding. Before the notification, the scene is still and routine. After it, change only the screen glow or posture.
+Image-generation prompt: Painterly atmospheric visual-novel background, lived-in bedroom at night, lonely young adult sitting on bed looking at phone, gaming PC glow, muted charcoal blue-grey and dusty mauve palette, tiny warm practical light, broad brushstrokes, selective detail, large soft shadow shapes, quiet intimate composition, cozy but faintly uneasy, no anime cel shading, no photorealism, no text.
+B. Phone / Dating-App Notification
+Emotional tone: Routine interrupted by a small possibility.
+Visual interpretation: A phone becomes a pool of cool light against broad dark shapes. The interface is understated and contemporary, with muted colours and restrained typography. Focus on hands, screen glow and the contrast with the indistinct room; do not rely on legible generated UI text.
+Composition and variations: Close-up of phone held loosely, bedroom fading into painted darkness; optionally a phone beside the protagonist's knee. The second notification should catch attention through composition and light, not an exaggerated alarm.
+Image-generation prompt: Painterly close-up for a moody visual novel, smartphone glowing in a dim bedroom, hand loosely holding it, muted dusty pink and cool blue-grey light, soft reflections on skin, room dissolving into charcoal brushstrokes, understated interface, emotionally quiet, detailed focal point with abstract surroundings, no readable text, no neon, no glossy 3D rendering.
+C. Wardrobe — Getting Ready
+Emotional tone: Small anticipation hidden beneath nonchalance.
+Visual interpretation: A simple wardrobe, hanging clothes, shoes and a mirror. Clothing looks like believable everyday choices, not a fashion-game catalogue. A warm lamp illuminates part of the scene; the rest fades into brown, mauve and charcoal. A jacket, worn jumper or small accessory can feel personal.
+Composition and variations: Medium view of wardrobe and mirror, plus details of fabric, shoes and an item chosen to bring. Keep an uncluttered area for a later UI overlay, but do not render UI text into the artwork.
+Image-generation prompt: Painterly atmospheric visual-novel illustration of a modest bedroom wardrobe before a first date, everyday jacket, oversized jumper, trousers and shoes, weathered wood, soft amber lamp against charcoal and dusty mauve shadows, visible brush texture, restrained detail, quiet anticipation, slightly dreamlike but believable, no anime style, no text, no fashion photography.
+D. Café — First Date
+Emotional tone: Warm, intimate, a little awkward, quietly uncanny only in retrospect.
+Visual interpretation: A small café in the evening, rain or damp streets outside, amber pendant lamps, worn timber, dark corners and windows reflecting indistinct street lights. Include tables, cups, glass, wood grain and distant patrons, but allow background edges and figures to dissolve into broad strokes. Two people at one table feel separate from the room without an obvious spotlight.
+Composition and variations: Generate a wide establishing view, two-person table composition, and details of a cup, hands, rain on glass and empty chair. Early version: more amber, more visible detail, softer shadows. Later echo: same layout but colder reflections, less warmth and more negative space.
+Image-generation prompt: Cinematic painterly visual-novel environment, small cozy café on a rainy evening, worn wooden tables, amber pendant lamps, dark corners, window reflections, muted earth brown smoky blue-grey dusty rose and candle amber palette, detailed architecture softened by expressive brushstrokes, distant customers as loose silhouettes, warm and inviting yet subtly uncertain, Western-leaning fusion with stylised visual-novel composition, no cel shading, no photorealism, no text.
+E. The Girl — First Appearance
+Emotional tone: Reserved, shy, detached, quietly attractive and difficult to read.
+Visual interpretation: A young adult woman with restrained gothic influence: dark or shadowed hair, oversized knitwear or a high collar, and a posture that partly hides her face. Her expression is subtle—an almost-smile, a tired gaze or a moment of awkwardness. Avoid exaggerated blush, enormous eyes, overtly sinister grins or threatening poses. Her character art shares the background's brush texture.
+Composition and variations: Create a consistent portrait, seated café pose, three-quarter view with hands around a cup, and restrained expressions: neutral, amused, embarrassed, thoughtful and uncomfortable. Keep face, hair, proportions and clothing consistent.
+Image-generation prompt: Painterly stylised visual-novel character concept, young adult woman with understated gothic influence, dark textured hair partly framing or concealing her face, oversized dark knitwear or high collar, restrained nonchalant expression with trace of shy warmth, realistic-stylised proportions, muted dusty pastels and warm amber edge light, visible brushwork, subtly uncanny but not monstrous, not conventional anime, no glossy skin, no exaggerated eyes.
+F. Night Walk — A Quiet Street Together
+Emotional tone: Tender, exposed, dreamlike; private even in a public place.
+Visual interpretation: A quiet street after rain, pavement reflecting a few street lamps, shopfronts or apartment windows fading into darkness. The characters walk side by side, not necessarily touching. Distant buildings become broad shapes; one lit window or pool of amber on wet pavement carries the scene. Trees and wires dissolve into painterly silhouettes.
+Composition and variations: Wide shot with the pair small against the street, side-on walking view, and detail of hands almost touching. Romantic version: warmer reflections and closer framing. Uneasy callback: cooler shadows, more distance between them, empty pavement behind.
+Image-generation prompt: Painterly atmospheric visual-novel scene of two young adults walking on a quiet city street at night after rain, wet pavement reflecting muted amber streetlights, blue-grey and smoky mauve darkness, distant architecture dissolving into loose brushstrokes, restrained intimate body language, hands almost touching, cinematic negative space, cozy melancholic uncertainty, no neon cyberpunk, no photorealism, no text.
+G. Ferris Wheel — Height and Intimacy
+Emotional tone: Romantic, suspended in time, beautiful in a way that may later hurt.
+Visual interpretation: A Ferris wheel at dusk or night, a few softly illuminated cabins and a city or waterfront below. Sections of the structure disappear into shadow while a few lights punctuate the sky. Inside a cabin, glass reflects the characters and scattered city lights. Avoid bright carnival colours; keep it quiet and melancholic.
+Composition and variations: Generate exterior wide shot, interior cabin view with two people sitting close, and details of hands against the dark window or reflected faces. Early memory: dusty rose dusk and warm cabin light. Later echo: darker sky, colder reflections and more space between reflected faces.
+Image-generation prompt: Painterly cinematic visual-novel environment, Ferris wheel at dusk above a quiet city, muted dusty rose sky fading into smoky blue-black, a few warm golden cabins, structure partly lost in expressive dark brushstrokes, reflective glass and distant city lights, intimate and dreamlike rather than carnival-bright, detailed focal areas with abstract surroundings, melancholic romance and subtle unease, no neon, no photorealism, no text.
+H. Her House — Quiet Domestic Interior
+Emotional tone: Safe, intimate and ordinary at first; gradually too enclosed.
+Visual interpretation: A modest, lived-in home: kitchen counter, sofa, low table, warm lamp, kettle, curtains and a hallway leading into shadow. Avoid luxury-showroom interiors. Use worn fabrics, ordinary objects and imperfect surfaces. Initially it feels like somewhere the protagonist can relax; doorways and corridors create subtle depth without haunted-house clichés.
+Composition and variations: Wide living-room view, tea-making scene and a detail of two cups. Early version: warm pools of light, balanced composition and signs of shared activity. Later version: cooler ambient light, an empty seat, moved or missing objects, hallway occupying more of the frame.
+Image-generation prompt: Painterly stylised visual-novel interior of a modest lived-in apartment at night, sofa, low table, kettle, two cups, curtains and dim hallway, worn fabrics and warm practical lamp, muted brown dusty mauve charcoal and amber palette, loose brushstrokes, cozy domestic intimacy with deep soft shadows, inhabitable but uncertain, no luxury showroom, no haunted-house clichés, no text.
+I. Tea After an Argument
+Emotional tone: Comforting on the surface, emotionally ambiguous underneath.
+Visual interpretation: Steam from tea, hands around a mug, warm light on a tabletop, and a second person partly obscured by shadow. The image should leave open whether this is a genuine reconciliation, an awkward pause or an attempt to redirect the conversation.
+Composition and variations: Close detail of steam and hands; medium shot with one character in focus; wide view showing the distance between chairs. Tender version: warm reflected light and balanced framing. Uneasy version: one untouched cup, one person partly outside the light, more table space separating them.
+Image-generation prompt: Painterly atmospheric visual-novel scene, two cups of tea on a low wooden table after an emotionally difficult conversation, delicate steam in warm lamplight, hands around one mug, another person partly obscured by soft shadow, muted amber umber dusty rose and charcoal, expressive brushwork, intimate and comforting but emotionally ambiguous, subtle tension without overt horror, no photorealism, no text.
+J. Empty Café — A Memory Revisited
+Emotional tone: Grief, recognition, and the pain of a place retaining its beauty.
+Visual interpretation: Return to the original café after the relationship has fractured. Keep the same architecture, table, window and lamp placement. There may be fewer visible patrons, colder reflections, a darker foreground and more space around the empty chair. The scene should not look ruined; it should look like the same place seen by someone who can no longer experience it in the same way.
+Composition and variations: Mirror the original café establishing shot as closely as possible. Include a detail of the empty chair, a cup left untouched or rain sliding down the same window. Preserve recognisable shapes; change lighting, colour balance, character presence and framing.
+Image-generation prompt: Painterly cinematic visual-novel background, same small rainy-night café as a cherished earlier date, same wooden table, amber pendant and window arrangement, now cooler and emptier, smoky blue-grey shadows, dim amber light, rain reflections, empty chair in foreground, detailed focal objects surrounded by broad abstract brushstrokes, quiet heartbreak, beautiful but emotionally estranged, no destruction, no overt horror, no text.
+
+4. Consistency rules for the mood board
+Generate the environments and character assets as a coordinated set; do not let each prompt invent a new art style.
+Use the same palette, brushwork, edge softness and shadow language in every location.
+For recurring places, keep architecture, furniture placement, key props and camera angle consistent between warm and uneasy versions.
+For the girl, reuse one approved character reference and expression guide. Do not redesign her face, hair, proportions or clothing in every image.
+Request clean images without embedded dialogue, subtitles, logos, watermarks or interface text. Add UI separately in the game engine.
+Prefer 16:9 landscape images for environment backgrounds. Use portrait or square crops for character studies and detail sheets.
+Request a wide establishing image, a medium composition and two or three detail studies per important location.
+Avoid overusing fog, heavy vignette, red lighting, glitch effects or exaggerated horror imagery. Unease should come primarily from composition, colour, stillness and contrast.
+Reuse the same scene as both a romantic memory and a later emotional callback. Change subtle visual decisions rather than replacing the environment entirely.
+Treat generated images as mood-board references first. Approve and refine the visual language before generating a large production asset library.
+5. General style anchor prompt
+Place this style anchor before every location-specific prompt. If the image model supports reference images, attach the strongest approved environment and character references.
+STYLE ANCHOR: Painterly atmospheric visual-novel art; a Western-leaning fusion of stylised illustration and East Asian visual-novel composition; hand-painted environmental concept art with visible brushstrokes, selective detail, softened edges, broad grouped shadows and subtly simplified forms. Muted earthy pastels: charcoal, smoky blue-grey, dusty mauve, faded rose, weathered brown, desaturated teal and restrained amber. Detailed focal points surrounded by ambiguous, abstracted areas. Soft painted lighting, deep but readable shadows, restrained character expressions, cinematic negative space. Cozy, intimate and quietly unnerving. Beautiful and inhabitable, never overtly horror-themed by default. No glossy anime rendering, no cel-shading, no vector outlines, no photorealism, no neon cyberpunk, no excessive bloom, no exaggerated horror lighting, no text or watermark.
+
+6. Suggested mood-board deliverables
+One palette and material board showing colours, brushwork, edge treatment, wood, fabric, glass, rain and shadow textures.
+Bedroom set: wide establishing shot, phone-light close-up and alternate lighting version.
+Café set: rainy exterior, wide interior, two-person table composition, cup/hand/window details and later emotional callback.
+Girl design sheet: consistent portrait, seated pose, clothing silhouette and five restrained expressions.
+Night-walk set: wide street, side-on pair composition, near-touching hands and altered-lighting callback.
+Ferris-wheel set: exterior at dusk, cabin interior, reflected faces/hands and later altered-lighting callback.
+Home set: living room, tea scene, hallway composition and a later, more isolating variation.
+A short note explaining how each image preserves the common style while changing the emotional atmosphere.
+
+ART DIRECTION IN ONE SENTENCE
+A world painted softly enough to feel like a memory, detailed enough to inhabit, and uncertain enough that familiar places can slowly become uncomfortable.

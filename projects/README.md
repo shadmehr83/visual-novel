@@ -23,8 +23,12 @@ POST `/api/project` requires that password and the same-origin browser request. 
 
 Other project JSON backups can be kept in this folder using distinct filenames. Only `published.stillframe.json` is loaded by the engine. Use **Open project** for other backups. Source history keeps older committed versions available.
 
-## Latest uploaded checkpoint
+## Uploaded checkpoint baseline (retained in Git history)
 
 On 27 October 2026, `published.stillframe_4.json` was saved here as `published.stillframe.json` without changing its contents. It includes four scenes, the embedded 1536 × 1024 café PNG, two café rain zones, two café lights, café motion settings, and bedroom lighting/motion/camera settings. Empty motion selections are preserved as authored; they require an affected area before they visibly move anything.
 
 After deployment, open **https://visual-novel-8b9.pages.dev/?snapshot=github** to explicitly load this published checkpoint on any computer. Existing different local work receives a recovery copy. Opening the normal website preserves that browser's autosaved project instead. The engine is maintained in this same repository; the checkpoint file stores the editable project and its embedded assets. Later changes require another export/publish to update the checkpoint.
+
+## Current story adaptation
+
+The published project now adapts **The First Match** story bible through the full first café date, with six scenes and four new mood-matched placeholder backgrounds. The original café photograph and all its visual settings are preserved. Dialogue replaces the previous sample script. See [adaptation details and limitations](../docs/story/IMPLEMENTATION.md). The previous unmodified uploaded checkpoint remains available in commit `35de011`.

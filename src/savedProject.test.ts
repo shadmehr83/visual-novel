@@ -17,7 +17,8 @@ it("loads the complete uploaded artwork and authored rain, lighting, motion and 
   expect(cafe.effects.lights).toHaveLength(2);
   expect(cafe.effects.lights?.[0]).toMatchObject({ x: 902, y: 140, radius: 51, intensity: 1.9 });
   expect(cafe.effects.motionZones?.[0]).toMatchObject({ strength: 2, direction: -62 });
-  expect(project.scenes.find(s => s.id === "bedroom")?.camera).toMatchObject({ enabled: true, zoom: 1.4, bob: 3 });
+  expect(project.scenes.find(s => s.id === "bedroom")?.background).toBe("first-match-bedroom");
+  expect(project.assets).toHaveLength(5);
   cafe.effects.rainZones![0].points[0].x = 0;
   cafe.effects.lightX = 0;
   const fresh = savedProject().scenes.find(scene => scene.id === "cafe")!;

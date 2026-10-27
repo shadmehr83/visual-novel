@@ -65,7 +65,7 @@ test("direct snapshot link loads the exported cafe over old local work and prese
     page.getByRole("heading", { name: "A table by the window", exact: true }),
   ).toBeVisible();
   await expect(page.getByLabel("Project title")).toHaveValue(
-    "The space between us",
+    "The First Match",
   );
   await expect(page.getByLabel("Brightness", { exact: true })).toHaveValue(
     "1",

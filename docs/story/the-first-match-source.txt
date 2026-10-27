@@ -1,0 +1,441 @@
+THE FIRST MATCH
+Visual Novel Story Bible & Opening Demo Script
+From waking in the bedroom to the end of the first café date
+Working story document • Version 1.0 • 26 October 2026A practical narrative source of truth for the first playable demo.
+
+How to use this document
+This document gathers the story decisions made so far and turns the opening into a playable, authored sequence. The demo begins with the protagonist waking or coming fully awake in their bedroom, noticing the phone, hesitating over a dating app, receiving a second notification, messaging the match, deciding whether to meet, getting ready, travelling to a quiet café, and completing the first date.
+The protagonist is addressed as “you” so the player can inhabit the role. The girl is temporarily named Mara; this is a placeholder, not a locked name. Dialogue is written as a strong first-pass script with branch variants. Do not try to play every line in one run.
+Core promise
+This is a grounded psychological relationship thriller, not supernatural horror and not a conventional dating sim. Its central tension is that affection can be real in the moment and still become entangled with manipulation, dependency, and control. The opening must work as an actual first date: funny, awkward, warm, occasionally quiet, and imperfect. The player should be able to like Mara without being foolish, and to be cautious without being punished.
+Make choices express readable attitudes: open, playful, guarded, direct, avoidant, or suspicious.
+Track patterns over time; one sharp line must not determine a route.
+Separate what happened from what the protagonist thinks it means.
+Mara can be sincere, funny, caring, evasive, and strategic; do not make every gesture a clue.
+Plot-critical facts and transitions remain authored and deterministic, even if AI dialogue is added later.
+The player can delay, ignore, decline, or leave. Never force a date after a clear refusal.
+The first demo should work without an external AI API, voice service, or image-generation subscription.
+1. Emotional and visual language
+Visual direction
+The bedroom should feel lived-in, not designed as a horror set: rumpled bedding, a phone charging nearby, a half-finished drink, clothes on a chair, a dark monitor, and muted light on the wall. The protagonist’s life is not necessarily in crisis; their days have simply blurred together.
+Use painterly, Western-leaning illustration with some Eastern influence in composition and quiet emotional beats. Avoid conventional anime proportions and cel shading, saturated neon, and photorealistic 3D. The palette is subdued, tactile, pastel-dark, and intimate. The café is tucked slightly below street level or away from the main road: warm lamps, timber, imperfect walls, window reflections, cups, and corners that feel comfortable. It should not look haunted.
+Sound and pacing
+Bedroom: distant traffic, room tone, phone vibration disproportionately loud in the quiet.
+App: restrained notification sound, not a celebratory reward.
+Getting ready: fabric, drawer, tap water, a pause before leaving.
+Café: soft conversation, espresso machine, crockery, traffic muffled through glass.
+Use silence deliberately. It may mean embarrassment, thought, discomfort, or nothing at all.
+2. Character bible
+The protagonist
+The protagonist is player-inhabited rather than a fixed archetype. They are tired of the dating-app cycle and ambivalent about trying again. They may be lonely without admitting it, or busy, sceptical, dryly funny, flirtatious, or socially anxious. Internal narration can be wry but should not explain every emotion. Let choices define the player’s voice.
+Mara — the match
+First impression: quiet, slightly gothic, face partly obscured in her profile photo by hair, scarf, shadow, or framing. Her style is understated and dark, not costume-like. She appears detached or nonchalant in the profile; in conversation she is more awkward and goofy than expected. She can be caring, funny, clumsy, observant, and mildly annoying. She is not initially overtly obsessive.
+Voice: concise, specific, conversational. She sometimes sends a second message to clarify a joke or correct herself. She can deflect a personal question with humour, but should not dodge everything. She must not sound like a therapist, a customer-support bot, or a villain explaining a plan.
+Rules for Mara in the first date
+She gives the protagonist room to say no. Disappointment is allowed; intimidation is not.
+She asks questions but shares ordinary details of her own.
+Her awkwardness is real: a joke lands badly, she fumbles with a sleeve or cup, or admits she nearly cancelled.
+Plant at most one or two faintly unusual details. Do not stack red flags.
+She may redirect tension toward tea, food, or a new topic; early on this should plausibly feel considerate.
+She is curious and attracted, not instantly in love.
+Long-term complexity
+Mara’s desire for closeness can coexist with a growing need to control the conditions of closeness. She may genuinely enjoy the protagonist and still rationalise intrusive behaviour as care. The later story explores how she becomes “the only one there for you”; it should not reduce her to a cartoon who faked every emotion.
+Supporting characters later
+A friend may warn the protagonist using specific observations, but can be blunt or wrong about some interpretations. Friends and family should not be perfect truth-oracles. The opening should not establish that the protagonist literally has nobody.
+3. State, routes, and continuity
+Use separate variables rather than one hidden “good/bad” score.
+openness — willingness to share, joke, and engage.
+guardedness — tendency to keep personal details private or move slowly.
+curiosity — interest in learning more about Mara.
+suspicion — noticed inconsistencies or discomfort, not proof of danger.
+boundary_signal — whether the player states a preference, asks for clarity, or declines pressure.
+warmth — positive mutual tone in this scene.
+mara_comfort — how relaxed Mara appears in this particular scene; not a moral score.
+Flags: app_opened_first, delayed_response, notification_dismissed, date_agreed, date_deferred, date_declined, outfit_choice, seat_choice, asked_about_profile, disclosed_personal_detail, boundary_set, second_meeting_interest.
+Choices add small, capped changes and set explicit flags. A single suspicious question should not lock a route. In the demo, route differences mostly affect tone, internal narration, which questions are asked, and what the protagonist notices. All routes can reach the café if the player agrees.
+Facts versus interpretations
+Recorded fact
+Possible interpretation A
+Possible interpretation B
+Mara suggests a café quickly.
+She likes spontaneous plans and is free today.
+She had a plan ready and wants to set the pace.
+She notices nervousness.
+She is perceptive and considerate.
+She watches reactions closely.
+She changes topic after a personal question.
+She is shy or protecting privacy.
+She is avoiding a detail.
+She knows a drink on the menu.
+She likes the café.
+She researched the venue beforehand.
+The engine should record facts separately from the protagonist’s interpretations. A later clue may change the interpretation without changing what actually happened.
+4. Demo flow
+Bedroom: wake, inspect room, phone, first app notification.
+Hesitation: open the app or delay; internal reaction to the familiar cycle.
+Second notification: Mara’s match/message gives the player a reason to engage.
+First chat: short back-and-forth, humour, personal boundaries, conversational chemistry.
+Invitation: same-day café plan; accept, negotiate, delay, or decline.
+Getting ready: outfit choice and reflection about why the player is going.
+Journey and arrival: short transition, with punctuality flavour if desired.
+Café date: branching topics, awkwardness, warmth, one ambiguous detail, boundary moment.
+Demo endpoint: unresolved but human impression and optional message afterward.
+5. Opening script — the bedroom
+Visual: close, quiet framing. Start with light on the wall or pillow edge, then the phone vibrating on a bedside surface. The protagonist is awake enough to notice it but not motivated to move. Optional hotspots: PHONE, WINDOW, MONITOR, CLOTHES ON CHAIR.
+NARRATION: “For a few seconds, I don’t remember what I was supposed to do today.”
+NARRATION: “Then my phone vibrates, and the day remembers me first.”
+Optional room interactions
+PHONE: “The screen lights up. Nothing urgent. Nothing that needs answering this second.”
+WINDOW: “The glass reflects more of the room than the view outside. The street is carrying on without me.”
+MONITOR: “Black screen. A faint reflection of the bed. Whatever I was doing last night can wait.”
+CLOTHES: “A chair has become a wardrobe by administrative default.”
+These interactions establish mood and voice, not a diagnosis. The protagonist is lonely or tired, not automatically in crisis.
+First notification
+PHONE NOTIFICATION: “Nearside — Someone liked you.”
+NARRATION: “A notification. The kind that promises absolutely nothing and still manages to ask for a little hope.”
+Choice A — Open app now. Set app_opened_first=true; curiosity rises slightly.
+Choice B — Ignore it for a while. Set delayed_response=true. Let room tone and optional interactions play; no penalty.
+Choice C — Dismiss notification. Set notification_dismissed=true. A second notification can still appear later, but do not force the player to open the app.
+The familiar cycle
+If the player opens the app, show ordinary traces of previous conversations: a chat that faded, a match with no reply, and a new notification. Keep names fictional and interface restrained.
+NARRATION: “There was a time when a match felt like something had happened.”
+NARRATION: “Now it’s mostly a tiny administrative task that might eventually become disappointment.”
+NARRATION: “Say hello. Ask a question. Try not to sound like you’re asking for an interview. Wait. Pretend you didn’t check.”
+PHONE NOTIFICATION: “Nearside — New message.”
+NARRATION: “Another one. All right. That is technically different.”
+If the player muted or dismissed the first notification, allow them to discover the new message by opening the app manually. Waiting must not break progression.
+6. Mara’s profile and first messages
+Profile image: dark, muted, face partly obscured; not a polished glamour shot. Profile text (provisional): “I like quiet cafés, bad horror films, and people who can sit in silence without trying to fix it.” Optional second line: “I have a talent for ordering the one thing on the menu that looks better in the photo.”
+MARA (MESSAGE): “Okay, important question. Is your profile photo intentionally mysterious, or did you just not want to take another one?”
+Response options
+PLAYER — playful: “It’s called building a brand. The brand is “doesn’t know where to put their hands in photos.””
+MARA: “Strong brand. Very relatable. Mine is “look away from the camera and hope that counts as a personality.””
+PLAYER — dry: “I was going for “person who has never been photographed under normal circumstances.””
+MARA: “Then I think you’ve achieved it. Congratulations, genuinely.”
+PLAYER — direct: “I just don’t take many photos. What made you message me?”
+MARA: “Honestly? You sounded like a person. That’s rarer on here than it should be.”
+PLAYER — guarded: “Depends. Are you collecting evidence?”
+MARA: “Only for a very boring case. The suspect is bad lighting.”
+Tone/state: playful may add warmth and openness; direct adds curiosity and a boundary signal; guarded adds guardedness but Mara accepts the joke. None of these options proves the player’s personality.
+Natural follow-up
+MARA: “Your profile says you like [a real profile interest]. Is that something you actually do, or something you put there to look employable?”
+PLAYER — playful: “A bit of both. I contain multitudes, most of them poorly organised.”
+MARA: “That’s comforting. I was worried everyone on here had a five-year plan.”
+PLAYER — honest: “I do like it. I just don’t know if I’m interesting enough to make it a conversation.”
+MARA: “I think the bar is lower than that. You can start with “I like it” and we’ll see where the wheels come off.”
+PLAYER — suspicious: “Do you always interview people this quickly?”
+MARA: “No. Sometimes I make them do a written test. This is the relaxed version.”
+MARA: “I was going to delete this app again tonight, actually.”
+PLAYER: “Why didn’t you?”
+MARA: “I had a very convincing speech prepared. Then I got distracted and forgot to delete it.”
+MARA: “Also, your profile made me laugh. Not in a “laughing at you” way. I should probably have led with that.”
+If the player asks what she wants
+PLAYER: “What are you actually hoping to find on here?”
+MARA: “Something that feels easy to talk to. Not effortless. Just… not like I’m trying to sell myself to a stranger.”
+PLAYER — hopeful: “That sounds nice.”
+MARA: “It does, doesn’t it? Which is probably why the app keeps making it feel like a job.”
+PLAYER — cynical: “That sounds optimistic for someone about to delete the app.”
+MARA: “I’m allowed one contradictory opinion per day. I used today’s early.”
+PLAYER — guarded: “I don’t know what I’m looking for yet.”
+MARA: “That’s a fair answer. Better than pretending you’ve got it all worked out.”
+If asked whether she wants something serious, Mara says: “I’d like to meet someone I actually want to see again. I don’t think I can know much more than that before meeting them.” No instant promises.
+7. The invitation
+MARA: “This might be a slightly strange question.”
+PLAYER: “Those are usually the best ones.”
+MARA: “There’s a café I like. It’s a little tucked away, kind of downstairs from the street. I’m free this afternoon. Would you want to meet there?”
+MARA: “No pressure, by the way. I know meeting a stranger because an app said so is a weird thing to do.”
+MARA: “We could just keep talking. Or not. I won’t be offended if today isn’t your day.”
+Invitation branches
+OPTION A — accept warmly: “Yeah. I’d like that. What time?”
+MARA: “How about four? Gives us time to become different people before then.”
+OPTION B — flirt: “A downstairs café? Are you trying to make this sound like the beginning of a mystery?”
+MARA: “I was going for “quiet place with good tea.” Mystery is included at no extra charge.”
+OPTION C — ask details: “What’s the place called? And is it busy?”
+MARA: “It’s called The Lantern Room. Usually quiet around four. I can send you the address so you can check it out.”
+OPTION D — set a boundary: “I’d rather meet somewhere public and easy to find for a first date.”
+MARA: “That’s completely fair. The Lantern Room is public, but if you’d rather pick somewhere more central, I’m happy to.”
+OPTION E — delay: “I’m not sure about today. Can we talk a little more first?”
+MARA: “Of course. We don’t have to turn a conversation into a calendar invitation.”
+OPTION F — decline: “I don’t think I’m up for meeting today, but thanks for asking.”
+MARA: “No worries. I’m glad I asked. And I hope your day gets a bit better, even if it doesn’t involve a suspicious downstairs café.”
+Decline should be a complete short branch, not a forced route back to the date. Delay can leave the conversation open. The canonical demo route accepts.
+Logistics and ambiguity
+MARA: “I’ll send the pin. If the map decides to lead you into a wall, it’s not my fault.”
+PLAYER: “That’s reassuring.”
+MARA: “I’m very good at reassurance. Less good at directions.”
+If asked how she knows the café, she says she has been a few times and likes that it is quieter than the main strip. Her drink recommendation should feel ordinary, not like proof of surveillance. Record only that she knows the venue and likes a menu item.
+8. Getting ready and the journey
+NARRATION: “It’s not the outfit that takes time. It’s deciding whether this is worth the effort.”
+Outfit choice (cosmetic, no hidden attraction score):
+Comfortable — “If this is awkward, at least I’ll be awkward in something I can breathe in.”
+Put-together — “No harm in looking like I meant to leave the house.”
+Familiar / low effort — “It’s a coffee, not a diplomatic summit.”
+NARRATION: “I look like myself. That should be enough. I spend another minute checking anyway.”
+The player may reread the address, reread Mara’s last message, or put the phone away. Then a short street transition: muted traffic, shopfront reflections, the entrance a little below street level. No ominous sting.
+NARRATION — hesitant: “I could still turn around. The thought is comforting, mostly because I don’t actually want to.”
+NARRATION — warm: “It has been a while since I went somewhere because I wanted to meet someone, rather than because I had already promised.”
+9. The café — arrival and settling in
+Mara is already there or arrives within a minute depending on the punctuality flag. She resembles her profile but is less composed in person: dark layers, hair partly falling across her face, reserved posture that changes when she notices the protagonist. She tries to look composed, then seems to wonder if she succeeded.
+MARA: “Hi. You made it.”
+PLAYER — playful: “Against the map’s best efforts.”
+MARA: “I knew it. The map is jealous.”
+PLAYER — shy: “Hi. Sorry, I wasn’t sure if I was in the right place.”
+MARA: “I did worry the entrance looked like it belonged to a storage room. It has that energy.”
+PLAYER — guarded: “This is the café?”
+MARA: “It is. If it turns out to be a very elaborate trap, I’ll be just as embarrassed as you.”
+She smiles at her own joke, then wonders if it landed. Keep the scene ordinary. She offers the player a choice of seat.
+MARA: “Do you want to sit by the window, or would you rather have a little more space?”
+Window seat: more intimate and exposed. Side table: quieter and more room. Neither is the correct answer.
+Beat 1 — Settling in
+MARA: “I had a whole opening line planned.”
+PLAYER: “What happened to it?”
+MARA: “You arrived and I forgot it. So, already a successful evening for my brain.”
+PLAYER — teasing: “Was it good?”
+MARA: “It was incredible. Historians would have argued about it for centuries.”
+PLAYER — kind: “You can still use it. I’ll pretend to arrive again.”
+MARA: “No, no. It would lose the natural spontaneity that made it terrible.”
+PLAYER — cool: “That’s all right. I didn’t prepare one either.”
+MARA: “Good. We can both be disappointing at the same time.”
+Route effect: teasing raises playful warmth; kindness increases comfort; coolness keeps pacing slower. These are tone shifts, not locked routes.
+Beat 2 — Ordering
+MARA: “Have you looked at the menu, or are you also going to make a life-changing decision based on the pictures?”
+PLAYER: “I usually choose the thing I can pronounce.”
+MARA: “That’s a sound system. Mine is choosing something, then wondering if the other thing would’ve been better.”
+PLAYER: “So you regret every drink?”
+MARA: “Not every drink. Only the ones I ordered while someone was watching.”
+PLAYER — tea: “Tea, I think.”
+MARA: “Good choice. I was going to get tea too, but now I have to pretend I wasn’t copying you.”
+PLAYER — coffee: “Coffee. I need all the help I can get.”
+MARA: “Fair. I respect a beverage with a job.”
+PLAYER — sweet drink: “Something sweet. I have no dignity to defend.”
+MARA: “Excellent. I’ll try not to judge you. I make no promises about the cake.”
+PLAYER — unsure: “I haven’t decided.”
+MARA: “We can take a minute. The menu isn’t going anywhere. Probably.”
+She recommends but does not order for the protagonist. This small beat establishes her goofy, mildly annoying streak without making her a caricature.
+Beat 3 — Dating apps
+MARA: “Can I ask something without making this sound like a job interview?”
+PLAYER: “You’ve already asked at least three questions. Go on.”
+MARA: “How long have you been on that app?”
+PLAYER — cynical: “Long enough to recognise the exact moment someone stops replying.”
+MARA: “The slow fade. They could at least send a little certificate.”
+PLAYER — honest: “On and off. I keep thinking it might be different if I try again.”
+MARA: “I know that feeling. You get tired of it, then one conversation is decent and you start making excuses for the app.”
+PLAYER — guarded: “Why are you asking?”
+MARA: “I was trying to find out whether we both hate it equally. I can stop asking if you’d rather not talk about it.”
+PLAYER — boundary: “I’d rather not compare bad dates on the first one.”
+MARA: “That’s fair. We can talk about literally anything else. The weather has done nothing wrong.”
+If the protagonist describes ghosting, Mara empathises without promising she would never do it. If the player sets a boundary, she moves on.
+Beat 4 — Why she messaged
+PLAYER: “You said my profile made you laugh. What part?”
+MARA: “The line about [real profile detail]. It sounded like something you’d say out loud, not something a committee approved.”
+PLAYER — flattered: “That’s oddly specific. I’ll take it.”
+MARA: “Please do. I was trying to give a compliment without making it weird.”
+PLAYER — suspicious: “You got all that from one profile?”
+MARA: “No. I got that it made me smile. The rest is me guessing. I’m not secretly a detective.”
+This matters: Mara admits the limits of what she knows. Later unusually precise knowledge becomes meaningful only if there is evidence beyond this scene.
+Beat 5 — Mara’s interests
+PLAYER: “What do you do when you’re not on the app?”
+MARA: “Very glamorous things. I make tea and forget it’s there. I watch films I complain about. Sometimes I walk until I realise I don’t know where I am, which sounds more poetic than it is.”
+PLAYER: “What kind of films?”
+MARA: “Horror, mostly. The bad ones are easier to love. You can tell the director cared, even when the monster looks like a damp curtain.”
+PLAYER — interested: “Do you like being scared?”
+MARA: “When I know I’m allowed to stop being scared afterwards.”
+PLAYER — teasing: “That’s a suspiciously sensible answer for a horror fan.”
+MARA: “I’m full of sensible answers. I save them for first dates so people don’t discover my true nature.”
+On first play this should land as a joke, not a villain tell. Do not add sinister music or a knowing camera zoom.
+Beat 6 — A small vulnerability
+MARA: “I almost cancelled, by the way.”
+PLAYER: “Why?”
+MARA: “I got dressed, then sat on my bed for twenty minutes trying to convince myself I was tired. I wasn’t even that tired.”
+PLAYER — empathetic: “I nearly didn’t come either.”
+MARA: “That makes me feel a little less ridiculous. Not that I was asking you to fix it.”
+PLAYER — light: “I had to negotiate with myself too. It was a difficult meeting.”
+MARA: “Who won?”
+PLAYER: “Apparently the person who wanted tea.”
+MARA: “A terrifying negotiator.”
+PLAYER — guarded: “I don’t usually tell people that kind of thing this early.”
+MARA: “You don’t have to. I only said it because it was true, not because you owe me the same.”
+This is a crucial boundary-respecting beat. It may be sincere. The story becomes stronger if later events complicate the memory rather than simply revealing that every early kindness was fake.
+Beat 7 — The ambiguous detail
+The café has a narrow window and a table catching warm light. Mara casually recommends a drink. This is the demo’s main ambiguous detail; do not add several others.
+MARA: “If you get the tea, the one with the orange peel is good. The other one tastes like someone described a garden from memory.”
+PLAYER — curious: “You sound like you’ve reviewed the entire menu.”
+MARA: “I have strong opinions about very unimportant things.”
+PLAYER — suspicious: “You come here a lot?”
+MARA: “A few times. It’s quiet. I like places where you don’t have to compete with the music to hear someone.”
+PLAYER — playful: “So you brought me here because you can hear me?”
+MARA: “That was the plan, yes. It would’ve been awkward if I had to lip-read the entire date.”
+Later evidence may show that Mara researched a location before presenting it as spontaneous. The fact alone does not prove motive. Here, the drink preference simply reads as familiarity.
+Beat 8 — The protagonist’s life
+MARA: “How have your days been lately?”
+PLAYER — routine: “Mostly the same. Work, home, phone, sleep. Repeat.”
+MARA: “I know that loop. Sometimes you only notice how small it’s got when you try to explain it to someone.”
+PLAYER — busy: “A bit full-on, actually. I haven’t had much time to think.”
+MARA: “That can be its own kind of tiring. You don’t have to give me the full report.”
+PLAYER — upbeat: “Pretty good. I’m trying to do more things instead of sitting around.”
+MARA: “Then this is a point in favour of doing things. Even if the thing is drinking tea with a stranger.”
+PLAYER — private: “I’d rather not get into work tonight.”
+MARA: “Okay. What would you rather talk about?”
+Mara must respect a direct boundary in the demo. If she asks a follow-up, it should be an invitation, not pressure.
+Beat 9 — The question that nearly lands wrong
+MARA: “Are you always this hard to read, or am I just doing an impressive job of making this awkward?”
+PLAYER — honest: “I’m still deciding how comfortable I am.”
+MARA: “Fair. I asked that badly. You don’t have to perform being comfortable for me.”
+PLAYER — teasing: “Maybe you’re just not as charming as you think.”
+MARA: “Devastating. I’ll have to update my résumé.”
+PLAYER — sharp: “That’s a pretty personal thing to ask someone you’ve just met.”
+MARA: “You’re right. Sorry. I meant it as a joke, but it didn’t land that way.”
+If the player is repeatedly hostile, Mara may grow quieter and suggest changing topic, but she does not retaliate here. A confrontation route must develop from a pattern, not a single sharp line.
+Beat 10 — Releasing tension
+MARA: “That cake has been cut into a shape no cake should have to experience.”
+PLAYER: “Maybe it’s modern art.”
+MARA: “Then I don’t understand the art. I’d still eat it.”
+PLAYER: “You use humour to avoid silence?”
+MARA: “Sometimes. Silence is fine. I just panic when I think someone thinks the silence is my fault.”
+PLAYER — reassuring: “I don’t mind quiet.”
+MARA: “Good. Then I’ll try not to fill every gap with cake criticism.”
+This supports the motif that Mara redirects tension toward an activity. Early on, it is ordinary social grace; later, similar redirection may also serve as avoidance or control.
+Beat 11 — First impression
+NARRATION — neutral: “She wasn’t what I expected from the photo. Or maybe the photo was just a bad way to meet a person.”
+NARRATION — neutral: “She was funny in a slightly embarrassing way. She listened. She changed the subject when I asked her to.”
+NARRATION — neutral: “It wasn’t a perfect date. That might be why it felt real.”
+NARRATION — guarded: “Nothing had happened that I could point to. I just hadn’t decided what I thought of her yet. That was allowed.”
+NARRATION — warm: “I had spent the walk here preparing for an awkward hour. I hadn’t prepared for wanting it to last a little longer.”
+Select one ending reflection based on accumulated tone; do not display all three.
+Beat 12 — Ending the date
+MARA: “I should probably let you go before I start reviewing the furniture.”
+PLAYER — warm: “I had a good time.”
+MARA: “Me too. I was worried I would be very strange in person.”
+PLAYER: “You were strange in person.”
+MARA: “Right. Excellent. My brand is consistent.”
+PLAYER — sincere: “I mean it in a good way.”
+MARA: “I know. I think.”
+Second-meeting branches
+PLAYER — enthusiastic: “I’d like to see you again.”
+MARA: “I’d like that. Maybe somewhere with less complicated stairs next time.”
+PLAYER — measured: “I’d be open to meeting again. I’d rather take things slowly.”
+MARA: “Slow is fine. We only just met. I don’t want to skip the part where we find out if we actually get along.”
+PLAYER — uncertain: “I’m glad we met. I’m not sure yet what I want.”
+MARA: “That’s okay. You don’t have to decide on the walk home.”
+PLAYER — decline: “I don’t think it’s a match for me, but I appreciate meeting you.”
+MARA: “Thanks for telling me honestly. I hope you get home safe.”
+Even the decline route preserves Mara’s dignity. She can feel disappointed, but the player is not punished for saying no.
+Demo endpoint
+The canonical route ends outside the café or on the first steps of the walk home. The street is ordinary. After a short delay, Mara messages the player unless they declined or chose not to exchange details.
+MARA (MESSAGE): “I had a nice time. Also, I have just realised I spent ten minutes complaining about cake. Sorry about that.”
+Reply options: “It was a very compelling cake review.” / “I had a nice time too.” / “Thanks for meeting me.” / Leave the message unanswered for now.
+End card: “END OF DEMO — THE FIRST MATCH”. Warm routes feel hopeful; guarded routes remain unresolved. The facts stay the same while the impression varies.
+10. Branch map and consequences
+Choice
+Immediate result
+Flag/state
+Later use
+Open app now
+Read first notification early
+app_opened_first; curiosity +1
+Inner narration variation
+Delay/dismiss
+Discover next message later
+delayed_response / notification_dismissed
+Changes pacing; no penalty
+Playful message
+Banter starts quickly
+warmth +1; openness +1
+Teasing variants
+Direct question
+Mara explains why she messaged
+boundary_signal +1; curiosity +1
+More direct café questions
+Guarded joke
+Mara accepts humour and gives space
+guardedness +1
+Cautious route without hostility
+Accept invitation
+Agree to meet at 4 pm
+date_agreed=true
+Canonical demo
+Ask for public location
+Mara accepts boundary
+boundary_signal +1; location_confirmed=true
+Future boundary memory
+Delay meeting
+Keep chatting or pause
+date_deferred=true
+Optional short ending
+Decline meeting
+Mara accepts answer
+date_declined=true
+Complete non-date branch
+Outfit choice
+Changes internal narration
+outfit_choice
+Cosmetic flavour only
+Seat choice
+Changes staging
+seat_choice
+Comfort/tone variation
+Set boundary in café
+Mara apologises or changes topic
+boundary_signal +1
+Later compare respectful vs violating behaviour
+Agree to meet again
+Tentative next step
+second_meeting_interest
+Future chapter hook
+11. Continuity ledger: what is true after the demo?
+The protagonist is lonely, bored, or ambivalent about dating apps; the precise feeling depends on narration choices.
+Mara matched and began a playful conversation based on visible profile information.
+Mara was willing to meet the same day and suggested a quiet café.
+Mara knew the café and had a drink recommendation; the reason is not established as suspicious.
+The date included humour, a small vulnerability, awkwardness, and at least one boundary-respecting moment.
+The protagonist’s impression of Mara is player-dependent and must not be overwritten by fixed narrator judgement.
+No proof of manipulation, stalking, or malicious intent has been discovered in the demo.
+What remains unknown
+Whether Mara planned anything beyond choosing a café she likes.
+Whether her vulnerability is strategic, sincere, or both.
+Whether the protagonist’s loneliness makes the date unusually meaningful.
+Whether later inconsistencies are coincidence, poor communication, deliberate manipulation, or a mixture.
+12. Later story possibilities connected to the opening
+Escalation across acts
+Act I — The Stranger: dates and messages become familiar; oddities remain explainable; the player chooses how much to trust.
+Act II — The Only One: jealousy begins as vulnerable insecurity, then becomes requests to change plans, withhold information, or prioritise Mara. Help becomes entangled with obligation.
+Act III — The Truth: the protagonist discovers patterns of isolation, dishonesty, interference with opportunities, or selective withdrawal of support. Evidence and suspicion must remain distinct.
+Motifs to echo
+Tea or a specific drink: attentiveness can later feel intimate or pre-planned.
+Quiet cafés: first a comfortable place; later a memory of a boundary being respected—or overlooked.
+Redirecting tension toward food, a walk, or a stall: early social grace may later resemble avoidance or control.
+Phone notifications: first they offer hope; later they may become pressure or interruption.
+An ice-cream stall researched in advance: the discovery may change the meaning of a “spontaneous” outing, but does not prove motive alone.
+A warm joke repeated later: its meaning changes because the relationship has changed, not because the original moment must have been fake.
+Possible later endings (not demo scope)
+Rejection — “Oh. That’s a Shame.” The protagonist preserves independence and leaves after recognising the pattern.
+Confrontation — “You Were Supposed to Care.” A repeated pattern of hostility and control leads to dangerous conflict; not triggered by one rude line.
+Betrayal — “Everything You Gave Her.” Attachment and dependency have accumulated costs. Consequences are serious and authored, never randomly selected by AI.
+The Life You Kept. The protagonist cares about Mara but retains judgement, boundaries, and support; the truth hurts but they can leave and rebuild.
+Third-playthrough secret ending — “Thanks for Playing, You Deserve It.” A carefully authored alternate path permits genuine change through costly accountability and respect for independence; it does not imply that love fixes every harmful partner.
+13. Future AI dialogue rules
+When dynamic dialogue is added, it can vary phrasing, react to freeform player input, and suggest directions. It cannot invent evidence, bypass authored route logic, or claim the player did something that was never recorded.
+Provide current scene goal, character voice, known facts, player-known facts, current state, recent dialogue, and allowed topics.
+Require response plus structured intent tags and proposed state changes.
+Validate state changes against an allowlist; reject invented facts, impossible knowledge, unearned intimacy, and unauthorised transitions.
+Record only events that actually happened. A character cannot claim the player made a promise unless the promise flag exists.
+Provide authored fallback dialogue when the model is unavailable or a response fails validation.
+Let the creator preview, edit, reject, and undo AI-authored content.
+14. First demo production checklist
+☐ Bedroom has at least three optional hotspots and a phone notification.
+☐ First notification can be opened, ignored, or dismissed without breaking progression.
+☐ Second notification and match can be discovered after a delay.
+☐ Mara’s opener uses only information visible on the profile.
+☐ Message exchange supports playful, direct, guarded, and sincere approaches.
+☐ Invitation supports accept, ask details, set boundary, delay, and decline.
+☐ Declining or delaying does not force a date; canonical path reaches café.
+☐ Outfit choice changes flavour text, not hidden attraction.
+☐ Café includes seat choice, ordering, app conversation, interests, vulnerability, one ambiguous detail, boundary moment, and ending.
+☐ State inspector shows flags and separate variables.
+☐ Demo works without a live AI model or external API key.
+☐ Routes are tested and save/reload preserves project content.
+15. Starter instruction for your coding agent
+Use this document alongside the technical build specification. The technical specification defines how the studio works; this story bible defines what the opening demo should feel like and what its facts are.
+Implement the opening demo from “The First Match” story bible. Use the bedroom-to-café sequence as the first vertical slice. Keep dialogue and state transitions data-driven so scenes can be edited without source-code changes. Implement the listed branches that fit the MVP and clearly mark simplified branches. Preserve ambiguity: no early confirmation that Mara is dangerous, no forced date after refusal, and no AI-generated plot facts. Make the café feel like a real first date with warmth, awkwardness, humour, silences, and a small number of ambiguous details.
+Final note
+This is a coherent first pass, not a locked final script. Test whether Mara feels like someone the protagonist might genuinely want to see again. If she feels obviously dangerous already, remove a clue. If she feels like a generic chatbot, give her specific preferences, small embarrassments, and moments where she does not know exactly what to say. The aim of the demo is not to prove the twist; it is to make the player care enough that the eventual twist changes the meaning of something they remember.
