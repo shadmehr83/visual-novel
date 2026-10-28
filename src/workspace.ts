@@ -1,6 +1,8 @@
+import { dockPanelSchema } from "./docking";
 import { z } from "zod";
 import { useState, useEffect } from "react";
 export const workspaceSchema = z.object({
+  docks: z.record(dockPanelSchema).default({}),
   splitWorkspace: z.boolean().default(false),
   secondWorkspace: z.enum(["editor", "scenes", "dialogues", "devices", "updates"]).default("dialogues"),
   splitDirection: z.enum(["side-by-side", "stacked"]).default("side-by-side"),

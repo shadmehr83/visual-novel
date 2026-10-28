@@ -175,7 +175,7 @@ export function Zones({
           Add rain zone
         </button>
         {e.rainZones?.map((r, i) => (
-          <div className="clue" key={r.id}>
+          <div className="clue" data-zone-id={r.id} key={r.id}>
             <label>
               Rain zone name
               <input
@@ -245,7 +245,7 @@ export function Zones({
           ))}
         </div>
         {e.lights?.map((l, i) => (
-          <div className="clue" key={l.id}>
+          <div className="clue" data-zone-id={l.id} key={l.id}>
             <label>
               Light name
               <input

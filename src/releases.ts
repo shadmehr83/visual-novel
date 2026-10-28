@@ -1,4 +1,4 @@
-export const ENGINE_VERSION = "2.7.0";
+export const ENGINE_VERSION = "2.8.0";
 export type ReleaseFeature = {
   name: string;
   description: string;
@@ -19,7 +19,14 @@ const f = (
   action?: string,
 ): ReleaseFeature => ({ name, description, steps: path.split(" → "), action });
 export const releases: Release[] = [
-  {version:"2.7.0", name:"Populated artwork folders and shared split workspaces", date:"2026-10-29", features:[
+  {version:"2.8.0", name:"Direct effect settings, docking windows and studio search", date:"2026-10-29", features:[
+    f("Active layers open their own settings", "Click an effect name in Active to open its settings, including named light, motion and hinge layers. The independent checkbox still toggles the layer; opening settings never enables or disables it.", "Editor → Active → Click an effect name", "active"),
+    f("Floating panels, restore and snap docking", "Panel title bars have small Pop out and Move icons. Float, resize, restore or dock the library, controls, preview, dialogue and workspace panes. Drag near an edge to preview snapping; restore chooses another free dock if the old one is occupied. Separate effects and properties docks can float independently.", "Panel title bar → Pop out or Move → Drag to a highlighted edge; Windows & docking → Restore all window positions", "windows"),
+    f("Movable dialogue editor", "Place dialogue above the scene, at an edge, in a floating window or in a separate split column. The same dialogue, notes, items, state and event log remain synchronized with the preview.", "Dialogue editor title bar → Move → Dock top, Floating window or Split beside workspace", "dialogue"),
+    f("Main studio feature search", "Search features, settings, scene names, dialogue, artwork and current effects from the main header. Results open the correct workspace or setting and highlight the requested control. Search stays local and does not execute an effect toggle.", "Search features or Ctrl+K / Command+K → Type a feature → Select a result"),
+    f("Specific help for new workspace tools", "Delayed hover descriptions explain pop-out, restore, docking, snap targets, shared workspace selectors, search results and dialogue artwork instead of repeating a generic description.", "Hover a new icon, button or selector for a moment → Read its description", "appearance")
+  ]},
+  {version:"2.7.0", commit:"38906b4", name:"Populated artwork folders and shared split workspaces", date:"2026-10-29", features:[
     f("Recovered artwork library and GitHub image folders", "Older saved projects now import all image dependencies before adding new sub-scenes, fixing the Missing sub-scene background update failure. Restore artwork retries a focused merge with a recovery copy. Every published image and all available generation originals are also archived as ordinary files in GitHub folders.", "Editor → Restore artwork → Assets → Artwork folder; GitHub → artwork"),
     f("Shared side-by-side and stacked workspaces", "Split view opens two workspaces sharing one project and selected dialogue. Edit alongside scene or dialogue maps, device settings or update history. Choose the pair, swap sides and resize their divider; playback temporarily uses one game view.", "Studio workspaces → Split view → Choose Second workspace → Drag the divider"),
     f("Artwork selection directly from dialogue maps", "Select a dialogue box and choose its background image from populated artwork folders in the map details. Each dialogue can have its own temporary image without changing a shared view or the main scene background. The companion editor previews that same dialogue immediately.", "Dialogue advanced → Select a box → Image for this dialogue → Choose a folder and image", "dialogues")

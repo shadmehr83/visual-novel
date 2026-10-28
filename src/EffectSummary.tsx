@@ -7,6 +7,23 @@ type Activity = {
   paused?: boolean;
   toggle: (s: Scene) => void;
 };
+export type EffectDestination = { action: string; label?: string; zone?: string };
+export function activitySetting(scene: Scene, id: string): EffectDestination {
+  if (id === "rain") return {action:"effect:Rain",label:"Intensity / density"};
+  if (id === "glass") return {action:"effect:Rain",label:"Rain on glass"};
+  if (id === "grading") return {action:"effect:Lighting",label:"Brightness"};
+  if (id === "tintOpacity") return {action:"effect:Lighting",label:"Ambient tint"};
+  if (id === "light") return {action:"effect:Lighting",label:"Soft light intensity"};
+  if (id === "lightLoop") return {action:"effect:Lighting",label:"Loop lighting"};
+  if (id === "vignette") return {action:"effect:All",label:"Soft vignette"};
+  if (id === "phone") return {action:"devices"};
+  if (id === "items") return {action:"items"};
+  if (id === "camera" || id === "bob") return {action:"effect:Camera",label:id === "bob" ? "Camera bob" : "Depth / camera movement"};
+  if (id === "keyframes") return {action:"tools",label:"Keyframes"};
+  if (scene.effects.lights?.some(l=>l.id===id)) return {action:"effect:Lighting",zone:id};
+  if (scene.effects.motionZones?.some(l=>l.id===id)) return {action:"effect:Motion",zone:id};
+  return {action:"effect:Cinematics",zone:id};
+}
 export function activities(scene: Scene, reduced = false): Activity[] {
   const e = scene.effects;
   const flag = (
@@ -171,10 +188,12 @@ export function EffectSummary({
   scene,
   project,
   update,
+  onOpen,
 }: {
   scene: Scene;
   project: Project;
   update?: (f: (s: Scene) => void) => void;
+  onOpen?: (destination: EffectDestination) => void;
 }) {
   const reduced =
     project.settings.reducedEffects ||
@@ -188,10 +207,11 @@ export function EffectSummary({
         enable the layer to restore them. Counts layers, not GPU cost.
       </p>
       {items.map((item) => (
-        <label className="state-row" key={item.id}>
-          <span>{item.name}</span>
+        <div className="state-row" key={item.id}>
+          {onOpen ? <button className="activity-settings-link" onClick={()=>onOpen(activitySetting(scene,item.id))} aria-label={"Open settings for " + item.name} data-help={"Open the settings for " + item.name + ". This does not change its enabled state. Use the separate toggle to turn the effect on or off."}>{item.name} ↗</button> : <span>{item.name}</span>}
           <input
             aria-label={"Enable " + item.name}
+            data-help={"Enable or disable " + item.name + " while retaining its saved settings. Click the effect name to open its controls."}
             type="checkbox"
             checked={item.enabled}
             disabled={!update}
@@ -200,7 +220,7 @@ export function EffectSummary({
           <b>
             {!item.enabled ? "Disabled" : item.paused ? "Paused" : "Enabled"}
           </b>
-        </label>
+        </div>
       ))}
       <p className="small muted">
         Scene audio tracks: {scene.audio?.length || 0}. Sound plays after you

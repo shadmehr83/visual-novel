@@ -3,6 +3,18 @@ export function specificHelp(
   element: HTMLElement,
 ): string | undefined {
   const name = label.toLowerCase().replace(/ exact value$/, "");
+  if (name === "main workspace") return "Choose the workspace in the first pane. When the selected workspace is already in the other pane, the panes exchange content; both still edit the same project.";
+  if (name === "second workspace") return "Choose what appears beside or below the main workspace. Select a map box in either pane to update the selected dialogue in the other.";
+  if (name === "workspace arrangement") return "Side by side divides the available width. One above the other divides the height. Drag the divider to give either workspace more room.";
+  if (name === "swap sides") return "Exchange the visual positions of the two workspaces without changing their contents, selection or story data.";
+  if (name === "close second workspace" || name === "single workspace") return "Hide the companion workspace and give the main workspace the full available area. Your project edits remain saved.";
+  if (name === "split view") return "Show two workspaces editing the same project. Choose Editor, scene map, dialogue map, devices or update history and resize them with the divider.";
+  if (name === "restore artwork") return "Add missing published images, repair saved outfit cards and populate artwork folders. Existing custom artwork and edits stay saved; a recovery copy is created.";
+  if (name.includes("dialogue background image") && !name.endsWith("folder")) return "Use this image for the selected dialogue’s temporary view. The main scene and other dialogues keep their own backgrounds; changing artwork clears masks tied to the previous image.";
+  if (name === "dialogue existing sub-scene") return "Reuse one of this scene’s saved temporary views for the selected dialogue, or return that dialogue to the main scene background.";
+  if (name.startsWith("pop out ")) return "Move this panel into a resizable floating window inside the studio. Drag its title near an edge to snap it into a dock. Restore returns it to its previous position.";
+  if (name.startsWith("restore ") && name.includes("window")) return "Return this window to its previous dock. If another panel occupies that dock, choose another free edge. Story content is unchanged.";
+  if (name.includes("resize workspace panes")) return "Drag this divider to redistribute width or height between the two workspaces, or use the arrow keys for five-percent steps.";
   if (name.includes("device return start")) return "First dialogue on the played route that enables Put phone away or Step back from computer.";
   if (name.includes("device return end")) return "Last dialogue with the put-away button available. The following dialogue continues on the device unless it has its own override.";
   if (name.includes("device return destination")) return "Choose the dialogue to revisit when the player puts the device down. Automatic finds their most recent choice menu; with none, hide the device and offer to reopen it.";

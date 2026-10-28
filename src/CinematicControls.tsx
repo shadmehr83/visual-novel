@@ -92,7 +92,7 @@ export function CinematicControls({
           const patch = (fn: (j: typeof joint) => void) =>
             update((s) => fn(s.joints![i]));
           return (
-            <details key={joint.id} open className="clue">
+            <details key={joint.id} data-zone-id={joint.id} open className="clue">
               <summary>{joint.name}</summary>
               <fieldset>
                 <legend>Dialogue activation range (optional)</legend>

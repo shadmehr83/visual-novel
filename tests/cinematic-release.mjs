@@ -12,6 +12,14 @@ try {
   await page.goto('https://cinematic-offline.test/?snapshot=github');
   await page.getByRole('button',{name:'Play story',exact:true}).waitFor();
   assert.equal(await page.getByLabel('Project title').inputValue(),'The First Match');
+  await page.getByRole('button',{name:/Search features/}).click();
+  await page.getByLabel('Search all studio features',{exact:true}).fill('rain on glass');
+  await page.keyboard.press('Enter');
+  await page.getByLabel('Rain on glass',{exact:true}).waitFor();
+  await page.getByRole('button',{name:'Pop out Dialogue editor',exact:true}).click();
+  await page.locator('[data-floating-panel="dialogue"]').waitFor();
+  await page.getByRole('button',{name:'Restore Dialogue editor',exact:true}).click();
+
   await page.getByRole('button',{name:/A small possibility.*dialogue nodes/}).click();
   await page.getByRole('region',{name:'Phone conversation'}).waitFor();
   await page.locator('.device-shell').evaluate(el=>Promise.all(el.getAnimations().map(animation=>animation.finished)));
@@ -44,5 +52,5 @@ try {
   await page.getByRole('button',{name:'Send response',exact:true}).click();
   await page.waitForFunction(()=>document.querySelector('.scene-in .message-you:last-of-type')?.textContent?.includes('My offline reply'));
   assert.deepEqual(errors,[]);
-  console.log('PASS: offline editor contains the new phone UI; its exported player animates a hinge, posts authored replies, and records a self-reply without a network connection or page errors.');
+  console.log('PASS: compressed offline editor opens search and floating dialogue panels; its exported player animates a hinge, posts authored replies, and records a self-reply without a network connection or page errors.');
 } finally { await browser.close(); }

@@ -55,7 +55,7 @@ export function WindTools({
         Add motion zone
       </button>
       {zones.map((w, i) => (
-        <div className="clue" key={w.id}>
+        <div className="clue" data-zone-id={w.id} key={w.id}>
           <label>
             Motion name
             <input

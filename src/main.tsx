@@ -4,6 +4,7 @@ import App from "./App";
 import "./style.css";
 import "./advanced.css";
 import "./devices.css";
+import "./docking.css";
 createRoot(document.getElementById("root")!).render(
   <RecoveryBoundary>
     <App />

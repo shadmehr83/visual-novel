@@ -1,6 +1,10 @@
 # Stillframe engine update history
 
-Current version: **2.7.0**. Earlier version numbers were assigned retrospectively from Git milestones. Directions below point to their current location; the in-app Update history tab also offers feature shortcuts. Dates use Australia/Sydney time. Project format remains schemaVersion 1.
+Current version: **2.8.0**. Earlier version numbers were assigned retrospectively from Git milestones. Directions below point to their current location; the in-app Update history tab also offers feature shortcuts. Dates use Australia/Sydney time. Project format remains schemaVersion 1.
+
+## v2.8.0 — Direct effect settings, docking windows and studio search (2026-10-29)
+
+Active effect names now open their settings independently of their toggles. Panel title bars can float, restore and dock windows with live drag-to-snap targets. Dialogue, preview, library, controls and both workspace panes support relocation; split effects/properties docks can float separately. A main Search features palette opens features, scene/dialogue/artwork entries and current settings, with destination highlighting and specific hover help. The single-file editor uses lossless code compression to stay within Cloudflare's asset limit while retaining original images and offline export. See [Window docking and studio search](WINDOW_DOCKING_AND_SEARCH.md).
 
 ## v2.7.0 — Populated artwork folders and split workspaces (2026-10-29)
 

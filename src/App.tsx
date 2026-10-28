@@ -1,3 +1,8 @@
+import { FeatureSearch } from "./FeatureSearch";
+import type { FeatureRoute } from "./searchIndex";
+import { PanelLayoutSettings } from "./PanelLayoutSettings";
+import { DockSurface, DockPanel } from "./DockPanels";
+import { panelLayout, type DockLayouts, type DockMode } from "./docking";
 import { WorkspaceSplit, WORKSPACES } from "./WorkspaceSplit";
 import { integrateContentUpdates } from "./contentUpdates";
 import { importPublishedArtwork } from "./libraryUpdate";
@@ -39,8 +44,8 @@ import { WorkspaceControls } from "./WorkspaceSettings";
 import { ResizeHandle } from "./ResizeHandle";
 import { CameraControls } from "./CameraControls";
 import { HoverHelp } from "./HoverHelp";
-import { EffectSummary, effectSummary } from "./EffectSummary";
-import { useEffect, useRef, useState } from "react";
+import { EffectSummary, effectSummary, type EffectDestination } from "./EffectSummary";
+import { useEffect, useRef, useState, useCallback } from "react";
 import {
   Layers,
   Film,
@@ -156,6 +161,7 @@ function Toggle({
       <span>{label}</span>
       <input
         type="checkbox"
+        aria-label={label}
         checked={value}
         onChange={(e) => onChange(e.target.checked)}
       />
@@ -176,6 +182,8 @@ export default function App() {
         } as React.CSSProperties)
       : undefined;
 
+  const setDocks = useCallback((update: React.SetStateAction<DockLayouts>) => setWorkspace(w => ({...w, docks: typeof update === "function" ? update(w.docks) : update})), [setWorkspace]);
+  function setPanelMode(id:string, mode:DockMode) { setDocks(old=>({...old,[id]:{...panelLayout(old,id), mode, ...(mode === "float" ? {returnTo:panelLayout(old,id).mode === "float" ? panelLayout(old,id).returnTo : panelLayout(old,id).mode} : {})}})); }
   const [project, setProject] = useState<Project>(() => savedProject());
   const [sceneId, setSceneId] = useState("cafe");
   const [nodeId, setNodeId] = useState("arrival");
@@ -184,16 +192,20 @@ export default function App() {
   const [placingLight, setPlacingLight] = useState<string | null>(null);
   const [tab, setTab] = useState("Scenes");
   const [effectPanel, setEffectPanel] = useState("All");
-  const [placement, setPlacement] = useState(() => {
+  const [placement, setPlacementState] = useState(() => {
     try {
       const saved = localStorage.getItem("stillframe-controls-placement");
-      return saved && ["right", "left", "float", "top"].includes(saved)
+      return saved && ["right", "left", "top"].includes(saved)
         ? saved
         : "right";
     } catch {
       return "right";
     }
   });
+  function setPlacement(next:string) {
+    if (next === "float") { setPanelMode("controls","float"); return; }
+    setPlacementState(next); setPanelMode("controls","home");
+  }
   const [floatPosition, setFloatPosition] = useState({
     x: Math.max(0, window.innerWidth - 320),
     y: 80,
@@ -224,6 +236,7 @@ export default function App() {
       localStorage.setItem("stillframe-controls-placement", placement);
     } catch {}
   }, [placement]);
+  const [revealControl,setRevealControl] = useState<{label?:string;zone?:string;panel?:string;key:number}|null>(null);
   const [inspector, setInspector] = useState("Atmosphere");
   const [bottom, setBottom] = useState("Dialogue");
   const [regionEditor, setRegionEditor] = useState<RegionEditor | null>(null);
@@ -691,7 +704,49 @@ export default function App() {
       dialogueMode: w.dialogueMode === "hidden" ? "pinned" : w.dialogueMode,
     }));
   }
+  function revealSettings(destination:EffectDestination) {
+    navigate(destination.action);
+    setRevealControl({label:destination.label,zone:destination.zone,panel:destination.action.startsWith("effect:")?destination.action.slice(7):undefined,key:Date.now()});
+  }
+  function ensurePanel(id:string) {
+    if(id === "workspace-second") setWorkspace(w=>({...w,splitWorkspace:true}));
+    if(["library","controls","effects","properties","dialogue","preview"].includes(id)) chooseMainWorkspace("editor");
+    if(id === "library") setWorkspace(w=>({...w,libraryCollapsed:false}));
+    if(id === "dialogue") {setWorkspace(w=>({...w,dialogueMode:w.dialogueMode === "hidden" ? "pinned" : w.dialogueMode}));setCollapseBottom(false);}
+    if(id === "effects" || id === "properties") setWorkspace(w=>({...w,splitDocks:true}));
+  }
+  function moveWindow(id:string,mode:DockMode) {ensurePanel(id);setPanelMode(id,mode);}
+  function openFeature(route:FeatureRoute) {
+    setModal("");
+    if(route.scene)chooseSharedDialogue(route.scene,route.node);
+    navigate(route.action);
+    if(route.node)setNodeId(route.node);
+    if(route.asset) {setTab("Assets");setAssetId(route.asset);setArtFolder("");setWorkspace(w=>({...w,libraryCollapsed:false}));}
+    if(route.target||route.zone||route.action.startsWith("effect:"))setRevealControl({label:route.target,zone:route.zone,panel:route.action.startsWith("effect:")?route.action.slice(7):undefined,key:Date.now()});
+  }
+  useEffect(()=>{
+    if(!revealControl || playing || (!revealControl.label&&!revealControl.zone&&!revealControl.panel))return;
+    let highlighted:HTMLElement|null=null;
+    const timer=setTimeout(()=>{
+      const normal=(s:string)=>s.trim().replace(/\s+/g," ").toLowerCase();
+      const nodes=[...document.querySelectorAll<HTMLElement>('[data-zone-id],[aria-label],label,h3,h4,summary,button')];
+      let target=revealControl.zone?nodes.find(el=>el.dataset.zoneId === revealControl.zone):revealControl.label?nodes.find(el=>normal(el.getAttribute('aria-label')||el.textContent||'') === normal(revealControl.label!)):undefined;
+      if(!target&&revealControl.panel)target=[...document.querySelectorAll<HTMLElement>('[data-effect-panel]')].find(el=>el.dataset.effectPanel===revealControl.panel&&el.getClientRects().length>0);
+      if(!target && revealControl.label)target=nodes.find(el=>el.getClientRects().length>0&&normal(el.getAttribute('aria-label')||el.textContent||'').includes(normal(revealControl.label!)));
+      if(!target)return;
+      for(let p:HTMLElement|null=target;p;p=p.parentElement)if(p instanceof HTMLDetailsElement)p.open=true;
+      target.scrollIntoView({block:'center',behavior:'smooth'});
+      const input=target.matches('input,select,textarea,button')?target:target.querySelector<HTMLElement>('input,select,textarea,button');
+      input?.focus({preventScroll:true});highlighted=target.closest<HTMLElement>('label,.clue,.property-section')||target;highlighted.classList.add('feature-reveal');
+      const floater=target.closest<HTMLElement>('[data-floating-panel]');if(floater)window.dispatchEvent(new CustomEvent('stillframe-reveal-panel',{detail:floater.dataset.floatingPanel}));
+    },80);
+    const remove=setTimeout(()=>highlighted?.classList.remove('feature-reveal'),2400);
+    return()=>{clearTimeout(timer);clearTimeout(remove);highlighted?.classList.remove('feature-reveal');};
+  },[revealControl,inspector,effectPanel,view,playing]);
   function navigate(action: string) {
+    if(action === "windows") {setModal("windows");return;}
+    if(action === "restore-artwork") {void restoreArtwork();return;}
+    if(action === "split-view") {setPlaying(false);setWorkspace(w=>({...w,splitWorkspace:true,secondWorkspace:view === w.secondWorkspace ? (view === "dialogues" ? "scenes" : "dialogues") : w.secondWorkspace}));return;}
     if (
       ["editor", "scenes", "dialogues", "devices", "updates"].includes(action)
     ) {
@@ -865,11 +920,12 @@ export default function App() {
               "workspace tools-" + workspace.toolsPlacement + " controls-" +
               placement +
               (workspace.libraryCollapsed ? " library-collapsed" : "") +
-              (workspace.splitDocks ? " split-docks" : "") +
+              (workspace.splitDocks && panelLayout(workspace.docks,"effects").mode === "home" && panelLayout(workspace.docks,"properties").mode === "home" ? " split-docks" : "") +
               (workspace.previewCustom ? " preview-custom" : "")
             }
           >
             {workspace.toolsPlacement === "left" && toolNavigation}
+            <DockPanel id="library">
             <aside className="library ui-pane" style={paneStyle("library")}>
               <ResizeHandle
                 label="Resize story library"
@@ -1226,6 +1282,7 @@ export default function App() {
                 </button>
               </div>
             </aside>
+            </DockPanel>
             <main
               ref={previewWindow.mainRef}
               className="ui-pane"
@@ -1236,8 +1293,8 @@ export default function App() {
                   Scenes <ChevronRight size={12} />
                   <b>{scene.title}</b>
                 </div>
-                {placement !== "right" && (
-                  <button onClick={() => setPlacement("right")}>
+                {(placement !== "right" || Object.values(workspace.docks).some(p=>p.mode!=="home")) && (
+                  <button data-help="Return all panels to their original dock positions. Story artwork and effect settings stay saved." onClick={() => {setDocks({});setPlacement("right");}}>
                     Reset panels
                   </button>
                 )}
@@ -1271,6 +1328,7 @@ export default function App() {
                   )}
                 </div>
               )}
+              <DockPanel id="preview">
               <section
                 ref={previewWindow.previewRef}
                 className={
@@ -1614,6 +1672,8 @@ export default function App() {
                 </div>
                 {!playing && previewWindow.handle}
               </section>
+              </DockPanel>
+              <DockPanel id="dialogue">
               <section
                 className={
                   "bottom-panel ui-pane " +
@@ -2066,7 +2126,9 @@ export default function App() {
                   </div>
                 )}
               </section>
+              </DockPanel>
             </main>
+            <DockPanel id="controls">
             <aside
               className="inspector ui-pane"
               data-panel={effectPanel}
@@ -2078,14 +2140,15 @@ export default function App() {
                   : {}),
               }}
             >
-              <div className="effects-dock" data-panel={effectPanel}>
+              <DockPanel id="effects" tools={workspace.splitDocks || panelLayout(workspace.docks,"effects").mode !== "home"}>
+              <div className="effects-dock" data-panel={effectPanel} data-inspector={inspector}>
                 <h3 className="dock-title">Effects & interactions</h3>
                 <div className="panel-layout">
                   <label>
                     Controls placement
                     <select
                       aria-label="Controls placement"
-                      value={placement}
+                      value={!playing && panelLayout(workspace.docks,"controls").mode === "float" ? "float" : placement}
                       onChange={(event) => setPlacement(event.target.value)}
                     >
                       <option value="right">Dock right</option>
@@ -2272,7 +2335,9 @@ export default function App() {
                   />
                 </fieldset>
               </div>
-              <div className="properties-dock">
+              </DockPanel>
+              <DockPanel id="properties" tools={workspace.splitDocks || panelLayout(workspace.docks,"properties").mode !== "home"}>
+              <div className="properties-dock" data-panel={effectPanel} data-inspector={inspector}>
                 <div className="panel-heading">
                   <span>
                     <SlidersHorizontal size={15} /> Scene properties
@@ -2389,6 +2454,7 @@ export default function App() {
                     />
                   ) : inspector === "Active" ? (
                     <EffectSummary
+                      onOpen={revealSettings}
                       scene={scene}
                       project={project}
                       update={(fn) =>
@@ -2740,6 +2806,7 @@ export default function App() {
                   )}
                 </fieldset>
               </div>
+              </DockPanel>
               {placement === "top" && (
                 <ResizeHandle
                   label="Resize top controls dock"
@@ -2757,6 +2824,7 @@ export default function App() {
                 <span className="live-dot" /> NON-DESTRUCTIVE EDITING
               </div>
             </aside>
+            </DockPanel>
           </div>
   );
   if (!loaded)
@@ -2785,9 +2853,9 @@ export default function App() {
           {
             ...previewWindow.style,
             "--library-size":
-              (workspace.libraryCollapsed ? 0 : workspace.libraryWidth) + "px",
-            "--controls-size": workspace.controlsWidth + "px",
-            "--top-dock-size": workspace.topDockHeight + "px",
+              (workspace.libraryCollapsed || (!playing && panelLayout(workspace.docks,"library").mode !== "home") ? 0 : workspace.libraryWidth) + "px",
+            "--controls-size": (!playing && panelLayout(workspace.docks,"controls").mode !== "home" ? 0 : workspace.controlsWidth) + "px",
+            "--top-dock-size": (!playing && panelLayout(workspace.docks,"controls").mode !== "home" ? 0 : workspace.topDockHeight) + "px",
             "--bottom-size": workspace.bottomHeight + "px",
             "--preview-scale": workspace.previewScale,
             "--ui-font": workspace.font,
@@ -2824,6 +2892,7 @@ export default function App() {
             />
             <span className="version">LOCAL PROJECT</span>
           </div>
+          <FeatureSearch project={project} scene={selected} onChoose={openFeature} disabled={playing}/>
           <div className="header-actions">
             <span className="save-status">
               <i className={status.startsWith("Saved") ? "saved" : ""} />
@@ -2884,7 +2953,8 @@ export default function App() {
         />
         <div className="visible-layout-controls">
           <label>Tools <select aria-label="Tools placement" value={workspace.toolsPlacement} onChange={e => setWorkspace(w => ({...w, toolsPlacement:e.target.value as "left" | "top"}))}><option value="left">Left</option><option value="top">Top</option></select></label>
-          <label>Controls <select aria-label="Quick controls placement" value={placement} onChange={e => setPlacement(e.target.value)}><option value="right">Right</option><option value="left">Left</option><option value="top">Top</option><option value="float">Floating</option></select></label>
+          <label>Controls <select aria-label="Quick controls placement" value={!playing && panelLayout(workspace.docks,"controls").mode === "float" ? "float" : placement} onChange={e => setPlacement(e.target.value)}><option value="right">Right</option><option value="left">Left</option><option value="top">Top</option><option value="float">Floating</option></select></label>
+          <button onClick={() => setModal("windows")} data-help="Choose dock positions for every panel, recover floating windows, or restore the original window layout.">Windows & docking</button>
           <button onClick={() => void restoreArtwork()}>Restore artwork</button>
           <button onClick={() => setModal("settings")}>Layout & project settings</button>
         </div>
@@ -2896,6 +2966,7 @@ export default function App() {
           <button onClick={() => setWorkspace(w => ({...w, splitWorkspace:false}))}>Close second workspace</button>
         </div>}
         {workspace.toolsPlacement === "top" && (view === "editor" || playing || (workspace.splitWorkspace && workspace.secondWorkspace === "editor")) && toolNavigation}
+        <DockSurface layouts={workspace.docks} onChange={setDocks} active={!playing}>
         <WorkspaceSplit active={workspace.splitWorkspace && !playing} ratio={workspace.workspaceRatio} direction={workspace.splitDirection} reversed={workspace.reverseWorkspaces} onResize={n => setWorkspace(w => ({...w, workspaceRatio:n}))} secondary={companionWorkspace()} primary={
         view === "editor" || playing ? editorContent : view === "devices" ? (
           <div id="studio-devices" className="secondary-workspace">
@@ -2937,6 +3008,7 @@ export default function App() {
           </div>
         )
         } />
+        </DockSurface>
         <footer className="app-footer">
           <span>
             <span className="live-dot" /> All yours. Stored locally.
@@ -2985,7 +3057,7 @@ export default function App() {
               role="dialog"
               aria-modal="true"
               aria-label={
-                modal === "save"
+                modal === "windows" ? "Windows & docking" : modal === "save"
                   ? "Save project"
                   : modal === "settings"
                     ? "Project settings"
@@ -3002,13 +3074,13 @@ export default function App() {
               </button>
               <Layers size={28} />
               <h2>
-                {modal === "save"
+                {modal === "windows" ? "Windows & docking" : modal === "save"
                   ? "Save your project"
                   : modal === "settings"
                     ? "Your workspace"
                     : "A new beginning"}
               </h2>
-              {modal === "save" ? (
+              {modal === "windows" ? <PanelLayoutSettings layouts={workspace.docks} onMove={moveWindow} onReset={()=>setWorkspace(w=>({...w,docks:{}}))}/> : modal === "save" ? (
                 <ProjectSave project={project} />
               ) : modal === "settings" ? (
                 <>
@@ -3023,6 +3095,7 @@ export default function App() {
                     GitHub automatically. Undo can restore your local project
                     after loading the snapshot.
                   </p>
+                  <PanelLayoutSettings layouts={workspace.docks} onMove={moveWindow} onReset={()=>setWorkspace(w=>({...w,docks:{}}))}/>
                   <WorkspaceControls value={workspace} onChange={setWorkspace} placement={placement} onPlacement={setPlacement} />
                   <details><summary>Interface colours and fonts</summary><WorkspaceControls value={workspace} onChange={setWorkspace} appearance /><StoryAppearance project={project} edit={edit} /></details>
                   <Toggle
