@@ -6,6 +6,7 @@ const action = z.object({
   value: z.union([z.string(), z.number(), z.boolean()]),
 });
 const choice = z.object({
+  routeLabel: z.string().max(120).optional(),
   id: z.string(),
   text: z.string(),
   target: z.string(),
@@ -345,6 +346,20 @@ const asset = z.object({
   reference: z.boolean(),
 });
 export const projectSchema = z.object({
+  flowLayout: z
+    .object({
+      scenes: z
+        .record(z.object({ x: z.number().finite(), y: z.number().finite() }))
+        .default({}),
+      dialogues: z
+        .record(
+          z.record(
+            z.object({ x: z.number().finite(), y: z.number().finite() }),
+          ),
+        )
+        .default({}),
+    })
+    .optional(),
   schemaVersion: z.literal(1),
   audioAssets: z
     .array(

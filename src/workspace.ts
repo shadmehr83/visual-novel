@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { useState, useEffect } from "react";
 export const workspaceSchema = z.object({
+  topDockHeight: z.number().min(140).max(460).default(240),
   splitDocks: z.boolean().default(false),
   font: z
     .enum(["Arial", "Verdana", "Trebuchet MS", "Georgia", "monospace"])

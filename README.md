@@ -105,3 +105,7 @@ See [zones, light cycles, custom replies and saving](docs/ZONES_AND_SAVING.md). 
 ## Camera and workspace customization
 
 [Camera and workspace guide](docs/CAMERA_AND_WORKSPACE.md) covers the collapsible/resizable library, adjustable preview/dialogue sizing, pinned/page/hidden layouts, delayed hover explanations, global/per-panel appearance, enabled-effect counts, zoom/pan approaches, walking bob and optional generated/imported footsteps. Interface preferences are local UI state; camera settings travel with your project and exports.
+
+### Stillframe 2.0
+
+Use the top tabs for the original **Editor**, **Scenes advanced**, **Dialogue advanced**, and searchable **Update history**. Top menus organise File, Edit, View, Effects and Instructions; View now includes top docking. The maps edit the existing project, with persisted coordinates and author-facing route names. Existing schema version 1 projects remain compatible. Read the [advanced workspace guide](docs/ADVANCED_WORKSPACES.md) or the [complete release history](docs/CHANGELOG.md).

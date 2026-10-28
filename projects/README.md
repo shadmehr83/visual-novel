@@ -44,3 +44,7 @@ The current checkpoint adds a local Home/Nearside/Loop phone system in the openi
 ## Device simplification update — 28 October 2026
 
 Simple phone ranges, independent app navigation, device Settings/custom icons and wallpaper, separate editing docks, effect toggles, item uploads, pause/Escape recovery and outgoing scene transitions are documented in [Device simplification](../docs/DEVICE_SIMPLIFICATION.md). The snapshot includes a new Maria profile portrait; the café visual configuration and original image remain unchanged. Existing browser projects remain local until explicitly loading the GitHub snapshot. The Phone panel can import only Maria’s new portrait without replacing a local project.
+
+## Stillframe 2.0 — advanced story maps
+
+The engine now has a version badge, searchable [update history](../docs/CHANGELOG.md), top File/Edit/View/Effects/Instructions menus, and separate **Scenes advanced** and **Dialogue advanced** workspaces. The original editor remains available. Graph route edits use the same story; coordinates are optional `flowLayout` data included in future project exports. New author-facing `routeLabel` values do not alter player reply text. File format remains `schemaVersion: 1` and existing local projects are retained. Controls can also dock at the top with a resizable height. See [the advanced-workspace guide](../docs/ADVANCED_WORKSPACES.md). This update preserves the published café artwork/effects.

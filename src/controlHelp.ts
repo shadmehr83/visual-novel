@@ -39,6 +39,32 @@ export function specificHelp(
     return "Queue this effect when the story leaves this scene. It overrides the destination scene’s entrance; it does not play between dialogues in the same scene.";
   if (name.startsWith("enable "))
     return "Enable or temporarily disable this specific visual layer. Its coordinates, masks and timing remain saved for reuse.";
+  if (name.includes("scenes advanced"))
+    return "Open the whole-story scene map. Drag scene headings to arrange boxes, name route branches, and open a scene’s dialogue map. It uses your existing project.";
+  if (name.includes("dialogue advanced"))
+    return "Open the selected scene’s dialogue map. Connect replies, Continue and timed-action paths with lines. Moving a box changes its saved layout only.";
+  if (name.includes("update history") || name.includes("engine version"))
+    return "Browse versioned engine changes and directions to each feature’s current location. This is separate from the playthrough event log.";
+  if (name === "fit all")
+    return "Zoom and pan so all boxes in this map are visible. Use Focus selection to return to a readable view of one box.";
+  if (name === "focus selection")
+    return "Centre the selected scene or dialogue box and restore a readable zoom level. Story connections stay unchanged.";
+  if (name.includes("find in flow map"))
+    return "Find boxes by their scene title, speaker or dialogue text, then choose a result to centre it on the map.";
+  if (
+    name === "route name" ||
+    name === "route label" ||
+    name.includes("new branch route label")
+  )
+    return "An author-only name beside a map branch, such as Friendly route. It does not replace the reply text shown to the player.";
+  if (name.includes("dock controls at top") || name === "dock top")
+    return "Place the controls above the scene. Drag the bottom edge of that dock to choose its height. Left, right and floating docks remain available.";
+  if (name.includes("add branch connection"))
+    return "Add this reply and its destination to the selected dialogue. If it previously used Continue, that original route is kept as another reply.";
+  if (name.includes("open original editor"))
+    return "Return to the list-based editor for this selected scene and dialogue. Both editors share the same story and Undo history.";
+  if (name.includes("auto arrange"))
+    return "Space the boxes automatically using their existing connections. This saves graph coordinates and leaves dialogue order and story paths unchanged.";
   const rules: [RegExp, string][] = [
     [
       /add device ui|add phone system/,

@@ -98,3 +98,10 @@ export const dialogueLabel = (p: Project, scene: Scene, id: string) => {
   const n = scene.nodes[i];
   return `Scene ${p.scenes.indexOf(scene) + 1} · Dialogue ${i + 1} · ${n?.speaker || ""}: ${n?.text.slice(0, 35) || ""}`;
 };
+
+// Opening a complete project replaces optional metadata as well as required fields.
+export function replaceProjectContents(target: Project, source: Project) {
+  for (const key of Object.keys(target))
+    delete (target as unknown as Record<string, unknown>)[key];
+  Object.assign(target, source);
+}
