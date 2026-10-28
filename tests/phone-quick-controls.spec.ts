@@ -127,10 +127,14 @@ test("dialogue map quick switches override ranges, show separate or integrated d
       width: el.getBoundingClientRect().width,
       border: getComputedStyle(el).borderWidth,
       text: getComputedStyle(el, "::after").content,
+      textBackground: getComputedStyle(el, "::after").backgroundColor,
+      textTransform: getComputedStyle(el, "::after").transform,
     }));
   expect(style.width).toBe(48);
   expect(style.border).toBe("2px");
   expect(style.text).toContain("ON");
+  expect(style.textBackground).toBe("rgba(0, 0, 0, 0)");
+  expect(style.textTransform).toBe("none");
   await page.waitForTimeout(900);
   await page.reload();
   await expect(page.locator(".scene-in .device-actions")).toBeVisible();

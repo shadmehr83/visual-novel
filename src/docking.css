@@ -12,3 +12,13 @@ input[type=checkbox]::after{content:"OFF";position:absolute;right:3px;top:4px;fo
 input[type=checkbox]:checked{background:#32694e!important;border-color:#a1d5b5!important}
 input[type=checkbox]:checked::before{transform:translateX(24px)}input[type=checkbox]:checked::after{content:"ON";left:4px;right:auto}
 input[type=checkbox]:focus-visible{outline:3px solid #d0ae79!important;outline-offset:2px}input[type=checkbox]:disabled{opacity:.45;cursor:not-allowed}
+input[type=checkbox]::after{left:auto;width:auto;height:auto;background:transparent!important;border-radius:0;transform:none!important;transition:none}
+input[type=checkbox]:checked::after{left:4px;right:auto}
+.dock-body>.inspector .effects-dock>.control-group-label{order:3}
+.dock-body>.inspector .effect-tabs{order:4}
+.dock-body>.inspector .properties-dock>.panel-heading,.dock-body>.inspector .properties-dock>.control-group-label{order:5}
+.dock-body>.inspector .inspector-tabs{order:6}
+.dock-body>.inspector .selection-toolbar{order:7}
+.dock-body>.inspector .specialized-controls{order:8}
+.dock-body>.inspector>.properties-dock>fieldset{order:9}
+.dock-body>.inspector .inspector-foot{order:10}
