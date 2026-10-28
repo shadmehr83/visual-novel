@@ -1,15 +1,18 @@
 import { validateProject, type Project } from "./model";
 import { assetFolder } from "./AssetPicker";
 import { restoreSavedOutfits } from "./outfits";
-export const LIBRARY_UPDATE = "2.6.0";
+export const LIBRARY_UPDATE = "2.7.0";
+export function isPublishedDemo(local: Project, source: Project) {
+  return local.id === source.id || (local.scenes.some(s => s.id === "bedroom" && s.nodes.some(n => n.id === "wake")) && local.scenes.some(s => s.id === "outfit" && s.nodes.some(n => n.id === "effort")));
+}
 /** Adds missing committed art and repairs known demo links; never replaces custom images or café data. */
 export function importPublishedArtwork(target: Project, source: Project) {
   for (const a of source.assets)
     if (!target.assets.some(old => old.id === a.id)) target.assets.push(structuredClone(a));
   for (const a of target.assets) a.folder ??= assetFolder(a);
 }
-export function integrateLibraryUpdate(local: Project, source: Project): Project | null {
-  if (local.contentUpdates?.includes(LIBRARY_UPDATE) || local.id !== source.id) return null;
+export function integrateLibraryUpdate(local: Project, source: Project, force = false): Project | null {
+  if ((!force && local.contentUpdates?.includes(LIBRARY_UPDATE)) || !isPublishedDemo(local, source)) return null;
   const p = structuredClone(local);
   importPublishedArtwork(p, source);
   if (p.scenes.some(s => s.id === "outfit")) {

@@ -4,11 +4,11 @@ import pkg from "../package.json";
 it("names every recorded milestone and supplies distinct feature directions", () => {
   expect(releases[0].version).toBe(ENGINE_VERSION);
   expect(pkg.version).toBe(ENGINE_VERSION);
-  expect(releases).toHaveLength(28);
+  expect(releases).toHaveLength(29);
   expect(new Set(releases.map((r) => r.version)).size).toBe(releases.length);
   expect(
     new Set(releases.flatMap((r) => (r.commit ? [r.commit] : []))).size,
-  ).toBe(27);
+  ).toBe(28);
   for (const r of releases) {
     expect(r.features.length).toBeGreaterThan(0);
     for (const f of r.features) {

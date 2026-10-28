@@ -1,4 +1,4 @@
-export const ENGINE_VERSION = "2.6.0";
+export const ENGINE_VERSION = "2.7.0";
 export type ReleaseFeature = {
   name: string;
   description: string;
@@ -19,7 +19,12 @@ const f = (
   action?: string,
 ): ReleaseFeature => ({ name, description, steps: path.split(" → "), action });
 export const releases: Release[] = [
-  {version:"2.6.0", name:"Artwork folders, device return routes and player progress", date:"2026-10-29", features:[
+  {version:"2.7.0", name:"Populated artwork folders and shared split workspaces", date:"2026-10-29", features:[
+    f("Recovered artwork library and GitHub image folders", "Older saved projects now import all image dependencies before adding new sub-scenes, fixing the Missing sub-scene background update failure. Restore artwork retries a focused merge with a recovery copy. Every published image and all available generation originals are also archived as ordinary files in GitHub folders.", "Editor → Restore artwork → Assets → Artwork folder; GitHub → artwork"),
+    f("Shared side-by-side and stacked workspaces", "Split view opens two workspaces sharing one project and selected dialogue. Edit alongside scene or dialogue maps, device settings or update history. Choose the pair, swap sides and resize their divider; playback temporarily uses one game view.", "Studio workspaces → Split view → Choose Second workspace → Drag the divider"),
+    f("Artwork selection directly from dialogue maps", "Select a dialogue box and choose its background image from populated artwork folders in the map details. Each dialogue can have its own temporary image without changing a shared view or the main scene background. The companion editor previews that same dialogue immediately.", "Dialogue advanced → Select a box → Image for this dialogue → Choose a folder and image", "dialogues")
+  ]},
+  {version:"2.6.0", commit:"84515e4", name:"Artwork folders, device return routes and player progress", date:"2026-10-29", features:[
     f("Artwork folders and restored clothing", "Missing published images are added to compatible saved projects with a recovery copy. Choose backgrounds, clothing and profile artwork from named folders. The room window and wardrobe now open their matching sub-scenes, and outfit cards retain inspect-before-confirm.", "Editor → Assets → Artwork folder; or Outfits & Items → Inspect a saved outfit → Choose it", "wardrobe"),
     f("Dialogue-based device return controls", "Enable a put-away button for a dialogue range or an individual dialogue. Return to a selected point or the last choice menu; reopening the original route resumes your phone or computer dialogue without replaying its state actions. Existing phone apps are unchanged.", "Advanced devices → Timing → Put device away · return route", "devices"),
     f("Visible layout placement and toggleable tools", "Click the selected tool again to close its library panel. Move tools to the top or left, place controls on any dock, and adjust panel sizes and dialogue layout from the visible placement strip or Project settings.", "Editor → Tools placement or Controls placement → Layout & project settings", "workspace"),

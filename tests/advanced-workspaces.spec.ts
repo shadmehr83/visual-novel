@@ -188,7 +188,7 @@ test("history searches old releases and opens feature locations; top dock resize
   await page
     .getByRole("button", { name: "Dock controls at top", exact: true })
     .click();
-  await expect(page.getByLabel("Controls placement")).toHaveValue("top");
+  await expect(page.getByLabel("Controls placement", { exact: true })).toHaveValue("top");
   const inspector = await page.locator(".inspector").boundingBox(),
     stage = await page.locator(".stage").boundingBox();
   expect(inspector!.y + inspector!.height).toBeLessThanOrEqual(stage!.y + 3);
@@ -199,7 +199,7 @@ test("history searches old releases and opens feature locations; top dock resize
   await page.keyboard.press("ArrowUp");
   await expect(divider).toHaveAttribute("aria-valuenow", "230");
   await page.reload();
-  await expect(page.getByLabel("Controls placement")).toHaveValue("top");
+  await expect(page.getByLabel("Controls placement", { exact: true })).toHaveValue("top");
   await expect(
     page.getByRole("separator", { name: "Resize top controls dock" }),
   ).toHaveAttribute("aria-valuenow", "230");

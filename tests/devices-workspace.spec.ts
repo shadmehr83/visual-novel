@@ -143,6 +143,7 @@ test("the saved three-outfit picker still inspects and confirms a real outfit, w
   await page.getByRole("region", { name: "Selected outfit", exact: true }).getByRole("button", { name: "Continue", exact: true }).click();
   await expect(page.locator(".dialogue-overlay")).toBeVisible();
   await page.keyboard.press("Escape");
+  await page.getByRole("dialog", {name:"Pause menu", exact:true}).getByRole("button", {name:"Back to editor", exact:true}).click();
   await page
     .locator(".bottom-tabs")
     .getByRole("button", { name: "Dialogue", exact: true })

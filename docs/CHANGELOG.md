@@ -1,6 +1,10 @@
 # Stillframe engine update history
 
-Current version: **2.6.0**. Earlier version numbers were assigned retrospectively from Git milestones. Directions below point to their current location; the in-app Update history tab also offers feature shortcuts. Dates use Australia/Sydney time. Project format remains schemaVersion 1.
+Current version: **2.7.0**. Earlier version numbers were assigned retrospectively from Git milestones. Directions below point to their current location; the in-app Update history tab also offers feature shortcuts. Dates use Australia/Sydney time. Project format remains schemaVersion 1.
+
+## v2.7.0 — Populated artwork folders and split workspaces (2026-10-29)
+
+Fixes the legacy update failure caused by importing sub-scene dependencies too late. Restore artwork retries the focused, recoverable library merge. All 14 current images and 17 generation originals are archived as ordinary files under `artwork/` in GitHub. Split view opens two shared workspaces side by side or stacked, with a draggable divider and live selection/edit synchronization. Dialogue advanced now offers folder-based image selection directly in a selected box's details. See [Split workspaces and artwork library](SPLIT_WORKSPACES_AND_ART_LIBRARY.md).
 
 ## v2.6.0 — Artwork folders, device returns and player progress (2026-10-29)
 

@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useId } from "react";
 import {
   CARD_WIDTH,
   autoFlowPositions,
@@ -32,6 +32,7 @@ export function FlowCanvas({
   onArrange: (p: Record<string, Point>) => void;
   onAdd?: (node: string, kind: "continue" | "reply") => void;
 }) {
+  const arrowId = "flow-arrow-" + useId().replace(/:/g, "");
   const canvas = useRef<HTMLDivElement>(null),
     [view, setView] = useState<View>({ x: 30, y: 30, zoom: 0.85 });
   const [temporary, setTemporary] = useState<Record<string, Point>>({}),
@@ -145,7 +146,7 @@ export function FlowCanvas({
     const target = document
       .elementsFromPoint(e.clientX, e.clientY)
       .map((el) => el.closest<HTMLElement>("[data-flow-input]"))
-      .find(Boolean)?.dataset.flowInput;
+      .find(el => el && canvas.current?.contains(el))?.dataset.flowInput;
     if (target) {
       completedLink.current = true;
       setTimeout(() => {
@@ -265,7 +266,7 @@ export function FlowCanvas({
           <svg className="flow-wires" aria-label="Story connections">
             <defs>
               <marker
-                id="flow-arrow"
+                id={arrowId}
                 viewBox="0 0 10 10"
                 refX="9"
                 refY="5"
@@ -300,7 +301,7 @@ export function FlowCanvas({
                   <path
                     className="flow-edge-line"
                     d={curve(a, b)}
-                    markerEnd="url(#flow-arrow)"
+                    markerEnd={"url(#" + arrowId + ")"}
                   />
                   <path
                     className="flow-edge-hit"

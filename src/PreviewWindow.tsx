@@ -11,6 +11,7 @@ export function usePreviewWindow(
   value: WorkspaceSettings,
   set: Dispatch<SetStateAction<WorkspaceSettings>>,
   active: boolean,
+  locationKey = "",
 ) {
   const mainRef = useRef<HTMLElement>(null),
     previewRef = useRef<HTMLElement>(null),
@@ -49,7 +50,7 @@ export function usePreviewWindow(
     const observer = new ResizeObserver(measure);
     observer.observe(main);
     return () => observer.disconnect();
-  }, [active, value.dialogueMode]);
+  }, [active, value.dialogueMode, locationKey]);
   const toggle = () => {
     if (value.previewLocked) {
       const box = previewRef.current?.getBoundingClientRect();

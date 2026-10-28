@@ -10,7 +10,8 @@ export function assetFolder(a: Asset) {
   return "Other artwork";
 }
 export function artworkFolders(assets: Asset[]) {
-  return [...new Set([...ART_FOLDERS, ...assets.map(assetFolder)])];
+  const populated = new Set(assets.map(assetFolder));
+  return [...ART_FOLDERS.filter(f => populated.has(f)), ...[...populated].filter(f => !ART_FOLDERS.includes(f)).sort()];
 }
 export function AssetPicker({ project, value, onChange, label, empty = "No image", initialFolder = "" }: {
   project: Project; value?: string | null; onChange: (id: string | null) => void; label: string; empty?: string; initialFolder?: string;
@@ -21,8 +22,10 @@ export function AssetPicker({ project, value, onChange, label, empty = "No image
   const assets = project.assets.filter(a => !folder || assetFolder(a) === folder || a.id === value);
   return <div className="artwork-picker">
     <label>{label} folder<select aria-label={label + " folder"} value={folder} onChange={e => setFolder(e.target.value)} data-help="Filter the saved artwork by folder. Changing this filter does not replace the currently selected image.">
-      <option value="">All folders</option>{artworkFolders(project.assets).map(f => <option key={f}>{f}</option>)}
+      <option value="">All folders ({project.assets.length})</option>{artworkFolders(project.assets).map(f => <option key={f} value={f}>{f} ({project.assets.filter(a => assetFolder(a) === f).length})</option>)}
     </select></label>
+    <p className="artwork-count">{project.assets.filter(a => !folder || assetFolder(a) === folder).length} saved images{folder ? " in " + folder : " available"}</p>
+    {folder && !project.assets.some(a => assetFolder(a) === folder) && <p className="small muted">No images in this folder yet. Choose All folders, import artwork, or use Restore artwork above the workspace.</p>}
     <label>{label}<select aria-label={label} value={value || ""} onChange={e => onChange(e.target.value || null)}>
       <option value="">{empty}</option>{artworkFolders(assets).map(f => <optgroup label={f} key={f}>{assets.filter(a => assetFolder(a) === f).map(a => <option value={a.id} key={a.id}>{a.name}</option>)}</optgroup>)}
     </select></label>

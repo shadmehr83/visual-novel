@@ -1,0 +1,142 @@
+[
+  {
+    "id": "2021e333-3387-4b6e-ad86-281b140a8cca",
+    "name": "Rainy Café Conversation.png",
+    "folder": "Background scenes",
+    "path": "artwork/background-scenes/2021e333-3387-4b6e-ad86-281b140a8cca.png",
+    "width": 1536,
+    "height": 1024,
+    "bytes": 1961747,
+    "sha256": "ceead27ef6f872db13d53b5d282053961cd0a0079928894b7051c902a349a6a6"
+  },
+  {
+    "id": "first-match-bedroom",
+    "name": "The First Match — bedroom environment.png",
+    "folder": "Background scenes",
+    "path": "artwork/background-scenes/first-match-bedroom.png",
+    "width": 1672,
+    "height": 941,
+    "bytes": 2190778,
+    "sha256": "edbdc83d1154b2b4fc8b138a46549c90c0b2d9be2eef6b2868ff7e6b4d2dc0b4"
+  },
+  {
+    "id": "first-match-wardrobe",
+    "name": "The First Match — wardrobe environment.png",
+    "folder": "Background scenes",
+    "path": "artwork/background-scenes/first-match-wardrobe.png",
+    "width": 1672,
+    "height": 941,
+    "bytes": 2152964,
+    "sha256": "6e45b16e3971a58f0c3ce8c63d2199f714d1e8726741932ad3a5f2e6c5124742"
+  },
+  {
+    "id": "first-match-journey",
+    "name": "The First Match — journey environment.png",
+    "folder": "Background scenes",
+    "path": "artwork/background-scenes/first-match-journey.png",
+    "width": 1672,
+    "height": 941,
+    "bytes": 2904494,
+    "sha256": "41e7d213ca4acfcbaba0f0c1488900c8f29258322d1c2d51198a060e998c3d56"
+  },
+  {
+    "id": "outfit-comfortable",
+    "name": "comfortable outfit item.png",
+    "folder": "Outfits & items",
+    "path": "artwork/outfits-and-items/outfit-comfortable.png",
+    "width": 1024,
+    "height": 1536,
+    "bytes": 2018123,
+    "sha256": "b78ddc7893ce41c4ec98a23d7a0f19664f3f2a5a1f72a9742cdfaebea0336db5"
+  },
+  {
+    "id": "outfit-smart",
+    "name": "smart outfit item.png",
+    "folder": "Outfits & items",
+    "path": "artwork/outfits-and-items/outfit-smart.png",
+    "width": 1024,
+    "height": 1536,
+    "bytes": 1882061,
+    "sha256": "bc614af3d594328b24126d71041eb44fb99d2d9cf3cad459503d337a60c58f21"
+  },
+  {
+    "id": "outfit-familiar",
+    "name": "familiar outfit item.png",
+    "folder": "Outfits & items",
+    "path": "artwork/outfits-and-items/outfit-familiar.png",
+    "width": 1024,
+    "height": 1536,
+    "bytes": 1993216,
+    "sha256": "d65fecd4b5194d7a7e88037b4a88ae61f6dec65359ace85a12c3563bf329f2fe"
+  },
+  {
+    "id": "maria-device-profile",
+    "name": "Maria · rainlit profile.png",
+    "folder": "Profiles & app icons",
+    "path": "artwork/profiles-and-app-icons/maria-device-profile.png",
+    "width": 1254,
+    "height": 1254,
+    "bytes": 2355363,
+    "sha256": "915d98f963ebea2b46c64fe8e58d2b9caadcc6bd66c5db312b356219d1c748f5"
+  },
+  {
+    "id": "first-match-departure",
+    "name": "After the café · rainy pavement.webp",
+    "folder": "Background scenes",
+    "path": "artwork/background-scenes/first-match-departure.webp",
+    "width": 1672,
+    "height": 941,
+    "bytes": 358280,
+    "sha256": "ec753d26f4f606adad441763c3392a60b7699f9c149466d1816e0dd808c55db8"
+  },
+  {
+    "id": "first-match-monitor",
+    "name": "Bedroom · monitor close-up",
+    "folder": "Background scenes",
+    "path": "artwork/background-scenes/first-match-monitor.webp",
+    "width": 1672,
+    "height": 941,
+    "bytes": 139340,
+    "sha256": "539b732999f40abf130b462493f5cefe1370748f06254dc01d790ccb2ea58642"
+  },
+  {
+    "id": "studio-icon-chat",
+    "name": "chat app icon",
+    "folder": "Profiles & app icons",
+    "path": "artwork/profiles-and-app-icons/studio-icon-chat.webp",
+    "width": 1254,
+    "height": 1254,
+    "bytes": 115042,
+    "sha256": "342ee0f671d63365b6a9706af4eac57b4fcfabdb19744f586c0bc6232246af14"
+  },
+  {
+    "id": "studio-icon-feed",
+    "name": "feed app icon",
+    "folder": "Profiles & app icons",
+    "path": "artwork/profiles-and-app-icons/studio-icon-feed.webp",
+    "width": 1254,
+    "height": 1254,
+    "bytes": 149902,
+    "sha256": "05b2f07de1be5803e92a95b9ec24ae3d58095c30e076a9f7efe4b98fcec8a9da"
+  },
+  {
+    "id": "studio-icon-settings",
+    "name": "settings app icon",
+    "folder": "Profiles & app icons",
+    "path": "artwork/profiles-and-app-icons/studio-icon-settings.webp",
+    "width": 1254,
+    "height": 1254,
+    "bytes": 171672,
+    "sha256": "32af1ec8c5b0bcab24ad3ea32966b1be1ff1eddc8bc787fbc8634fb6e44796a3"
+  },
+  {
+    "id": "first-match-window",
+    "name": "At the window · rainy city",
+    "folder": "Background scenes",
+    "path": "artwork/background-scenes/first-match-window.webp",
+    "width": 1672,
+    "height": 941,
+    "bytes": 128128,
+    "sha256": "eb055f49b49ef1aef072ff44d98fda5fe15d36a92bfdc6669b5ec24395b93c12"
+  }
+]

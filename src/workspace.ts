@@ -1,6 +1,11 @@
 import { z } from "zod";
 import { useState, useEffect } from "react";
 export const workspaceSchema = z.object({
+  splitWorkspace: z.boolean().default(false),
+  secondWorkspace: z.enum(["editor", "scenes", "dialogues", "devices", "updates"]).default("dialogues"),
+  splitDirection: z.enum(["side-by-side", "stacked"]).default("side-by-side"),
+  workspaceRatio: z.number().min(25).max(75).default(55),
+  reverseWorkspaces: z.boolean().default(false),
   toolsPlacement: z.enum(["left", "top"]).default("left"),
   previewLocked: z.boolean().default(true),
   previewCustom: z.boolean().default(false),

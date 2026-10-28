@@ -2,7 +2,7 @@ import {validateProject, type Project} from './model';
 export function integrateDeviceUpdate(local:Project, source:Project):Project|null {
  if(local.id!==source.id || local.contentUpdates?.includes('2.5.0'))return null;
  const p=structuredClone(local),s=p.scenes.find(s=>s.id==='bedroom'),from=source.scenes[0];if(!s)return null;
- for(const a of source.assets.filter(a=>a.id==='first-match-window'))if(!p.assets.some(b=>b.id===a.id))p.assets.push(structuredClone(a));
+ for(const a of source.assets)if(!p.assets.some(b=>b.id===a.id))p.assets.push(structuredClone(a));
  for(const a of source.audioAssets||[])if(a.id==='studio-rain-window'&&!p.audioAssets?.some(b=>b.id===a.id))(p.audioAssets??=[]).push(structuredClone(a));
  for(const view of from.subscenes||[]){const old=s.subscenes?.find(v=>v.id===view.id);if(!old)(s.subscenes??=[]).push(structuredClone(view));else old.effects??=structuredClone(view.effects);}
  for(const n of s.nodes){if(from.nodes.some(v=>v.id===n.id))n.deviceDialogue??=false;for(const c of n.choices)if(n.deviceDialogue===false)c.sendAsMessage=false;}

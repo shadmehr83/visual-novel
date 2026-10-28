@@ -2,6 +2,8 @@ import { useState } from "react";
 import { validateProject, type Project, type Scene } from "./model";
 import { removeDialogue } from "./authoring";
 import { FlowCanvas } from "./FlowCanvas";
+import { DialogueArtwork } from "./DialogueArtwork";
+import { AssetPicker } from "./AssetPicker";
 import {
   addFlowChoice,
   addConnectedDialogue,
@@ -383,6 +385,7 @@ export function FlowEditor({
                       {scene.nodes.length} dialogue boxes. First dialogue:{" "}
                       {scene.nodes[0].text.slice(0, 80)}
                     </p>
+                    <AssetPicker project={project} label="Map scene background" initialFolder="Background scenes" value={scene.background} empty="Included illustration" onChange={id => updateScene(s => {s.background=id;})} />
                     <button onClick={() => onDrill(scene.id)}>
                       Edit dialogue flow
                     </button>
@@ -392,6 +395,7 @@ export function FlowEditor({
                   </>
                 ) : (
                   <>
+                    <DialogueArtwork project={project} scene={scene} nodeId={node.id} update={updateScene} />
                     <label>
                       Speaker
                       <input

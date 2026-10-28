@@ -2,6 +2,8 @@
 
 A working local-first visual novel authoring web app built from the supplied **Visual Novel Studio Technical Build Specification**. React 19, TypeScript, Vite, Zod, IndexedDB (`idb`), and native SVG compositing. No AI key or backend is needed.
 
+Current release: **2.7.0**. See [Split workspaces and artwork folders](docs/SPLIT_WORKSPACES_AND_ART_LIBRARY.md). All current artwork is available as ordinary files in the [artwork library](artwork/README.md), including archived image-generation originals.
+
 ## Run
 
 Node 22+ (validated on Node 24.19), npm 11:

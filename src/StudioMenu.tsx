@@ -16,6 +16,8 @@ export function StudioMenu({
   collapsed,
   effects,
   placement,
+  split = false,
+  onSplit,
 }: {
   view: StudioView;
   onView: (v: StudioView) => void;
@@ -26,6 +28,8 @@ export function StudioMenu({
   collapsed: boolean;
   effects: number;
   placement: string;
+  split?: boolean;
+  onSplit?: () => void;
 }) {
   const root = useRef<HTMLDivElement>(null);
   useEffect(() => {
@@ -187,6 +191,7 @@ export function StudioMenu({
           </button>
         ))}
       </nav>
+      {onSplit && <button className="split-workspace-button" aria-pressed={split} onClick={onSplit} data-help="Open two workspaces in one window. They share your story, selected dialogue, artwork and Undo history. Choose side-by-side or stacked and drag the divider.">{split ? "Single workspace" : "Split view"}</button>}
     </div>
   );
 }

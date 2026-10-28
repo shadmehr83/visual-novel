@@ -226,6 +226,7 @@ export function DeviceWorkspace({
             </div>
             <div className="device-preview-frame">
               <Stage
+                idPrefix="device-preview-"
                 project={project}
                 scene={previewScene}
                 playing={false}

@@ -1,11 +1,11 @@
-import { integrateLibraryUpdate, importPublishedArtwork } from "./libraryUpdate";
+import { WorkspaceSplit, WORKSPACES } from "./WorkspaceSplit";
+import { integrateContentUpdates } from "./contentUpdates";
+import { importPublishedArtwork } from "./libraryUpdate";
 import { AssetPicker, assetFolder, artworkFolders } from "./AssetPicker";
 import { integrateDeparture, updateDepartureRuntime } from "./projectUpdates";
 import { saveProjectUpdate } from "./storage";
 import { SoundControls } from "./SoundControls";
 import { SceneViewControls } from "./SceneViews";
-import { integrateDeviceUpdate } from "./deviceUpdates";
-import { integrateDemoUpdates } from "./demoUpdates";
 import { openNotification } from "./notifications";
 import { DeviceWorkspace, DeviceSummary } from "./DeviceWorkspace";
 import { DialogueItems } from "./DialogueItems";
@@ -301,7 +301,7 @@ export default function App() {
                   workspace.runtime,
                   update,
                 );
-                const complete = integrateDemoUpdates(update.project, savedProject()) || update.project;
+                const complete = integrateContentUpdates(update.project, savedProject()) || update.project;
                 await saveProjectUpdate(complete, runtime, workspace);
                 workspace = { project: complete, runtime };
                 setSnapshotNotice(
@@ -317,9 +317,7 @@ export default function App() {
         }
         if (workspace) {
           try {
-            const demoUpdated = integrateDemoUpdates(workspace.project, savedProject()) || workspace.project;
-            const deviceUpdated = integrateDeviceUpdate(demoUpdated, savedProject()) || demoUpdated;
-            const updated = integrateLibraryUpdate(deviceUpdated, savedProject()) || (deviceUpdated !== workspace.project ? deviceUpdated : null);
+            const updated = integrateContentUpdates(workspace.project, savedProject());
             if (updated) {
               await saveProjectUpdate(updated, workspace.runtime, workspace);
               workspace = { project: updated, runtime: workspace.runtime };
@@ -371,6 +369,18 @@ export default function App() {
       localStorage.setItem("stillframe-scene:" + project.id, sceneId);
     } catch {}
   }, [loaded, canSave, project.id, sceneId]);
+  async function restoreArtwork() {
+    try {
+      await saveQueue.current.catch(() => {});
+      const source = savedProject();
+      const next = integrateContentUpdates(project, source, true) || clone(project);
+      importPublishedArtwork(next, source);
+      await saveProjectUpdate(next, runtime, { project, runtime });
+      edit(p => replaceProjectContents(p, next));
+      setHasRecovery(true);
+      setSnapshotNotice("Restored the published artwork library and folders. Your custom images, edits and café were kept; a recovery copy is available.");
+    } catch (e) { setError("Artwork restore could not finish: " + String(e)); }
+  }
   async function addMissingDeparture() {
     try {
       await saveQueue.current.catch(() => {});
@@ -516,7 +526,7 @@ export default function App() {
     setRegionEditor(null);
   }
   function play(restart = false) {
-    setView("editor");
+    chooseMainWorkspace("editor");
     setPlacingLight(null);
     try {
       validateProject(project);
@@ -554,8 +564,8 @@ export default function App() {
     if (!f) return;
     try {
       const imported = await readProject(f);
-      const p = integrateLibraryUpdate(imported, savedProject()) || imported;
-      setView("editor");
+      const p = integrateContentUpdates(imported, savedProject()) || imported;
+      chooseMainWorkspace("editor");
       edit((current) => replaceProjectContents(current, p));
       setRuntime(null);
       setPlaying(false);
@@ -631,9 +641,47 @@ export default function App() {
       !c.condition ||
       runtime?.values[c.condition.key] === c.condition.equals,
   );
+  function chooseMainWorkspace(next: StudioView) {
+    setPlaying(false);
+    if (workspace.splitWorkspace && next === workspace.secondWorkspace)
+      setWorkspace(w => ({...w, secondWorkspace:view}));
+    setView(next);
+  }
+  function chooseSecondWorkspace(next: StudioView) {
+    setPlaying(false);
+    if (next === view) return;
+    setWorkspace(w => ({...w, secondWorkspace:next}));
+  }
+  function toggleSplit() {
+    setPlaying(false);
+    setWorkspace(w => ({...w, splitWorkspace:!w.splitWorkspace,
+      secondWorkspace:view === w.secondWorkspace ? (view === "dialogues" ? "scenes" : "dialogues") : w.secondWorkspace,
+      libraryCollapsed:!w.splitWorkspace ? true : w.libraryCollapsed}));
+  }
+  const chooseSharedDialogue = (sid: string, nid?: string) => {
+    selectScene(sid);
+    if (nid) setNodeId(nid);
+  };
+  const companionWorkspace = () => {
+    const side = workspace.secondWorkspace;
+    if (side === "editor") return editorContent;
+    const openEditor = (sid:string,nid?:string) => { chooseSharedDialogue(sid,nid); if (view !== "editor") chooseSecondWorkspace("editor"); };
+    return <div className="secondary-workspace">
+      {side === "devices" ? <DeviceWorkspace project={project} sceneId={selected.id} nodeId={nodeId} edit={edit} onSelect={chooseSharedDialogue} onOriginal={openEditor} />
+        : side === "updates" ? <ReleaseHistory onNavigate={action => {
+          if (["scenes","dialogues","devices","editor"].includes(action)) chooseSecondWorkspace(action as StudioView);
+          else navigate(action);
+        }} />
+        : <FlowEditor key={side + ":" + selected.id} project={project} mode={side} sceneId={selected.id} nodeId={nodeId} edit={edit}
+          onSelect={chooseSharedDialogue} onDrill={sid => {selectScene(sid);chooseSecondWorkspace("dialogues");}} onOriginal={openEditor} />}
+    </div>;
+  };
   function showOriginal(scene: string, node?: string) {
     setPlaying(false);
-    setView("editor");
+    if (view !== "editor" && !(workspace.splitWorkspace && workspace.secondWorkspace === "editor")) {
+      if (workspace.splitWorkspace) chooseSecondWorkspace("editor");
+      else chooseMainWorkspace("editor");
+    }
     selectScene(scene);
     if (node) setNodeId(node);
     setBottom("Dialogue");
@@ -647,13 +695,12 @@ export default function App() {
     if (
       ["editor", "scenes", "dialogues", "devices", "updates"].includes(action)
     ) {
-      setPlaying(false);
-      setView(action as StudioView);
+      chooseMainWorkspace(action as StudioView);
       return;
     }
     if (action === "wardrobe" || action === "items") {
       setPlaying(false);
-      setView("editor");
+      chooseMainWorkspace("editor");
       setBottom("Items & outfits");
       setCollapseBottom(false);
       setWorkspace((w) => ({
@@ -715,7 +762,7 @@ export default function App() {
       return;
     }
     setPlaying(false);
-    setView("editor");
+    chooseMainWorkspace("editor");
     if (action.startsWith("effect:")) {
       setEffectPanel(action.slice(7));
       setInspector("Atmosphere");
@@ -770,7 +817,8 @@ export default function App() {
   const previewWindow = usePreviewWindow(
     workspace,
     setWorkspace,
-    loaded && view === "editor",
+    loaded && (view === "editor" || (workspace.splitWorkspace && workspace.secondWorkspace === "editor")),
+    (view === "editor" ? "main" : "second") + ":" + workspace.splitWorkspace,
   );
   const toolNavigation = (
             <nav className={"rail" + (workspace.toolsPlacement === "top" ? " rail-top" : "")} aria-label="Studio tools">
@@ -810,137 +858,7 @@ export default function App() {
               <span className="avatar">Y</span>
             </nav>
   );
-  if (!loaded)
-    return (
-      <div className="loading-screen">
-        <Layers size={30} />
-        <p>Opening your studio…</p>
-      </div>
-    );
-  return (
-    <PlaySession
-      playing={playing}
-      project={project}
-      runtime={runtime}
-      onExit={() => setPlaying(false)}
-      onRestart={() => play(true)}
-    >
-      <div
-        data-theme={workspace.theme}
-        className={
-          "app " +
-          (playing ? "is-playing " : "") +
-          (workspace.dialogueMode === "page" ? "page-layout" : "")
-        }
-        style={
-          {
-            ...previewWindow.style,
-            "--library-size":
-              (workspace.libraryCollapsed ? 0 : workspace.libraryWidth) + "px",
-            "--controls-size": workspace.controlsWidth + "px",
-            "--top-dock-size": workspace.topDockHeight + "px",
-            "--bottom-size": workspace.bottomHeight + "px",
-            "--preview-scale": workspace.previewScale,
-            "--ui-font": workspace.font,
-            "--ui-font-size": workspace.fontSize + "px",
-            "--story-font": project.settings.dialogueFont || "Georgia",
-            "--story-size": (project.settings.dialogueSize || 17) + "px",
-          } as React.CSSProperties
-        }
-      >
-        <header>
-          <a
-            className="brand"
-            href="#"
-            onClick={(ev) => {
-              ev.preventDefault();
-              setModal("projects");
-            }}
-          >
-            <span className="brand-icon">
-              <Layers size={21} />
-            </span>
-            stillframe<span className="brand-sub">STUDIO</span>
-          </a>
-          <div className="project-name">
-            <span className="separator">/</span>
-            <input
-              aria-label="Project title"
-              value={project.title}
-              onChange={(e) =>
-                edit((p) => {
-                  p.title = e.target.value;
-                })
-              }
-            />
-            <span className="version">LOCAL PROJECT</span>
-          </div>
-          <div className="header-actions">
-            <span className="save-status">
-              <i className={status.startsWith("Saved") ? "saved" : ""} />
-              {status}
-            </span>
-            <button
-              title="Save project file"
-              aria-label="Save project file"
-              onClick={() => setModal("save")}
-            >
-              <Save size={16} />
-            </button>
-            <button
-              title="Undo"
-              aria-label="Undo"
-              disabled={!undo.length || playing}
-              onClick={() => history(true)}
-            >
-              <Undo2 size={16} />
-            </button>
-            <button
-              title="Redo"
-              aria-label="Redo"
-              disabled={!redo.length || playing}
-              onClick={() => history(false)}
-            >
-              <Redo2 size={16} />
-            </button>
-            <div className="divider" />
-            <button onClick={() => setModal("settings")} aria-label="Settings">
-              <Settings2 size={17} />
-            </button>
-            <button
-              className="primary"
-              onClick={() => (playing ? setPlaying(false) : play())}
-            >
-              {playing ? (
-                <Square size={14} />
-              ) : (
-                <Play size={14} fill="currentColor" />
-              )}
-              {playing ? "Back to editor" : "Play story"}
-            </button>
-          </div>
-        </header>
-        <StudioMenu
-          view={playing ? "editor" : view}
-          onView={(v) => {
-            setPlaying(false);
-            setView(v);
-          }}
-          onAction={navigate}
-          canUndo={!!undo.length}
-          canRedo={!!redo.length}
-          playing={playing}
-          collapsed={workspace.libraryCollapsed}
-          effects={effectSummary(scene, project.settings.reducedEffects).length}
-          placement={placement}
-        />
-        <div className="visible-layout-controls">
-          <label>Tools <select aria-label="Tools placement" value={workspace.toolsPlacement} onChange={e => setWorkspace(w => ({...w, toolsPlacement:e.target.value as "left" | "top"}))}><option value="left">Left</option><option value="top">Top</option></select></label>
-          <label>Controls <select aria-label="Quick controls placement" value={placement} onChange={e => setPlacement(e.target.value)}><option value="right">Right</option><option value="left">Left</option><option value="top">Top</option><option value="float">Floating</option></select></label>
-          <button onClick={() => setModal("settings")}>Layout & project settings</button>
-        </div>
-        {workspace.toolsPlacement === "top" && (view === "editor" || playing) && toolNavigation}
-        {view === "editor" || playing ? (
+  const editorContent = (
           <div
             id="studio-editor"
             className={
@@ -1058,6 +976,7 @@ export default function App() {
                     PNG, JPEG or WebP · up to 15 MB. Originals stay in your
                     project.
                   </p>
+                  <a className="artwork-github-link" href="https://github.com/shadmehr83/visual-novel/tree/main/artwork" target="_blank" rel="noreferrer">Browse saved artwork folders on GitHub ↗</a>
                   <label>Artwork folder<select aria-label="Artwork folder" value={artFolder} onChange={e => setArtFolder(e.target.value)}><option value="">All folders</option>{artworkFolders(project.assets).map(f => <option key={f}>{f}</option>)}</select></label>
                   <button className="wide" data-help="Add every missing image from the committed GitHub project to your library. Your current images and scene backgrounds are kept." onClick={() => edit(p => importPublishedArtwork(p, savedProject()))}>Import missing GitHub artwork</button>
                   {project.assets.length === 0 && (
@@ -2839,7 +2758,146 @@ export default function App() {
               </div>
             </aside>
           </div>
-        ) : view === "devices" ? (
+  );
+  if (!loaded)
+    return (
+      <div className="loading-screen">
+        <Layers size={30} />
+        <p>Opening your studio…</p>
+      </div>
+    );
+  return (
+    <PlaySession
+      playing={playing}
+      project={project}
+      runtime={runtime}
+      onExit={() => setPlaying(false)}
+      onRestart={() => play(true)}
+    >
+      <div
+        data-theme={workspace.theme}
+        className={
+          "app " +
+          (playing ? "is-playing " : "") +
+          (workspace.dialogueMode === "page" ? "page-layout" : "")
+        }
+        style={
+          {
+            ...previewWindow.style,
+            "--library-size":
+              (workspace.libraryCollapsed ? 0 : workspace.libraryWidth) + "px",
+            "--controls-size": workspace.controlsWidth + "px",
+            "--top-dock-size": workspace.topDockHeight + "px",
+            "--bottom-size": workspace.bottomHeight + "px",
+            "--preview-scale": workspace.previewScale,
+            "--ui-font": workspace.font,
+            "--ui-font-size": workspace.fontSize + "px",
+            "--story-font": project.settings.dialogueFont || "Georgia",
+            "--story-size": (project.settings.dialogueSize || 17) + "px",
+          } as React.CSSProperties
+        }
+      >
+        <header>
+          <a
+            className="brand"
+            href="#"
+            onClick={(ev) => {
+              ev.preventDefault();
+              setModal("projects");
+            }}
+          >
+            <span className="brand-icon">
+              <Layers size={21} />
+            </span>
+            stillframe<span className="brand-sub">STUDIO</span>
+          </a>
+          <div className="project-name">
+            <span className="separator">/</span>
+            <input
+              aria-label="Project title"
+              value={project.title}
+              onChange={(e) =>
+                edit((p) => {
+                  p.title = e.target.value;
+                })
+              }
+            />
+            <span className="version">LOCAL PROJECT</span>
+          </div>
+          <div className="header-actions">
+            <span className="save-status">
+              <i className={status.startsWith("Saved") ? "saved" : ""} />
+              {status}
+            </span>
+            <button
+              title="Save project file"
+              aria-label="Save project file"
+              onClick={() => setModal("save")}
+            >
+              <Save size={16} />
+            </button>
+            <button
+              title="Undo"
+              aria-label="Undo"
+              disabled={!undo.length || playing}
+              onClick={() => history(true)}
+            >
+              <Undo2 size={16} />
+            </button>
+            <button
+              title="Redo"
+              aria-label="Redo"
+              disabled={!redo.length || playing}
+              onClick={() => history(false)}
+            >
+              <Redo2 size={16} />
+            </button>
+            <div className="divider" />
+            <button onClick={() => setModal("settings")} aria-label="Settings">
+              <Settings2 size={17} />
+            </button>
+            <button
+              className="primary"
+              onClick={() => (playing ? setPlaying(false) : play())}
+            >
+              {playing ? (
+                <Square size={14} />
+              ) : (
+                <Play size={14} fill="currentColor" />
+              )}
+              {playing ? "Back to editor" : "Play story"}
+            </button>
+          </div>
+        </header>
+        <StudioMenu
+          view={playing ? "editor" : view}
+          onView={chooseMainWorkspace}
+          onAction={navigate}
+          canUndo={!!undo.length}
+          canRedo={!!redo.length}
+          playing={playing}
+          collapsed={workspace.libraryCollapsed}
+          effects={effectSummary(scene, project.settings.reducedEffects).length}
+          placement={placement}
+          split={workspace.splitWorkspace && !playing}
+          onSplit={toggleSplit}
+        />
+        <div className="visible-layout-controls">
+          <label>Tools <select aria-label="Tools placement" value={workspace.toolsPlacement} onChange={e => setWorkspace(w => ({...w, toolsPlacement:e.target.value as "left" | "top"}))}><option value="left">Left</option><option value="top">Top</option></select></label>
+          <label>Controls <select aria-label="Quick controls placement" value={placement} onChange={e => setPlacement(e.target.value)}><option value="right">Right</option><option value="left">Left</option><option value="top">Top</option><option value="float">Floating</option></select></label>
+          <button onClick={() => void restoreArtwork()}>Restore artwork</button>
+          <button onClick={() => setModal("settings")}>Layout & project settings</button>
+        </div>
+        {workspace.splitWorkspace && !playing && <div className="workspace-split-controls">
+          <label>Main workspace<select aria-label="Main workspace" value={view} onChange={e => chooseMainWorkspace(e.target.value as StudioView)}>{WORKSPACES.map(([id,label]) => <option key={id} value={id}>{label}</option>)}</select></label>
+          <label>Second workspace<select aria-label="Second workspace" value={workspace.secondWorkspace} onChange={e => chooseSecondWorkspace(e.target.value as StudioView)}>{WORKSPACES.filter(([id]) => id !== view).map(([id,label]) => <option key={id} value={id}>{label}</option>)}</select></label>
+          <label>Arrange<select aria-label="Workspace arrangement" value={workspace.splitDirection} onChange={e => setWorkspace(w => ({...w, splitDirection:e.target.value as typeof w.splitDirection}))}><option value="side-by-side">Side by side</option><option value="stacked">One above the other</option></select></label>
+          <button onClick={() => setWorkspace(w => ({...w, reverseWorkspaces:!w.reverseWorkspaces}))}>Swap sides</button>
+          <button onClick={() => setWorkspace(w => ({...w, splitWorkspace:false}))}>Close second workspace</button>
+        </div>}
+        {workspace.toolsPlacement === "top" && (view === "editor" || playing || (workspace.splitWorkspace && workspace.secondWorkspace === "editor")) && toolNavigation}
+        <WorkspaceSplit active={workspace.splitWorkspace && !playing} ratio={workspace.workspaceRatio} direction={workspace.splitDirection} reversed={workspace.reverseWorkspaces} onResize={n => setWorkspace(w => ({...w, workspaceRatio:n}))} secondary={companionWorkspace()} primary={
+        view === "editor" || playing ? editorContent : view === "devices" ? (
           <div id="studio-devices" className="secondary-workspace">
             <DeviceWorkspace
               project={project}
@@ -2872,12 +2930,13 @@ export default function App() {
               }}
               onDrill={(sid) => {
                 selectScene(sid);
-                setView("dialogues");
+                chooseMainWorkspace("dialogues");
               }}
               onOriginal={showOriginal}
             />
           </div>
-        )}
+        )
+        } />
         <footer className="app-footer">
           <span>
             <span className="live-dot" /> All yours. Stored locally.

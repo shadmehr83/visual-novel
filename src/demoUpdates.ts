@@ -6,7 +6,9 @@ export function integrateDemoUpdates(local: Project, source: Project): Project |
   if (local.contentUpdates?.includes(DEMO_UPDATE) ||
     !(local.id === source.id || (local.scenes.some(s => s.id === "bedroom" && s.nodes.some(n => n.id === "wake")) && local.scenes.some(s => s.id === "outfit" && s.nodes.some(n => n.id === "effort"))))) return null;
   const p = structuredClone(local);
-  for (const a of source.assets.filter(a => a.id.startsWith("studio-icon-") || a.id === "first-match-monitor"))
+  // Import dependencies before copying views: newer published views can reference
+  // artwork that was not present when this older migration was first written.
+  for (const a of source.assets)
     if (!p.assets.some(b => b.id === a.id)) p.assets.push(structuredClone(a));
   for (const a of source.audioAssets || [])
     if (!p.audioAssets?.some(b => b.id === a.id)) (p.audioAssets ??= []).push(structuredClone(a));
