@@ -176,10 +176,14 @@ test("item creation without pre-existing choices opens direct upload and split d
   expect(boxes[0].left).toBeLessThan(boxes[1].left);
   expect(boxes.map((b) => b.overflow)).toEqual(["auto", "auto"]);
   await page.getByLabel("Separate controls and properties docks").uncheck();
-  await page.getByRole("button",{name:"Active",exact:true}).click();
-  await expect(page.getByLabel("Enable Device UI",{exact:true})).toBeVisible();
-  await page.getByLabel("Enable Device UI",{exact:true}).uncheck();
-  await expect(page.getByLabel("Enable Device UI",{exact:true})).not.toBeChecked();
+  await page.getByRole("button", { name: "Active", exact: true }).click();
+  await expect(
+    page.getByLabel("Enable Device UI", { exact: true }),
+  ).toBeVisible();
+  await page.getByLabel("Enable Device UI", { exact: true }).uncheck();
+  await expect(
+    page.getByLabel("Enable Device UI", { exact: true }),
+  ).not.toBeChecked();
 });
 test("pause freezes timed choices until resumed", async ({ page }) => {
   const p = fixture();
@@ -194,7 +198,10 @@ test("pause freezes timed choices until resumed", async ({ page }) => {
     before,
   );
   await page.getByRole("button", { name: "Resume story", exact: true }).click();
-  await expect(page.locator(".device-actions")).toContainText("Finished", {
-    timeout: 4000,
-  });
+  await expect(page.getByLabel("Dialogue text", { exact: true })).toHaveValue(
+    "Finished",
+    { timeout: 4000 },
+  );
+  await expect(page.locator(".device-overlay .device-actions")).toHaveCount(0);
+  await expect(page.locator(".device-story-progress")).toBeVisible();
 });

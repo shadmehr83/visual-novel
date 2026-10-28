@@ -37,6 +37,15 @@ export function PlaybackControls({
       } else if (mode !== "screen" || !target?.closest(".scene-in .stage"))
         return;
       if (document.querySelector(".scene-in .typing-bubble")) return;
+      const phone = document.querySelector<HTMLElement>(
+        ".scene-in .device-overlay",
+      );
+      if (
+        phone &&
+        phone.dataset.deviceScreen !== "chat" &&
+        !document.querySelector(".scene-in .device-story-progress")
+      )
+        return;
       if (canAdvance) {
         event.preventDefault();
         advance();

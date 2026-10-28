@@ -113,3 +113,7 @@ Use the top tabs for the original **Editor**, **Scenes advanced**, **Dialogue ad
 ### Stillframe 2.2
 
 **Advanced devices** provides a dedicated phone/computer workspace with app previews, frame sizing, timing, appearance and custom shortcuts. Home, Ember, scrolling Insta and Settings remain available. **Items & outfits** beside Dialogue opens the original wardrobe picker; additional items keep independent choices. The game preview window can be unlocked, resized, filled and locked. The rainy **After the café** scene from 2.1 is included. Read [Devices and preview](docs/DEVICES_AND_PREVIEW.md).
+
+### Stillframe 2.3
+
+Compatible older First Match projects gain the missing **After the café** scene on normal reload, keeping their custom artwork/effects and a recovery copy. Home/back remains available in every device mode. Home, Insta and Settings have a single app area; conversation text and replies appear in Ember. Authored narrative actions remain outside the phone while browsing. See [Phone navigation and saved project updates](docs/PHONE_NAVIGATION_AND_PROJECT_UPDATES.md).

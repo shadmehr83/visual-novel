@@ -1,8 +1,52 @@
 # Stillframe engine update history
 
-Current version: **2.2.0**. Earlier version numbers were assigned retrospectively from Git milestones. Directions below point to their current location; the in-app Update history tab also offers feature shortcuts. Dates use Australia/Sydney time. Project format remains schemaVersion 1.
+Current version: **2.3.0**. Earlier version numbers were assigned retrospectively from Git milestones. Directions below point to their current location; the in-app Update history tab also offers feature shortcuts. Dates use Australia/Sydney time. Project format remains schemaVersion 1.
+
+## v2.3.0 — Phone navigation and missing story updates (2026-10-28)
+
+### Integrate the missing café departure into saved projects
+
+Compatible older First Match projects receive the rainy After the café scene on normal reload. Existing backgrounds, effects, other scenes and edited farewell lines are preserved; the previous project is backed up.
+
+1. Open or reload the studio
+2. Scenes library
+3. After the café; Restore previous local project opens the recovery copy
+
+### Home and back in every device mode
+
+The back arrow and labelled Home button remain available in phone and computer interfaces, including older configurations that open directly to chat. They stay outside the app scroll area.
+
+1. Open a device scene
+2. Use the header back arrow or Home button
+3. Choose Ember, Insta or Settings
+
+### Texting controls only inside chat
+
+Home, Insta and Settings no longer contain a second dialogue pane, reply choices or the texting keyboard. Reopen Ember to see conversation text and authored replies.
+
+1. Advanced devices
+2. Open Home or Insta in the preview
+3. Open Ember to show messages and reply controls
+
+### Separate story controls when browsing the phone
+
+Authored opening actions such as continuing the story or choosing to open an app stay outside the handset while Home/feed is shown. Actual texting choices remain inside chat, and navigation does not advance unseen chat lines.
+
+1. Play story
+2. Browse the opening phone Home/feed
+3. Use story actions outside the device or open Ember to text
+
+### Add departure without replacing a project
+
+A focused update button can add the missing departure to a copied project. It preserves custom café loops and creates a recovery copy instead of replacing the full project with a snapshot.
+
+1. Editor
+2. Project banner
+3. Add missing café departure (shown only when the scene is absent)
 
 ## v2.2.0 — Dedicated devices and a flexible preview (2026-10-28)
+
+[Source milestone 24935cf](https://github.com/shadmehr83/visual-novel/commit/24935cf)
 
 ### Advanced devices workspace
 

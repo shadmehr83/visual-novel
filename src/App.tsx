@@ -1,3 +1,5 @@
+import { integrateDeparture, updateDepartureRuntime } from "./projectUpdates";
+import { saveProjectUpdate } from "./storage";
 import { DeviceWorkspace, DeviceSummary } from "./DeviceWorkspace";
 import { DialogueItems } from "./DialogueItems";
 import { usePreviewWindow } from "./PreviewWindow";
@@ -225,7 +227,7 @@ export default function App() {
   const [canSave, setCanSave] = useState(false);
   const [hasRecovery, setHasRecovery] = useState(false);
   const [snapshotNotice, setSnapshotNotice] = useState(
-    "Your exported café project is available.",
+    "Your local project is saved here. Published story updates can be added without replacing your artwork.",
   );
   function preferredScene(p: Project) {
     let previous: string | null = null;
@@ -275,7 +277,35 @@ export default function App() {
           setSnapshotNotice(
             "Your exported café is loaded. Any different local project has a recovery copy.",
           );
-        } else workspace = await load();
+        } else {
+          workspace = await load();
+          if (
+            workspace &&
+            !workspace.project.scenes.some((s) => s.id === "departure")
+          ) {
+            try {
+              const update = integrateDeparture(
+                workspace.project,
+                savedProject(),
+              );
+              if (update.changed) {
+                const runtime = updateDepartureRuntime(
+                  workspace.runtime,
+                  update,
+                );
+                await saveProjectUpdate(update.project, runtime, workspace);
+                workspace = { project: update.project, runtime };
+                setSnapshotNotice(
+                  "Added After the café to this saved project. Your artwork, effects and other edits were kept; a recovery copy is available.",
+                );
+              }
+            } catch {
+              setSnapshotNotice(
+                "Your local project is unchanged. Use Add missing café departure to review an update problem.",
+              );
+            }
+          }
+        }
         if (workspace) {
           setProject(workspace.project);
           const focus = explicit
@@ -318,6 +348,26 @@ export default function App() {
       localStorage.setItem("stillframe-scene:" + project.id, sceneId);
     } catch {}
   }, [loaded, canSave, project.id, sceneId]);
+  async function addMissingDeparture() {
+    try {
+      await saveQueue.current.catch(() => {});
+      const update = integrateDeparture(project, savedProject(), true);
+      if (!update.changed) return;
+      const nextRuntime = updateDepartureRuntime(runtime, update);
+      await saveProjectUpdate(update.project, nextRuntime, {
+        project,
+        runtime,
+      });
+      edit((p) => replaceProjectContents(p, update.project));
+      setRuntime(nextRuntime);
+      setHasRecovery(true);
+      setSnapshotNotice(
+        "Added After the café without replacing your café artwork, effects or other scenes.",
+      );
+    } catch (e) {
+      setError("Departure update was not applied: " + String(e));
+    }
+  }
   async function loadPublishedCafe() {
     setLoaded(false);
     try {
@@ -1247,6 +1297,12 @@ export default function App() {
                   >
                     Load GitHub snapshot
                   </button>
+                  {!project.scenes.some((s) => s.id === "departure") &&
+                    project.scenes.some((s) => s.id === "cafe") && (
+                      <button onClick={() => void addMissingDeparture()}>
+                        Add missing café departure
+                      </button>
+                    )}
                   {hasRecovery && (
                     <button
                       onClick={() => void restoreLocalProject()}

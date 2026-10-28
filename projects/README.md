@@ -58,3 +58,7 @@ Load the updated authored checkpoint using **Load GitHub snapshot**, or `https:/
 ## Stillframe 2.2 — advanced devices and visible saved items
 
 A dedicated **Advanced devices** workspace keeps the complete app system and moves detailed device settings out of the narrow inspector. Width and height now resize independently from a stable upper-left corner. The Editor preview pane has unlock/resize/fill/lock controls. **Items & outfits** beside Dialogue opens the saved outfit picker and allows additional items with independent choices. **Restore missing demo outfits** merges missing approved cards/images without replacing local backgrounds or customised cards. See [Devices and preview](../docs/DEVICES_AND_PREVIEW.md).
+
+## Stillframe 2.3 — integrated local story updates and phone navigation
+
+Normal reload now adds **After the café** to compatible older saved First Match projects with a recovery copy, preserving locally edited art, effects, other scenes and farewell text. Existing departure scenes are kept as edited. A focused **Add missing café departure** button supports copied projects without replacing the whole project. Header back and Home remain available in every phone/computer mode. Home/Insta/Settings no longer contain a second dialogue pane; conversation text and replies appear inside Ember. See [Phone navigation and project updates](../docs/PHONE_NAVIGATION_AND_PROJECT_UPDATES.md).

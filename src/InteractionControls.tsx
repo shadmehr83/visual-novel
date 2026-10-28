@@ -86,7 +86,7 @@ export function InteractionControls({
                   }
                 >
                   <option value="chat-only">
-                    Messages only · direct conversation
+                    Chat opens first · Home remains available
                   </option>
                   <option value="phone-system">
                     Device with apps · Home, Ember, Insta & Settings

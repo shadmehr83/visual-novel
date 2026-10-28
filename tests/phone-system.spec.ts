@@ -118,10 +118,9 @@ test("scheduled phone screens, home and feed, hinge ranges and non-choice shortc
   await page
     .getByLabel("Insta scrolling feed")
     .click({ position: { x: 30, y: 30 } });
+  await expect(page.locator(".device-overlay .device-actions")).toHaveCount(0);
   await expect(
-    page
-      .locator(".device-narration")
-      .getByText("Browsing Loop", { exact: true }),
+    page.locator(".device-story-progress .device-story-continue"),
   ).toBeVisible();
   const stage = page.getByRole("img", { name: "Another evening live stage" });
   await clickScenePoint(stage, 0.1, 0.1);

@@ -277,3 +277,72 @@
 .device-live-preview {
   position: relative;
 }
+/* Navigation remains outside the app's scroll area, even on compact or legacy devices. */
+.device-overlay .device-contact > button {
+  flex: 0 0 24px;
+  min-width: 24px;
+  min-height: 24px;
+  display: grid;
+  place-items: center;
+  font-size: 24px;
+  padding: 0;
+}
+.device-overlay .device-contact > div {
+  min-width: 0;
+}
+.device-overlay .device-contact b {
+  display: block;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.device-overlay .device-home,
+.device-overlay.device-desktop .device-home {
+  display: block;
+  min-height: 24px;
+  height: auto;
+  width: calc(100% - 16px);
+  padding: 4px;
+  margin: 4px 8px;
+  flex-shrink: 0;
+  background: #66556a35;
+  color: var(--device-text, #eee1e9);
+  border: 1px solid #a48ba04d;
+  border-radius: 6px;
+  font-size: 10px;
+  line-height: 1.2;
+}
+.device-story-progress {
+  position: absolute;
+  left: 3%;
+  bottom: 5%;
+  z-index: 4;
+  max-width: 38%;
+  display: grid;
+  gap: 7px;
+  background: #17191de8;
+  padding: 10px;
+  border: 1px solid #9c897955;
+  border-radius: 9px;
+}
+.device-story-progress button {
+  color: #e8d8c9;
+  background: #514746;
+  border: 1px solid #9d8478;
+  padding: 8px;
+  font-size: clamp(10px, 1.2vw, 14px);
+  border-radius: 5px;
+  text-align: left;
+}
+@container (max-width:180px) {
+  .device-overlay .device-contact > button {
+    min-width: 20px;
+    flex-basis: 20px;
+    font-size: 20px;
+  }
+  .device-overlay .device-home {
+    min-height: 22px;
+    margin: 3px 5px;
+    width: calc(100% - 10px);
+  }
+}

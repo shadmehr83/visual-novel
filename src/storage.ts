@@ -20,8 +20,17 @@ export async function load(): Promise<{
 }
 export type Workspace = { project: Project; runtime: Runtime | null };
 export async function loadSnapshotRecovery(): Promise<Workspace | null> {
-  const value = await (await db()).get("projects", "before-github-snapshot");
-  return value ? { ...value, project: validateProject(value.project) } : null;
+  const connection = await db();
+  const copies = await Promise.all([
+    connection.get("projects", "before-github-snapshot"),
+    connection.get("projects", "before-studio-update"),
+  ]);
+  const value = copies
+    .filter(Boolean)
+    .sort((a, b) => (b.savedAt || 0) - (a.savedAt || 0))[0];
+  return value
+    ? { project: validateProject(value.project), runtime: value.runtime }
+    : null;
 }
 // One transaction preserves the previous workspace before replacing current.
 export async function openGithubSnapshot(
@@ -39,7 +48,10 @@ export async function openGithubSnapshot(
         runtime: old.runtime,
       };
       if (JSON.stringify(workspace.project) !== JSON.stringify(snapshot))
-        await tx.store.put(workspace, "before-github-snapshot");
+        await tx.store.put(
+          { ...workspace, savedAt: Date.now() },
+          "before-github-snapshot",
+        );
     }
     await tx.store.put({ project: snapshot, runtime: null }, "current");
     await tx.done;
@@ -102,4 +114,23 @@ export async function readImage(
     approved: false,
     reference: false,
   };
+}
+
+// A content upgrade and its recoverable previous copy commit together.
+export async function saveProjectUpdate(
+  project: Project,
+  runtime: Runtime | null,
+  previous: Workspace,
+) {
+  const next = validateProject(project),
+    old = {
+      project: validateProject(previous.project),
+      runtime: previous.runtime,
+      savedAt: Date.now(),
+    };
+  const connection = await db(),
+    tx = connection.transaction("projects", "readwrite");
+  await tx.store.put(old, "before-studio-update");
+  await tx.store.put({ project: next, runtime }, "current");
+  await tx.done;
 }

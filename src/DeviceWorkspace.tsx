@@ -42,7 +42,7 @@ export function DeviceSummary({
             {scene.phone.device === "phone" ? "Phone" : "Computer"} ·{" "}
             {scene.phone.mode === "phone-system"
               ? "Full app system"
-              : "Messages only"}{" "}
+              : "Chat opens first"}{" "}
             · {scene.phone.contact}
           </p>
         </>
@@ -157,9 +157,7 @@ export function DeviceWorkspace({
         </label>
         <button
           onClick={() => {
-            const s = project.scenes.find(
-              (s) => s.phone?.mode === "phone-system",
-            );
+            const s = project.scenes.find((s) => !!s.phone);
             if (s) onSelect(s.id, s.nodes[0].id);
           }}
         >
@@ -330,10 +328,10 @@ export function DeviceWorkspace({
                       }
                     >
                       <option value="phone-system">
-                        Full device · Home, Ember, Insta & Settings
+                        Home and apps · Ember, Insta & Settings
                       </option>
                       <option value="chat-only">
-                        Messages only · direct conversation
+                        Chat opens first · Home remains available
                       </option>
                     </select>
                   </label>

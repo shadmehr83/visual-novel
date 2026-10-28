@@ -3,7 +3,7 @@ import { test, expect } from "@playwright/test";
 test("the complete story leaves the preserved café for rainy pavement and Maria's phone chat", async ({
   page,
 }) => {
-  test.setTimeout(180000);
+  test.setTimeout(300000);
   await page.setViewportSize({ width: 1500, height: 1100 });
   const errors: string[] = [];
   page.on("pageerror", (e) => errors.push(e.message));
@@ -35,8 +35,10 @@ test("the complete story leaves the preserved café for rainy pavement and Maria
       .locator(".scene-in")
       .getByRole("region", { name: "Phone conversation" });
     const inPhone = await phone.isVisible();
-    const active = inPhone ? phone : dialogue;
-    if (inPhone)
+    const story = page.locator(".scene-in .device-story-progress");
+    const outside = await story.isVisible();
+    const active = outside ? story : inPhone ? phone : dialogue;
+    if (inPhone && !outside)
       await active
         .locator(
           ".device-actions .device-replies button, .device-actions .device-continue",
@@ -66,15 +68,20 @@ test("the complete story leaves the preserved café for rainy pavement and Maria
       completed = true;
       break;
     }
-    const choices = active.locator(
-      ".play-choices button, .device-replies button",
-    );
+    const choices = outside
+      ? story.locator("button:not(.device-story-continue)")
+      : active.locator(
+          ".play-choices button, .device-replies button, .device-story-progress button:not(.device-story-continue)",
+        );
     if (await choices.count()) {
       const checkPhone = choices.filter({ hasText: "Check the phone" });
       await ((await checkPhone.count()) ? checkPhone : choices.first()).click();
     } else
       await active
-        .getByRole("button", { name: "Continue", exact: true })
+        .getByRole("button", {
+          name: outside ? "Continue story" : "Continue",
+          exact: true,
+        })
         .click();
   }
   expect(completed).toBe(true);

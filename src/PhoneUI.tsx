@@ -106,41 +106,53 @@ export function PhoneUI({
   const currentIsMessage = messages.some(
     (m) => m.scene === scene.id && m.node === node.id && m.text === node.text,
   );
+  const storyNotice =
+    node.phoneNotice || (node.speaker === "Phone" ? node.text : undefined);
+  const narrativeOutside =
+    !!runtime &&
+    screen !== "chat" &&
+    effective !== "chat" &&
+    effective !== "settings" &&
+    ["Narrator", "Phone"].includes(node.speaker) &&
+    !node.choices.some((c) => c.sendAsMessage === true);
   return (
-    <section
-      className={
-        "device-overlay " +
-        (reduced ? "device-reduced " : "") +
-        (config.device === "desktop" ? "device-desktop" : "")
-      }
-      aria-label="Phone conversation"
-      style={
-        {
-          left: box.x + "%",
-          top: box.y + "%",
-          transform: "none",
-          "--frame-width": box.width + "%",
-          "--frame-height": box.height + "%",
-          "--device-bg": appearance?.background || "#211e29",
-          "--device-text": appearance?.textColor || "#eee1e9",
-          "--device-font": appearance?.font || "Arial",
-          "--device-size": (appearance?.fontSize || 14) + "px",
-          "--device-wallpaper": wallpaper ? `url("${wallpaper.data}")` : "none",
-          "--device-duration": `${config.entrance.seconds}s`,
-        } as React.CSSProperties
-      }
-    >
-      <div
+    <>
+      <section
         className={
-          "device-shell device-" + (reduced ? "cut" : config.entrance.style)
+          "device-overlay " +
+          (reduced ? "device-reduced " : "") +
+          (config.device === "desktop" ? "device-desktop" : "")
+        }
+        aria-label="Phone conversation"
+        data-device-screen={screen}
+        style={
+          {
+            left: box.x + "%",
+            top: box.y + "%",
+            transform: "none",
+            "--frame-width": box.width + "%",
+            "--frame-height": box.height + "%",
+            "--device-bg": appearance?.background || "#211e29",
+            "--device-text": appearance?.textColor || "#eee1e9",
+            "--device-font": appearance?.font || "Arial",
+            "--device-size": (appearance?.fontSize || 14) + "px",
+            "--device-wallpaper": wallpaper
+              ? `url("${wallpaper.data}")`
+              : "none",
+            "--device-duration": `${config.entrance.seconds}s`,
+          } as React.CSSProperties
         }
       >
-        <div className="device-status">
-          <span>16:00</span>
-          <span>◔ ▰</span>
-        </div>
-        <header className="device-contact">
-          {config.mode === "phone-system" && (
+        <div
+          className={
+            "device-shell device-" + (reduced ? "cut" : config.entrance.style)
+          }
+        >
+          <div className="device-status">
+            <span>16:00</span>
+            <span>◔ ▰</span>
+          </div>
+          <header className="device-contact">
             <button
               type="button"
               aria-label="Back to phone home"
@@ -149,171 +161,200 @@ export function PhoneUI({
             >
               ‹
             </button>
-          )}
-          {avatar ? (
-            <img src={avatar.data} alt="" />
-          ) : (
-            <span className="contact-monogram">
-              {config.contact.slice(0, 1)}
-            </span>
-          )}
-          <div>
-            <b>
-              {screen === "chat"
-                ? config.contact
-                : screen === "feed"
-                  ? "Insta"
-                  : screen === "settings"
-                    ? "Settings"
-                    : config.device === "desktop"
-                      ? "Computer"
-                      : "Phone"}
-            </b>
-            <small>
-              {screen === "chat"
-                ? config.title
-                : screen === "feed"
-                  ? "Fictional offline feed"
-                  : "Local device"}
-            </small>
-          </div>
-          <span>···</span>
-        </header>
-        {config.mode === "phone-system" && screen !== "home" && (
-          <nav className="phone-app-nav" data-no-advance>
-            <button onClick={() => setScreen("home")}>Home</button>
-            <button onClick={() => setScreen("chat")}>Ember</button>
-            <button onClick={() => setScreen("feed")}>Insta</button>
-          </nav>
-        )}
-        {node.phoneNotice && (
-          <button
-            className="phone-notification"
-            data-help="Open this story notification. If an authored Open reply is available, its branch is followed; otherwise this opens the chat app."
-            onClick={() => {
-              const c = choices.find((c) => /open|read.*message/i.test(c.text));
-              if (c) onStep(c.id);
-              else setScreen("chat");
-            }}
-          >
-            {node.phoneNotice}
-            <small>Open notification</small>
-          </button>
-        )}
-        {screen === "settings" ? (
-          <DeviceAppearanceControls
-            compact
-            project={project}
-            value={appearance}
-            onChange={(a) => {
-              setLocalAppearance(a);
-              onAppearance?.(a);
-            }}
-            onUpload={onUpload}
-          />
-        ) : screen !== "chat" ? (
-          <PhoneApps
-            screen={screen}
-            onOpen={setScreen}
-            project={project}
-            appearance={appearance}
-          />
-        ) : (
-          <div className="device-feed" ref={feed} aria-live="polite">
-            <p className="device-date">Today · Ember</p>
-            {messages.map((m, i) =>
-              typing && m.node === node.id && m.scene === scene.id ? null : (
-                <div
-                  key={i}
-                  className={
-                    "message-bubble " +
-                    (m.sender === "You" ? "message-you" : "message-contact")
-                  }
-                >
-                  <span>{m.text}</span>
-                  <small>{m.sender === "You" ? "You" : config.contact}</small>
-                </div>
-              ),
+            {avatar ? (
+              <img src={avatar.data} alt="" />
+            ) : (
+              <span className="contact-monogram">
+                {config.contact.slice(0, 1)}
+              </span>
             )}
-            {typing && (
-              <div
-                className="typing-bubble"
-                aria-label={config.contact + " is typing"}
-              >
-                <i />
-                <i />
-                <i />
-              </div>
-            )}
-            {!currentIsMessage && (
-              <p className="device-narration">{node.text}</p>
-            )}
-          </div>
-        )}
-        <div className="device-actions">
-          {screen !== "chat" && <p className="device-narration">{node.text}</p>}
-          {runtime?.ended ? (
             <div>
-              <p>End of conversation</p>
-              {onRestart && <button onClick={onRestart}>Restart story</button>}
+              <b>
+                {screen === "chat"
+                  ? config.contact
+                  : screen === "feed"
+                    ? "Insta"
+                    : screen === "settings"
+                      ? "Settings"
+                      : config.device === "desktop"
+                        ? "Computer"
+                        : "Phone"}
+              </b>
+              <small>
+                {screen === "chat"
+                  ? config.title
+                  : screen === "feed"
+                    ? "Fictional offline feed"
+                    : "Local device"}
+              </small>
             </div>
-          ) : typing ? (
-            <span className="small muted">{config.contact} is typing…</span>
+            <span>···</span>
+          </header>
+          {screen !== "home" && (
+            <nav className="phone-app-nav" data-no-advance>
+              <button onClick={() => setScreen("home")}>Home</button>
+              <button onClick={() => setScreen("chat")}>Ember</button>
+              <button onClick={() => setScreen("feed")}>Insta</button>
+            </nav>
+          )}
+          {storyNotice && (
+            <button
+              className="phone-notification"
+              data-help="Open this story notification. If an authored Open reply is available, its branch is followed; otherwise this opens the chat app."
+              onClick={() => {
+                const c = choices.find((c) =>
+                  /open|read.*message/i.test(c.text),
+                );
+                if (c) onStep(c.id);
+                else setScreen("chat");
+              }}
+            >
+              {storyNotice}
+              <small>Open notification</small>
+            </button>
+          )}
+          {screen === "settings" ? (
+            <DeviceAppearanceControls
+              compact
+              project={project}
+              value={appearance}
+              onChange={(a) => {
+                setLocalAppearance(a);
+                onAppearance?.(a);
+              }}
+              onUpload={onUpload}
+            />
+          ) : screen !== "chat" ? (
+            <PhoneApps
+              screen={screen}
+              onOpen={setScreen}
+              project={project}
+              appearance={appearance}
+            />
           ) : (
-            <>
-              {choices.length ? (
-                <div className="device-replies">
-                  {choices.map((c) => (
-                    <button key={c.id} onClick={() => onStep(c.id)}>
-                      {c.text}
-                    </button>
-                  ))}
-                </div>
-              ) : (
-                <button className="device-continue" onClick={() => onStep()}>
-                  Continue
-                </button>
+            <div className="device-feed" ref={feed} aria-live="polite">
+              <p className="device-date">Today · Ember</p>
+              {messages.map((m, i) =>
+                typing && m.node === node.id && m.scene === scene.id ? null : (
+                  <div
+                    key={i}
+                    className={
+                      "message-bubble " +
+                      (m.sender === "You" ? "message-you" : "message-contact")
+                    }
+                  >
+                    <span>{m.text}</span>
+                    <small>{m.sender === "You" ? "You" : config.contact}</small>
+                  </div>
+                ),
               )}
-              {allowsReply(scene, node, true) && (
-                <SelfReply
-                  choices={choices}
-                  nodeId={node.id}
-                  onSend={onReply}
-                />
-              )}
-            </>
-          )}
-        </div>
-        {screen === "chat" &&
-          config.keyboard &&
-          choices.length > 0 &&
-          !typing && (
-            <div className="device-keyboard" aria-hidden>
-              {[
-                "Q W E R T Y U I O P",
-                "A S D F G H J K L",
-                "⇧ Z X C V B N M ⌫",
-              ].map((row) => (
-                <div key={row}>
-                  {row.split(" ").map((key) => (
-                    <span key={key}>{key}</span>
-                  ))}
+              {typing && (
+                <div
+                  className="typing-bubble"
+                  aria-label={config.contact + " is typing"}
+                >
+                  <i />
+                  <i />
+                  <i />
                 </div>
-              ))}
-              <div>
-                <span className="space-key">space</span>
-              </div>
+              )}
+              {!currentIsMessage && (
+                <p className="device-narration">{node.text}</p>
+              )}
             </div>
           )}
-        {config.mode === "phone-system" && (
+          {screen === "chat" && (
+            <div className="device-actions">
+              {runtime?.ended ? (
+                <div>
+                  <p>End of conversation</p>
+                  {onRestart && (
+                    <button onClick={onRestart}>Restart story</button>
+                  )}
+                </div>
+              ) : typing ? (
+                <span className="small muted">{config.contact} is typing…</span>
+              ) : (
+                <>
+                  {choices.length ? (
+                    <div className="device-replies">
+                      {choices.map((c) => (
+                        <button key={c.id} onClick={() => onStep(c.id)}>
+                          {c.text}
+                        </button>
+                      ))}
+                    </div>
+                  ) : (
+                    <button
+                      className="device-continue"
+                      onClick={() => onStep()}
+                    >
+                      Continue
+                    </button>
+                  )}
+                  {allowsReply(scene, node, true) && (
+                    <SelfReply
+                      choices={choices}
+                      nodeId={node.id}
+                      onSend={onReply}
+                    />
+                  )}
+                </>
+              )}
+            </div>
+          )}
+          {screen === "chat" &&
+            config.keyboard &&
+            choices.length > 0 &&
+            !typing && (
+              <div className="device-keyboard" aria-hidden>
+                {[
+                  "Q W E R T Y U I O P",
+                  "A S D F G H J K L",
+                  "⇧ Z X C V B N M ⌫",
+                ].map((row) => (
+                  <div key={row}>
+                    {row.split(" ").map((key) => (
+                      <span key={key}>{key}</span>
+                    ))}
+                  </div>
+                ))}
+                <div>
+                  <span className="space-key">space</span>
+                </div>
+              </div>
+            )}
           <button
             className="device-home"
             aria-label="Phone home"
             data-help="Return to the home screen without deleting messages or rewinding the story."
             onClick={() => setScreen("home")}
-          />
-        )}
-      </div>
-    </section>
+          >
+            Home
+          </button>
+        </div>
+      </section>
+      {narrativeOutside && (
+        <aside
+          className="device-story-progress"
+          data-no-advance
+          aria-label="Story controls outside device"
+        >
+          {runtime?.ended ? (
+            <button onClick={onRestart}>Restart story</button>
+          ) : choices.length ? (
+            choices.map((c) => (
+              <button key={c.id} onClick={() => onStep(c.id)}>
+                {c.text}
+              </button>
+            ))
+          ) : (
+            <button className="device-story-continue" onClick={() => onStep()}>
+              Continue story
+            </button>
+          )}
+        </aside>
+      )}
+    </>
   );
 }

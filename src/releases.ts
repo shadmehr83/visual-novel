@@ -1,4 +1,4 @@
-export const ENGINE_VERSION = "2.2.0";
+export const ENGINE_VERSION = "2.3.0";
 export type ReleaseFeature = {
   name: string;
   description: string;
@@ -20,7 +20,45 @@ const f = (
 ): ReleaseFeature => ({ name, description, steps: path.split(" → "), action });
 export const releases: Release[] = [
   {
+    version: "2.3.0",
+    name: "Phone navigation and missing story updates",
+    date: "2026-10-28",
+    features: [
+      f(
+        "Integrate the missing café departure into saved projects",
+        "Compatible older First Match projects receive the rainy After the café scene on normal reload. Existing backgrounds, effects, other scenes and edited farewell lines are preserved; the previous project is backed up.",
+        "Open or reload the studio → Scenes library → After the café; Restore previous local project opens the recovery copy",
+        "library:Scenes",
+      ),
+      f(
+        "Home and back in every device mode",
+        "The back arrow and labelled Home button remain available in phone and computer interfaces, including older configurations that open directly to chat. They stay outside the app scroll area.",
+        "Open a device scene → Use the header back arrow or Home button → Choose Ember, Insta or Settings",
+        "devices",
+      ),
+      f(
+        "Texting controls only inside chat",
+        "Home, Insta and Settings no longer contain a second dialogue pane, reply choices or the texting keyboard. Reopen Ember to see conversation text and authored replies.",
+        "Advanced devices → Open Home or Insta in the preview → Open Ember to show messages and reply controls",
+        "devices",
+      ),
+      f(
+        "Separate story controls when browsing the phone",
+        "Authored opening actions such as continuing the story or choosing to open an app stay outside the handset while Home/feed is shown. Actual texting choices remain inside chat, and navigation does not advance unseen chat lines.",
+        "Play story → Browse the opening phone Home/feed → Use story actions outside the device or open Ember to text",
+        "editor",
+      ),
+      f(
+        "Add departure without replacing a project",
+        "A focused update button can add the missing departure to a copied project. It preserves custom café loops and creates a recovery copy instead of replacing the full project with a snapshot.",
+        "Editor → Project banner → Add missing café departure (shown only when the scene is absent)",
+        "editor",
+      ),
+    ],
+  },
+  {
     version: "2.2.0",
+    commit: "24935cf",
     name: "Dedicated devices and a flexible preview",
     date: "2026-10-28",
     features: [
