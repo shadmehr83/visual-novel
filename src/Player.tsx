@@ -3,9 +3,10 @@ import { PlaySession } from "./PlaySession";
 import { withDeviceUpload } from "./DeviceAppearance";
 import { deviceScreen } from "./interactions";
 import { PlaybackControls } from "./PlaybackControls";
-import { ItemOverlay } from "./ItemOverlay";
+import { ItemOverlay, hasItemUI } from "./ItemOverlay";
 import { SceneTransition } from "./SceneTransition";
 import { PhoneUI } from "./PhoneUI";
+import { openNotification } from "./notifications";
 import { SelfReply } from "./SelfReply";
 import { FullscreenButton } from "./FullscreenButton";
 import { useState } from "react";
@@ -53,6 +54,7 @@ function Player() {
 
         <SceneTransition
           scene={scene}
+          nodeId={node.id}
           playing
           reduced={
             project.settings.reducedEffects ||
@@ -64,10 +66,7 @@ function Player() {
               ?.filter((v) => v.scene === scene.id)
               .map((v) => v.node)}
             itemFocus={
-              !!scene.items?.enabled &&
-              scene.items.options.some((i) =>
-                node.choices.some((c) => c.id === i.choice),
-              )
+              hasItemUI(scene, node)
             }
             project={project}
             scene={scene}
@@ -76,12 +75,10 @@ function Player() {
             maskMode={false}
             onMask={() => {}}
           >
-            <SceneAudio project={project} scene={scene} />
-            {scene.items?.enabled &&
-            scene.items.options.some((i) =>
-              node.choices.some((c) => c.id === i.choice),
-            ) ? (
+            <SceneAudio project={project} scene={scene} nodeId={node.id} choices={runtime.choices} choiceSource={runtime.memories?.at(-1)} onAdvance={() => setRuntime(r => advance(project, r))} />
+            {hasItemUI(scene, node) ? (
               <ItemOverlay
+                onReply={(text, branch) => setRuntime(r => respond(project, r, text, branch))}
                 project={project}
                 scene={scene}
                 node={node}
@@ -97,6 +94,7 @@ function Player() {
                   .map((v) => v.node),
               ) !== "off" ? (
               <PhoneUI
+                onNotification={() => setRuntime(r => openNotification(project, r))}
                 key={scene.id}
                 onAppearance={(a) =>
                   setProject((p) => {

@@ -1,6 +1,7 @@
 import { usePaused } from "./PlaySession";
 import { RangeInput } from "./RangeInput";
 import { useFootsteps } from "./Footsteps";
+import { useSound } from "./Sound";
 import { useEffect, useRef, useState } from "react";
 import {
   validateProject,
@@ -108,14 +109,53 @@ export function Qte({
 export function SceneAudio({
   project,
   scene,
+  nodeId,
+  choices,
+  choiceSource,
+  onAdvance,
 }: {
   project: Project;
   scene: Scene;
+  nodeId?: string;
+  choices?: string[];
+  choiceSource?: { scene: string; node: string };
+  onAdvance?: () => void;
 }) {
   const sessionPaused = usePaused();
-  const [enabled, setEnabled] = useState(false);
+  const { enabled, volume, play, onBlocked } = useSound();
   const [error, setError] = useState("");
-  useFootsteps(project, scene, enabled && !sessionPaused, setError);
+  useFootsteps(project, scene, enabled && !sessionPaused, setError, volume);
+  const node = scene.nodes.find(n => n.id === nodeId);
+  const cue = node?.sound || ((node?.phoneNotice || node?.speaker === "Phone") ? scene.phone?.notificationSound : undefined);
+  const lastCue = useRef("");
+  const lastNotice = useRef("");
+  const advanceRef = useRef(onAdvance);
+  advanceRef.current = onAdvance;
+  useEffect(() => {
+    if (!node?.autoAdvance || node.choices.length || node.qte || sessionPaused) return;
+    const timer = setTimeout(() => advanceRef.current?.(), node.autoAdvance * 1000);
+    return () => clearTimeout(timer);
+  }, [scene.id, nodeId, sessionPaused]);
+  useEffect(() => {
+    const key = scene.id + ":" + nodeId;
+    if (!enabled || lastCue.current === key) return;
+    lastCue.current = key;
+    const notice = node?.phoneNotice || (node?.speaker === "Phone" ? node.text : "");
+    if (!node?.sound && notice && lastNotice.current === notice) return;
+    if (notice) lastNotice.current = notice;
+    play(project.audioAssets?.find(a => a.id === cue?.asset)?.data, cue?.volume);
+  }, [scene.id, nodeId, enabled]);
+  const choiceCount = choices?.length || 0;
+  const heardChoice = useRef(-1);
+  useEffect(() => {
+    if (!choiceCount) { play(undefined, 0, "reset-choice"); return; }
+    if (!enabled || heardChoice.current === choiceCount) return;
+    heardChoice.current = choiceCount;
+    const id = choices?.at(-1);
+    const source = choiceSource ? project.scenes.find(s => s.id === choiceSource.scene)?.nodes.find(n => n.id === choiceSource.node)?.choices : scene.nodes.flatMap(n => n.choices);
+    const sound = source?.find(c => c.id === id)?.sound;
+    if (sound) play(project.audioAssets?.find(a => a.id === sound.asset)?.data, sound.volume, "choice:" + choiceCount + ":" + choiceSource?.scene + ":" + choiceSource?.node + ":" + id);
+  }, [choiceCount, enabled]);
   const audioRef = useRef<(HTMLAudioElement | null)[]>([]);
   useEffect(() => {
     audioRef.current.forEach((a) => {
@@ -131,13 +171,13 @@ export function SceneAudio({
       const asset = project.audioAssets?.find((a) => a.id === t.id);
       if (!asset) return null;
       const audio = new Audio(asset.data);
-      audio.volume = t.volume;
+      audio.volume = t.volume * volume;
       audio.loop = t.loop;
       if (!sessionPaused)
         audio
           .play()
           .catch(() =>
-            setError("Audio playback was blocked. Toggle sound to retry."),
+            { setError("Audio playback was blocked. Enable sound to retry."); onBlocked(); },
           );
       return audio;
     });
@@ -148,24 +188,8 @@ export function SceneAudio({
         if (a) a.src = "";
       });
   }, [enabled, scene.id, JSON.stringify(scene.audio)]);
-  if (
-    !scene.audio?.length &&
-    !(scene.camera?.enabled && scene.camera.footsteps)
-  )
-    return null;
-  return (
-    <div className="sound-control">
-      <button
-        onClick={() => {
-          setError("");
-          setEnabled((v) => !v);
-        }}
-      >
-        {enabled ? "Mute sound" : "Enable scene sound"}
-      </button>
-      {error && <small>{error}</small>}
-    </div>
-  );
+  useEffect(() => { audioRef.current.forEach((a, i) => { if (a) a.volume = (scene.audio?.[i]?.volume || 0) * volume; }); }, [volume]);
+  return error ? <small className="sound-control">{error}</small> : null;
 }
 export function EngineTools({
   project,

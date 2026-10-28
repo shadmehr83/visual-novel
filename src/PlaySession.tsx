@@ -5,6 +5,7 @@ import {
   useState,
   type ReactNode,
 } from "react";
+import { SoundSession } from "./Sound";
 const PauseContext = createContext(false);
 export const usePaused = () => useContext(PauseContext);
 export function PlaySession({
@@ -37,6 +38,7 @@ export function PlaySession({
   }, [playing, onExit]);
   return (
     <PauseContext.Provider value={playing && paused}>
+      <SoundSession playing={playing} paused={paused}>
       <div
         className={
           playing && paused ? "play-session session-paused" : "play-session"
@@ -92,6 +94,7 @@ export function PlaySession({
           </div>
         )}
       </div>
+      </SoundSession>
     </PauseContext.Provider>
   );
 }

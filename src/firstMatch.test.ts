@@ -19,7 +19,7 @@ function play(
     const c =
       available.find((c) => overrides(c.text, s.id)) ||
       (n.id === "room"
-        ? available.find((c) => c.target === "notification")
+        ? available.find((c) => ["notification", "browse-feed"].includes(c.target))
         : available[0]);
     r = advance(p, r, c?.id);
   }

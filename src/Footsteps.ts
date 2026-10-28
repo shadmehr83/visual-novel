@@ -5,6 +5,7 @@ export function useFootsteps(
   scene: Scene,
   enabled: boolean,
   onError: (message: string) => void,
+  masterVolume = 1,
 ) {
   const origin = useRef(performance.now());
   useEffect(() => {
@@ -20,7 +21,7 @@ export function useFootsteps(
         sample = new Audio(
           project.audioAssets?.find((a) => a.id === c.footstepAsset)?.data,
         );
-        sample.volume = c.footstepVolume;
+        sample.volume = c.footstepVolume * masterVolume;
       } else {
         ctx = new AudioContext();
         ctx
@@ -65,7 +66,7 @@ export function useFootsteps(
       filter.type = "lowpass";
       filter.frequency.value = 350;
       const gain = ctx.createGain();
-      gain.gain.value = c.footstepVolume;
+      gain.gain.value = c.footstepVolume * masterVolume;
       source.connect(filter).connect(gain).connect(ctx.destination);
       source.onended = () => {
         source.disconnect();
@@ -82,5 +83,5 @@ export function useFootsteps(
       if (sample) sample.src = "";
       void ctx?.close();
     };
-  }, [enabled, scene.id, scene.camera, project.audioAssets]);
+  }, [enabled, scene.id, scene.camera, project.audioAssets, masterVolume]);
 }

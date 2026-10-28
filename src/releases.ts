@@ -1,4 +1,4 @@
-export const ENGINE_VERSION = "2.3.0";
+export const ENGINE_VERSION = "2.4.0";
 export type ReleaseFeature = {
   name: string;
   description: string;
@@ -20,7 +20,20 @@ const f = (
 ): ReleaseFeature => ({ name, description, steps: path.split(" → "), action });
 export const releases: Release[] = [
   {
+    version: "2.4.0", name: "Sound, wardrobe and close-up storytelling", date: "2026-10-28",
+    features: [
+      f("Restored clothing cards and visible chosen outfits", "The three saved clothing images can be inspected, worn and reconsidered. The chosen image stays visible with its result dialogue; missing links in compatible older projects are repaired with a recovery copy.", "Editor → Items & outfits → Open saved outfit selection; during playback inspect a card, choose it, or See the other outfits", "wardrobe"),
+      f("Reusable sound library and master volume", "Original notification, rain, muffled room rain, wet footsteps, closet and coat sound designs are included. Assign ambience or dialogue/reply/item cues and upload additional audio. Walking is enabled in scenes five and seven; rain in one, four and seven.", "Editor → Effect panels → Sound → Add background ambience or assign a sound cue; Play story → Sound volume", "effect:Sound"),
+      f("Feed-first phone opening and notification sound", "Checking the phone opens the scrolling Insta feed, followed by an animated Ember notification with a gentle chime. Opening a notification follows the authored reply route. Home, apps and the existing handset layout are retained.", "Play story → Another evening → Check the phone → Tap the notification or choose Open the app now", "devices"),
+      f("App images and independent profile uploads", "Three original app icons are included. Ember and Insta each have an independent profile image, editable both in the phone Settings app and the studio’s Advanced devices workspace.", "Advanced devices → Apps → App profile pictures; or Phone Home → Settings → Upload Ember or Insta profile image", "devices"),
+      f("Phone keyboard toggle", "Show or hide the decorative keyboard while chatting. Authors can choose its initial state; players can toggle it in chat or the phone Settings app.", "Advanced devices → Dialogue & replies → Show phone keyboard by default; Chat → Show keyboard or Hide keyboard", "devices"),
+      f("Temporary sub-scenes and a monitor close-up", "A dialogue can use a temporary background view inside its existing scene. The monitor now has a matching desk illustration, and returning to the room fades back to the main image. Main-view masks are not applied to unrelated close-ups.", "Editor → Effect panels → Sub-scenes → Add sub-scene for this dialogue → Choose its image; choose Original scene on the returning dialogue", "effect:Sub-scenes"),
+      f("Quick dialogue and reply boxes", "Every dialogue map box has + Dialogue and + Reply actions. Quick connected dialogue also lets you choose incoming and outgoing nodes. Inserting a Continue keeps its previous destination; adding a reply preserves existing routes.", "Dialogue advanced → Use + Dialogue or + Reply on a box; or Quick connected dialogue → Choose incoming/outgoing → Add connected dialogue", "dialogues"),
+    ],
+  },
+  {
     version: "2.3.0",
+    commit: "3c16fbf",
     name: "Phone navigation and missing story updates",
     date: "2026-10-28",
     features: [

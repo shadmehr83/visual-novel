@@ -65,6 +65,7 @@ export function PhoneApps({
       data-no-advance
       aria-label="Insta scrolling feed"
     >
+      {appearance?.profiles.feed && <header className="phone-feed-profile"><img className="device-profile-picture" src={project.assets.find(a => a.id === appearance.profiles.feed)?.data} alt="Your Insta profile" /><b>Your Insta feed</b></header>}
       {[
         {
           name: "nightwalks",

@@ -57,7 +57,7 @@ test("story collapses, dividers resize, layout modes restore page scrolling and 
   await inspector.getByLabel("Dialogue layout").selectOption("pinned");
   await expect(page.locator(".bottom-panel")).toBeVisible();
   await page
-    .locator(".workspace-toolbar")
+    .locator(".studio-menu")
     .getByRole("button", { name: "Appearance", exact: true })
     .click();
   await inspector.getByLabel("Interface theme").selectOption("light");
@@ -69,7 +69,7 @@ test("story collapses, dividers resize, layout modes restore page scrolling and 
   await page.reload();
   await expect(page.locator(".app")).toHaveAttribute("data-theme", "light");
   await page
-    .locator(".workspace-toolbar")
+    .locator(".studio-menu")
     .getByRole("button", { name: "Appearance", exact: true })
     .click();
   await expect(inspector.getByLabel("inspector background colour")).toHaveValue(
@@ -104,7 +104,7 @@ test("camera zoom, walking audio, hover help and enabled effect count work", asy
   await page.getByLabel("Camera zoom", { exact: true }).fill("1.8");
   await page.getByLabel("Camera bob", { exact: true }).fill("5");
   await page
-    .getByRole("checkbox", { name: "Generated footsteps", exact: true })
+    .getByRole("checkbox", { name: "Footsteps during camera movement", exact: true })
     .check();
   await page.getByLabel("Camera zoom", { exact: true }).hover();
   await expect(page.getByRole("tooltip")).toContainText(
@@ -136,9 +136,7 @@ test("camera zoom, walking audio, hover help and enabled effect count work", asy
   await page
     .getByRole("button", { name: /A table by the window.*dialogue nodes/ })
     .click();
-  await page
-    .getByRole("button", { name: "Enable scene sound", exact: true })
-    .click();
+  await expect(page.getByLabel("Story sound volume")).toBeVisible();
   await expect
     .poll(() => page.evaluate(() => (window as any).stepSounds))
     .toBeGreaterThan(0);

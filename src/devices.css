@@ -346,3 +346,29 @@
     width: calc(100% - 10px);
   }
 }
+
+/* Sound and temporary view controls share the existing effect dock. */
+.effects-dock[data-panel="Sound"] [data-effect-panel]:not([data-effect-panel="Sound"]),
+.effects-dock[data-panel="Sub-scenes"] [data-effect-panel]:not([data-effect-panel="Sub-scenes"]),
+.effects-dock:is([data-panel="Sound"],[data-panel="Sub-scenes"]) .zone-tools { display: none; }
+.workspace:not(.split-docks)>.inspector[data-inspector="Atmosphere"]:is([data-panel="Sound"],[data-panel="Sub-scenes"])>.properties-dock>fieldset { display:none; }
+.story-sound { position: fixed; z-index: 40; left: 15px; bottom: 8px; display: flex; align-items: center; gap: 8px; padding: 6px 9px; border: 1px solid #88716a88; border-radius: 7px; background: #202025ed; color: #f0e2d4; font-size: 11px; }
+.story-sound label { display: flex; gap: 6px; align-items: center; }
+.story-sound input { width: 90px; }
+.sound-cue { padding: 8px 0; border-bottom: 1px solid var(--line); }
+.sound-cue audio,.property-section audio { width: 100%; max-width: 100%; }
+.device-profile-picture { width: 32px; height: 32px; object-fit: cover; border-radius: 50%; }
+.phone-feed-profile { display: flex; align-items: center; gap: 7px; padding: 8px; font-size: 11px; background: #28222b; color: var(--device-text); }
+.phone-app-grid button>span>img { width: 100%; height: 100%; object-fit: cover; border-radius: 13px; }
+.phone-app-nav { flex-wrap: wrap; }
+.phone-notification { animation: phone-alert-pop .35s ease-out both; }
+@keyframes phone-alert-pop { from { opacity:0; transform:translateY(-15px); } to { opacity:1; transform:translateY(0); } }
+.flow-quick-add { position: absolute; bottom: 6px; left: 10px; right: 10px; display: flex; gap: 7px; }
+.flow-quick-add button { padding: 4px 7px; font-size: 11px; }
+@media(prefers-reduced-motion:reduce) { .phone-notification { animation: none; } }
+@container (max-width:180px) {
+  .device-overlay .phone-app-nav { display:flex; gap:1px; padding:2px; }
+  .device-overlay .phone-app-nav button { padding:3px; font-size:9px; }
+  .device-overlay .device-keyboard { display:block; padding:2px; }
+  .device-overlay .device-keyboard span { padding:2px; font-size:7px; }
+}

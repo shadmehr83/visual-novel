@@ -19,7 +19,7 @@ export function restoreSavedOutfits(target: Project, saved: Project) {
     const asset = saved.assets.find((a) => a.id === item.asset);
     if (asset && !target.assets.some((a) => a.id === asset.id))
       target.assets.push(structuredClone(asset));
-    if (scene.items.options.some((i) => i.id === item.id)) continue;
+    const existing = scene.items.options.find((i) => i.id === item.id);
     const original = sourceNode.choices.find((c) => c.id === item.choice)!;
     let choice = node.choices.find(
       (c) => c.id === original.id || c.text === original.text,
@@ -48,7 +48,10 @@ export function restoreSavedOutfits(target: Project, saved: Project) {
       node.choices.push(choice);
       delete node.next;
     }
-    scene.items.options.push({ ...structuredClone(item), choice: choice.id });
+    if (existing) {
+      if (!scene.nodes.some(n => n.choices.some(c => c.id === existing.choice))) existing.choice = choice.id;
+      if (!existing.asset || !target.assets.some(a => a.id === existing.asset)) existing.asset = item.asset;
+    } else scene.items.options.push({ ...structuredClone(item), choice: choice.id });
   }
   return { scene: scene.id, node: node.id };
 }

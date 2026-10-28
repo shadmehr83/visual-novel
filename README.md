@@ -117,3 +117,7 @@ Use the top tabs for the original **Editor**, **Scenes advanced**, **Dialogue ad
 ### Stillframe 2.3
 
 Compatible older First Match projects gain the missing **After the café** scene on normal reload, keeping their custom artwork/effects and a recovery copy. Home/back remains available in every device mode. Home, Insta and Settings have a single app area; conversation text and replies appear in Ember. Authored narrative actions remain outside the phone while browsing. See [Phone navigation and saved project updates](docs/PHONE_NAVIGATION_AND_PROJECT_UPDATES.md).
+
+### Stillframe 2.4
+
+The original outfit images remain visible after selection and can be reconsidered. **Sound** provides reusable ambience, dialogue/reply/item cues and uploads, with original rain, muffled rain, walking, notification and wardrobe sounds in the demo. The phone opens to the feed before its notification, with three image icons, separate app profile uploads and a keyboard toggle. **Sub-scenes** provides temporary views, including a monitor close-up. Dialogue map boxes have **+ Dialogue / + Reply** actions. Compatible saved projects receive the additions with a recovery copy. See [Sound and sub-scenes](docs/SOUND_AND_SUBSCENES.md).

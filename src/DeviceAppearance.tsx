@@ -59,7 +59,7 @@ export function DeviceAppearanceControls({
   );
   return (
     <section
-      className={compact ? "phone-settings-screen" : "property-section"}
+      className={compact ? "phone-settings-content" : "property-section"}
       data-effect-panel={compact ? undefined : "Phone"}
     >
       <h3>{compact ? "Device Settings" : "Phone & computer appearance"}</h3>
@@ -132,7 +132,7 @@ export function DeviceAppearanceControls({
           {onUpload && upload("wallpaper")}
         </>
       )}
-      {!compact && area !== "appearance" && (
+      {area !== "appearance" && (
         <>
           <h4>App icons & shortcuts</h4>
           <p>Custom app shortcuts open one of the built-in offline screens.</p>
@@ -163,6 +163,17 @@ export function DeviceAppearanceControls({
               {onUpload && upload(id)}
             </div>
           ))}
+          <h4>App profile pictures</h4>
+          {["chat", "feed"].map(id => <div key={id}>
+            <label>{id === "chat" ? "Ember" : "Insta"} profile image
+              <select aria-label={id + " profile image"} value={appearance.profiles[id] || ""} onChange={e => set("profiles", { ...appearance.profiles, [id]: e.target.value })}>
+                <option value="">No profile image</option>
+                {project.assets.map(a => <option key={a.id} value={a.id}>{a.name}</option>)}
+              </select>
+            </label>
+            {appearance.profiles[id] && <img className="device-profile-picture" alt={id + " profile"} src={project.assets.find(a => a.id === appearance.profiles[id])?.data} />}
+            {onUpload && upload("profile:" + id, (id === "chat" ? "Ember" : "Insta") + " profile image")}
+          </div>)}
           {appearance.apps.map((app, i) => (
             <details key={app.id} open>
               <summary>{app.name}</summary>
@@ -269,6 +280,7 @@ export function withDeviceUpload(
 ) {
   const a = structuredClone(value || deviceAppearanceSchema.parse({}));
   if (target === "wallpaper") a.wallpaper = asset.id;
+  else if (target.startsWith("profile:")) a.profiles[target.slice(8)] = asset.id;
   else if (["chat", "feed", "settings"].includes(target))
     a.icons[target] = asset.id;
   else

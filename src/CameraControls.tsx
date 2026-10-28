@@ -118,7 +118,7 @@ export function CameraControls({
             </label>
           ))}
           <label className="toggle-row">
-            Generated footsteps
+            Footsteps during camera movement
             <input
               type="checkbox"
               checked={c.footsteps}

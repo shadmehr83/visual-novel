@@ -1,5 +1,9 @@
 import { integrateDeparture, updateDepartureRuntime } from "./projectUpdates";
 import { saveProjectUpdate } from "./storage";
+import { SoundControls } from "./SoundControls";
+import { SceneViewControls } from "./SceneViews";
+import { integrateDemoUpdates } from "./demoUpdates";
+import { openNotification } from "./notifications";
 import { DeviceWorkspace, DeviceSummary } from "./DeviceWorkspace";
 import { DialogueItems } from "./DialogueItems";
 import { usePreviewWindow } from "./PreviewWindow";
@@ -14,7 +18,7 @@ import { deviceScreen } from "./interactions";
 import { PlaybackControls } from "./PlaybackControls";
 import { LightLibrary, makePlacedLight } from "./LightLibrary";
 import { RangeInput } from "./RangeInput";
-import { ItemOverlay } from "./ItemOverlay";
+import { ItemOverlay, hasItemUI } from "./ItemOverlay";
 import { ItemControls } from "./ItemControls";
 import { EffectPresets, StoryAppearance } from "./AuthoringExtras";
 import {
@@ -262,7 +266,7 @@ export default function App() {
       try {
         const params = new URLSearchParams(location.search);
         const explicit = params.get("snapshot") === "github";
-        let workspace;
+        let workspace: { project: Project; runtime: Runtime | null } | null;
         if (explicit) {
           const snapshot = savedProject();
           await openGithubSnapshot(snapshot);
@@ -293,8 +297,9 @@ export default function App() {
                   workspace.runtime,
                   update,
                 );
-                await saveProjectUpdate(update.project, runtime, workspace);
-                workspace = { project: update.project, runtime };
+                const complete = integrateDemoUpdates(update.project, savedProject()) || update.project;
+                await saveProjectUpdate(complete, runtime, workspace);
+                workspace = { project: complete, runtime };
                 setSnapshotNotice(
                   "Added After the café to this saved project. Your artwork, effects and other edits were kept; a recovery copy is available.",
                 );
@@ -307,19 +312,31 @@ export default function App() {
           }
         }
         if (workspace) {
+          try {
+            const updated = integrateDemoUpdates(workspace.project, savedProject());
+            if (updated) {
+              await saveProjectUpdate(updated, workspace.runtime, workspace);
+              workspace = { project: updated, runtime: workspace.runtime };
+              setSnapshotNotice("Restored outfit cards and added sound, phone icons and temporary views. Your artwork and café edits were kept; a recovery copy is available.");
+            }
+          } catch (e) {
+            setSnapshotNotice("Your saved project is unchanged. The demo content update could not be applied: " + String(e));
+          }
           setProject(workspace.project);
+          const restored = workspace.project;
+          const restoredRuntime = workspace.runtime;
           const focus = explicit
-            ? workspace.project.scenes.find((s) => s.id === "cafe") ||
-              workspace.project.scenes[0]
-            : preferredScene(workspace.project);
+            ? restored.scenes.find((s) => s.id === "cafe") ||
+              restored.scenes[0]
+            : preferredScene(restored);
           setSceneId(focus.id);
           setNodeId(focus.nodes[0].id);
           if (
-            workspace.runtime &&
-            workspace.project.scenes.some(
+            restoredRuntime &&
+            restored.scenes.some(
               (s) =>
-                s.id === workspace.runtime!.scene &&
-                s.nodes.some((n) => n.id === workspace.runtime!.node),
+                s.id === restoredRuntime.scene &&
+                s.nodes.some((n) => n.id === restoredRuntime.node),
             )
           )
             setRuntime(workspace.runtime);
@@ -1371,6 +1388,7 @@ export default function App() {
                 <div className="stage-frame">
                   <SceneTransition
                     scene={scene}
+                    nodeId={node.id}
                     playing={playing}
                     reduced={
                       project.settings.reducedEffects ||
@@ -1403,10 +1421,7 @@ export default function App() {
                           : undefined
                       }
                       itemFocus={
-                        !!scene.items?.enabled &&
-                        scene.items.options.some((i) =>
-                          node.choices.some((c) => c.id === i.choice),
-                        )
+                        hasItemUI(scene, node)
                       }
                       project={project}
                       scene={scene}
@@ -1430,7 +1445,7 @@ export default function App() {
                       onRegion={changeSelectedRegion}
                     >
                       {playing && (
-                        <SceneAudio project={project} scene={scene} />
+                        <SceneAudio project={project} scene={scene} nodeId={node.id} choices={runtime?.choices} choiceSource={runtime?.memories?.at(-1)} onAdvance={() => step()} />
                       )}
                       {playing && runtime && node.qte && (
                         <Qte
@@ -1446,6 +1461,7 @@ export default function App() {
                       )}
                       {scene.items?.enabled && placingLight === null && (
                         <ItemOverlay
+                          onReply={playing ? (text, branch) => { if (runtime) setRuntime(respond(project, runtime, text, branch)); } : undefined}
                           project={project}
                           scene={scene}
                           node={node}
@@ -1467,6 +1483,7 @@ export default function App() {
                         placingLight === null &&
                         !regionEditor && (
                           <PhoneUI
+                            onNotification={() => setRuntime(r => r && openNotification(project, r))}
                             onRestart={() => play(true)}
                             key={scene.id}
                             onAppearance={(a) =>
@@ -1520,10 +1537,7 @@ export default function App() {
                             : undefined,
                         ) === "off" &&
                         !(
-                          scene.items?.enabled &&
-                          scene.items.options.some((i) =>
-                            node.choices.some((c) => c.id === i.choice),
-                          )
+                          hasItemUI(scene, node)
                         ) && (
                           <div
                             className={
@@ -2211,6 +2225,8 @@ export default function App() {
                     "Light Library",
                     "Effect Presets",
                     "Camera",
+                    "Sound",
+                    "Sub-scenes",
                     "Save",
                   ].map((panel) => (
                     <button
@@ -2301,6 +2317,8 @@ export default function App() {
                     restart={() => setCameraPreview((n) => n + 1)}
                   />
                   <ProjectSave project={project} />
+                  <SoundControls project={project} scene={selected} nodeId={node.id} edit={edit} />
+                  <SceneViewControls project={project} scene={selected} nodeId={node.id} edit={edit} />
                   <Zones
                     scene={selected}
                     update={updateScene}

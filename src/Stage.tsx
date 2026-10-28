@@ -1,7 +1,8 @@
 import { usePaused } from "./PlaySession";
+import { sceneView } from "./SceneViews";
 import { JointLayers } from "./JointLayers";
 import { createBrush, dab, maskPath, clipToBoundary } from "./brush";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import type { Project, Scene, Region } from "./model";
 import { sampleMotion } from "./motion";
 import { sampleCamera } from "./camera";
@@ -43,6 +44,8 @@ export function Stage({
   onPlaceLight?: (x: number, y: number) => void;
   onPivot?: (x: number, y: number) => void;
 }) {
+  const baseScene = scene;
+  scene = useMemo(() => sceneView(baseScene, nodeId), [baseScene, nodeId]);
   const stroke = useRef<{
     canvas: HTMLCanvasElement;
     ctx: CanvasRenderingContext2D;

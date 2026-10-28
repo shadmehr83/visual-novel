@@ -363,6 +363,7 @@ export function DeviceWorkspace({
             {section === "Dialogue & replies" && (
               <section className="property-section">
                 <h2>Current device dialogue</h2>
+                <label><input type="checkbox" aria-label="Show phone keyboard by default" checked={phone.keyboard} onChange={e => update(s => { s.phone!.keyboard = e.target.checked; })} />Show phone keyboard by default</label>
                 <label>
                   Speaker
                   <input

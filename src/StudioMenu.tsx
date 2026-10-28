@@ -118,6 +118,8 @@ export function StudioMenu({
               "Light Library",
               "Effect Presets",
               "Camera",
+              "Sound",
+              "Sub-scenes",
               "Save",
             ].map((name) => command(name + " controls", "effect:" + name))}
             {command("Active effect switches", "active")}

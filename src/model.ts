@@ -1,11 +1,16 @@
 import { deviceScreen, allowsReply } from "./interactions";
 import { z } from "zod";
+export const soundCueSchema = z.object({
+  asset: z.string(),
+  volume: z.number().min(0).max(1).default(0.5),
+});
 const action = z.object({
   key: z.string(),
   op: z.enum(["set", "add"]),
   value: z.union([z.string(), z.number(), z.boolean()]),
 });
 const choice = z.object({
+  sound: soundCueSchema.optional(),
   routeLabel: z.string().max(120).optional(),
   id: z.string(),
   text: z.string(),
@@ -41,6 +46,9 @@ export const poseSchema = z.object({
   asset: z.string().optional(),
 });
 const node = z.object({
+  autoAdvance: z.number().min(0.5).max(30).optional(),
+  view: z.string().optional(),
+  sound: soundCueSchema.optional(),
   deviceScreen: z.enum(["off", "home", "feed", "chat"]).optional(),
   phoneNotice: z.string().max(300).optional(),
   notes: z.string().max(10000).optional(),
@@ -222,6 +230,7 @@ export const jointSchema = z.object({
 export type Joint = z.infer<typeof jointSchema>;
 export type Pose = z.infer<typeof poseSchema>;
 export const deviceAppearanceSchema = z.object({
+  profiles: z.record(z.string()).default({}),
   background: z
     .string()
     .regex(/^#[a-fA-F0-9]{6}$/)
@@ -249,6 +258,7 @@ export const deviceAppearanceSchema = z.object({
     .default([]),
 });
 export const deviceSchema = z.object({
+  notificationSound: soundCueSchema.optional(),
   frameWidth: z.number().min(5).max(95).optional(),
   frameHeight: z.number().min(20).max(98).optional(),
   anchor: z.enum(["center", "top-left"]).optional(),
@@ -278,6 +288,12 @@ export const deviceSchema = z.object({
   keyboard: z.boolean(),
 });
 const scene = z.object({
+  subscenes: z.array(z.object({
+    id: z.string(),
+    title: z.string().min(1).max(100),
+    background: z.string().nullable(),
+    transition: transitionSchema,
+  })).max(40).optional(),
   effectBackup: z.record(z.number()).optional(),
   keyframesEnabled: z.boolean().optional(),
   items: z
@@ -285,6 +301,9 @@ const scene = z.object({
       enabled: z.boolean(),
       title: z.string(),
       blur: z.number().min(0).max(15),
+      showSelected: z.boolean().optional(),
+      inspectSound: soundCueSchema.optional(),
+      chooseSound: soundCueSchema.optional(),
       options: z
         .array(
           z.object({
@@ -366,6 +385,7 @@ export const projectSchema = z.object({
     })
     .optional(),
   schemaVersion: z.literal(1),
+  contentUpdates: z.array(z.string()).optional(),
   audioAssets: z
     .array(
       z.object({
@@ -468,6 +488,24 @@ export function validateProject(input: unknown): Project {
     if (ids.has(s.id)) throw Error("Duplicate scene id: " + s.id);
     ids.add(s.id);
     const nodes = new Set(s.nodes.map((n) => n.id));
+    const checkSound = (cue?: z.infer<typeof soundCueSchema>) => {
+      if (cue && !p.audioAssets?.some((a) => a.id === cue.asset))
+        throw Error("Missing sound cue asset");
+    };
+    checkSound(s.phone?.notificationSound);
+    checkSound(s.items?.inspectSound);
+    checkSound(s.items?.chooseSound);
+    if (new Set(s.subscenes?.map((v) => v.id)).size !== (s.subscenes?.length || 0))
+      throw Error("Duplicate sub-scene id");
+    for (const view of s.subscenes || [])
+      if (view.background && !p.assets.some((a) => a.id === view.background))
+        throw Error("Missing sub-scene background");
+    for (const n of s.nodes) {
+      if (n.view && !s.subscenes?.some((v) => v.id === n.view))
+        throw Error("Missing dialogue sub-scene");
+      checkSound(n.sound);
+      for (const c of n.choices) checkSound(c.sound);
+    }
     if (nodes.size !== s.nodes.length)
       throw Error("Duplicate dialogue node in " + s.title);
     for (const frame of s.keyframes || [])
@@ -499,6 +537,7 @@ export function validateProject(input: unknown): Project {
     const appearance = s.phone?.appearance;
     for (const id of [
       appearance?.wallpaper,
+      ...Object.values(appearance?.profiles || {}),
       ...Object.values(appearance?.icons || {}),
       ...(appearance?.apps || []).map((a) => a.icon),
     ])

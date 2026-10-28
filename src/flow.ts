@@ -38,7 +38,23 @@ export type FlowGraph = {
 export const CARD_WIDTH = 270;
 export const portY = (index: number) => 112 + index * 34;
 export const cardHeight = (card: FlowCard) =>
-  Math.max(146, 112 + card.ports.length * 34 + 12);
+  Math.max(146, 112 + card.ports.length * 34 + (card.kind === "dialogue" ? 44 : 12));
+export function addConnectedDialogue(p: Project, sceneId: string, from: string | undefined, kind: "continue" | "reply", outgoing?: string) {
+  const s = p.scenes.find(s => s.id === sceneId)!;
+  const source = s.nodes.find(n => n.id === from);
+  if (source?.qte) throw Error("Connect a timed action outcome first, then add a dialogue there.");
+  const id = crypto.randomUUID();
+  const n: Node = { id, speaker: "Narrator", text: "A new line of dialogue.", choices: [], next: outgoing || (kind === "continue" ? source?.next : undefined) };
+  s.nodes.push(n);
+  if (source) {
+    if (kind === "continue" && !source.choices.length) source.next = id;
+    else addFlowChoice(p, s.id, source.id, id, "New reply", "");
+  }
+  const positions = p.flowLayout?.dialogues[s.id];
+  const old = positions?.["node:" + from];
+  if (old) storeFlowPositions(p, "dialogues", s.id, { ["node:" + id]: { x: old.x + 410, y: old.y + source!.choices.length * 65 } });
+  return id;
+}
 const label = (c: Choice) => c.routeLabel?.trim() || c.text;
 export function flowGraph(
   p: Project,

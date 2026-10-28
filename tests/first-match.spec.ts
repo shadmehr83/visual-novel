@@ -27,7 +27,8 @@ test("the complete story leaves the preserved café for rainy pavement and Maria
     scenes.add(title);
     const items = page.locator(".scene-in .item-overlay");
     if (await items.isVisible()) {
-      await items.locator(".item-grid button").first().click();
+      if (await items.locator(".item-grid button").count())
+        await items.locator(".item-grid button").first().click();
       await items.locator(".item-detail button").first().click();
       continue;
     }

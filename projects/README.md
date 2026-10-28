@@ -62,3 +62,7 @@ A dedicated **Advanced devices** workspace keeps the complete app system and mov
 ## Stillframe 2.3 — integrated local story updates and phone navigation
 
 Normal reload now adds **After the café** to compatible older saved First Match projects with a recovery copy, preserving locally edited art, effects, other scenes and farewell text. Existing departure scenes are kept as edited. A focused **Add missing café departure** button supports copied projects without replacing the whole project. Header back and Home remain available in every phone/computer mode. Home/Insta/Settings no longer contain a second dialogue pane; conversation text and replies appear inside Ember. See [Phone navigation and project updates](../docs/PHONE_NAVIGATION_AND_PROJECT_UPDATES.md).
+
+## Stillframe 2.4 — sound, temporary views and restored wardrobe
+
+The checkpoint embeds six original sound designs, three app icons and a monitor close-up. Compatible older First Match workspaces receive the wardrobe repairs and demo additions once, with a recovery copy. Audio, view selections, app profiles and graph links travel with exported JSON. The café image and its visual settings remain protected. See [Sound and sub-scenes](../docs/SOUND_AND_SUBSCENES.md).

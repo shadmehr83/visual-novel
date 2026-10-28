@@ -19,7 +19,7 @@ try {
   const p=JSON.parse(await readFile('projects/published.stillframe.json','utf8'));
   p.id='offline-cinematic-fixture';p.assets=[];
   const a=p.scenes[0],b=p.scenes[1];p.scenes=[a,b];
-  for(const s of p.scenes){s.background=null;s.effects.rain=false;s.effects.glass=false;delete s.camera;s.joints=[];if(s.phone){s.phone.avatar=null;delete s.phone.appearance;delete s.phone.schedule;}}
+  for(const s of p.scenes){s.background=null;s.effects.rain=false;s.effects.glass=false;delete s.camera;s.joints=[];delete s.subscenes;if(s.phone){s.phone.avatar=null;delete s.phone.appearance;delete s.phone.schedule;}}
   delete a.phone;
   a.nodes=[{id:'a',speaker:'Narrator',text:'Resting hand',choices:[],next:'b'},{id:'b',speaker:'Narrator',text:'Moved hand',choices:[{id:'open',text:'Open phone',target:b.id,actions:[],note:''}]}];
   const pose=node=>({node,x:0,y:0,angle:0,scaleX:1,scaleY:1,opacity:1});

@@ -61,9 +61,10 @@ test("advanced device controls resize one edge, retain Home and scrolling Insta,
   await expect(device).toHaveClass(/device-desktop/);
   await page.getByRole("button", { name: "Apps", exact: true }).click();
   await page
+    .getByRole("region", { name: "Advanced device settings", exact: true })
     .getByRole("button", { name: "Add app shortcut", exact: true })
     .click();
-  await page.getByLabel("App name", { exact: true }).fill("My gallery");
+  await page.getByRole("region", { name: "Advanced device settings", exact: true }).getByLabel("App name", { exact: true }).fill("My gallery");
   await page.getByLabel("Back to phone home", { exact: true }).click();
   await expect(page.locator(".phone-app-grid")).toContainText("My gallery");
   expect(errors).toEqual([]);
@@ -138,6 +139,8 @@ test("the saved three-outfit picker still inspects and confirms a real outfit, w
   await expect(
     page.getByRole("region", { name: "Item selection" }),
   ).toHaveCount(0);
+  await expect(page.getByRole("region", { name: "Selected outfit", exact: true })).toBeVisible();
+  await page.getByRole("region", { name: "Selected outfit", exact: true }).getByRole("button", { name: "Continue", exact: true }).click();
   await expect(page.locator(".dialogue-overlay")).toBeVisible();
   await page.keyboard.press("Escape");
   await page

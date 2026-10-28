@@ -1,4 +1,5 @@
 import { test, expect } from "@playwright/test";
+import { demo } from "../src/demo";
 test("AI proposal is reviewed, applied, undone, and dictated without automatically editing", async ({
   page,
 }) => {
@@ -30,34 +31,36 @@ test("AI proposal is reviewed, applied, undone, and dictated without automatical
     };
   });
   await page.goto("/");
+  const originalBrightness = await page.getByLabel("Brightness", { exact: true }).inputValue();
   await page.getByRole("button", { name: "Assistant", exact: true }).click();
   await expect(page.getByText("SERVER AI", { exact: true })).toBeVisible();
   await page.getByLabel("Studio access password").fill("test");
   await page.getByLabel(/Share this request/).check();
   await page.getByRole("button", { name: "Ask AI", exact: true }).click();
   await expect(page.getByText("Dim the café.", { exact: true })).toBeVisible();
-  await expect(page.getByLabel("Brightness", { exact: true })).toHaveValue("0.78");
+  await expect(page.getByLabel("Brightness", { exact: true })).toHaveValue(originalBrightness);
   await page.getByRole("button", { name: "Apply approved changes" }).click();
   await expect(page.getByLabel("Brightness", { exact: true })).toHaveValue(
     "0.6",
   );
   await page.getByRole("button", { name: "Undo", exact: true }).click();
-  await expect(page.getByLabel("Brightness", { exact: true })).toHaveValue("0.78");
+  await expect(page.getByLabel("Brightness", { exact: true })).toHaveValue(originalBrightness);
   page.on("dialog", (d) => d.accept());
   await page.getByRole("button", { name: "Speak your request" }).click();
   await expect(page.getByLabel("Assistant request")).toHaveValue(
     /Make the scene gentler/,
   );
-  await expect(page.getByLabel("Brightness", { exact: true })).toHaveValue("0.78");
+  await expect(page.getByLabel("Brightness", { exact: true })).toHaveValue(originalBrightness);
 });
 test("sprite and audio import, QTE authoring and play", async ({ page }) => {
   await page.goto("/");
+  await page.locator('input[accept=".json"]').setInputFiles({ name: "engine-fixture.json", mimeType: "application/json", buffer: Buffer.from(JSON.stringify(demo())) });
   await page
     .getByRole("button", { name: /Another evening.*dialogue nodes/ })
     .click();
   await page
-    .locator("input[type=file]")
-    .first()
+    .locator('input[type=file][accept="image/png,image/jpeg,image/webp"]')
+    .last()
     .setInputFiles({
       name: "sprite.png",
       mimeType: "image/png",
@@ -68,8 +71,8 @@ test("sprite and audio import, QTE authoring and play", async ({ page }) => {
     });
   await page.getByRole("button", { name: "Tools", exact: true }).click();
   await page.getByRole("button", { name: "Add sprite layer" }).click();
-  await expect(page.getByLabel("Sprite x")).toHaveValue("500");
-  await page.getByLabel("Sprite x").fill("700");
+  await expect(page.getByLabel("Sprite x", { exact: true })).toHaveValue("500");
+  await page.getByLabel("Sprite x", { exact: true }).fill("700");
   await expect(page.locator(".stage svg image").last()).toHaveAttribute(
     "transform",
     /translate\(700/,
@@ -105,6 +108,6 @@ test("sprite and audio import, QTE authoring and play", async ({ page }) => {
     page.getByRole("button", { name: "Open the message", exact: true }),
   ).toBeVisible();
   await expect(
-    page.getByRole("button", { name: "Enable scene sound" }),
+    page.getByLabel("Story sound volume"),
   ).toBeVisible();
 });

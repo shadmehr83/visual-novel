@@ -20,8 +20,10 @@ export function PhoneUI({
   onAppearance,
   onUpload,
   screenOverride,
+  onNotification,
 }: {
   screenOverride?: "home" | "chat" | "feed" | "settings";
+  onNotification?: () => void;
   project: Project;
   scene: Scene;
   node: Node;
@@ -54,6 +56,8 @@ export function PhoneUI({
     if (effective !== "off") setScreen(effective);
   }, [effective, scene.id]);
   const [typing, setTyping] = useState(false);
+  const [keyboardVisible, setKeyboardVisible] = useState(config.keyboard);
+  useEffect(() => setKeyboardVisible(config.keyboard), [config.keyboard, scene.id]);
   const feed = useRef<HTMLDivElement>(null);
   const reduced =
     project.settings.reducedEffects ||
@@ -195,6 +199,7 @@ export function PhoneUI({
               <button onClick={() => setScreen("home")}>Home</button>
               <button onClick={() => setScreen("chat")}>Ember</button>
               <button onClick={() => setScreen("feed")}>Insta</button>
+              {screen === "chat" && <button aria-label="Toggle phone keyboard" aria-pressed={keyboardVisible} onClick={() => setKeyboardVisible(v => !v)}>{keyboardVisible ? "Hide keyboard" : "Show keyboard"}</button>}
             </nav>
           )}
           {storyNotice && (
@@ -206,6 +211,7 @@ export function PhoneUI({
                   /open|read.*message/i.test(c.text),
                 );
                 if (c) onStep(c.id);
+                else if (runtime && onNotification && scene.nodes.find(n => n.id === node.next)?.choices.some(c => /open|read.*message/i.test(c.text))) onNotification();
                 else setScreen("chat");
               }}
             >
@@ -214,6 +220,8 @@ export function PhoneUI({
             </button>
           )}
           {screen === "settings" ? (
+            <div className="phone-settings-screen">
+            <label><input type="checkbox" aria-label="Show phone keyboard in Settings" checked={keyboardVisible} onChange={e => setKeyboardVisible(e.target.checked)} />Show keyboard while replying</label>
             <DeviceAppearanceControls
               compact
               project={project}
@@ -224,6 +232,7 @@ export function PhoneUI({
               }}
               onUpload={onUpload}
             />
+            </div>
           ) : screen !== "chat" ? (
             <PhoneApps
               screen={screen}
@@ -233,6 +242,7 @@ export function PhoneUI({
             />
           ) : (
             <div className="device-feed" ref={feed} aria-live="polite">
+              {appearance?.profiles.chat && <div className="phone-feed-profile"><img className="device-profile-picture" src={project.assets.find(a => a.id === appearance.profiles.chat)?.data} alt="Your Ember profile" /><small>Your Ember profile</small></div>}
               <p className="device-date">Today · Ember</p>
               {messages.map((m, i) =>
                 typing && m.node === node.id && m.scene === scene.id ? null : (
@@ -304,7 +314,7 @@ export function PhoneUI({
             </div>
           )}
           {screen === "chat" &&
-            config.keyboard &&
+            keyboardVisible &&
             choices.length > 0 &&
             !typing && (
               <div className="device-keyboard" aria-hidden>

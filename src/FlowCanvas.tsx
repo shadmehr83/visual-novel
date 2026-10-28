@@ -19,6 +19,7 @@ export function FlowCanvas({
   onConnect,
   onRoute,
   onArrange,
+  onAdd,
 }: {
   graph: FlowGraph;
   saved: Record<string, Point>;
@@ -29,6 +30,7 @@ export function FlowCanvas({
   onConnect: (ref: LinkRef, target: string) => void;
   onRoute: (ref: LinkRef) => void;
   onArrange: (p: Record<string, Point>) => void;
+  onAdd?: (node: string, kind: "continue" | "reply") => void;
 }) {
   const canvas = useRef<HTMLDivElement>(null),
     [view, setView] = useState<View>({ x: 30, y: 30, zoom: 0.85 });
@@ -429,6 +431,10 @@ export function FlowCanvas({
               <p className="flow-card-text" title={c.text}>
                 {c.text}
               </p>
+              {c.kind === "dialogue" && onAdd && <div className="flow-quick-add">
+                <button aria-label={"Add connected dialogue after " + c.title} onClick={e => { e.stopPropagation(); onAdd(c.node!, "continue"); }}>+ Dialogue</button>
+                <button aria-label={"Add reply route from " + c.title} onClick={e => { e.stopPropagation(); onAdd(c.node!, "reply"); }}>+ Reply</button>
+              </div>}
               {c.ports.map((port, i) => (
                 <div
                   key={port.id}

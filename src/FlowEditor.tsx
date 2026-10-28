@@ -4,6 +4,7 @@ import { removeDialogue } from "./authoring";
 import { FlowCanvas } from "./FlowCanvas";
 import {
   addFlowChoice,
+  addConnectedDialogue,
   connectFlow,
   createFlowScene,
   flowGraph,
@@ -39,6 +40,7 @@ export function FlowEditor({
     [reply, setReply] = useState("New reply"),
     [route, setRoute] = useState(""),
     [target, setTarget] = useState("");
+  const [incoming, setIncoming] = useState(""), [linkKind, setLinkKind] = useState<"continue" | "reply">("continue"), [outgoing, setOutgoing] = useState("");
   const graph = flowGraph(project, mode, scene.id),
     selected = mode === "scenes" ? "scene:" + scene.id : "node:" + node.id;
   const source = selectedLink
@@ -112,6 +114,13 @@ export function FlowEditor({
           .choices.find((c) => c.id === selectedLink.choice)!;
         fn(c);
       });
+  };
+  const quickAdd = (from?: string, kind: "continue" | "reply" = "continue", to?: string) => {
+    let id = "";
+    if (commit(p => { id = addConnectedDialogue(p, scene.id, from, kind, to); }, "Dialogue and its connections added. Edit the text here, or drag its input/output dots.")) {
+      setSelectedLink(null);
+      onSelect(scene.id, id);
+    }
   };
   return (
     <section
@@ -203,6 +212,7 @@ export function FlowEditor({
       <div className="flow-body">
         <FlowCanvas
           graph={graph}
+          onAdd={mode === "dialogues" ? (from, kind) => quickAdd(from, kind) : undefined}
           saved={saved || {}}
           selected={selected}
           onSelect={selectCard}
@@ -231,6 +241,15 @@ export function FlowEditor({
           className="flow-details ui-pane"
           aria-label="Flow selection details"
         >
+          {mode === "dialogues" && <section className="property-section">
+            <h3>Quick connected dialogue</h3>
+            <label>Incoming dialogue<select aria-label="New dialogue incoming" value={incoming} onChange={e => setIncoming(e.target.value)}><option value="">Unconnected box</option>{scene.nodes.filter(n => !n.qte).map((n, i) => <option key={n.id} value={n.id}>{i + 1}. {n.speaker}: {n.text.slice(0, 35)}</option>)}</select></label>
+            <button onClick={() => setIncoming(node.id)}>Use selected box as incoming</button>
+            <label>Connection type<select aria-label="New dialogue connection type" value={linkKind} onChange={e => setLinkKind(e.target.value as typeof linkKind)}><option value="continue">Continue · no reply required</option><option value="reply">New reply route</option></select></label>
+            <label>Outgoing dialogue<select aria-label="New dialogue outgoing" value={outgoing} onChange={e => setOutgoing(e.target.value)}><option value="">Keep previous Continue, or end here</option>{scene.nodes.map((n, i) => <option key={n.id} value={n.id}>{i + 1}. {n.speaker}: {n.text.slice(0, 35)}</option>)}</select></label>
+            <button onClick={() => quickAdd(incoming || undefined, linkKind, outgoing || undefined)}>Add connected dialogue</button>
+            <p>Use + Dialogue or + Reply directly on a box. Existing routes remain connected; drag the dots to change destinations.</p>
+          </section>}
           {error && (
             <p className="flow-error" role="alert">
               {error}

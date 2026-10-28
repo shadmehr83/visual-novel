@@ -14,26 +14,30 @@ export function SceneTransition({
   playing,
   reduced,
   children,
+  nodeId,
 }: {
   scene: Scene;
   playing: boolean;
   reduced: boolean;
   children: ReactNode;
+  nodeId?: string;
 }) {
-  const previous = useRef(scene.id),
+  const view = scene.subscenes?.find(v => v.id === scene.nodes.find(n => n.id === nodeId)?.view);
+  const key = scene.id + ":" + (view?.id || "main");
+  const previous = useRef(key),
     timer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
   const [outgoing, setOutgoing] = useState<ReactNode>(null);
   const last = useRef(children);
   const lastScene = useRef(scene);
   const selectedTransition = useRef(scene.transition);
-  if (previous.current !== scene.id)
+  if (previous.current !== key)
     selectedTransition.current =
-      lastScene.current.exitTransition || scene.transition;
+      view?.transition || (previous.current.startsWith(scene.id + ":") ? { style: "fade", seconds: 0.65 } : lastScene.current.exitTransition || scene.transition);
   const transition = playing ? selectedTransition.current : scene.transition;
   useEffect(() => {
     setOutgoing(null);
     if (
-      previous.current !== scene.id &&
+      previous.current !== key &&
       playing &&
       !reduced &&
       transition &&
@@ -62,10 +66,10 @@ export function SceneTransition({
         transition.seconds * 1000,
       );
     }
-    previous.current = scene.id;
+    previous.current = key;
     lastScene.current = scene;
     return () => clearTimeout(timer.current);
-  }, [scene.id, playing, reduced]);
+  }, [key, playing, reduced]);
   useEffect(() => {
     last.current = children;
     lastScene.current = scene;
@@ -90,7 +94,7 @@ export function SceneTransition({
         </div>
       )}
       <div
-        key={scene.id}
+        key={key}
         className={`scene-in ${active ? "scene-in-" + transition.style : ""}`}
       >
         {children}

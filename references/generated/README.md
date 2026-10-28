@@ -5,3 +5,7 @@
 `first-match-departure.webp` is the same image encoded at quality 90, with unchanged 1672 × 941 dimensions, for a compact embedded project asset. The scene has no added window masks, lamp zones or cloth movement from another picture; rain ripples and reflections are painted into this background.
 
 The portable project embeds the WebP as `first-match-departure`. Both the engine downloads and GitHub snapshot include it.
+
+## Stillframe 2.4
+
+`first-match-monitor.webp` is an original generated desk close-up using the existing bedroom as its style reference. `first-match-chat.webp`, `first-match-feed.webp` and `first-match-settings.webp` are three original app icons. They were generated specifically for this project, then encoded as WebP at unchanged dimensions for compact portable builds. Source generated PNGs remain in the execution workspace; the WebPs are committed and embedded in the portable project.

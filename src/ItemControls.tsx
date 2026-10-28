@@ -57,6 +57,10 @@ export function ItemControls({
             Enable item picker · keep saved cards
           </label>
           <label>
+            <input type="checkbox" aria-label="Keep selected outfit visible" checked={scene.items.showSelected ?? false} onChange={e => update(s => { s.items!.showSelected = e.target.checked; })} />
+            Keep selected item visible on its result dialogue
+          </label>
+          <label>
             Overlay title
             <input
               value={scene.items.title}

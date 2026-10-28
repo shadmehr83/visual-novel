@@ -47,8 +47,8 @@ try {
     .getByLabel("Dialogue text")
     .fill("Authored inside the single-file editor.");
   await page
-    .locator("input[type=file]")
-    .first()
+    .locator('input[type=file][accept="image/png,image/jpeg,image/webp"]')
+    .last()
     .setInputFiles({
       name: "local.png",
       mimeType: "image/png",

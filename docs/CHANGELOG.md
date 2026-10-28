@@ -1,8 +1,77 @@
 # Stillframe engine update history
 
-Current version: **2.3.0**. Earlier version numbers were assigned retrospectively from Git milestones. Directions below point to their current location; the in-app Update history tab also offers feature shortcuts. Dates use Australia/Sydney time. Project format remains schemaVersion 1.
+Current version: **2.4.0**. Earlier version numbers were assigned retrospectively from Git milestones. Directions below point to their current location; the in-app Update history tab also offers feature shortcuts. Dates use Australia/Sydney time. Project format remains schemaVersion 1.
+
+## v2.4.0 — Sound, wardrobe and close-up storytelling (2026-10-28)
+
+### Restored clothing cards and visible chosen outfits
+
+The three saved clothing images can be inspected, worn and reconsidered. The chosen image stays visible with its result dialogue; missing links in compatible older projects are repaired with a recovery copy.
+
+1. Editor
+2. Items & outfits
+3. Open saved outfit selection; during playback inspect a card, choose it, or See the other outfits
+
+### Reusable sound library and master volume
+
+Original notification, rain, muffled room rain, wet footsteps, closet and coat sound designs are included. Assign ambience or dialogue/reply/item cues and upload additional audio. Walking is enabled in scenes five and seven; rain in one, four and seven.
+
+1. Editor
+2. Effect panels
+3. Sound
+4. Add background ambience or assign a sound cue; Play story
+5. Sound volume
+
+### Feed-first phone opening and notification sound
+
+Checking the phone opens the scrolling Insta feed, followed by an animated Ember notification with a gentle chime. Opening a notification follows the authored reply route. Home, apps and the existing handset layout are retained.
+
+1. Play story
+2. Another evening
+3. Check the phone
+4. Tap the notification or choose Open the app now
+
+### App images and independent profile uploads
+
+Three original app icons are included. Ember and Insta each have an independent profile image, editable both in the phone Settings app and the studio’s Advanced devices workspace.
+
+1. Advanced devices
+2. Apps
+3. App profile pictures; or Phone Home
+4. Settings
+5. Upload Ember or Insta profile image
+
+### Phone keyboard toggle
+
+Show or hide the decorative keyboard while chatting. Authors can choose its initial state; players can toggle it in chat or the phone Settings app.
+
+1. Advanced devices
+2. Dialogue & replies
+3. Show phone keyboard by default; Chat
+4. Show keyboard or Hide keyboard
+
+### Temporary sub-scenes and a monitor close-up
+
+A dialogue can use a temporary background view inside its existing scene. The monitor now has a matching desk illustration, and returning to the room fades back to the main image. Main-view masks are not applied to unrelated close-ups.
+
+1. Editor
+2. Effect panels
+3. Sub-scenes
+4. Add sub-scene for this dialogue
+5. Choose its image; choose Original scene on the returning dialogue
+
+### Quick dialogue and reply boxes
+
+Every dialogue map box has + Dialogue and + Reply actions. Quick connected dialogue also lets you choose incoming and outgoing nodes. Inserting a Continue keeps its previous destination; adding a reply preserves existing routes.
+
+1. Dialogue advanced
+2. Use + Dialogue or + Reply on a box; or Quick connected dialogue
+3. Choose incoming/outgoing
+4. Add connected dialogue
 
 ## v2.3.0 — Phone navigation and missing story updates (2026-10-28)
+
+[Source milestone 3c16fbf](https://github.com/shadmehr83/visual-novel/commit/3c16fbf)
 
 ### Integrate the missing café departure into saved projects
 

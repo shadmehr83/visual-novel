@@ -205,6 +205,16 @@ export function integrateDeparture(
     const a = published.assets.find((a) => a.id === id);
     if (a) p.assets.push(structuredClone(a));
   }
+  const audio = new Set([
+    ...(departure.audio || []).map(t => t.id),
+    departure.camera?.footstepAsset,
+    departure.phone?.notificationSound?.asset,
+    ...departure.nodes.flatMap(n => [n.sound?.asset, ...n.choices.map(c => c.sound?.asset)]),
+  ].filter((id): id is string => !!id));
+  for (const id of audio) {
+    const asset = published.audioAssets?.find(a => a.id === id);
+    if (asset && !p.audioAssets?.some(a => a.id === id)) (p.audioAssets ??= []).push(structuredClone(asset));
+  }
   if (
     phone?.schedule &&
     !departure.nodes.some((n) => n.id === phone.schedule!.end)

@@ -29,8 +29,8 @@ test("author, import, mask, undo, persist, export and play opening", async ({
     .getByLabel("Dialogue text")
     .fill("A line authored in the browser.");
   await page
-    .locator("input[type=file]")
-    .first()
+    .locator('input[type=file][accept="image/png,image/jpeg,image/webp"]')
+    .last()
     .setInputFiles({
       name: "test.png",
       mimeType: "image/png",
@@ -59,7 +59,7 @@ test("author, import, mask, undo, persist, export and play opening", async ({
   const bundle = await download;
   await expect(bundle.suggestedFilename()).toContain(".stillframe.json");
   const bundlePath = await bundle.path();
-  await page.locator("input[type=file]").nth(1).setInputFiles(bundlePath!);
+  await page.locator('input[accept=".json"]').setInputFiles(bundlePath!);
   await page
     .getByRole("button", { name: /A table by the window.*dialogue nodes/ })
     .click();
