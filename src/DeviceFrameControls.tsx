@@ -1,3 +1,4 @@
+import { effectiveDevice } from "./deviceShared";
 import type { Project, Scene } from "./model";
 import { RangeInput } from "./RangeInput";
 import { changeDeviceFrame, deviceBox, fitDeviceFrame } from "./deviceFrame";
@@ -5,12 +6,14 @@ export function DeviceFrameControls({
   project,
   scene,
   update,
+  onAvatar,
 }: {
+  onAvatar?: (id: string | null) => void;
   project: Project;
   scene: Scene;
   update: (f: (s: Scene) => void) => void;
 }) {
-  const d = scene.phone;
+  const d = scene.phone ? effectiveDevice(project, scene) : undefined;
   if (!d) return null;
   const box = deviceBox(d);
   return (
@@ -106,10 +109,13 @@ export function DeviceFrameControls({
         <select
           aria-label="Device portrait"
           value={d.avatar || ""}
+          data-help="Choose the contact’s face from project images. With shared phone appearance enabled, this portrait also appears on phones in other scenes. Select Initials to use a letter instead."
           onChange={(e) =>
-            update((s) => {
-              s.phone!.avatar = e.target.value || null;
-            })
+            onAvatar
+              ? onAvatar(e.target.value || null)
+              : update((s) => {
+                  s.phone!.avatar = e.target.value || null;
+                })
           }
         >
           <option value="">Initials</option>

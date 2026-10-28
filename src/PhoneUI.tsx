@@ -1,3 +1,4 @@
+import { effectiveDevice } from "./deviceShared";
 import { deviceBox } from "./deviceFrame";
 import { PhoneApps } from "./PhoneApps";
 import {
@@ -34,9 +35,23 @@ export function PhoneUI({
   onAppearance?: (a: DeviceAppearance) => void;
   onUpload?: (a: Project["assets"][number], target: string) => void;
 }) {
-  const config = { ...scene.phone!, device: node.deviceKind || scene.phone!.device };
-  if (node.deviceKind === "desktop") Object.assign(config, {x: 50, y: 50, frameWidth: 75, frameHeight: 85, anchor: "center"});
-  const texting = deviceDialogue(scene, node, runtime?.nodeVisits?.filter(v => v.scene === scene.id).map(v => v.node));
+  const config = {
+    ...effectiveDevice(project, scene),
+    device: node.deviceKind || scene.phone!.device,
+  };
+  if (node.deviceKind === "desktop")
+    Object.assign(config, {
+      x: 50,
+      y: 50,
+      frameWidth: 75,
+      frameHeight: 85,
+      anchor: "center",
+    });
+  const texting = deviceDialogue(
+    scene,
+    node,
+    runtime?.nodeVisits?.filter((v) => v.scene === scene.id).map((v) => v.node),
+  );
   const box = deviceBox(config);
   const paused = usePaused();
   const [localAppearance, setLocalAppearance] = useState(config.appearance);
@@ -59,7 +74,10 @@ export function PhoneUI({
   }, [effective, scene.id]);
   const [typing, setTyping] = useState(false);
   const [keyboardVisible, setKeyboardVisible] = useState(config.keyboard);
-  useEffect(() => setKeyboardVisible(config.keyboard), [config.keyboard, scene.id]);
+  useEffect(
+    () => setKeyboardVisible(config.keyboard),
+    [config.keyboard, scene.id],
+  );
   const feed = useRef<HTMLDivElement>(null);
   const reduced =
     project.settings.reducedEffects ||
@@ -68,6 +86,7 @@ export function PhoneUI({
     setTyping(
       !!runtime &&
         screen === "chat" &&
+        texting &&
         node.speaker === config.contact &&
         config.typingSeconds > 0 &&
         !reduced &&
@@ -79,7 +98,7 @@ export function PhoneUI({
       config.typingSeconds * 1000,
     );
     return () => clearTimeout(timer);
-  }, [node.id, config.typingSeconds, reduced, screen, paused]);
+  }, [node.id, config.typingSeconds, reduced, screen, paused, texting]);
   const messages = (
     runtime
       ? runtime.phoneMessages || []
@@ -93,16 +112,21 @@ export function PhoneUI({
             },
           ]
         : []
-  ).filter(
-    (m) => {
-      const s = project.scenes.find(s => s.id === m.scene), n = s?.nodes.find(n => n.id === m.node);
-      if (!s || !n || n.deviceDialogue === false) return false;
-      if (m.sender === "You" && n.choices.some(c => c.text === m.text) && !deviceDialogue(s, n)) return false;
-      return (
+  ).filter((m) => {
+    const s = project.scenes.find((s) => s.id === m.scene),
+      n = s?.nodes.find((n) => n.id === m.node);
+    if (!s || !n || n.deviceDialogue === false) return false;
+    if (
+      m.sender === "You" &&
+      n.choices.some((c) => c.text === m.text) &&
+      !deviceDialogue(s, n)
+    )
+      return false;
+    return (
       project.scenes.find((s) => s.id === m.scene)?.phone?.contact ===
-      config.contact);
-    },
-  );
+      config.contact
+    );
+  });
   useEffect(() => {
     feed.current?.scrollTo({
       top: feed.current.scrollHeight,
@@ -119,8 +143,7 @@ export function PhoneUI({
   );
   const storyNotice =
     node.phoneNotice || (node.speaker === "Phone" ? node.text : undefined);
-  const narrativeOutside =
-    !!runtime && !texting;
+  const narrativeOutside = !texting || screen !== "chat";
   return (
     <>
       <section
@@ -201,7 +224,15 @@ export function PhoneUI({
               <button onClick={() => setScreen("home")}>Home</button>
               <button onClick={() => setScreen("chat")}>Ember</button>
               <button onClick={() => setScreen("feed")}>Insta</button>
-              {screen === "chat" && <button aria-label="Toggle phone keyboard" aria-pressed={keyboardVisible} onClick={() => setKeyboardVisible(v => !v)}>{keyboardVisible ? "Hide keyboard" : "Show keyboard"}</button>}
+              {screen === "chat" && (
+                <button
+                  aria-label="Toggle phone keyboard"
+                  aria-pressed={keyboardVisible}
+                  onClick={() => setKeyboardVisible((v) => !v)}
+                >
+                  {keyboardVisible ? "Hide keyboard" : "Show keyboard"}
+                </button>
+              )}
             </nav>
           )}
           {storyNotice && (
@@ -213,7 +244,14 @@ export function PhoneUI({
                   /open|read.*message/i.test(c.text),
                 );
                 if (c) onStep(c.id);
-                else if (runtime && onNotification && scene.nodes.find(n => n.id === node.next)?.choices.some(c => /open|read.*message/i.test(c.text))) onNotification();
+                else if (
+                  runtime &&
+                  onNotification &&
+                  scene.nodes
+                    .find((n) => n.id === node.next)
+                    ?.choices.some((c) => /open|read.*message/i.test(c.text))
+                )
+                  onNotification();
                 else setScreen("chat");
               }}
             >
@@ -223,17 +261,25 @@ export function PhoneUI({
           )}
           {screen === "settings" ? (
             <div className="phone-settings-screen">
-            <label><input type="checkbox" aria-label="Show phone keyboard in Settings" checked={keyboardVisible} onChange={e => setKeyboardVisible(e.target.checked)} />Show keyboard while replying</label>
-            <DeviceAppearanceControls
-              compact
-              project={project}
-              value={appearance}
-              onChange={(a) => {
-                setLocalAppearance(a);
-                onAppearance?.(a);
-              }}
-              onUpload={onUpload}
-            />
+              <label>
+                <input
+                  type="checkbox"
+                  aria-label="Show phone keyboard in Settings"
+                  checked={keyboardVisible}
+                  onChange={(e) => setKeyboardVisible(e.target.checked)}
+                />
+                Show keyboard while replying
+              </label>
+              <DeviceAppearanceControls
+                compact
+                project={project}
+                value={appearance}
+                onChange={(a) => {
+                  setLocalAppearance(a);
+                  onAppearance?.(a);
+                }}
+                onUpload={onUpload}
+              />
             </div>
           ) : screen !== "chat" ? (
             <PhoneApps
@@ -244,7 +290,20 @@ export function PhoneUI({
             />
           ) : (
             <div className="device-feed" ref={feed} aria-live="polite">
-              {appearance?.profiles.chat && <div className="phone-feed-profile"><img className="device-profile-picture" src={project.assets.find(a => a.id === appearance.profiles.chat)?.data} alt="Your Ember profile" /><small>Your Ember profile</small></div>}
+              {appearance?.profiles.chat && (
+                <div className="phone-feed-profile">
+                  <img
+                    className="device-profile-picture"
+                    src={
+                      project.assets.find(
+                        (a) => a.id === appearance.profiles.chat,
+                      )?.data
+                    }
+                    alt="Your Ember profile"
+                  />
+                  <small>Your Ember profile</small>
+                </div>
+              )}
               <p className="device-date">Today · Ember</p>
               {(texting ? messages : []).map((m, i) =>
                 typing && m.node === node.id && m.scene === scene.id ? null : (
@@ -316,7 +375,8 @@ export function PhoneUI({
             </div>
           )}
           {screen === "chat" &&
-            keyboardVisible && texting &&
+            keyboardVisible &&
+            texting &&
             choices.length > 0 &&
             !typing && (
               <div className="device-keyboard" aria-hidden>

@@ -3,6 +3,35 @@ export function specificHelp(
   element: HTMLElement,
 ): string | undefined {
   const name = label.toLowerCase().replace(/ exact value$/, "");
+  const phoneHelp: Record<string,string> = {
+    "device enabled": "Enable the scene’s scheduled phone or computer. Turning this off hides its scheduled device, but explicit Phone visible overrides on individual dialogue boxes still work.",
+    "default phone screen": "Choose the first app used when no dialogue has its own app switch: Home shows icons, feed opens Insta, and chat opens Ember. This does not decide when the phone appears.",
+    "screen during interaction": "Choose the app for the simple start/end phone range. Individual app changes apply when Advanced overrides is enabled. Quick phone controls on a dialogue always take priority.",
+    "screen for current dialogue": "Switch to this app when the selected dialogue is entered. Inherit follows the last app on the played route. Off closes the scheduled phone. Use quick Phone visible for a direct override outside the range.",
+    "dialogue placement": "Automatic places only actual chat speakers inside Ember. Story dialogue outside device keeps narration and choices beside it. Texting inside device puts this dialogue’s text and replies in Ember when chat is open.",
+    "phone notification text": "Show this notification banner when the selected dialogue appears. Tapping follows an authored Open/read choice when available; otherwise it opens Ember without inventing a new story route.",
+    "enable texting only in a dialogue range": "Put dialogue inside Ember only between the selected Texting start and Texting end. This controls text placement, not whether the device itself is visible. Per-dialogue placement overrides take priority.",
+    "texting start": "First visited dialogue whose text is integrated into Ember. Earlier story dialogue stays outside the device.",
+    "texting end": "Last visited dialogue integrated into Ember. On the next dialogue, story text returns outside unless that dialogue has an override.",
+    "device workspace scene": "Select the scene whose phone or computer you want to edit. Placement and timing belong to this scene; shared appearance can carry icons and portraits across scenes.",
+    "device workspace dialogue": "Select the dialogue to edit its quick phone switches, app schedule, text placement and replies. The preview and companion workspace follow this selection.",
+    "show phone keyboard by default": "Show the decorative keyboard when replying inside Ember. The player can hide it using the keyboard button or the phone Settings app. It does not type or send replies.",
+    "device contact": "Set the chat contact’s displayed name for this scene. Use the same name as the character’s dialogue speaker so their authored messages are recognised correctly.",
+    "device contact status": "Change the small subtitle below the contact’s name, such as Online. It is display text and does not connect to a messaging service.",
+    "device typingseconds": "How long typing dots appear before an incoming contact message. Zero shows it immediately. Normal narration outside the phone never shows typing dots.",
+    "device shape": "Choose a phone handset or a desktop frame for this scene. Both retain Home, Ember, Insta and Settings; changing shape does not change dialogue routes.",
+    "enable full app system": "Enable this scene’s device and use the full Home-and-apps experience. Its existing timing and dialogue switches are kept.",
+    "open advanced devices": "Open the full device workspace for frame position, size, shared appearance, app images, schedules and replies. The quick switches here already work without opening it.",
+    "use maria’s new profile portrait": "Use the saved rainlit Maria face as the contact portrait. With shared appearance enabled it also becomes the default portrait for other scenes. Background art is unchanged.",
+    "device background colour": "Change the device interior colour behind its apps. This does not recolour the scene, editor or contact portrait.",
+    "device text colour": "Change text inside the phone or computer apps. The story dialogue outside the device and editor keep their own text colours.",
+    "device font": "Choose the font for text inside the device apps. Editor fonts and the separate story dialogue font have their own settings.",
+    "device text size": "Set device-app text size in pixels. Larger text uses more space and can be scrolled inside the phone.",
+  };
+  if (phoneHelp[name]) return phoneHelp[name];
+  if (name.startsWith("screen at dialogue ")) return "Switch the scheduled phone to Home, Insta, Ember or Off when this numbered dialogue begins. Inherit keeps the previous app. Enable advanced range overrides to use this schedule.";
+  if (name.includes("app icon")) return "Choose this app’s image from the project library. With shared appearance enabled the image stays on phones in other scenes and is included in a complete project save.";
+  if (name.includes("profile picture") || name.startsWith("upload ember profile") || name.startsWith("upload insta profile")) return "Set this app’s profile image, independently of the contact portrait. Shared phone appearance carries it to other scenes; the image is embedded when you save the project.";
   if (name === "main workspace") return "Choose the workspace in the first pane. When the selected workspace is already in the other pane, the panes exchange content; both still edit the same project.";
   if (name === "second workspace") return "Choose what appears beside or below the main workspace. Select a map box in either pane to update the selected dialogue in the other.";
   if (name === "workspace arrangement") return "Side by side divides the available width. One above the other divides the height. Drag the divider to give either workspace more room.";

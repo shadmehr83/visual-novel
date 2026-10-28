@@ -1,3 +1,4 @@
+import { DialogueDeviceControls } from "./DialogueDeviceControls";
 import { useState } from "react";
 import { validateProject, type Project, type Scene } from "./model";
 import { removeDialogue } from "./authoring";
@@ -395,6 +396,7 @@ export function FlowEditor({
                   </>
                 ) : (
                   <>
+                    <DialogueDeviceControls project={project} scene={scene} nodeId={node.id} edit={edit} />
                     <DialogueArtwork project={project} scene={scene} nodeId={node.id} update={updateScene} />
                     <label>
                       Speaker

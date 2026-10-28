@@ -1,3 +1,4 @@
+import { effectiveDevice, saveDeviceAppearance } from "./deviceShared";
 import { RecoveryBoundary } from "./RecoveryBoundary";
 import { PlaySession } from "./PlaySession";
 import { withDeviceUpload } from "./DeviceAppearance";
@@ -100,9 +101,7 @@ function Player() {
                 onAppearance={(a) =>
                   setProject((p) => {
                     const next = structuredClone(p);
-                    next.scenes.find(
-                      (s) => s.id === scene.id,
-                    )!.phone!.appearance = a;
+                    saveDeviceAppearance(next, scene.id, a);
                     return next;
                   })
                 }
@@ -111,11 +110,7 @@ function Player() {
                     const next = structuredClone(p);
                     next.assets.push(asset);
                     const s = next.scenes.find((s) => s.id === scene.id)!;
-                    s.phone!.appearance = withDeviceUpload(
-                      s.phone!.appearance,
-                      asset,
-                      target,
-                    );
+                    saveDeviceAppearance(next, scene.id, withDeviceUpload(effectiveDevice(next,s).appearance, asset, target));
                     return next;
                   })
                 }

@@ -1,3 +1,9 @@
+import {
+  effectiveDevice,
+  saveDeviceAppearance,
+  saveDeviceAvatar,
+  ensureDevice,
+} from "./deviceShared";
 import { savedProject } from "./savedProject";
 import { DeviceAppearanceControls, withDeviceUpload } from "./DeviceAppearance";
 import type { Project, Scene } from "./model";
@@ -31,27 +37,7 @@ export function InteractionControls({
         <button
           onClick={() =>
             update((s) => {
-              s.phone = {
-                enabled: true,
-                schedule: {
-                  start: node.id,
-                  end: scene.nodes.at(-1)!.id,
-                  screen: "home",
-                  advanced: false,
-                },
-                mode: "phone-system",
-                defaultScreen: "home",
-                device: "phone",
-                contact: project.characters[0]?.name || "Maria",
-                title: "Ember · Online",
-                avatar: null,
-                x: 65,
-                y: 50,
-                width: 44,
-                entrance: { style: "slide", seconds: 0.7 },
-                typingSeconds: 0.65,
-                keyboard: true,
-              };
+              ensureDevice(project, s);
             })
           }
         >
@@ -61,7 +47,11 @@ export function InteractionControls({
         <>
           {section !== "appearance" && (
             <>
-              <DeviceReturnControls scene={scene} nodeId={nodeId} update={update} />
+              <DeviceReturnControls
+                scene={scene}
+                nodeId={nodeId}
+                update={update}
+              />
               <label>
                 <input
                   type="checkbox"
@@ -82,8 +72,7 @@ export function InteractionControls({
                   onChange={(e) =>
                     update((s) => {
                       s.phone!.mode = e.target.value as
-                        | "phone-system"
-                        | "chat-only";
+                        "phone-system" | "chat-only";
                     })
                   }
                 >
@@ -102,9 +91,7 @@ export function InteractionControls({
                   onChange={(e) =>
                     update((s) => {
                       s.phone!.defaultScreen = e.target.value as
-                        | "home"
-                        | "feed"
-                        | "chat";
+                        "home" | "feed" | "chat";
                     })
                   }
                 >
@@ -180,9 +167,7 @@ export function InteractionControls({
                       onChange={(e) =>
                         update((s) => {
                           s.phone!.schedule!.screen = e.target.value as
-                            | "home"
-                            | "chat"
-                            | "feed";
+                            "home" | "chat" | "feed";
                         })
                       }
                     >
@@ -295,8 +280,7 @@ export function InteractionControls({
                     edit((p) => {
                       if (!p.assets.some((a) => a.id === portrait.id))
                         p.assets.push(portrait);
-                      p.scenes.find((s) => s.id === scene.id)!.phone!.avatar =
-                        portrait.id;
+                      saveDeviceAvatar(p, scene.id, portrait.id);
                     });
                 }}
               >
@@ -304,20 +288,22 @@ export function InteractionControls({
               </button>
               <DeviceAppearanceControls
                 project={project}
-                value={scene.phone.appearance}
+                value={effectiveDevice(project, scene).appearance}
                 onChange={(a) =>
-                  update((s) => {
-                    s.phone!.appearance = a;
-                  })
+                  edit((p) => saveDeviceAppearance(p, scene.id, a))
                 }
                 onUpload={(asset, target) =>
                   edit((p) => {
                     p.assets.push(asset);
                     const s = p.scenes.find((s) => s.id === scene.id)!;
-                    s.phone!.appearance = withDeviceUpload(
-                      s.phone!.appearance,
-                      asset,
-                      target,
+                    saveDeviceAppearance(
+                      p,
+                      scene.id,
+                      withDeviceUpload(
+                        effectiveDevice(p, s).appearance,
+                        asset,
+                        target,
+                      ),
                     );
                   })
                 }

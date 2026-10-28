@@ -49,6 +49,7 @@ export const poseSchema = z.object({
 const node = z.object({
   deviceReturn: z.boolean().optional(),
   deviceDialogue: z.boolean().optional(),
+  deviceVisible: z.boolean().optional(),
   deviceKind: z.enum(["phone", "desktop"]).optional(),
   autoAdvance: z.number().min(0.5).max(30).optional(),
   view: z.string().optional(),
@@ -262,6 +263,7 @@ export const deviceAppearanceSchema = z.object({
     .default([]),
 });
 export const deviceSchema = z.object({
+  independentAppearance: z.boolean().optional(),
   returnControl: z.object({ enabled: z.boolean(), start: z.string(), end: z.string(), target: z.string().optional() }).optional(),
   dialogueRange: z.object({enabled: z.boolean(), start: z.string(), end: z.string()}).optional(),
   notificationSound: soundCueSchema.optional(),
@@ -378,6 +380,7 @@ const asset = z.object({
   reference: z.boolean(),
 });
 export const projectSchema = z.object({
+  deviceDefaults: z.object({ appearance: deviceAppearanceSchema.optional(), avatar: z.string().nullable().optional() }).optional(),
   flowLayout: z
     .object({
       scenes: z
@@ -492,6 +495,12 @@ export type Runtime = {
 };
 export function validateProject(input: unknown): Project {
   const p = projectSchema.parse(input);
+  const defaults = p.deviceDefaults;
+  for (const id of [defaults?.avatar, defaults?.appearance?.wallpaper,
+    ...Object.values(defaults?.appearance?.icons || {}),
+    ...Object.values(defaults?.appearance?.profiles || {}),
+    ...(defaults?.appearance?.apps || []).map(a => a.icon)])
+    if (id && !p.assets.some(a => a.id === id)) throw Error("Missing shared device image");
   const ids = new Set<string>();
   for (const s of p.scenes) {
     if (ids.has(s.id)) throw Error("Duplicate scene id: " + s.id);
@@ -704,7 +713,7 @@ function recordPhone(p: Project, r: Runtime): Runtime {
   const s = p.scenes.find((s) => s.id === r.scene)!;
   const n = s.nodes.find((n) => n.id === r.node)!;
   if (
-    !s.phone?.enabled || !deviceDialogue(s, n, r.nodeVisits?.filter(v => v.scene === s.id).map(v => v.node)) ||
+    !s.phone || !deviceDialogue(s, n, r.nodeVisits?.filter(v => v.scene === s.id).map(v => v.node)) ||
     ![s.phone.contact, "You", "Mara", "Maria"].includes(n.speaker)
   )
     return r;
@@ -728,7 +737,7 @@ export function advance(p: Project, r: Runtime, choiceId?: string): Runtime {
     .find((n) => n.id === r.node)
     ?.choices.find((c) => c.id === choiceId);
   const sourceNode = s.nodes.find(n => n.id === r.node)!;
-  if (s.phone?.enabled && c && c.sendAsMessage !== false && deviceDialogue(s, sourceNode, r.nodeVisits?.filter(v => v.scene === s.id).map(v => v.node)))
+  if (s.phone && c && c.sendAsMessage !== false && deviceDialogue(s, sourceNode, r.nodeVisits?.filter(v => v.scene === s.id).map(v => v.node)))
     next = {
       ...next,
       phoneMessages: [

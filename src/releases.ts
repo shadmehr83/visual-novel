@@ -1,4 +1,4 @@
-export const ENGINE_VERSION = "2.8.0";
+export const ENGINE_VERSION = "2.9.0";
 export type ReleaseFeature = {
   name: string;
   description: string;
@@ -19,7 +19,13 @@ const f = (
   action?: string,
 ): ReleaseFeature => ({ name, description, steps: path.split(" → "), action });
 export const releases: Release[] = [
-  {version:"2.8.0", name:"Direct effect settings, docking windows and studio search", date:"2026-10-29", features:[
+  {version:"2.9.0", name:"Phone controls made clear", date:"2026-10-29", features:[
+    f("Phone switches on every dialogue", "Show or hide the phone directly in the dialogue map, original editor or simple Phone panel. Keep story dialogue separate, or integrate it into Ember chat. Choose Home, Insta or Ember without opening Advanced devices. Overrides affect only the selected dialogue; reset returns to the existing schedule.", "Dialogue advanced → Select a box → Phone on this dialogue", "dialogues"),
+    f("Shared contact portraits and app icons", "Phone appearance is shared by default: saved icons, wallpaper and contact portrait follow the device across scenes and survive project export. Disable sharing in Advanced devices for an independent scene. Existing scene artwork, outfits and effect settings remain intact.", "Advanced devices → Use shared phone appearance → Apps or Frame & placement", "devices"),
+    f("Visible switches and independent settings bars", "On/off switches now have bounded tracks and explicit ON/OFF states. Effects and interactions form one labelled tool row, while scene and workspace settings form another. Selecting Phone highlights Phone without also highlighting Atmosphere.", "Editor → Effects & interactions → Phone", "effect:Phone"),
+    f("Published docking and search update", "The previously unpublished v2.8 docking windows, direct effect links and main feature search are included with this release. The studio displays both its version number and release name.", "Studio header → Search features or Update history")
+  ]},
+  {version:"2.8.0", commit:"9371bc8", name:"Direct effect settings, docking windows and studio search", date:"2026-10-29", features:[
     f("Active layers open their own settings", "Click an effect name in Active to open its settings, including named light, motion and hinge layers. The independent checkbox still toggles the layer; opening settings never enables or disables it.", "Editor → Active → Click an effect name", "active"),
     f("Floating panels, restore and snap docking", "Panel title bars have small Pop out and Move icons. Float, resize, restore or dock the library, controls, preview, dialogue and workspace panes. Drag near an edge to preview snapping; restore chooses another free dock if the old one is occupied. Separate effects and properties docks can float independently.", "Panel title bar → Pop out or Move → Drag to a highlighted edge; Windows & docking → Restore all window positions", "windows"),
     f("Movable dialogue editor", "Place dialogue above the scene, at an edge, in a floating window or in a separate split column. The same dialogue, notes, items, state and event log remain synchronized with the preview.", "Dialogue editor title bar → Move → Dock top, Floating window or Split beside workspace", "dialogue"),

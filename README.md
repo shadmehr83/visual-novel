@@ -2,7 +2,7 @@
 
 A working local-first visual novel authoring web app built from the supplied **Visual Novel Studio Technical Build Specification**. React 19, TypeScript, Vite, Zod, IndexedDB (`idb`), and native SVG compositing. No AI key or backend is needed.
 
-Current release: **2.8.0**. See [Window docking and studio search](docs/WINDOW_DOCKING_AND_SEARCH.md). See [Split workspaces and artwork folders](docs/SPLIT_WORKSPACES_AND_ART_LIBRARY.md). All current artwork is available as ordinary files in the [artwork library](artwork/README.md), including archived image-generation originals.
+Current release: **2.9.0 — Phone controls made clear**. [Open the Cloudflare studio](https://visual-novel-8b9.pages.dev/?release=2.9.0). See [Quick phone switches and shared images](docs/PHONE_QUICK_CONTROLS.md). See [Window docking and studio search](docs/WINDOW_DOCKING_AND_SEARCH.md). See [Split workspaces and artwork folders](docs/SPLIT_WORKSPACES_AND_ART_LIBRARY.md). All current artwork is available as ordinary files in the [artwork library](artwork/README.md), including archived image-generation originals.
 
 ## Run
 
@@ -60,7 +60,7 @@ This app produces a static site in `dist/`. A development process in this machin
 
 **Vercel:** import the repository as a Vite project; build `npm run build`, output `dist`.
 
-The ready-to-upload build is also included at `downloads/stillframe-cloudflare.zip`; use GitHub’s **Download raw file** button on that file. Alternatively connect this repository directly to Cloudflare Pages with the settings above. No hosting account is connected to this task, and the application has **not been deployed publicly**. Deployment requires your hosting account/access. Do not put secrets in frontend environment variables. Host at the domain root; subpath hosting needs a corresponding Vite base and service-worker path change.
+The ready-to-upload build is also included at `downloads/stillframe-cloudflare.zip`; use GitHub’s **Download raw file** button on that file. Alternatively connect this repository directly to Cloudflare Pages with the settings above. The Git-connected Cloudflare Pages project deploys `main` to https://visual-novel-8b9.pages.dev/. Do not put secrets in frontend environment variables. Host at the domain root; subpath hosting needs a corresponding Vite base and service-worker path change.
 
 The production build creates a versioned service worker that caches the application shell and bundled assets over HTTPS (or localhost). Once installed, editor reloads work offline; imported art lives in IndexedDB. Development mode has no service worker. There are no external fonts, image services or analytics. Core editing/playback works without the network. Service workers are origin-scoped; old caches update when a new deployment installs.
 

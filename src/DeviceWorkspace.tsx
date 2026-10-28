@@ -1,17 +1,30 @@
+import { DialogueDeviceControls } from "./DialogueDeviceControls";
+import {
+  effectiveDevice,
+  ensureDevice,
+  saveDeviceAppearance,
+  saveDeviceAvatar,
+  setDeviceIndependent,
+} from "./deviceShared";
 import { useState } from "react";
 import type { Project, Scene } from "./model";
 import { DeviceFrameControls } from "./DeviceFrameControls";
 import { DeviceAppearanceControls, withDeviceUpload } from "./DeviceAppearance";
 import { InteractionControls } from "./InteractionControls";
-import { makeDevice } from "./deviceFrame";
 import { PhoneUI } from "./PhoneUI";
 import { Stage } from "./Stage";
 import { savedProject } from "./savedProject";
 export function DeviceSummary({
+  project,
   scene,
+  nodeId,
+  edit,
   update,
   onOpen,
 }: {
+  project: Project;
+  nodeId: string;
+  edit: (fn: (p: Project) => void) => void;
   scene: Scene;
   update: (f: (s: Scene) => void) => void;
   onOpen: () => void;
@@ -23,6 +36,12 @@ export function DeviceSummary({
         Home, Ember messages, scrolling Insta and Settings remain available.
         Their full settings now have a dedicated workspace.
       </p>
+      <DialogueDeviceControls
+        project={project}
+        scene={scene}
+        nodeId={nodeId}
+        edit={edit}
+      />
       {scene.phone ? (
         <>
           <label>
@@ -50,7 +69,7 @@ export function DeviceSummary({
         <button
           onClick={() =>
             update((s) => {
-              s.phone = makeDevice(s);
+              ensureDevice(project, s);
             })
           }
         >
@@ -88,21 +107,18 @@ export function DeviceWorkspace({
     [notice, setNotice] = useState("");
   const update = (fn: (s: Scene) => void) =>
     edit((p) => fn(p.scenes.find((s) => s.id === scene.id)!));
-  const phone = scene.phone;
+  const phone = scene.phone ? effectiveDevice(project, scene) : undefined;
   const changeAppearance = (
     a: NonNullable<NonNullable<Scene["phone"]>["appearance"]>,
-  ) =>
-    update((s) => {
-      s.phone!.appearance = a;
-    });
+  ) => edit((p) => saveDeviceAppearance(p, scene.id, a));
   const upload = (asset: Project["assets"][number], target: string) =>
     edit((p) => {
       p.assets.push(asset);
       const s = p.scenes.find((s) => s.id === scene.id)!;
-      s.phone!.appearance = withDeviceUpload(
-        s.phone!.appearance,
-        asset,
-        target,
+      saveDeviceAppearance(
+        p,
+        scene.id,
+        withDeviceUpload(effectiveDevice(p, s).appearance, asset, target),
       );
     });
   const previewScene = {
@@ -195,7 +211,7 @@ export function DeviceWorkspace({
             className="primary"
             onClick={() =>
               update((s) => {
-                s.phone = makeDevice(s, project.characters[0]?.name || "Maria");
+                ensureDevice(project, s);
               })
             }
           >
@@ -267,11 +283,40 @@ export function DeviceWorkspace({
             className="device-workspace-settings"
             aria-label="Advanced device settings"
           >
+            <DialogueDeviceControls
+              project={project}
+              scene={scene}
+              nodeId={node.id}
+              edit={edit}
+            />
+            <label
+              className="shared-device-switch"
+              data-help="On: this scene uses the project’s saved phone icons, wallpaper and contact portrait, and edits update those shared defaults. Off: freeze this scene’s current appearance so it can be customised independently. Timing, phone position and story routes are always separate."
+            >
+              <input
+                type="checkbox"
+                aria-label="Use shared phone appearance"
+                checked={!scene.phone?.independentAppearance}
+                onChange={(e) =>
+                  edit((p) =>
+                    setDeviceIndependent(p, scene.id, !e.target.checked),
+                  )
+                }
+              />
+              Use shared phone appearance
+            </label>
+            <p className="small muted">
+              Icons, wallpaper and contact portrait follow you into other
+              scenes. Turn sharing off for an independent device.
+            </p>
             {section === "Frame & placement" && (
               <DeviceFrameControls
                 project={project}
                 scene={scene}
                 update={update}
+                onAvatar={(id) =>
+                  edit((p) => saveDeviceAvatar(p, scene.id, id))
+                }
               />
             )}
             {section === "Timing" && (
@@ -302,8 +347,7 @@ export function DeviceWorkspace({
                       edit((p) => {
                         if (!p.assets.some((b) => b.id === a.id))
                           p.assets.push(a);
-                        p.scenes.find((s) => s.id === scene.id)!.phone!.avatar =
-                          a.id;
+                        saveDeviceAvatar(p, scene.id, a.id);
                       });
                   }}
                 >
@@ -323,8 +367,7 @@ export function DeviceWorkspace({
                       onChange={(e) =>
                         update((s) => {
                           s.phone!.mode = e.target.value as
-                            | "phone-system"
-                            | "chat-only";
+                            "phone-system" | "chat-only";
                         })
                       }
                     >
@@ -364,10 +407,81 @@ export function DeviceWorkspace({
             {section === "Dialogue & replies" && (
               <section className="property-section">
                 <h2>Current device dialogue</h2>
-                <label>Dialogue placement<select aria-label="Dialogue placement" value={node.deviceDialogue === undefined ? "auto" : String(node.deviceDialogue)} onChange={e => update(s => { s.nodes.find(n => n.id === node.id)!.deviceDialogue = e.target.value === "auto" ? undefined : e.target.value === "true"; })}><option value="auto">Automatic · only actual chat speakers</option><option value="false">Story dialogue outside device</option><option value="true">Texting inside device</option></select></label>
-                <label><input type="checkbox" checked={phone.dialogueRange?.enabled || false} onChange={e => update(s => { s.phone!.dialogueRange = {enabled: e.target.checked, start: node.id, end: scene.nodes.at(-1)!.id}; })} />Enable texting only in a dialogue range</label>
-                {phone.dialogueRange && (["start", "end"] as const).map(key => <label key={key}>Texting {key}<select aria-label={"Texting " + key} value={phone.dialogueRange![key]} onChange={e => update(s => { s.phone!.dialogueRange![key] = e.target.value; })}>{scene.nodes.map((n,i) => <option key={n.id} value={n.id}>{i+1}. {n.text.slice(0,45)}</option>)}</select></label>)}
-                <label><input type="checkbox" aria-label="Show phone keyboard by default" checked={phone.keyboard} onChange={e => update(s => { s.phone!.keyboard = e.target.checked; })} />Show phone keyboard by default</label>
+                <label>
+                  Dialogue placement
+                  <select
+                    aria-label="Dialogue placement"
+                    value={
+                      node.deviceDialogue === undefined
+                        ? "auto"
+                        : String(node.deviceDialogue)
+                    }
+                    onChange={(e) =>
+                      update((s) => {
+                        s.nodes.find((n) => n.id === node.id)!.deviceDialogue =
+                          e.target.value === "auto"
+                            ? undefined
+                            : e.target.value === "true";
+                      })
+                    }
+                  >
+                    <option value="auto">
+                      Automatic · only actual chat speakers
+                    </option>
+                    <option value="false">Story dialogue outside device</option>
+                    <option value="true">Texting inside device</option>
+                  </select>
+                </label>
+                <label>
+                  <input
+                    type="checkbox"
+                    checked={phone.dialogueRange?.enabled || false}
+                    onChange={(e) =>
+                      update((s) => {
+                        s.phone!.dialogueRange = {
+                          enabled: e.target.checked,
+                          start: node.id,
+                          end: scene.nodes.at(-1)!.id,
+                        };
+                      })
+                    }
+                  />
+                  Enable texting only in a dialogue range
+                </label>
+                {phone.dialogueRange &&
+                  (["start", "end"] as const).map((key) => (
+                    <label key={key}>
+                      Texting {key}
+                      <select
+                        aria-label={"Texting " + key}
+                        value={phone.dialogueRange![key]}
+                        onChange={(e) =>
+                          update((s) => {
+                            s.phone!.dialogueRange![key] = e.target.value;
+                          })
+                        }
+                      >
+                        {scene.nodes.map((n, i) => (
+                          <option key={n.id} value={n.id}>
+                            {i + 1}. {n.text.slice(0, 45)}
+                          </option>
+                        ))}
+                      </select>
+                    </label>
+                  ))}
+                <label>
+                  <input
+                    type="checkbox"
+                    aria-label="Show phone keyboard by default"
+                    checked={phone.keyboard}
+                    onChange={(e) =>
+                      update((s) => {
+                        s.phone!.keyboard = e.target.checked;
+                      })
+                    }
+                  />
+                  Show phone keyboard by default
+                </label>
                 <label>
                   Speaker
                   <input

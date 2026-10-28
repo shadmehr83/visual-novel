@@ -1,3 +1,10 @@
+# 2.9.0 — Phone controls made clear (2026-10-29)
+
+- Quick phone visibility, separate/integrated dialogue and app selection on the selected dialogue in the flow map, simple Phone panel and original dialogue editor. Explicit quick switches work outside scheduled ranges; reset restores schedule inheritance.
+- Shared app images, wallpaper, profiles and contact portrait across devices, with independent scene appearance available. Saved image assets and overrides survive complete project export and browser reload.
+- Bounded ON/OFF switches, distinct effects/general settings highlights, and specific advanced-device hover explanations.
+- Publish the previously unshipped 2.8 docking/search work and display the release name next to the engine version. Existing artwork, outfits and effect data remain unchanged.
+
 # Stillframe engine update history
 
 Current version: **2.8.0**. Earlier version numbers were assigned retrospectively from Git milestones. Directions below point to their current location; the in-app Update history tab also offers feature shortcuts. Dates use Australia/Sydney time. Project format remains schemaVersion 1.

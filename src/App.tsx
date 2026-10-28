@@ -1,3 +1,5 @@
+import { DialogueDeviceControls } from "./DialogueDeviceControls";
+import { effectiveDevice, saveDeviceAppearance } from "./deviceShared";
 import { FeatureSearch } from "./FeatureSearch";
 import type { FeatureRoute } from "./searchIndex";
 import { PanelLayoutSettings } from "./PanelLayoutSettings";
@@ -1488,9 +1490,7 @@ export default function App() {
                             key={scene.id}
                             onAppearance={(a) =>
                               edit((p) => {
-                                p.scenes.find(
-                                  (s) => s.id === scene.id,
-                                )!.phone!.appearance = a;
+                                saveDeviceAppearance(p, scene.id, a);
                               })
                             }
                             onUpload={(asset, target) =>
@@ -1499,11 +1499,7 @@ export default function App() {
                                 const s = p.scenes.find(
                                   (s) => s.id === scene.id,
                                 )!;
-                                s.phone!.appearance = withDeviceUpload(
-                                  s.phone!.appearance,
-                                  asset,
-                                  target,
-                                );
+                                saveDeviceAppearance(p, scene.id, withDeviceUpload(effectiveDevice(p,s).appearance, asset, target));
                               })
                             }
                             project={project}
@@ -1826,6 +1822,7 @@ export default function App() {
                           </select>
                         </label>
                       </div>
+                      <DialogueDeviceControls project={project} scene={selected} nodeId={node.id} edit={edit} />
                       <label>
                         Author note
                         <textarea
@@ -2214,6 +2211,7 @@ export default function App() {
                     </button>
                   )}
                 </div>
+                <p className="control-group-label">Effects & interactions · choose a tool</p>
                 <div
                   className="effect-tabs"
                   role="group"
@@ -2236,7 +2234,8 @@ export default function App() {
                   ].map((panel) => (
                     <button
                       key={panel}
-                      className={effectPanel === panel ? "active" : ""}
+                      aria-pressed={effectPanel === panel && inspector === "Atmosphere"}
+                      className={effectPanel === panel && inspector === "Atmosphere" ? "active" : ""}
                       onClick={() => {
                         setEffectPanel(panel);
                         setInspector("Atmosphere");
@@ -2260,6 +2259,7 @@ export default function App() {
                     }}
                   />
                   <DeviceSummary
+                    project={project} nodeId={node.id} edit={edit}
                     scene={selected}
                     update={updateScene}
                     onOpen={() => {
@@ -2357,6 +2357,7 @@ export default function App() {
                     <RotateCcw size={14} />
                   </button>
                 </div>
+                <p className="control-group-label">Scene & workspace · general settings</p>
                 <div className="inspector-tabs">
                   {[
                     "Atmosphere",
@@ -2368,8 +2369,9 @@ export default function App() {
                   ].map((t) => (
                     <button
                       key={t}
-                      className={inspector === t ? "active" : ""}
-                      onClick={() => setInspector(t)}
+                      aria-pressed={inspector === t && (t !== "Atmosphere" || effectPanel === "All")}
+                      className={inspector === t && (t !== "Atmosphere" || effectPanel === "All") ? "active" : ""}
+                      onClick={() => {setInspector(t); if(t === "Atmosphere")setEffectPanel("All");}}
                     >
                       {t}
                     </button>

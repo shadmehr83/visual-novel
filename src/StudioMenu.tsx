@@ -1,5 +1,5 @@
 import { useEffect, useRef } from "react";
-import { ENGINE_VERSION } from "./releases";
+import { ENGINE_VERSION, releases } from "./releases";
 export type StudioView =
   | "editor"
   | "scenes"
@@ -162,7 +162,7 @@ export function StudioMenu({
             data-help="Engine version, separate from your story project. Open the update history for feature changes and directions."
             onClick={() => onView("updates")}
           >
-            Stillframe v{ENGINE_VERSION}
+            Stillframe v{ENGINE_VERSION} · {releases[0].name}
           </button>
         </div>
       </nav>
