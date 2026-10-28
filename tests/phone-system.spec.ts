@@ -92,18 +92,16 @@ test("scheduled phone screens, home and feed, hinge ranges and non-choice shortc
   page,
 }) => {
   await page.goto("/");
-  await page
-    .locator('input[accept=".json"]')
-    .setInputFiles({
-      name: "phone-system.json",
-      mimeType: "application/json",
-      buffer: Buffer.from(JSON.stringify(fixture())),
-    });
+  await page.locator('input[accept=".json"]').setInputFiles({
+    name: "phone-system.json",
+    mimeType: "application/json",
+    buffer: Buffer.from(JSON.stringify(fixture())),
+  });
   await page.getByRole("button", { name: "Play story", exact: true }).click();
   await expect(page.locator('[data-joint-layer="hand"]')).toHaveCount(0);
   await page.getByLabel("Advance story", { exact: true }).selectOption("enter");
   await page.keyboard.press("Enter");
-  await expect(page.getByLabel("Loop scrolling feed")).toBeVisible();
+  await expect(page.getByLabel("Insta scrolling feed")).toBeVisible();
   await expect(page.locator('[data-joint-layer="hand"]')).toHaveCount(1);
   await page
     .getByRole("button", { name: "Back to phone home", exact: true })
@@ -111,14 +109,14 @@ test("scheduled phone screens, home and feed, hinge ranges and non-choice shortc
   await expect(page.locator(".phone-home-screen")).toBeVisible();
   await page
     .locator(".phone-app-grid")
-    .getByRole("button", { name: /Loop/ })
+    .getByRole("button", { name: /Insta/ })
     .click();
-  await expect(page.getByLabel("Loop scrolling feed")).toBeVisible();
+  await expect(page.getByLabel("Insta scrolling feed")).toBeVisible();
   await page
     .getByLabel("Advance story", { exact: true })
     .selectOption("screen");
   await page
-    .getByLabel("Loop scrolling feed")
+    .getByLabel("Insta scrolling feed")
     .click({ position: { x: 30, y: 30 } });
   await expect(
     page
@@ -149,13 +147,11 @@ test("light stamping and individual favourites are available under Light Library
   const p = fixture();
   delete p.scenes[0].phone;
   delete p.scenes[0].joints;
-  await page
-    .locator('input[accept=".json"]')
-    .setInputFiles({
-      name: "lights.json",
-      mimeType: "application/json",
-      buffer: Buffer.from(JSON.stringify(p)),
-    });
+  await page.locator('input[accept=".json"]').setInputFiles({
+    name: "lights.json",
+    mimeType: "application/json",
+    buffer: Buffer.from(JSON.stringify(p)),
+  });
   await page
     .getByRole("button", { name: "Light Library", exact: true })
     .click();

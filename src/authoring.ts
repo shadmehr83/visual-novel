@@ -29,6 +29,11 @@ export function removeDialogue(scene: Scene, id: string) {
     if (joint.range && (joint.range.start === id || joint.range.end === id))
       delete joint.range;
   }
+  if (
+    scene.phone?.schedule &&
+    [scene.phone.schedule.start, scene.phone.schedule.end].includes(id)
+  )
+    delete scene.phone.schedule;
   if (scene.items)
     scene.items.options = scene.items.options.filter((item) =>
       scene.nodes.some((n) => n.choices.some((c) => c.id === item.choice)),

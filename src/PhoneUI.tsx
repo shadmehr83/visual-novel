@@ -1,5 +1,10 @@
 import { PhoneApps } from "./PhoneApps";
-import { deviceScreen } from "./interactions";
+import {
+  DeviceAppearanceControls,
+  type DeviceAppearance,
+} from "./DeviceAppearance";
+import { usePaused } from "./PlaySession";
+import { deviceScreen, allowsReply } from "./interactions";
 import { useEffect, useRef, useState } from "react";
 import type { Project, Scene, Runtime, Node } from "./model";
 import { SelfReply } from "./SelfReply";
@@ -11,6 +16,8 @@ export function PhoneUI({
   onStep,
   onReply,
   onRestart,
+  onAppearance,
+  onUpload,
 }: {
   project: Project;
   scene: Scene;
@@ -19,19 +26,25 @@ export function PhoneUI({
   onStep: (id?: string) => void;
   onReply: (text: string, choiceId?: string) => void;
   onRestart?: () => void;
+  onAppearance?: (a: DeviceAppearance) => void;
+  onUpload?: (a: Project["assets"][number], target: string) => void;
 }) {
   const config = scene.phone!;
+  const paused = usePaused();
+  const [localAppearance, setLocalAppearance] = useState(config.appearance);
+  const appearance = config.appearance || localAppearance;
+  const wallpaper = project.assets.find((a) => a.id === appearance?.wallpaper);
   const effective = deviceScreen(
     scene,
     node,
     runtime?.nodeVisits?.filter((v) => v.scene === scene.id).map((v) => v.node),
   );
-  const [screen, setScreen] = useState<"home" | "feed" | "chat">(
+  const [screen, setScreen] = useState<"home" | "feed" | "chat" | "settings">(
     effective === "off" ? "home" : effective,
   );
   useEffect(() => {
     if (effective !== "off") setScreen(effective);
-  }, [effective, scene.id, node.deviceScreen ? node.id : ""]);
+  }, [effective, scene.id]);
   const [typing, setTyping] = useState(false);
   const feed = useRef<HTMLDivElement>(null);
   const reduced =
@@ -43,26 +56,34 @@ export function PhoneUI({
         screen === "chat" &&
         node.speaker === config.contact &&
         config.typingSeconds > 0 &&
-        !reduced,
+        !reduced &&
+        !paused,
     );
+    if (paused) return;
     const timer = setTimeout(
       () => setTyping(false),
       config.typingSeconds * 1000,
     );
     return () => clearTimeout(timer);
-  }, [node.id, config.typingSeconds, reduced, screen]);
-  const messages = runtime
-    ? runtime.phoneMessages || []
-    : [config.contact, "You"].includes(node.speaker)
-      ? [
-          {
-            scene: scene.id,
-            node: node.id,
-            sender: node.speaker,
-            text: node.text,
-          },
-        ]
-      : [];
+  }, [node.id, config.typingSeconds, reduced, screen, paused]);
+  const messages = (
+    runtime
+      ? runtime.phoneMessages || []
+      : [config.contact, "You"].includes(node.speaker)
+        ? [
+            {
+              scene: scene.id,
+              node: node.id,
+              sender: node.speaker,
+              text: node.text,
+            },
+          ]
+        : []
+  ).filter(
+    (m) =>
+      project.scenes.find((s) => s.id === m.scene)?.phone?.contact ===
+      config.contact,
+  );
   useEffect(() => {
     feed.current?.scrollTo({
       top: feed.current.scrollHeight,
@@ -92,6 +113,11 @@ export function PhoneUI({
           width: config.width + "%",
           "--phone-height":
             Math.min(96, Math.max(40, (config.width / 44) * 94)) + "%",
+          "--device-bg": appearance?.background || "#211e29",
+          "--device-text": appearance?.textColor || "#eee1e9",
+          "--device-font": appearance?.font || "Arial",
+          "--device-size": (appearance?.fontSize || 14) + "px",
+          "--device-wallpaper": wallpaper ? `url("${wallpaper.data}")` : "none",
           "--device-duration": `${config.entrance.seconds}s`,
         } as React.CSSProperties
       }
@@ -106,14 +132,16 @@ export function PhoneUI({
           <span>◔ ▰</span>
         </div>
         <header className="device-contact">
-          <button
-            type="button"
-            aria-label="Back to phone home"
-            data-help="Return to the phone home screen. This does not undo a story choice or delete messages."
-            onClick={() => setScreen("home")}
-          >
-            ‹
-          </button>
+          {config.mode === "phone-system" && (
+            <button
+              type="button"
+              aria-label="Back to phone home"
+              data-help="Return to the phone home screen. This does not undo a story choice or delete messages."
+              onClick={() => setScreen("home")}
+            >
+              ‹
+            </button>
+          )}
           {avatar ? (
             <img src={avatar.data} alt="" />
           ) : (
@@ -126,8 +154,12 @@ export function PhoneUI({
               {screen === "chat"
                 ? config.contact
                 : screen === "feed"
-                  ? "Loop"
-                  : "Phone"}
+                  ? "Insta"
+                  : screen === "settings"
+                    ? "Settings"
+                    : config.device === "desktop"
+                      ? "Computer"
+                      : "Phone"}
             </b>
             <small>
               {screen === "chat"
@@ -139,11 +171,11 @@ export function PhoneUI({
           </div>
           <span>···</span>
         </header>
-        {screen !== "home" && (
+        {config.mode === "phone-system" && screen !== "home" && (
           <nav className="phone-app-nav" data-no-advance>
             <button onClick={() => setScreen("home")}>Home</button>
-            <button onClick={() => setScreen("chat")}>Nearside</button>
-            <button onClick={() => setScreen("feed")}>Loop</button>
+            <button onClick={() => setScreen("chat")}>Ember</button>
+            <button onClick={() => setScreen("feed")}>Insta</button>
           </nav>
         )}
         {node.phoneNotice && (
@@ -160,11 +192,27 @@ export function PhoneUI({
             <small>Open notification</small>
           </button>
         )}
-        {screen !== "chat" ? (
-          <PhoneApps screen={screen} onOpen={setScreen} />
+        {screen === "settings" ? (
+          <DeviceAppearanceControls
+            compact
+            project={project}
+            value={appearance}
+            onChange={(a) => {
+              setLocalAppearance(a);
+              onAppearance?.(a);
+            }}
+            onUpload={onUpload}
+          />
+        ) : screen !== "chat" ? (
+          <PhoneApps
+            screen={screen}
+            onOpen={setScreen}
+            project={project}
+            appearance={appearance}
+          />
         ) : (
           <div className="device-feed" ref={feed} aria-live="polite">
-            <p className="device-date">Today · Nearside</p>
+            <p className="device-date">Today · Ember</p>
             {messages.map((m, i) =>
               typing && m.node === node.id && m.scene === scene.id ? null : (
                 <div
@@ -218,7 +266,7 @@ export function PhoneUI({
                   Continue
                 </button>
               )}
-              {node.allowCustomResponse !== false && (
+              {allowsReply(scene, node, true) && (
                 <SelfReply
                   choices={choices}
                   nodeId={node.id}
@@ -249,12 +297,14 @@ export function PhoneUI({
               </div>
             </div>
           )}
-        <button
-          className="device-home"
-          aria-label="Phone home"
-          data-help="Return to the home screen without deleting messages or rewinding the story."
-          onClick={() => setScreen("home")}
-        />
+        {config.mode === "phone-system" && (
+          <button
+            className="device-home"
+            aria-label="Phone home"
+            data-help="Return to the home screen without deleting messages or rewinding the story."
+            onClick={() => setScreen("home")}
+          />
+        )}
       </div>
     </section>
   );

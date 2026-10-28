@@ -1,3 +1,4 @@
+import { usePaused } from "./PlaySession";
 import { JointLayers } from "./JointLayers";
 import { createBrush, dab, maskPath, clipToBoundary } from "./brush";
 import { useEffect, useRef, useState } from "react";
@@ -55,6 +56,9 @@ export function Stage({
   } | null>(null);
   const [wandError, setWandError] = useState("");
   const [wandBusy, setWandBusy] = useState(false);
+  const paused = usePaused();
+  const pausedRef = useRef(paused);
+  pausedRef.current = paused;
   const [time, setTime] = useState(0);
   const svg = useRef<SVGSVGElement>(null);
   const e = scene.effects;
@@ -132,10 +136,18 @@ export function Stage({
       )
     )
       return;
-    const origin = performance.now();
+    let origin = performance.now();
+    let lastFrame = origin;
     let frame = 0;
     let previous = 0;
     const tick = (t: number) => {
+      if (pausedRef.current) {
+        origin += t - lastFrame;
+        lastFrame = t;
+        frame = requestAnimationFrame(tick);
+        return;
+      }
+      lastFrame = t;
       if (t - previous > 32) {
         setTime((t - origin) / 1000);
         previous = t;
@@ -666,7 +678,7 @@ export function Stage({
               {(scene.sprites || []).map((original) => {
                 const sprite = animateSprite(
                   original,
-                  scene.keyframes || [],
+                  scene.keyframesEnabled === false ? [] : scene.keyframes || [],
                   time,
                 );
                 const image = project.assets.find((a) => a.id === sprite.asset);

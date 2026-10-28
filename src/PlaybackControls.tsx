@@ -1,3 +1,4 @@
+import { usePaused } from "./PlaySession";
 import { useEffect } from "react";
 export function PlaybackControls({
   mode,
@@ -12,8 +13,9 @@ export function PlaybackControls({
   canAdvance: boolean;
   playing?: boolean;
 }) {
+  const paused = usePaused();
   useEffect(() => {
-    if (!playing) return;
+    if (!playing || paused) return;
     const handler = (event: KeyboardEvent | MouseEvent) => {
       const target = event.target instanceof Element ? event.target : null;
       if (
@@ -46,7 +48,7 @@ export function PlaybackControls({
       document.removeEventListener("keydown", handler);
       document.removeEventListener("click", handler);
     };
-  }, [mode, advance, canAdvance, playing]);
+  }, [mode, advance, canAdvance, playing, paused]);
   return (
     <label className="playback-setting">
       Advance story

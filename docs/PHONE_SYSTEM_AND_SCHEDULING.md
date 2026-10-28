@@ -1,10 +1,12 @@
 # Phone system, scheduling and simpler navigation
 
+For the current simpler start/end schedule, device Settings, split docks and pause controls, see [Device simplification](DEVICE_SIMPLIFICATION.md). The individual-dialogue schedule below is now advanced.
+
 ## Where each tool lives
 
 - **Outfits & Items**: wardrobe/book cards, descriptions, PNG selection, confirmation paths and background blur. This is the existing outfit picker, now explicitly named.
-- **Phone**: create the phone system, choose original chat-only or full phone mode, and schedule Off/Home/Loop/Chat on individual dialogues.
-- **Cinematics**: hinge selections, pivots, saved poses and their optional start/end dialogue range; also original device placement/appearance controls.
+- **Phone**: create the phone system, choose original chat-only or full phone mode, and schedule Off/Home/Insta/Chat on individual dialogues.
+- **Cinematics**: hinge selections, pivots, saved poses and their optional start/end dialogue range; Device placement and appearance controls now live in Phone.
 - **Light Library**: save one local lamp as a favourite, including its colour, radius and loop. Select a favourite and click the artwork to place copies.
 - **Effect Presets**: reusable complete rain, lighting, motion or all-effect categories. This is the previous Presets tab with a clearer name.
 
@@ -14,13 +16,13 @@ Enable **Restrict hinge to a dialogue range** on a hinge. Pick its start and end
 
 ## Phone screens inside one scene
 
-The original chat UI remains selectable. **Phone system** adds a home screen, working Nearside and Loop app buttons, a functional back/home button and an offline fictional scrolling feed. Camera/weather icons are decorative; the feed cards are styled local mock posts, not real videos or a connection to a social network.
+The original chat UI remains selectable. **Phone system** adds a home screen, working Ember and Insta app buttons, a functional back/home button and an offline fictional scrolling feed. Camera/weather icons are decorative; the feed cards are styled local mock posts, not real videos or a connection to a social network.
 
 For each dialogue, select **Off**, **Home**, **Feed**, **Chat** or **Inherit**. A switch takes effect when the chosen dialogue is entered; to switch after a line, schedule its following dialogue. Inherit follows the last authored screen on the branch actually played. Off hides the phone and shows normal dialogue. This changes the interface without replacing the scene background. Existing phone position and entrance controls remain in Cinematics.
 
 Home/app navigation is local exploration and does not itself progress the story. The story actions stay accessible under the app. A notification can follow an authored Open choice, or open chat if there is no such choice. Actual authored messages remain separate from browsing. No invented messages are sent to Maria.
 
-The demo opening now keeps the bedroom visible initially, raises the phone for the notification, and uses Loop at **Keep scrolling for a while**. The later notification offers opening the message or leaving it for today. The messages and invitation continue with the same phone system and saved transcript. The café artwork and effect settings are unchanged.
+The demo opening now keeps the bedroom visible initially, raises the phone for the notification, and uses Insta at **Keep scrolling for a while**. The later notification offers opening the message or leaving it for today. The messages and invitation continue with the same phone system and saved transcript. The café artwork and effect settings are unchanged.
 
 ## Reusable individual lights
 

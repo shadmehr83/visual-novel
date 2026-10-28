@@ -1,3 +1,4 @@
+import { deviceScreen, allowsReply } from "./interactions";
 import { z } from "zod";
 const action = z.object({
   key: z.string(),
@@ -44,6 +45,7 @@ const node = z.object({
   notes: z.string().max(10000).optional(),
   qte: qteSchema.optional(),
   allowCustomResponse: z.boolean().optional(),
+  allowPhoneCustomResponse: z.boolean().optional(),
   portrait: z.string().nullable().optional(),
   id: z.string(),
   speaker: z.string(),
@@ -218,7 +220,43 @@ export const jointSchema = z.object({
 });
 export type Joint = z.infer<typeof jointSchema>;
 export type Pose = z.infer<typeof poseSchema>;
+export const deviceAppearanceSchema = z.object({
+  background: z
+    .string()
+    .regex(/^#[a-fA-F0-9]{6}$/)
+    .default("#211e29"),
+  wallpaper: z.string().nullable().default(null),
+  textColor: z
+    .string()
+    .regex(/^#[a-fA-F0-9]{6}$/)
+    .default("#eee1e9"),
+  fontSize: z.number().min(10).max(22).default(14),
+  font: z
+    .enum(["Arial", "Verdana", "Trebuchet MS", "Georgia", "monospace"])
+    .default("Arial"),
+  icons: z.record(z.string()).default({}),
+  apps: z
+    .array(
+      z.object({
+        id: z.string(),
+        name: z.string().min(1).max(40),
+        icon: z.string().nullable(),
+        screen: z.enum(["home", "feed", "chat", "settings"]),
+      }),
+    )
+    .max(12)
+    .default([]),
+});
 export const deviceSchema = z.object({
+  schedule: z
+    .object({
+      start: z.string(),
+      end: z.string(),
+      screen: z.enum(["home", "feed", "chat"]),
+      advanced: z.boolean().default(false),
+    })
+    .optional(),
+  appearance: deviceAppearanceSchema.optional(),
   mode: z.enum(["chat-only", "phone-system"]).optional(),
   defaultScreen: z.enum(["home", "feed", "chat"]).optional(),
   enabled: z.boolean(),
@@ -234,6 +272,8 @@ export const deviceSchema = z.object({
   keyboard: z.boolean(),
 });
 const scene = z.object({
+  effectBackup: z.record(z.number()).optional(),
+  keyframesEnabled: z.boolean().optional(),
   items: z
     .object({
       enabled: z.boolean(),
@@ -254,6 +294,7 @@ const scene = z.object({
     .optional(),
   joints: z.array(jointSchema).max(20).optional(),
   transition: transitionSchema.optional(),
+  exitTransition: transitionSchema.optional(),
   phone: deviceSchema.optional(),
   camera: cameraSchema.optional(),
   sprites: z.array(spriteSchema).max(30).optional(),
@@ -429,6 +470,20 @@ export function validateProject(input: unknown): Project {
       if (!s.nodes.some((n) => n.choices.some((c) => c.id === item.choice)))
         throw Error("Missing item choice");
     }
+    if (
+      s.phone?.schedule &&
+      (!s.nodes.some((n) => n.id === s.phone!.schedule!.start) ||
+        !s.nodes.some((n) => n.id === s.phone!.schedule!.end))
+    )
+      throw Error("Missing phone schedule dialogue");
+    const appearance = s.phone?.appearance;
+    for (const id of [
+      appearance?.wallpaper,
+      ...Object.values(appearance?.icons || {}),
+      ...(appearance?.apps || []).map((a) => a.icon),
+    ])
+      if (id && !p.assets.some((a) => a.id === id))
+        throw Error("Missing device appearance image");
     if (s.phone?.avatar && !p.assets.some((a) => a.id === s.phone!.avatar))
       throw Error("Missing device avatar");
     for (const joint of s.joints || []) {
@@ -608,9 +663,12 @@ export function resolveQte(
     ...r,
     history: [...r.history, `QTE ${outcome}: ${n.qte.prompt}`],
   };
-  return recordPhone(p,p.scenes.some((s) => s.id === target)
-    ? enter(p, next, target)
-    : { ...next, node: target });
+  return recordPhone(
+    p,
+    p.scenes.some((s) => s.id === target)
+      ? enter(p, next, target)
+      : { ...next, node: target },
+  );
 }
 
 export function respond(
@@ -626,7 +684,15 @@ export function respond(
     !node ||
     (node.choices.length > 0 && !choiceId) ||
     node.qte ||
-    node.allowCustomResponse === false ||
+    !allowsReply(
+      p.scenes.find((s) => s.id === r.scene)!,
+      node,
+      deviceScreen(
+        p.scenes.find((s) => s.id === r.scene)!,
+        node,
+        r.nodeVisits?.filter((v) => v.scene === r.scene).map((v) => v.node),
+      ) !== "off",
+    ) ||
     r.ended
   )
     throw Error("Custom reply unavailable here");

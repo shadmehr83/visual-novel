@@ -3,11 +3,46 @@ export function specificHelp(
   element: HTMLElement,
 ): string | undefined {
   const name = label.toLowerCase().replace(/ exact value$/, "");
-  if(name.includes('after end dialogue'))return 'Hide removes the moved layer after leaving its end dialogue. Hold keeps the final pose visible without further movement.';
+  if (name.includes("after end dialogue"))
+    return "Hide removes the moved layer after leaving its end dialogue. Hold keeps the final pose visible without further movement.";
+
+  if (name.includes("phone interaction timing"))
+    return "Simple timing uses one start and one end dialogue. Existing schedule keeps your older individual switches until you choose to replace them.";
+  if (name.includes("start phone"))
+    return "The device appears when this dialogue is reached. Earlier dialogue stays in the normal scene view.";
+  if (name.includes("end phone"))
+    return "This is the last dialogue with the device visible. It closes on the next dialogue along the path you play.";
+  if (name.includes("advanced") && name.includes("override"))
+    return "Let individual dialogues switch the displayed app within the start/end range. Leave this off for one uninterrupted interaction.";
+  if (name.includes("device experience"))
+    return "Messages only opens the conversation directly. Device with apps also lets the player visit Home, Insta and device Settings without advancing dialogue.";
+  if (name.includes("separate controls"))
+    return "Show Effects & interactions and Scene properties side by side, each with its own scroll area. Turn off to combine them in one dock.";
+  if (name.includes("upload image for"))
+    return "Import an image directly for this item card. It is embedded in your project export and never replaces the scene background.";
+  if (
+    name.includes("phone custom") ||
+    name.includes("custom response in device")
+  )
+    return "Show Self-reply inside the device for this dialogue, independently of the normal scene dialogue setting. Typed text follows your authored next path.";
+  if (name.includes("device background colour"))
+    return "Change only the phone or computer interior. Choose Solid background under wallpaper to see the full colour.";
+  if (name.includes("device font"))
+    return "Typeface inside this device only. Story dialogue and the editor interface have separate font controls.";
+  if (name.includes("device text size"))
+    return "Size of text inside the device, in pixels. Editor and normal story dialogue fonts are separate.";
+  if (name.includes("device text colour"))
+    return "Text colour inside the device. Pick a colour with enough contrast against its wallpaper.";
+  if (name.includes("device wallpaper"))
+    return "Use an imported image behind the device apps. It never changes the scene background.";
+  if (name.includes("scene exit transition"))
+    return "Queue this effect when the story leaves this scene. It overrides the destination scene’s entrance; it does not play between dialogues in the same scene.";
+  if (name.startsWith("enable "))
+    return "Enable or temporarily disable this specific visual layer. Its coordinates, masks and timing remain saved for reuse.";
   const rules: [RegExp, string][] = [
     [
       /add device ui|add phone system/,
-      "Create a device panel for this scene. Phone system includes Home, chat and Loop; configure its per-dialogue screen schedule in the Phone tab.",
+      "Create a device panel for this scene. Phone system includes Home, chat and Insta; configure its per-dialogue screen schedule in the Phone tab.",
     ],
     [
       /device entrance/,
@@ -155,7 +190,7 @@ export function specificHelp(
     ],
     [
       /device experience/,
-      "Original chat UI keeps the previous messaging panel. Phone system adds the Home screen and a fictional scrolling Loop app.",
+      "Original chat UI keeps the previous messaging panel. Phone system adds the Home screen and a fictional scrolling Insta app.",
     ],
     [
       /screen for current dialogue|screen at dialogue/,
@@ -163,7 +198,7 @@ export function specificHelp(
     ],
     [
       /default phone screen/,
-      "Initial screen when no dialogue-specific switch has been reached: Home, Loop feed or chat.",
+      "Initial screen when no dialogue-specific switch has been reached: Home, Insta feed or chat.",
     ],
     [
       /notification.*dialogue|phone notification text/,
@@ -291,7 +326,7 @@ export function specificHelp(
     ],
     [
       /^phone$/,
-      "Open phone mode and the per-dialogue screen schedule: Off, Home, Loop or chat.",
+      "Open phone mode and the per-dialogue screen schedule: Off, Home, Insta or chat.",
     ],
   ];
   const result = rules.find(([pattern]) => pattern.test(name))?.[1];

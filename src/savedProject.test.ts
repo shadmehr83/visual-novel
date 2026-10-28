@@ -18,7 +18,11 @@ it("loads the complete uploaded artwork and authored rain, lighting, motion and 
   expect(cafe.effects.lights?.[0]).toMatchObject({ x: 902, y: 140, radius: 51, intensity: 1.9 });
   expect(cafe.effects.motionZones?.[0]).toMatchObject({ strength: 2, direction: -62 });
   expect(project.scenes.find(s => s.id === "bedroom")?.background).toBe("first-match-bedroom");
-  expect(project.assets).toHaveLength(7);
+  expect(project.assets).toHaveLength(8);
+  const portrait = project.assets.find(a => a.id === "maria-device-profile")!;
+  expect(portrait.data).toMatch(/^data:image\/png;base64,/);
+  expect(portrait.id).not.toBe(cafe.background);
+  expect(project.scenes.find(s=>s.id==="messages")?.phone?.avatar).toBe(portrait.id);
   cafe.effects.rainZones![0].points[0].x = 0;
   cafe.effects.lightX = 0;
   const fresh = savedProject().scenes.find(scene => scene.id === "cafe")!;

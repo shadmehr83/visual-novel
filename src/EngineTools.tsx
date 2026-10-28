@@ -1,5 +1,6 @@
-import {RangeInput} from "./RangeInput";
-import {useFootsteps} from "./Footsteps";
+import { usePaused } from "./PlaySession";
+import { RangeInput } from "./RangeInput";
+import { useFootsteps } from "./Footsteps";
 import { useEffect, useRef, useState } from "react";
 import {
   validateProject,
@@ -20,6 +21,7 @@ export function Qte({
   const node = project.scenes
     .find((s) => s.id === runtime.scene)!
     .nodes.find((n) => n.id === runtime.node)!;
+  const sessionPaused = usePaused();
   const q = node.qte!;
   const [remaining, setRemaining] = useState(
     q.seconds * (project.settings.timing || 1),
@@ -48,14 +50,14 @@ export function Qte({
     };
   }, []);
   useEffect(() => {
-    if (project.settings.skipQte) {
+    if (project.settings.skipQte && !sessionPaused) {
       resolve("success");
       return;
     }
     last.current = performance.now();
     const timer = setInterval(() => {
       const now = performance.now();
-      if (!paused && !done.current) {
+      if (!paused && !sessionPaused && !done.current) {
         elapsed.current += (now - last.current) / 1000;
         const value =
           q.seconds * (project.settings.timing || 1) - elapsed.current;
@@ -65,7 +67,7 @@ export function Qte({
       last.current = now;
     }, 50);
     const key = (e: KeyboardEvent) => {
-      if (e.code === "Space" && !paused) {
+      if (e.code === "Space" && !paused && !sessionPaused) {
         e.preventDefault();
         resolve("success");
       }
@@ -75,7 +77,7 @@ export function Qte({
       clearInterval(timer);
       window.removeEventListener("keydown", key);
     };
-  }, [paused]);
+  }, [paused, sessionPaused]);
   return (
     <div className="qte">
       <b>{q.prompt}</b>
@@ -86,7 +88,10 @@ export function Qte({
       <span>
         {remaining.toFixed(1)} seconds {paused ? "· Paused" : ""}
       </span>
-      <button disabled={paused} onClick={() => resolve("success")}>
+      <button
+        disabled={paused || sessionPaused}
+        onClick={() => resolve("success")}
+      >
         Act · Space / tap
       </button>
       <button onClick={() => setPaused((v) => !v)}>
@@ -107,9 +112,19 @@ export function SceneAudio({
   project: Project;
   scene: Scene;
 }) {
+  const sessionPaused = usePaused();
   const [enabled, setEnabled] = useState(false);
   const [error, setError] = useState("");
-  useFootsteps(project,scene,enabled,setError);
+  useFootsteps(project, scene, enabled && !sessionPaused, setError);
+  const audioRef = useRef<(HTMLAudioElement | null)[]>([]);
+  useEffect(() => {
+    audioRef.current.forEach((a) => {
+      if (!a) return;
+      if (sessionPaused) a.pause();
+      else if (enabled)
+        void a.play().catch(() => setError("Toggle sound to retry."));
+    });
+  }, [sessionPaused]);
   useEffect(() => {
     if (!enabled) return;
     const tracks = (scene.audio || []).map((t) => {
@@ -118,20 +133,26 @@ export function SceneAudio({
       const audio = new Audio(asset.data);
       audio.volume = t.volume;
       audio.loop = t.loop;
-      audio
-        .play()
-        .catch(() =>
-          setError("Audio playback was blocked. Toggle sound to retry."),
-        );
+      if (!sessionPaused)
+        audio
+          .play()
+          .catch(() =>
+            setError("Audio playback was blocked. Toggle sound to retry."),
+          );
       return audio;
     });
+    audioRef.current = tracks;
     return () =>
       tracks.forEach((a) => {
         a?.pause();
         if (a) a.src = "";
       });
   }, [enabled, scene.id, JSON.stringify(scene.audio)]);
-  if (!scene.audio?.length&&!(scene.camera?.enabled&&scene.camera.footsteps)) return null;
+  if (
+    !scene.audio?.length &&
+    !(scene.camera?.enabled && scene.camera.footsteps)
+  )
+    return null;
   return (
     <div className="sound-control">
       <button

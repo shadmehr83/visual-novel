@@ -68,4 +68,110 @@ it("records visited dialogue for persisted ranges and phone scheduling", () => {
   expect(JSON.parse(JSON.stringify(r)).nodeVisits[1].node).toBe(r.node);
 });
 
-it('QTE outcomes record their entered dialogue for screen switches and hinge ranges', async()=>{const {resolveQte}=await import('./model');const p=demo();p.scenes[0].nodes=[{id:'quiz',speaker:'Narrator',text:'Wait',choices:[],qte:{prompt:'Act',seconds:1,success:'end',timeout:'end'}},{id:'end',speaker:'Narrator',text:'Done',choices:[]}];const r=resolveQte(p,start(p),'success');expect(r.nodeVisits?.at(-1)?.node).toBe('end');});
+it("QTE outcomes record their entered dialogue for screen switches and hinge ranges", async () => {
+  const { resolveQte } = await import("./model");
+  const p = demo();
+  p.scenes[0].nodes = [
+    {
+      id: "quiz",
+      speaker: "Narrator",
+      text: "Wait",
+      choices: [],
+      qte: { prompt: "Act", seconds: 1, success: "end", timeout: "end" },
+    },
+    { id: "end", speaker: "Narrator", text: "Done", choices: [] },
+  ];
+  const r = resolveQte(p, start(p), "success");
+  expect(r.nodeVisits?.at(-1)?.node).toBe("end");
+});
+
+it("simple device ranges ignore leftover directives, include their end and follow the visited branch", () => {
+  const s = demo().scenes[0];
+  s.phone = {
+    enabled: true,
+    mode: "phone-system",
+    device: "phone",
+    contact: "Maria",
+    title: "Online",
+    avatar: null,
+    x: 50,
+    y: 50,
+    width: 44,
+    entrance: { style: "cut", seconds: 0.1 },
+    typingSeconds: 0,
+    keyboard: false,
+    schedule: { start: "b", end: "c", screen: "feed", advanced: false },
+  };
+  s.nodes = [
+    { id: "a", speaker: "Narrator", text: "a", choices: [] },
+    {
+      id: "b",
+      speaker: "Narrator",
+      text: "b",
+      choices: [],
+      deviceScreen: "chat",
+    },
+    { id: "c", speaker: "Narrator", text: "c", choices: [] },
+    { id: "d", speaker: "Narrator", text: "d", choices: [] },
+  ];
+  expect(deviceScreen(s, s.nodes[0], ["a"])).toBe("off");
+  expect(deviceScreen(s, s.nodes[1], ["a", "b"])).toBe("feed");
+  expect(deviceScreen(s, s.nodes[2], ["a", "b", "c"])).toBe("feed");
+  expect(deviceScreen(s, s.nodes[3], ["a", "b", "c", "d"])).toBe("off");
+  expect(deviceScreen(s, s.nodes[3], ["a", "d"])).toBe("off");
+  s.phone.schedule!.advanced = true;
+  expect(deviceScreen(s, s.nodes[2], ["a", "b", "c"])).toBe("chat");
+});
+it("normal and device self-reply permissions are independent in rendering and runtime", async () => {
+  const { respond } = await import("./model");
+  const { allowsReply } = await import("./interactions");
+  const p = demo(),
+    s = p.scenes[0];
+  s.phone = {
+    enabled: true,
+    device: "phone",
+    contact: "Maria",
+    title: "Online",
+    avatar: null,
+    x: 50,
+    y: 50,
+    width: 44,
+    entrance: { style: "cut", seconds: 0.1 },
+    typingSeconds: 0,
+    keyboard: false,
+  };
+  const n = s.nodes[0];
+  n.allowCustomResponse = false;
+  n.allowPhoneCustomResponse = true;
+  expect(allowsReply(s, n, false)).toBe(false);
+  expect(allowsReply(s, n, true)).toBe(true);
+  expect(() => respond(p, start(p), "Hello")).not.toThrow();
+  n.allowPhoneCustomResponse = false;
+  expect(() => respond(p, start(p), "Hello")).toThrow(
+    "Custom reply unavailable",
+  );
+});
+it("active controls restore grading and lamp intensity without discarding their values", async () => {
+  const { activities } = await import("./EffectSummary");
+  const s = demo().scenes[0];
+  s.effects.light = 0.37;
+  s.effects.brightness = 0.83;
+  s.effects.contrast = 1.21;
+  activities(s)
+    .find((x) => x.id === "light")!
+    .toggle(s);
+  expect(s.effects.light).toBe(0);
+  activities(s)
+    .find((x) => x.id === "light")!
+    .toggle(s);
+  expect(s.effects.light).toBe(0.37);
+  activities(s)
+    .find((x) => x.id === "grading")!
+    .toggle(s);
+  expect(s.effects.brightness).toBe(1);
+  activities(s)
+    .find((x) => x.id === "grading")!
+    .toggle(s);
+  expect(s.effects.brightness).toBe(0.83);
+  expect(s.effects.contrast).toBe(1.21);
+});

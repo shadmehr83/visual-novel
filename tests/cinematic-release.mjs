@@ -19,13 +19,16 @@ try {
   const p=JSON.parse(await readFile('projects/published.stillframe.json','utf8'));
   p.id='offline-cinematic-fixture';p.assets=[];
   const a=p.scenes[0],b=p.scenes[1];p.scenes=[a,b];
-  for(const s of p.scenes){s.background=null;s.effects.rain=false;s.effects.glass=false;delete s.camera;s.joints=[];}
+  for(const s of p.scenes){s.background=null;s.effects.rain=false;s.effects.glass=false;delete s.camera;s.joints=[];if(s.phone){s.phone.avatar=null;delete s.phone.appearance;delete s.phone.schedule;}}
+  delete a.phone;
   a.nodes=[{id:'a',speaker:'Narrator',text:'Resting hand',choices:[],next:'b'},{id:'b',speaker:'Narrator',text:'Moved hand',choices:[{id:'open',text:'Open phone',target:b.id,actions:[],note:''}]}];
   const pose=node=>({node,x:0,y:0,angle:0,scaleX:1,scaleY:1,opacity:1});
   a.joints=[{id:'hand',name:'Hand',enabled:true,pivotX:300,pivotY:200,transition:{style:'smooth',seconds:.15},region:{id:'r',name:'Hand',enabled:true,points:[{x:200,y:200},{x:400,y:200},{x:350,y:300}]},poses:[pose('a'),{...pose('b'),angle:25}]}];
   b.phone.typingSeconds=.1;
   b.nodes=[{id:'hello',speaker:'Maria',text:'Hello.',choices:[{id:'hi',text:'Hello Maria.',target:'reply',actions:[],note:''}]},{id:'reply',speaker:'Maria',text:'Nice to meet you.',choices:[],next:'end'},{id:'end',speaker:'Narrator',text:'Goodbye',choices:[]}];
   await page.locator('input[type=file][accept=".json"]').setInputFiles({name:'cinematics.json',mimeType:'application/json',buffer:Buffer.from(JSON.stringify(p))});
+  await page.getByLabel('Project title').waitFor();
+  assert.equal(await page.getByRole('alert').count(),0,'offline fixture imports successfully');
   const download=page.waitForEvent('download');
   await page.getByRole('button',{name:'Export playable HTML',exact:true}).click();
   const playerHtml=await readFile(await (await download).path(),'utf8');

@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { useState, useEffect } from "react";
 export const workspaceSchema = z.object({
+  splitDocks: z.boolean().default(false),
   font: z
     .enum(["Arial", "Verdana", "Trebuchet MS", "Georgia", "monospace"])
     .default("Arial"),

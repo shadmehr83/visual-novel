@@ -24,7 +24,12 @@ export function SceneTransition({
     timer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
   const [outgoing, setOutgoing] = useState<ReactNode>(null);
   const last = useRef(children);
-  const transition = scene.transition;
+  const lastScene = useRef(scene);
+  const selectedTransition = useRef(scene.transition);
+  if (previous.current !== scene.id)
+    selectedTransition.current =
+      lastScene.current.exitTransition || scene.transition;
+  const transition = playing ? selectedTransition.current : scene.transition;
   useEffect(() => {
     setOutgoing(null);
     if (
@@ -58,10 +63,12 @@ export function SceneTransition({
       );
     }
     previous.current = scene.id;
+    lastScene.current = scene;
     return () => clearTimeout(timer.current);
   }, [scene.id, playing, reduced]);
   useEffect(() => {
     last.current = children;
+    lastScene.current = scene;
   });
   const active = playing && !reduced && transition;
   return (

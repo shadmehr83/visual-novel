@@ -40,3 +40,7 @@ The current checkpoint uses Maria, three refreshed environment paintings and a r
 ## Phone system and scheduled interactions
 
 The current checkpoint adds a local Home/Nearside/Loop phone system in the opening and retains the original chat-only option. Hinge activation ranges, per-dialogue screen schedules, individual light favourites, click placement and progression shortcuts are available in the engine. See [phone system and navigation guide](../docs/PHONE_SYSTEM_AND_SCHEDULING.md). The named tabs are Outfits & Items, Phone, Cinematics, Light Library and Effect Presets.
+
+## Device simplification update — 28 October 2026
+
+Simple phone ranges, independent app navigation, device Settings/custom icons and wallpaper, separate editing docks, effect toggles, item uploads, pause/Escape recovery and outgoing scene transitions are documented in [Device simplification](../docs/DEVICE_SIMPLIFICATION.md). The snapshot includes a new Maria profile portrait; the café visual configuration and original image remain unchanged. Existing browser projects remain local until explicitly loading the GitHub snapshot. The Phone panel can import only Maria’s new portrait without replacing a local project.

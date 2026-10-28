@@ -1,3 +1,5 @@
+import { useState } from "react";
+import { readImage } from "./storage";
 import { RangeInput } from "./RangeInput";
 import type { Scene, Project } from "./model";
 export function ItemControls({
@@ -5,16 +7,24 @@ export function ItemControls({
   project,
   nodeId,
   update,
+  edit,
 }: {
   scene: Scene;
   project: Project;
   nodeId: string;
+  edit: (f: (p: Project) => void) => void;
   update: (f: (s: Scene) => void) => void;
 }) {
-  const node = scene.nodes.find((n) => n.id === nodeId)!;
+  const node = scene.nodes.find((n) => n.id === nodeId) || scene.nodes[0];
+  const [error, setError] = useState("");
   return (
     <section className="property-section" data-effect-panel="Outfits & Items">
-      <h3>Outfits & Items · inspect and choose</h3><p>Clothing and book cards live here. Choose a dialogue with choices, add items, then link each confirmation to its choice. Inspecting does not commit the choice.</p>
+      <h3>Outfits & Items · inspect and choose</h3>
+      <p>
+        Clothing and book cards live here. Select a dialogue and add an item. A
+        choice is created when needed. Upload its image below, then choose which
+        story path confirms it. Inspecting does not commit the choice.
+      </p>
       <button
         onClick={() =>
           update((s) => {
@@ -61,23 +71,54 @@ export function ItemControls({
             />
           </label>
           <button
-            disabled={!node.choices.length}
+            disabled={scene.items.options.length >= 40}
             onClick={() =>
               update((s) => {
+                const current = s.nodes.find((n) => n.id === node.id)!;
+                let choice = current.choices[0];
+                if (!choice) {
+                  let target =
+                    current.next || s.nodes[s.nodes.indexOf(current) + 1]?.id;
+                  if (!target) {
+                    target = crypto.randomUUID();
+                    s.nodes.push({
+                      id: target,
+                      speaker: "Narrator",
+                      text: "You put the item away.",
+                      choices: [],
+                    });
+                  }
+                  choice = {
+                    id: crypto.randomUUID(),
+                    text: "Choose item",
+                    target,
+                    actions: [],
+                    note: "",
+                  };
+                  current.choices.push(choice);
+                  delete current.next;
+                }
                 s.items!.options.push({
                   id: crypto.randomUUID(),
                   label: "New item",
                   description: "Describe this item",
                   asset: null,
-                  choice: node.choices[0].id,
+                  choice: choice.id,
                 });
               })
             }
           >
             Add item for current dialogue
           </button>
+          {error && <p role="alert">{error}</p>}
+          {scene.items.options.length === 0 && (
+            <p>
+              Add an item above to reveal its image upload, name, description
+              and story path.
+            </p>
+          )}
           {scene.items.options.map((item, i) => (
-            <details key={item.id}>
+            <details key={item.id} open>
               <summary>{item.label}</summary>
               <label>
                 Item name
@@ -101,6 +142,39 @@ export function ItemControls({
                   }
                 />
               </label>
+              <label className="item-image-upload">
+                Upload item image
+                <input
+                  aria-label={"Upload image for " + item.label}
+                  type="file"
+                  accept="image/png,image/jpeg,image/webp"
+                  onChange={async (e) => {
+                    const f = e.target.files?.[0];
+                    e.target.value = "";
+                    if (!f) return;
+                    try {
+                      const asset = await readImage(f);
+                      edit((p) => {
+                        p.assets.push(asset);
+                        const sceneItem = p.scenes
+                          .find((s) => s.id === scene.id)
+                          ?.items?.options.find((x) => x.id === item.id);
+                        if (sceneItem) sceneItem.asset = asset.id;
+                      });
+                      setError("");
+                    } catch (e) {
+                      setError(String(e));
+                    }
+                  }}
+                />
+              </label>
+              {item.asset && (
+                <img
+                  className="item-author-thumbnail"
+                  src={project.assets.find((a) => a.id === item.asset)?.data}
+                  alt={item.label}
+                />
+              )}
               <label>
                 PNG / image
                 <select

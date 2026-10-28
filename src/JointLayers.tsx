@@ -1,3 +1,4 @@
+import { usePaused } from "./PlaySession";
 import { hingeWindow } from "./interactions";
 import { useEffect, useRef, useState } from "react";
 import type { Joint, Pose, Project, Scene } from "./model";
@@ -21,6 +22,9 @@ function MovingPatch({
   playing: boolean;
   reduced: boolean;
 }) {
+  const paused = usePaused();
+  const pausedRef = useRef(paused);
+  pausedRef.current = paused;
   const [pose, setPose] = useState<Pose>(restingPose());
   const latest = useRef(pose);
   const destination = useRef(pose);
@@ -66,8 +70,16 @@ function MovingPatch({
       return;
     }
     let raf = 0;
-    const origin = performance.now();
+    let origin = performance.now();
+    let lastFrame = origin;
     const tick = (now: number) => {
+      if (pausedRef.current) {
+        origin += now - lastFrame;
+        lastFrame = now;
+        raf = requestAnimationFrame(tick);
+        return;
+      }
+      lastFrame = now;
       const t = Math.min(1, (now - origin) / (joint.transition.seconds * 1000));
       const next = samplePose(from, to, t, joint.transition.style);
       latest.current = next;
