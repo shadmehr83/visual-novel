@@ -1,4 +1,4 @@
-export const ENGINE_VERSION = "2.4.0";
+export const ENGINE_VERSION = "2.5.0";
 export type ReleaseFeature = {
   name: string;
   description: string;
@@ -19,8 +19,9 @@ const f = (
   action?: string,
 ): ReleaseFeature => ({ name, description, steps: path.split(" → "), action });
 export const releases: Release[] = [
+  {version:"2.5.0", name:"Independent devices and rainy window views", date:"2026-10-28", features:[f("Independent texting activation", "Ordinary story actions never become messages. Configure dialogue placement and texting start/end in Advanced devices. Monitor interaction opens the desktop separately; window and monitor close-ups have glass-specific rain.", "Advanced devices → Dialogue & replies → Dialogue placement or Texting start/end", "devices")]},
   {
-    version: "2.4.0", name: "Sound, wardrobe and close-up storytelling", date: "2026-10-28",
+    version: "2.4.0", commit: "bef5f98", name: "Sound, wardrobe and close-up storytelling", date: "2026-10-28",
     features: [
       f("Restored clothing cards and visible chosen outfits", "The three saved clothing images can be inspected, worn and reconsidered. The chosen image stays visible with its result dialogue; missing links in compatible older projects are repaired with a recovery copy.", "Editor → Items & outfits → Open saved outfit selection; during playback inspect a card, choose it, or See the other outfits", "wardrobe"),
       f("Reusable sound library and master volume", "Original notification, rain, muffled room rain, wet footsteps, closet and coat sound designs are included. Assign ambience or dialogue/reply/item cues and upload additional audio. Walking is enabled in scenes five and seven; rain in one, four and seven.", "Editor → Effect panels → Sound → Add background ambience or assign a sound cue; Play story → Sound volume", "effect:Sound"),

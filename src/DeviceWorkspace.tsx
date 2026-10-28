@@ -363,6 +363,9 @@ export function DeviceWorkspace({
             {section === "Dialogue & replies" && (
               <section className="property-section">
                 <h2>Current device dialogue</h2>
+                <label>Dialogue placement<select aria-label="Dialogue placement" value={node.deviceDialogue === undefined ? "auto" : String(node.deviceDialogue)} onChange={e => update(s => { s.nodes.find(n => n.id === node.id)!.deviceDialogue = e.target.value === "auto" ? undefined : e.target.value === "true"; })}><option value="auto">Automatic · only actual chat speakers</option><option value="false">Story dialogue outside device</option><option value="true">Texting inside device</option></select></label>
+                <label><input type="checkbox" checked={phone.dialogueRange?.enabled || false} onChange={e => update(s => { s.phone!.dialogueRange = {enabled: e.target.checked, start: node.id, end: scene.nodes.at(-1)!.id}; })} />Enable texting only in a dialogue range</label>
+                {phone.dialogueRange && (["start", "end"] as const).map(key => <label key={key}>Texting {key}<select aria-label={"Texting " + key} value={phone.dialogueRange![key]} onChange={e => update(s => { s.phone!.dialogueRange![key] = e.target.value; })}>{scene.nodes.map((n,i) => <option key={n.id} value={n.id}>{i+1}. {n.text.slice(0,45)}</option>)}</select></label>)}
                 <label><input type="checkbox" aria-label="Show phone keyboard by default" checked={phone.keyboard} onChange={e => update(s => { s.phone!.keyboard = e.target.checked; })} />Show phone keyboard by default</label>
                 <label>
                   Speaker

@@ -5,7 +5,7 @@ import {
   type DeviceAppearance,
 } from "./DeviceAppearance";
 import { usePaused } from "./PlaySession";
-import { deviceScreen, allowsReply } from "./interactions";
+import { deviceScreen, deviceDialogue, allowsReply } from "./interactions";
 import { useEffect, useRef, useState } from "react";
 import type { Project, Scene, Runtime, Node } from "./model";
 import { SelfReply } from "./SelfReply";
@@ -34,7 +34,9 @@ export function PhoneUI({
   onAppearance?: (a: DeviceAppearance) => void;
   onUpload?: (a: Project["assets"][number], target: string) => void;
 }) {
-  const config = scene.phone!;
+  const config = { ...scene.phone!, device: node.deviceKind || scene.phone!.device };
+  if (node.deviceKind === "desktop") Object.assign(config, {x: 50, y: 50, frameWidth: 75, frameHeight: 85, anchor: "center"});
+  const texting = deviceDialogue(scene, node, runtime?.nodeVisits?.filter(v => v.scene === scene.id).map(v => v.node));
   const box = deviceBox(config);
   const paused = usePaused();
   const [localAppearance, setLocalAppearance] = useState(config.appearance);
@@ -92,9 +94,14 @@ export function PhoneUI({
           ]
         : []
   ).filter(
-    (m) =>
+    (m) => {
+      const s = project.scenes.find(s => s.id === m.scene), n = s?.nodes.find(n => n.id === m.node);
+      if (!s || !n || n.deviceDialogue === false) return false;
+      if (m.sender === "You" && n.choices.some(c => c.text === m.text) && !deviceDialogue(s, n)) return false;
+      return (
       project.scenes.find((s) => s.id === m.scene)?.phone?.contact ===
-      config.contact,
+      config.contact);
+    },
   );
   useEffect(() => {
     feed.current?.scrollTo({
@@ -113,12 +120,7 @@ export function PhoneUI({
   const storyNotice =
     node.phoneNotice || (node.speaker === "Phone" ? node.text : undefined);
   const narrativeOutside =
-    !!runtime &&
-    screen !== "chat" &&
-    effective !== "chat" &&
-    effective !== "settings" &&
-    ["Narrator", "Phone"].includes(node.speaker) &&
-    !node.choices.some((c) => c.sendAsMessage === true);
+    !!runtime && !texting;
   return (
     <>
       <section
@@ -244,7 +246,7 @@ export function PhoneUI({
             <div className="device-feed" ref={feed} aria-live="polite">
               {appearance?.profiles.chat && <div className="phone-feed-profile"><img className="device-profile-picture" src={project.assets.find(a => a.id === appearance.profiles.chat)?.data} alt="Your Ember profile" /><small>Your Ember profile</small></div>}
               <p className="device-date">Today · Ember</p>
-              {messages.map((m, i) =>
+              {(texting ? messages : []).map((m, i) =>
                 typing && m.node === node.id && m.scene === scene.id ? null : (
                   <div
                     key={i}
@@ -268,12 +270,12 @@ export function PhoneUI({
                   <i />
                 </div>
               )}
-              {!currentIsMessage && (
+              {texting && !currentIsMessage && (
                 <p className="device-narration">{node.text}</p>
               )}
             </div>
           )}
-          {screen === "chat" && (
+          {screen === "chat" && texting && (
             <div className="device-actions">
               {runtime?.ended ? (
                 <div>
@@ -314,7 +316,7 @@ export function PhoneUI({
             </div>
           )}
           {screen === "chat" &&
-            keyboardVisible &&
+            keyboardVisible && texting &&
             choices.length > 0 &&
             !typing && (
               <div className="device-keyboard" aria-hidden>
@@ -350,6 +352,7 @@ export function PhoneUI({
           data-no-advance
           aria-label="Story controls outside device"
         >
+          <p>{node.text}</p>
           {runtime?.ended ? (
             <button onClick={onRestart}>Restart story</button>
           ) : choices.length ? (

@@ -3,7 +3,7 @@ import { readImage } from "./storage";
 import { useState } from "react";
 export function sceneView(scene: Scene, nodeId?: string): Scene {
   const view = scene.subscenes?.find(v => v.id === scene.nodes.find(n => n.id === nodeId)?.view);
-  return view ? { ...scene, background: view.background, x: 0, y: 0, scale: 1, fit: "cover", camera: undefined, effects: { ...scene.effects, rain: false, glass: false, rainZones: [], lights: [], motionZones: [], light: 0, lightLoop: undefined }, transition: view.transition } : scene;
+  return view ? { ...scene, background: view.background, x: 0, y: 0, scale: 1, fit: "cover", camera: undefined, effects: view.effects || { ...scene.effects, rain: false, glass: false, rainZones: [], lights: [], motionZones: [], light: 0, lightLoop: undefined }, transition: view.transition } : scene;
 }
 export function SceneViewControls({ project, scene, nodeId, edit }: { project: Project; scene: Scene; nodeId: string; edit: (fn: (p: Project) => void) => void }) {
   const [error, setError] = useState("");

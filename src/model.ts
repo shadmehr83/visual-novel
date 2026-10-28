@@ -1,4 +1,4 @@
-import { deviceScreen, allowsReply } from "./interactions";
+import { deviceScreen, deviceDialogue, allowsReply } from "./interactions";
 import { z } from "zod";
 export const soundCueSchema = z.object({
   asset: z.string(),
@@ -46,6 +46,8 @@ export const poseSchema = z.object({
   asset: z.string().optional(),
 });
 const node = z.object({
+  deviceDialogue: z.boolean().optional(),
+  deviceKind: z.enum(["phone", "desktop"]).optional(),
   autoAdvance: z.number().min(0.5).max(30).optional(),
   view: z.string().optional(),
   sound: soundCueSchema.optional(),
@@ -258,6 +260,7 @@ export const deviceAppearanceSchema = z.object({
     .default([]),
 });
 export const deviceSchema = z.object({
+  dialogueRange: z.object({enabled: z.boolean(), start: z.string(), end: z.string()}).optional(),
   notificationSound: soundCueSchema.optional(),
   frameWidth: z.number().min(5).max(95).optional(),
   frameHeight: z.number().min(20).max(98).optional(),
@@ -293,6 +296,7 @@ const scene = z.object({
     title: z.string().min(1).max(100),
     background: z.string().nullable(),
     transition: transitionSchema,
+    effects: effectsSchema.optional(),
   })).max(40).optional(),
   effectBackup: z.record(z.number()).optional(),
   keyframesEnabled: z.boolean().optional(),
@@ -674,7 +678,7 @@ function recordPhone(p: Project, r: Runtime): Runtime {
   const s = p.scenes.find((s) => s.id === r.scene)!;
   const n = s.nodes.find((n) => n.id === r.node)!;
   if (
-    !s.phone?.enabled ||
+    !s.phone?.enabled || !deviceDialogue(s, n, r.nodeVisits?.filter(v => v.scene === s.id).map(v => v.node)) ||
     ![s.phone.contact, "You", "Mara", "Maria"].includes(n.speaker)
   )
     return r;
@@ -697,7 +701,8 @@ export function advance(p: Project, r: Runtime, choiceId?: string): Runtime {
   const c = s.nodes
     .find((n) => n.id === r.node)
     ?.choices.find((c) => c.id === choiceId);
-  if (s.phone?.enabled && c && c.sendAsMessage !== false)
+  const sourceNode = s.nodes.find(n => n.id === r.node)!;
+  if (s.phone?.enabled && c && c.sendAsMessage !== false && deviceDialogue(s, sourceNode, r.nodeVisits?.filter(v => v.scene === s.id).map(v => v.node)))
     next = {
       ...next,
       phoneMessages: [
@@ -761,7 +766,7 @@ export function respond(
   const next = advance(p, r, choiceId);
   return {
     ...next,
-    ...(p.scenes.find((s) => s.id === r.scene)?.phone?.enabled
+    ...(deviceDialogue(p.scenes.find(s => s.id === r.scene)!, node, r.nodeVisits?.filter(v => v.scene === r.scene).map(v => v.node))
       ? {
           phoneMessages: [
             ...(r.phoneMessages || []),

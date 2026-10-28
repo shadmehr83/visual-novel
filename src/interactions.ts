@@ -1,4 +1,15 @@
 import type { Scene, Node, Joint } from "./model";
+export function deviceDialogue(scene: Scene, node: Node, visits?: string[]) {
+  if (deviceScreen(scene, node, visits) !== "chat") return false;
+  if (node.deviceDialogue !== undefined) return node.deviceDialogue;
+  const range = scene.phone?.dialogueRange;
+  if (range?.enabled) {
+    const path = visits || scene.nodes.slice(0, scene.nodes.indexOf(node) + 1).map(n => n.id);
+    const start = path.lastIndexOf(range.start), end = path.lastIndexOf(range.end);
+    return start >= 0 && (end < start || node.id === range.end);
+  }
+  return [scene.phone?.contact, "You"].includes(node.speaker);
+}
 export function deviceScreen(scene: Scene, node: Node, visits?: string[]) {
   if (!scene.phone?.enabled) return "off";
   let path =

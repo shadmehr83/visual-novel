@@ -2,6 +2,7 @@ import { integrateDeparture, updateDepartureRuntime } from "./projectUpdates";
 import { saveProjectUpdate } from "./storage";
 import { SoundControls } from "./SoundControls";
 import { SceneViewControls } from "./SceneViews";
+import { integrateDeviceUpdate } from "./deviceUpdates";
 import { integrateDemoUpdates } from "./demoUpdates";
 import { openNotification } from "./notifications";
 import { DeviceWorkspace, DeviceSummary } from "./DeviceWorkspace";
@@ -313,7 +314,8 @@ export default function App() {
         }
         if (workspace) {
           try {
-            const updated = integrateDemoUpdates(workspace.project, savedProject());
+            const demoUpdated = integrateDemoUpdates(workspace.project, savedProject()) || workspace.project;
+            const updated = integrateDeviceUpdate(demoUpdated, savedProject()) || (demoUpdated !== workspace.project ? demoUpdated : null);
             if (updated) {
               await saveProjectUpdate(updated, workspace.runtime, workspace);
               workspace = { project: updated, runtime: workspace.runtime };

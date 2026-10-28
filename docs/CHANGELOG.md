@@ -1,6 +1,10 @@
 # Stillframe engine update history
 
-Current version: **2.4.0**. Earlier version numbers were assigned retrospectively from Git milestones. Directions below point to their current location; the in-app Update history tab also offers feature shortcuts. Dates use Australia/Sydney time. Project format remains schemaVersion 1.
+Current version: **2.5.0**. Earlier version numbers were assigned retrospectively from Git milestones. Directions below point to their current location; the in-app Update history tab also offers feature shortcuts. Dates use Australia/Sydney time. Project format remains schemaVersion 1.
+
+## v2.5.0 — Independent devices and rainy window views
+
+Story actions no longer become device messages. Configure placement and texting start/end under Advanced devices → Dialogue & replies. Monitor → Interact opens the desktop. The window close-up and monitor use their own glass-specific rain masks. Sound includes rain tapping on glass. See [Independent devices](INDEPENDENT_DEVICES.md).
 
 ## v2.4.0 — Sound, wardrobe and close-up storytelling (2026-10-28)
 

@@ -37,7 +37,7 @@ it("sub-scene views restore the original image and never inherit misaligned regi
   const p = savedProject(), s = p.scenes[0];
   const v = sceneView(s, "monitor");
   expect(v.background).toBe("first-match-monitor");
-  expect(v.effects.rainZones).toEqual([]);
+  expect(v.effects.rainZones).toHaveLength(2);
   expect(v.effects.lights).toEqual([]);
   expect(sceneView(s, "room")).toBe(s);
   const broken = structuredClone(p);
