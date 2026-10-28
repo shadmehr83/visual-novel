@@ -1,3 +1,6 @@
+import { DeviceWorkspace, DeviceSummary } from "./DeviceWorkspace";
+import { DialogueItems } from "./DialogueItems";
+import { usePreviewWindow } from "./PreviewWindow";
 import { StudioMenu, type StudioView } from "./StudioMenu";
 import { FlowEditor } from "./FlowEditor";
 import { ReleaseHistory } from "./ReleaseHistory";
@@ -7,7 +10,6 @@ import { PlaySession } from "./PlaySession";
 import { withDeviceUpload } from "./DeviceAppearance";
 import { deviceScreen } from "./interactions";
 import { PlaybackControls } from "./PlaybackControls";
-import { InteractionControls } from "./InteractionControls";
 import { LightLibrary, makePlacedLight } from "./LightLibrary";
 import { RangeInput } from "./RangeInput";
 import { ItemOverlay } from "./ItemOverlay";
@@ -568,9 +570,34 @@ export default function App() {
     }));
   }
   function navigate(action: string) {
-    if (["editor", "scenes", "dialogues", "updates"].includes(action)) {
+    if (
+      ["editor", "scenes", "dialogues", "devices", "updates"].includes(action)
+    ) {
       setPlaying(false);
       setView(action as StudioView);
+      return;
+    }
+    if (action === "wardrobe" || action === "items") {
+      setPlaying(false);
+      setView("editor");
+      setBottom("Items & outfits");
+      setCollapseBottom(false);
+      setWorkspace((w) => ({
+        ...w,
+        dialogueMode: w.dialogueMode === "hidden" ? "pinned" : w.dialogueMode,
+      }));
+      if (action === "wardrobe") {
+        const scene = project.scenes.find((s) => s.id === "outfit");
+        if (scene) {
+          selectScene(scene.id);
+          setNodeId(
+            scene.nodes.find((n) => n.id === "effort")?.id || scene.nodes[0].id,
+          );
+        } else
+          setError(
+            "No saved wardrobe scene in this project. Add an item picker to the current dialogue.",
+          );
+      }
       return;
     }
     if (action.startsWith("dock:")) {
@@ -666,6 +693,11 @@ export default function App() {
       setWorkspace((w) => ({ ...w, libraryCollapsed: false }));
     }
   }
+  const previewWindow = usePreviewWindow(
+    workspace,
+    setWorkspace,
+    loaded && view === "editor",
+  );
   if (!loaded)
     return (
       <div className="loading-screen">
@@ -688,6 +720,7 @@ export default function App() {
         }
         style={
           {
+            ...previewWindow.style,
             "--library-size":
               (workspace.libraryCollapsed ? 0 : workspace.libraryWidth) + "px",
             "--controls-size": workspace.controlsWidth + "px",
@@ -794,7 +827,8 @@ export default function App() {
               "workspace controls-" +
               placement +
               (workspace.libraryCollapsed ? " library-collapsed" : "") +
-              (workspace.splitDocks ? " split-docks" : "")
+              (workspace.splitDocks ? " split-docks" : "") +
+              (workspace.previewCustom ? " preview-custom" : "")
             }
           >
             <nav className="rail">
@@ -1184,7 +1218,11 @@ export default function App() {
                 </button>
               </div>
             </aside>
-            <main className="ui-pane" style={paneStyle("workspace")}>
+            <main
+              ref={previewWindow.mainRef}
+              className="ui-pane"
+              style={paneStyle("workspace")}
+            >
               <div className="workspace-toolbar">
                 <div className="breadcrumb">
                   Scenes <ChevronRight size={12} />
@@ -1219,7 +1257,13 @@ export default function App() {
                   )}
                 </div>
               )}
-              <section className="preview-area">
+              <section
+                ref={previewWindow.previewRef}
+                className={
+                  "preview-area " +
+                  (workspace.previewLocked ? "preview-locked" : "")
+                }
+              >
                 <div className="preview-header">
                   <div>
                     <span className="eyebrow">{scene.subtitle}</span>
@@ -1534,6 +1578,7 @@ export default function App() {
                   </SceneTransition>
                 </div>
                 <div className="stage-footer">
+                  {!playing && previewWindow.tools}
                   <div>
                     <span className="live-dot" />{" "}
                     {playing
@@ -1555,6 +1600,7 @@ export default function App() {
                     {playing ? "Restart story" : "Play from beginning"}
                   </button>
                 </div>
+                {!playing && previewWindow.handle}
               </section>
               <section
                 className={
@@ -1587,7 +1633,12 @@ export default function App() {
                   >
                     {collapseBottom ? "Expand" : "Collapse"}
                   </button>
-                  {["Dialogue", "State & clues", "Event log"].map((t) => (
+                  {[
+                    "Dialogue",
+                    "Items & outfits",
+                    "State & clues",
+                    "Event log",
+                  ].map((t) => (
                     <button
                       key={t}
                       className={bottom === t ? "active" : ""}
@@ -1623,6 +1674,24 @@ export default function App() {
                     </button>
                   )}
                 </div>
+                {bottom === "Items & outfits" && (
+                  <fieldset
+                    disabled={playing}
+                    style={{ border: 0, padding: 0, margin: 0 }}
+                  >
+                    <DialogueItems
+                      project={project}
+                      scene={selected}
+                      nodeId={node.id}
+                      edit={edit}
+                      update={updateScene}
+                      onSelect={(sid, nid) => {
+                        selectScene(sid);
+                        if (nid) setNodeId(nid);
+                      }}
+                    />
+                  </fieldset>
+                )}
                 {bottom === "Dialogue" && (
                   <div className="dialogue-editor">
                     <div className="node-list">
@@ -1758,6 +1827,14 @@ export default function App() {
                         }
                       />
                       <div className="choices-heading">
+                        <button
+                          onClick={() => {
+                            setBottom("Items & outfits");
+                            setCollapseBottom(false);
+                          }}
+                        >
+                          Outfit & item picker
+                        </button>
                         <span>
                           CHOICES <small>{node.choices.length}</small>
                         </span>
@@ -2105,35 +2182,50 @@ export default function App() {
                       setMaskMode(false);
                     }}
                   />
-                  <InteractionControls
-                    key={selected.id}
-                    edit={edit}
-                    project={project}
+                  <DeviceSummary
                     scene={selected}
-                    nodeId={
-                      selected.nodes.some((n) => n.id === node.id)
-                        ? node.id
-                        : selected.nodes[0].id
-                    }
                     update={updateScene}
+                    onOpen={() => {
+                      setPlaying(false);
+                      setView("devices");
+                    }}
                   />
                   <EffectPresets
                     project={project}
                     scene={selected}
                     edit={edit}
                   />
-                  <ItemControls
-                    key={selected.id}
-                    edit={edit}
-                    project={project}
-                    scene={selected}
-                    nodeId={
-                      selected.nodes.some((n) => n.id === node.id)
-                        ? node.id
-                        : selected.nodes[0].id
-                    }
-                    update={updateScene}
-                  />
+                  {bottom !== "Items & outfits" ? (
+                    <>
+                      {" "}
+                      <ItemControls
+                        key={selected.id}
+                        edit={edit}
+                        project={project}
+                        scene={selected}
+                        nodeId={
+                          selected.nodes.some((n) => n.id === node.id)
+                            ? node.id
+                            : selected.nodes[0].id
+                        }
+                        update={updateScene}
+                      />
+                    </>
+                  ) : (
+                    <section
+                      className="property-section"
+                      data-effect-panel="Outfits & Items"
+                    >
+                      <h3>Saved outfit & item picker</h3>
+                      <p>
+                        The picker is open in the dialogue panel below. Its
+                        existing cards, images and choices remain saved.
+                      </p>
+                      <button onClick={() => navigate("wardrobe")}>
+                        Open saved outfit selection
+                      </button>
+                    </section>
+                  )}
                   <CinematicControls
                     scene={selected}
                     project={project}
@@ -2667,6 +2759,20 @@ export default function App() {
                 <span className="live-dot" /> NON-DESTRUCTIVE EDITING
               </div>
             </aside>
+          </div>
+        ) : view === "devices" ? (
+          <div id="studio-devices" className="secondary-workspace">
+            <DeviceWorkspace
+              project={project}
+              sceneId={selected.id}
+              nodeId={nodeId}
+              edit={edit}
+              onSelect={(sid, nid) => {
+                selectScene(sid);
+                if (nid) setNodeId(nid);
+              }}
+              onOriginal={showOriginal}
+            />
           </div>
         ) : view === "updates" ? (
           <div id="studio-updates" className="secondary-workspace">

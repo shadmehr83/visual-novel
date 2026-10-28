@@ -1,8 +1,73 @@
 # Stillframe engine update history
 
-Current version: **2.1.0**. Earlier version numbers were assigned retrospectively from Git milestones. Directions below point to their current location; the in-app Update history tab also offers feature shortcuts. Dates use Australia/Sydney time. Project format remains schemaVersion 1.
+Current version: **2.2.0**. Earlier version numbers were assigned retrospectively from Git milestones. Directions below point to their current location; the in-app Update history tab also offers feature shortcuts. Dates use Australia/Sydney time. Project format remains schemaVersion 1.
+
+## v2.2.0 — Dedicated devices and a flexible preview (2026-10-28)
+
+### Advanced devices workspace
+
+A full workspace groups phone and computer controls into Frame & placement, Timing, Appearance, Apps, and Dialogue & replies. Existing Home, Ember, Insta and Settings remain available.
+
+1. Top tabs
+2. Advanced devices
+3. Choose a scene with a device
+4. Select a settings section
+
+### Independent device frame resizing
+
+Width moves the right edge without changing height or drifting diagonally. Height moves the lower edge. Optional proportion lock scales both dimensions around a fixed upper-left corner.
+
+1. Advanced devices
+2. Frame & placement
+3. Device width or Device height; enable Lock frame proportions when wanted
+
+### Resizable and lockable preview window
+
+Unlock and resize the entire game preview pane, not just its artwork zoom. Fill preview space gives the scene more height; lock saves that allocation while the dialogue editor uses the remainder.
+
+1. Editor
+2. Preview footer
+3. Unlock window
+4. Drag its lower-right corner or Fill preview space
+5. Lock window
+
+### Saved outfits in the dialogue panel
+
+The original three clothing cards and inspect/confirm flow are preserved. The dialogue panel now has an Items & outfits tab and a direct shortcut to the saved wardrobe selection.
+
+1. Editor
+2. Items & outfits beside Dialogue
+3. Open saved outfit selection; or Edit
+4. Saved outfit selection
+
+### Recover missing outfit cards without replacing a project
+
+An explicit restore button adds missing demo cards and images while keeping existing custom cards, descriptions, backgrounds and dialogue routes.
+
+1. Editor
+2. Items & outfits
+3. Restore missing demo outfits
+
+### Additional items keep their own choice routes
+
+New item cards create independent confirmation choices and direct uploads remain available. Enabling/disabling a picker retains its existing cards. Normal dialogue and device self-reply are kept.
+
+1. Editor
+2. Items & outfits
+3. Add item for current dialogue
+4. Upload image and choose its destination
+
+### Full app preview and scrolling feed
+
+Browse Home, Ember, scrolling Insta and Settings in the device workspace preview. Add custom app shortcuts and icons without altering story progression or removing the original apps.
+
+1. Advanced devices
+2. Apps
+3. Enable full app system or Add app shortcut; browse using Preview app buttons
 
 ## v2.1.0 — After the café (2026-10-28)
+
+[Source milestone 0aa0629](https://github.com/shadmehr83/visual-novel/commit/0aa0629)
 
 ### Separate rainy departure scene
 
@@ -97,28 +162,29 @@ Browse every recorded milestone, search for a feature and open its current contr
 
 Show a device from one dialogue through another, with optional advanced individual overrides.
 
-1. Editor
-2. Phone
-3. Interaction timing
-4. Simple start & end dialogues
+1. Top tabs
+2. Advanced devices
+3. Timing
+4. Interaction timing
+5. Simple start & end dialogues
 
 ### Stable app navigation and computer layout
 
 Home, Ember messages, Insta and Settings share one device system. Opening an app does not advance dialogue. Choose the wider computer shape when needed.
 
-1. Editor
-2. Phone
-3. Device placement & contact
+1. Top tabs
+2. Advanced devices
+3. Frame & placement
 4. Device shape
-5. Computer / desktop
+5. Computer / laptop
 
 ### Device Settings and custom apps
 
 Change device-only wallpaper, font, colours and text size; upload icons and add shortcuts to built-in screens. The Settings app exposes device appearance during play.
 
-1. Editor
-2. Phone
-3. Phone & computer appearance; during playback open Home
+1. Top tabs
+2. Advanced devices
+3. Appearance; during playback open Home
 4. Settings
 
 ### Independent device self-reply
@@ -177,8 +243,8 @@ Choose the transition used when leaving a scene; it can override the next scene�
 
 A new rainlit portrait keeps the café character’s style in a different composition. It can be imported into an existing local project without replacing that project.
 
-1. Editor
-2. Phone
+1. Advanced devices
+2. Appearance
 3. Use Maria’s new profile portrait
 
 ### Clearer phone and lighting controls
@@ -206,16 +272,17 @@ Choose the dialogue where a hinge starts and ends, then hide it or hold its fina
 
 Change the displayed device screen on authored dialogues without creating extra scenes. The old per-line schedule now lives under Advanced.
 
-1. Editor
-2. Phone
-3. Advanced dialogue screen schedule; for a range enable Advanced overrides first
+1. Top tabs
+2. Advanced devices
+3. Timing
+4. Advanced dialogue screen schedule; for a range enable Advanced overrides first
 
 ### Phone home and offline feed
 
 Functional back/Home buttons and a fictional scrolling feed accompany messages. Apps now use the names Ember and Insta.
 
-1. Editor
-2. Phone
+1. Advanced devices
+2. Apps
 3. Device experience
 4. Device with apps; in playback use the device Home button
 
@@ -303,8 +370,8 @@ Choose editor typography separately from story dialogue typography and character
 
 Narrower handset proportions and self-reply alongside multi-choice replies improve phone playback.
 
-1. Editor
-2. Phone for size; Play story
+1. Advanced devices
+2. Frame & placement for size; Play story
 3. Self-reply
 4. Select authored path
 5. Send

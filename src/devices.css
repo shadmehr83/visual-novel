@@ -1,0 +1,279 @@
+.device-overlay:not(.device-desktop),
+.device-overlay.device-desktop {
+  width: var(--frame-width) !important;
+  height: var(--frame-height) !important;
+  aspect-ratio: auto;
+  max-width: none;
+  max-height: none;
+  transform: none;
+}
+.device-overlay .device-shell {
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+}
+.device-workspace {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  padding: 18px 22px;
+  color: var(--ui-text, #d2d3ce);
+  background: var(--ui-bg, #171b1d);
+}
+.device-workspace-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-shrink: 0;
+  gap: 20px;
+}
+.device-workspace-heading h1 {
+  font:
+    28px Georgia,
+    serif;
+  color: inherit;
+  margin: 6px 0;
+}
+.device-workspace-heading p {
+  font-size: 12px;
+  color: var(--muted);
+}
+.device-workspace-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+  align-items: center;
+  padding: 10px 0;
+  font-size: 12px;
+}
+.device-workspace-toolbar label {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+.device-workspace-toolbar select {
+  max-width: 280px;
+}
+.device-section-tabs {
+  display: flex;
+  gap: 5px;
+  padding: 8px 0 12px;
+  flex-shrink: 0;
+  flex-wrap: wrap;
+}
+.device-section-tabs button[aria-pressed="true"] {
+  background: #92725a33;
+  border-color: #ac947a;
+}
+.device-workspace-content {
+  flex: 1;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: minmax(0, 1.1fr) minmax(320px, 1fr);
+  gap: 20px;
+}
+.device-live-preview {
+  min-width: 0;
+  overflow: auto;
+  padding: 12px;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+}
+.device-preview-apps {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding-bottom: 12px;
+  flex-wrap: wrap;
+  font-size: 12px;
+}
+.device-preview-frame {
+  width: 100%;
+  aspect-ratio: 1000/563;
+  flex-shrink: 0;
+}
+.device-preview-frame > .stage {
+  width: 100%;
+  height: 100%;
+}
+.device-live-preview > p {
+  font-size: 12px;
+  color: var(--muted);
+  line-height: 1.6;
+}
+.device-workspace-settings {
+  overflow: auto;
+  min-height: 0;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--panel);
+  padding: 8px 14px;
+}
+.device-workspace-settings .property-section {
+  padding: 15px 8px;
+}
+.device-workspace-settings :is(label, input, select, textarea, button, p) {
+  font-size: 13px;
+}
+.device-workspace-settings label {
+  display: block;
+  margin: 12px 0;
+}
+.device-workspace-settings
+  :is(input:not([type="checkbox"]):not([type="color"]), select, textarea) {
+  display: block;
+  width: 100%;
+  margin-top: 5px;
+  padding: 8px;
+  max-width: 100%;
+}
+.device-workspace-settings input[type="checkbox"] {
+  width: auto;
+}
+.device-workspace-settings textarea {
+  min-height: 100px;
+}
+.device-workspace-settings input[type="range"] {
+  padding: 0 !important;
+}
+.device-workspace-settings p {
+  line-height: 1.6;
+}
+.device-empty {
+  padding: 30px;
+}
+.dialogue-item-tools {
+  padding: 16px;
+  overflow: auto;
+  min-height: 0;
+}
+.item-picker-shortcut {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  flex-wrap: wrap;
+  padding: 10px 0;
+}
+.item-author-cards {
+  display: flex;
+  gap: 12px;
+  overflow: auto;
+  padding: 12px 0;
+}
+.item-author-cards button {
+  min-width: 150px;
+  max-width: 190px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 5px;
+}
+.item-author-cards img {
+  height: 120px;
+  width: 100%;
+  object-fit: contain;
+}
+.preview-window-resize {
+  position: absolute;
+  right: 2px;
+  bottom: 1px;
+  z-index: 20;
+  width: 25px;
+  height: 25px;
+  cursor: nwse-resize !important;
+  touch-action: none;
+  padding: 0 !important;
+  border: 0 !important;
+  background: #967a5a66 !important;
+  color: #eee !important;
+}
+.preview-area {
+  position: relative;
+}
+.workspace.preview-custom > main .preview-area {
+  width: min(100%, var(--preview-window-width));
+  height: var(--preview-window-height);
+  flex: 0 0 auto;
+  align-self: center;
+  max-height: var(--preview-window-max);
+  min-height: 180px;
+}
+.workspace.preview-custom > main .bottom-panel:not(.collapsed) {
+  flex: 1 1 0;
+  height: 0;
+  max-height: none;
+  min-height: 46px;
+}
+.preview-window-actions {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+}
+.preview-window-actions button {
+  font-size: 10px;
+  padding: 5px;
+}
+.workspace.preview-custom > main .preview-area:not(.preview-locked) {
+  outline: 1px dashed #b59875;
+  outline-offset: -2px;
+}
+.dialogue-item-tools .property-section {
+  padding: 8px;
+}
+.dialogue-item-tools .item-author-cards button {
+  font-size: 13px;
+}
+@media (max-width: 850px) {
+  .device-workspace {
+    padding: 10px;
+  }
+  .device-workspace-content {
+    grid-template-columns: 1fr;
+    grid-template-rows: minmax(240px, 45%) minmax(0, 1fr);
+  }
+  .device-workspace-heading p {
+    display: none;
+  }
+  .device-workspace-toolbar select {
+    max-width: 190px;
+  }
+  .device-live-preview {
+    justify-content: flex-start;
+  }
+  .device-preview-frame {
+    max-width: 650px;
+    margin: auto;
+  }
+  .device-workspace-settings {
+    padding: 6px;
+  }
+  .studio-workspace-tabs {
+    overflow: auto;
+  }
+}
+
+.device-workspace-toolbar {
+  flex-shrink: 0;
+}
+.device-workspace-heading {
+  height: auto !important;
+  padding: 0 !important;
+  background: transparent !important;
+  border: 0 !important;
+}
+.studio-workspace-tabs {
+  min-width: 0;
+  overflow-x: auto;
+}
+.device-preview-apps {
+  flex-shrink: 0;
+}
+.device-live-preview {
+  position: relative;
+}

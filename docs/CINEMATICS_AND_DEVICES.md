@@ -1,5 +1,7 @@
 # Hinge poses, foreground objects, device UI and fullscreen
 
+Current device controls are in the **Advanced devices** workspace. The original outfit picker is in **Items & outfits** beside Dialogue. See [the 2.2 guide](DEVICES_AND_PREVIEW.md) for current locations and preview resizing.
+
 Open the latest published project with `https://visual-novel-8b9.pages.dev/?snapshot=github` after deployment. Existing local work receives a recovery copy. The new controls are under **Atmosphere → Cinematics**. New settings live in the complete project JSON and travel with save/export/publish and standalone players.
 
 ## Small articulated movements

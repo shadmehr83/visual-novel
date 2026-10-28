@@ -41,8 +41,8 @@ export function ReleaseHistory({
       <p className="release-provenance">
         Versions before 2.0 were named retrospectively from the repository’s
         recorded milestones. Dates use Sydney time. Feature directions point to
-        their current location in 2.0. This history is separate from the
-        playthrough event log.
+        their current location in this release. This history is separate from
+        the playthrough event log.
       </p>
       <div className="release-list">
         {matches.map((r, index) => (

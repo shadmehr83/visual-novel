@@ -1,6 +1,10 @@
 import { z } from "zod";
 import { useState, useEffect } from "react";
 export const workspaceSchema = z.object({
+  previewLocked: z.boolean().default(true),
+  previewCustom: z.boolean().default(false),
+  previewWidth: z.number().min(280).max(3200).default(1000),
+  previewHeight: z.number().min(180).max(1800).default(600),
   topDockHeight: z.number().min(140).max(460).default(240),
   splitDocks: z.boolean().default(false),
   font: z

@@ -44,6 +44,19 @@ export function ItemControls({
       {scene.items && (
         <>
           <label>
+            <input
+              aria-label="Enable item picker"
+              type="checkbox"
+              checked={scene.items.enabled}
+              onChange={(e) =>
+                update((s) => {
+                  s.items!.enabled = e.target.checked;
+                })
+              }
+            />
+            Enable item picker · keep saved cards
+          </label>
+          <label>
             Overlay title
             <input
               value={scene.items.title}
@@ -75,29 +88,28 @@ export function ItemControls({
             onClick={() =>
               update((s) => {
                 const current = s.nodes.find((n) => n.id === node.id)!;
-                let choice = current.choices[0];
-                if (!choice) {
-                  let target =
-                    current.next || s.nodes[s.nodes.indexOf(current) + 1]?.id;
-                  if (!target) {
-                    target = crypto.randomUUID();
-                    s.nodes.push({
-                      id: target,
-                      speaker: "Narrator",
-                      text: "You put the item away.",
-                      choices: [],
-                    });
-                  }
-                  choice = {
-                    id: crypto.randomUUID(),
-                    text: "Choose item",
-                    target,
-                    actions: [],
-                    note: "",
-                  };
-                  current.choices.push(choice);
-                  delete current.next;
+                let target =
+                  current.next ||
+                  current.choices[0]?.target ||
+                  s.nodes[s.nodes.indexOf(current) + 1]?.id;
+                if (!target) {
+                  target = crypto.randomUUID();
+                  s.nodes.push({
+                    id: target,
+                    speaker: "Narrator",
+                    text: "You put the item away.",
+                    choices: [],
+                  });
                 }
+                const choice = {
+                  id: "item-route-" + crypto.randomUUID(),
+                  text: "Choose New item",
+                  target,
+                  actions: [],
+                  note: "",
+                };
+                current.choices.push(choice);
+                delete current.next;
                 s.items!.options.push({
                   id: crypto.randomUUID(),
                   label: "New item",
@@ -127,6 +139,11 @@ export function ItemControls({
                   onChange={(e) =>
                     update((s) => {
                       s.items!.options[i].label = e.target.value;
+                      const choice = s.nodes
+                        .flatMap((n) => n.choices)
+                        .find((c) => c.id === item.choice);
+                      if (choice?.id.startsWith("item-route-"))
+                        choice.text = "Choose " + e.target.value;
                     })
                   }
                 />

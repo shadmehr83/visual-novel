@@ -1,5 +1,7 @@
 # Simpler device interactions and editing
 
+Current device controls are in the **Advanced devices** workspace. The original outfit picker is in **Items & outfits** beside Dialogue. See [the 2.2 guide](DEVICES_AND_PREVIEW.md) for current locations and preview resizing.
+
 Updated 28 October 2026.
 
 ## Device timing

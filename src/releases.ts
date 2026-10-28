@@ -1,4 +1,4 @@
-export const ENGINE_VERSION = "2.1.0";
+export const ENGINE_VERSION = "2.2.0";
 export type ReleaseFeature = {
   name: string;
   description: string;
@@ -20,7 +20,57 @@ const f = (
 ): ReleaseFeature => ({ name, description, steps: path.split(" → "), action });
 export const releases: Release[] = [
   {
+    version: "2.2.0",
+    name: "Dedicated devices and a flexible preview",
+    date: "2026-10-28",
+    features: [
+      f(
+        "Advanced devices workspace",
+        "A full workspace groups phone and computer controls into Frame & placement, Timing, Appearance, Apps, and Dialogue & replies. Existing Home, Ember, Insta and Settings remain available.",
+        "Top tabs → Advanced devices → Choose a scene with a device → Select a settings section",
+        "devices",
+      ),
+      f(
+        "Independent device frame resizing",
+        "Width moves the right edge without changing height or drifting diagonally. Height moves the lower edge. Optional proportion lock scales both dimensions around a fixed upper-left corner.",
+        "Advanced devices → Frame & placement → Device width or Device height; enable Lock frame proportions when wanted",
+        "devices",
+      ),
+      f(
+        "Resizable and lockable preview window",
+        "Unlock and resize the entire game preview pane, not just its artwork zoom. Fill preview space gives the scene more height; lock saves that allocation while the dialogue editor uses the remainder.",
+        "Editor → Preview footer → Unlock window → Drag its lower-right corner or Fill preview space → Lock window",
+        "editor",
+      ),
+      f(
+        "Saved outfits in the dialogue panel",
+        "The original three clothing cards and inspect/confirm flow are preserved. The dialogue panel now has an Items & outfits tab and a direct shortcut to the saved wardrobe selection.",
+        "Editor → Items & outfits beside Dialogue → Open saved outfit selection; or Edit → Saved outfit selection",
+        "wardrobe",
+      ),
+      f(
+        "Recover missing outfit cards without replacing a project",
+        "An explicit restore button adds missing demo cards and images while keeping existing custom cards, descriptions, backgrounds and dialogue routes.",
+        "Editor → Items & outfits → Restore missing demo outfits",
+        "items",
+      ),
+      f(
+        "Additional items keep their own choice routes",
+        "New item cards create independent confirmation choices and direct uploads remain available. Enabling/disabling a picker retains its existing cards. Normal dialogue and device self-reply are kept.",
+        "Editor → Items & outfits → Add item for current dialogue → Upload image and choose its destination",
+        "items",
+      ),
+      f(
+        "Full app preview and scrolling feed",
+        "Browse Home, Ember, scrolling Insta and Settings in the device workspace preview. Add custom app shortcuts and icons without altering story progression or removing the original apps.",
+        "Advanced devices → Apps → Enable full app system or Add app shortcut; browse using Preview app buttons",
+        "devices",
+      ),
+    ],
+  },
+  {
     version: "2.1.0",
+    commit: "0aa0629",
     name: "After the café",
     date: "2026-10-28",
     features: [
@@ -34,7 +84,7 @@ export const releases: Release[] = [
         "Return to Maria’s phone chat",
         "The departure plays through the existing phone interface. Maria’s follow-up is an incoming message with authored replies, and the ending closes the phone. Declining a second meeting still skips the follow-up.",
         "Editor → Select After the café → Phone; Play story from the café to continue into the phone sequence",
-        "effect:Phone",
+        "devices",
       ),
       f(
         "Rainy pavement background",
@@ -103,20 +153,20 @@ export const releases: Release[] = [
       f(
         "Simple device timing",
         "Show a device from one dialogue through another, with optional advanced individual overrides.",
-        "Editor → Phone → Interaction timing → Simple start & end dialogues",
-        "effect:Phone",
+        "Top tabs → Advanced devices → Timing → Interaction timing → Simple start & end dialogues",
+        "devices",
       ),
       f(
         "Stable app navigation and computer layout",
         "Home, Ember messages, Insta and Settings share one device system. Opening an app does not advance dialogue. Choose the wider computer shape when needed.",
-        "Editor → Phone → Device placement & contact → Device shape → Computer / desktop",
-        "effect:Phone",
+        "Top tabs → Advanced devices → Frame & placement → Device shape → Computer / laptop",
+        "devices",
       ),
       f(
         "Device Settings and custom apps",
         "Change device-only wallpaper, font, colours and text size; upload icons and add shortcuts to built-in screens. The Settings app exposes device appearance during play.",
-        "Editor → Phone → Phone & computer appearance; during playback open Home → Settings",
-        "effect:Phone",
+        "Top tabs → Advanced devices → Appearance; during playback open Home → Settings",
+        "devices",
       ),
       f(
         "Independent device self-reply",
@@ -157,8 +207,8 @@ export const releases: Release[] = [
       f(
         "Maria’s separate profile portrait",
         "A new rainlit portrait keeps the café character’s style in a different composition. It can be imported into an existing local project without replacing that project.",
-        "Editor → Phone → Use Maria’s new profile portrait",
-        "effect:Phone",
+        "Advanced devices → Appearance → Use Maria’s new profile portrait",
+        "devices",
       ),
       f(
         "Clearer phone and lighting controls",
@@ -183,14 +233,14 @@ export const releases: Release[] = [
       f(
         "Same-scene app switches",
         "Change the displayed device screen on authored dialogues without creating extra scenes. The old per-line schedule now lives under Advanced.",
-        "Editor → Phone → Advanced dialogue screen schedule; for a range enable Advanced overrides first",
-        "effect:Phone",
+        "Top tabs → Advanced devices → Timing → Advanced dialogue screen schedule; for a range enable Advanced overrides first",
+        "devices",
       ),
       f(
         "Phone home and offline feed",
         "Functional back/Home buttons and a fictional scrolling feed accompany messages. Apps now use the names Ember and Insta.",
-        "Editor → Phone → Device experience → Device with apps; in playback use the device Home button",
-        "effect:Phone",
+        "Advanced devices → Apps → Device experience → Device with apps; in playback use the device Home button",
+        "devices",
       ),
       f(
         "Individual light favourites",
@@ -257,8 +307,8 @@ export const releases: Release[] = [
       f(
         "Phone replies and proportions",
         "Narrower handset proportions and self-reply alongside multi-choice replies improve phone playback.",
-        "Editor → Phone for size; Play story → Self-reply → Select authored path → Send",
-        "effect:Phone",
+        "Advanced devices → Frame & placement for size; Play story → Self-reply → Select authored path → Send",
+        "devices",
       ),
       f(
         "Authored subtle environmental effects",
@@ -296,7 +346,7 @@ export const releases: Release[] = [
         "Device conversation interface",
         "A styled phone/chat overlay supports authored message history, typing indicators, a decorative keyboard and phone or desktop shape.",
         "Editor → Phone → Add phone system → Device placement & contact",
-        "effect:Phone",
+        "devices",
       ),
       f(
         "Custom replies and fullscreen",

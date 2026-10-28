@@ -65,6 +65,18 @@ export function specificHelp(
     return "Return to the list-based editor for this selected scene and dialogue. Both editors share the same story and Undo history.";
   if (name.includes("auto arrange"))
     return "Space the boxes automatically using their existing connections. This saves graph coordinates and leaves dialogue order and story paths unchanged.";
+  if (name.includes("advanced devices"))
+    return "Open the full device workspace with live app previews and separate frame, timing, appearance, app and reply sections. Phone and computer use the same app system.";
+  if (name.includes("unlock game preview") || name.includes("unlock window"))
+    return "Unlock the entire preview pane so its lower-right corner can be dragged. Extra height gives the artwork more space; the dialogue panel uses the remainder.";
+  if (name.includes("lock game preview") || name === "lock window")
+    return "Keep your chosen preview pane size and hide the resize handle. This affects only the editor workspace, not the story camera or exported game.";
+  if (name.includes("fill preview space"))
+    return "Expand the preview pane to the available editor area while retaining the dialogue tab bar. Lock the size when it looks right, or Reset to return to the original layout.";
+  if (name.includes("restore missing demo outfits"))
+    return "Add any missing original clothing cards and images to the wardrobe scene. Existing custom items, descriptions, backgrounds and dialogue choices stay in place.";
+  if (name.includes("open saved outfit selection"))
+    return "Select the wardrobe dialogue containing the existing three outfit cards. Inspecting a card never commits its choice; confirm it during Play story.";
   const rules: [RegExp, string][] = [
     [
       /add device ui|add phone system/,

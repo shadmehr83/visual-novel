@@ -1,5 +1,7 @@
 # Phone system, scheduling and simpler navigation
 
+Current device controls are in the **Advanced devices** workspace. The original outfit picker is in **Items & outfits** beside Dialogue. See [the 2.2 guide](DEVICES_AND_PREVIEW.md) for current locations and preview resizing.
+
 For the current simpler start/end schedule, device Settings, split docks and pause controls, see [Device simplification](DEVICE_SIMPLIFICATION.md). The individual-dialogue schedule below is now advanced.
 
 ## Where each tool lives

@@ -10,7 +10,9 @@ export function DeviceAppearanceControls({
   onChange,
   onUpload,
   compact = false,
+  area = "all",
 }: {
+  area?: "all" | "appearance" | "apps";
   project: Project;
   value?: DeviceAppearance;
   onChange: (value: DeviceAppearance) => void;
@@ -23,9 +25,20 @@ export function DeviceAppearanceControls({
     key: K,
     v: DeviceAppearance[K],
   ) => onChange({ ...appearance, [key]: v });
-  const upload = (target: string) => (
+  const upload = (
+    target: string,
+    name = target === "wallpaper"
+      ? "wallpaper"
+      : (
+          {
+            chat: "Ember icon",
+            feed: "Insta icon",
+            settings: "Settings icon",
+          } as Record<string, string>
+        )[target] || "app icon",
+  ) => (
     <label className="device-upload">
-      Upload {target === "wallpaper" ? "wallpaper" : target + " icon"}
+      Upload {name}
       <input
         type="file"
         accept="image/png,image/jpeg,image/webp"
@@ -54,68 +67,72 @@ export function DeviceAppearanceControls({
         Only the device changes. Scene artwork and the Stillframe editor keep
         their own appearance.
       </p>
-      <label>
-        Device background colour
-        <input
-          aria-label="Device background colour"
-          type="color"
-          value={appearance.background}
-          onChange={(e) => set("background", e.target.value)}
-        />
-      </label>
-      <label>
-        Device text colour
-        <input
-          aria-label="Device text colour"
-          type="color"
-          value={appearance.textColor}
-          onChange={(e) => set("textColor", e.target.value)}
-        />
-      </label>
-      <label>
-        Device font
-        <select
-          aria-label="Device font"
-          value={appearance.font}
-          onChange={(e) =>
-            set("font", e.target.value as DeviceAppearance["font"])
-          }
-        >
-          {["Arial", "Verdana", "Trebuchet MS", "Georgia", "monospace"].map(
-            (f) => (
-              <option key={f}>{f}</option>
-            ),
-          )}
-        </select>
-      </label>
-      <label>
-        Device text size · {appearance.fontSize}px
-        <input
-          aria-label="Device text size"
-          type="range"
-          min="10"
-          max="22"
-          value={appearance.fontSize}
-          onChange={(e) => set("fontSize", +e.target.value)}
-        />
-      </label>
-      <label>
-        Device wallpaper
-        <select
-          aria-label="Device wallpaper"
-          value={appearance.wallpaper || ""}
-          onChange={(e) => set("wallpaper", e.target.value || null)}
-        >
-          <option value="">Solid background</option>
-          {project.assets.map((a) => (
-            <option key={a.id} value={a.id}>
-              {a.name}
-            </option>
-          ))}
-        </select>
-      </label>
-      {onUpload && upload("wallpaper")}
-      {!compact && (
+      {area !== "apps" && (
+        <>
+          <label>
+            Device background colour
+            <input
+              aria-label="Device background colour"
+              type="color"
+              value={appearance.background}
+              onChange={(e) => set("background", e.target.value)}
+            />
+          </label>
+          <label>
+            Device text colour
+            <input
+              aria-label="Device text colour"
+              type="color"
+              value={appearance.textColor}
+              onChange={(e) => set("textColor", e.target.value)}
+            />
+          </label>
+          <label>
+            Device font
+            <select
+              aria-label="Device font"
+              value={appearance.font}
+              onChange={(e) =>
+                set("font", e.target.value as DeviceAppearance["font"])
+              }
+            >
+              {["Arial", "Verdana", "Trebuchet MS", "Georgia", "monospace"].map(
+                (f) => (
+                  <option key={f}>{f}</option>
+                ),
+              )}
+            </select>
+          </label>
+          <label>
+            Device text size · {appearance.fontSize}px
+            <input
+              aria-label="Device text size"
+              type="range"
+              min="10"
+              max="22"
+              value={appearance.fontSize}
+              onChange={(e) => set("fontSize", +e.target.value)}
+            />
+          </label>
+          <label>
+            Device wallpaper
+            <select
+              aria-label="Device wallpaper"
+              value={appearance.wallpaper || ""}
+              onChange={(e) => set("wallpaper", e.target.value || null)}
+            >
+              <option value="">Solid background</option>
+              {project.assets.map((a) => (
+                <option key={a.id} value={a.id}>
+                  {a.name}
+                </option>
+              ))}
+            </select>
+          </label>
+          {onUpload && upload("wallpaper")}
+        </>
+      )}
+      {!compact && area !== "appearance" && (
         <>
           <h4>App icons & shortcuts</h4>
           <p>Custom app shortcuts open one of the built-in offline screens.</p>
@@ -210,7 +227,7 @@ export function DeviceAppearanceControls({
                   ))}
                 </select>
               </label>
-              {onUpload && upload(app.id)}
+              {onUpload && upload(app.id, app.name + " icon")}
               <button
                 onClick={() =>
                   set(

@@ -1,6 +1,11 @@
 import { useEffect, useRef } from "react";
 import { ENGINE_VERSION } from "./releases";
-export type StudioView = "editor" | "scenes" | "dialogues" | "updates";
+export type StudioView =
+  | "editor"
+  | "scenes"
+  | "dialogues"
+  | "devices"
+  | "updates";
 export function StudioMenu({
   view,
   onView,
@@ -73,6 +78,8 @@ export function StudioMenu({
             {command("Undo", "undo", !canUndo || playing)}
             {command("Redo", "redo", !canRedo || playing)}
             {command("Original dialogue editor", "dialogue")}
+            {command("Outfit & item picker", "items")}
+            {command("Saved outfit selection", "wardrobe")}
           </div>
         </details>
         <details>
@@ -122,6 +129,7 @@ export function StudioMenu({
             {command("Find a feature / update history", "updates")}
             {command("Scenes advanced guide", "scenes")}
             {command("Dialogue advanced guide", "dialogues")}
+            {command("Advanced device workspace", "devices")}
             {command("AI helper", "assistant")}
             {command("Project settings…", "settings")}
           </div>
@@ -162,6 +170,7 @@ export function StudioMenu({
             ["editor", "Editor"],
             ["scenes", "Scenes advanced"],
             ["dialogues", "Dialogue advanced"],
+            ["devices", "Advanced devices"],
             ["updates", "Update history"],
           ] as const
         ).map(([id, label]) => (

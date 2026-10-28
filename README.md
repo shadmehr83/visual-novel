@@ -109,3 +109,7 @@ See [zones, light cycles, custom replies and saving](docs/ZONES_AND_SAVING.md). 
 ### Stillframe 2.0
 
 Use the top tabs for the original **Editor**, **Scenes advanced**, **Dialogue advanced**, and searchable **Update history**. Top menus organise File, Edit, View, Effects and Instructions; View now includes top docking. The maps edit the existing project, with persisted coordinates and author-facing route names. Existing schema version 1 projects remain compatible. Read the [advanced workspace guide](docs/ADVANCED_WORKSPACES.md) or the [complete release history](docs/CHANGELOG.md).
+
+### Stillframe 2.2
+
+**Advanced devices** provides a dedicated phone/computer workspace with app previews, frame sizing, timing, appearance and custom shortcuts. Home, Ember, scrolling Insta and Settings remain available. **Items & outfits** beside Dialogue opens the original wardrobe picker; additional items keep independent choices. The game preview window can be unlocked, resized, filled and locked. The rainy **After the café** scene from 2.1 is included. Read [Devices and preview](docs/DEVICES_AND_PREVIEW.md).

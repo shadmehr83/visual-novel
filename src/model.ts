@@ -249,6 +249,11 @@ export const deviceAppearanceSchema = z.object({
     .default([]),
 });
 export const deviceSchema = z.object({
+  frameWidth: z.number().min(5).max(95).optional(),
+  frameHeight: z.number().min(20).max(98).optional(),
+  anchor: z.enum(["center", "top-left"]).optional(),
+  lockAspect: z.boolean().optional(),
+  frameRatio: z.number().positive().max(10).optional(),
   schedule: z
     .object({
       start: z.string(),

@@ -1,3 +1,4 @@
+import { deviceBox } from "./deviceFrame";
 import { PhoneApps } from "./PhoneApps";
 import {
   DeviceAppearanceControls,
@@ -18,7 +19,9 @@ export function PhoneUI({
   onRestart,
   onAppearance,
   onUpload,
+  screenOverride,
 }: {
+  screenOverride?: "home" | "chat" | "feed" | "settings";
   project: Project;
   scene: Scene;
   node: Node;
@@ -30,15 +33,20 @@ export function PhoneUI({
   onUpload?: (a: Project["assets"][number], target: string) => void;
 }) {
   const config = scene.phone!;
+  const box = deviceBox(config);
   const paused = usePaused();
   const [localAppearance, setLocalAppearance] = useState(config.appearance);
   const appearance = config.appearance || localAppearance;
   const wallpaper = project.assets.find((a) => a.id === appearance?.wallpaper);
-  const effective = deviceScreen(
-    scene,
-    node,
-    runtime?.nodeVisits?.filter((v) => v.scene === scene.id).map((v) => v.node),
-  );
+  const effective =
+    screenOverride ||
+    deviceScreen(
+      scene,
+      node,
+      runtime?.nodeVisits
+        ?.filter((v) => v.scene === scene.id)
+        .map((v) => v.node),
+    );
   const [screen, setScreen] = useState<"home" | "feed" | "chat" | "settings">(
     effective === "off" ? "home" : effective,
   );
@@ -108,11 +116,11 @@ export function PhoneUI({
       aria-label="Phone conversation"
       style={
         {
-          left: config.x + "%",
-          top: config.y + "%",
-          width: config.width + "%",
-          "--phone-height":
-            Math.min(96, Math.max(40, (config.width / 44) * 94)) + "%",
+          left: box.x + "%",
+          top: box.y + "%",
+          transform: "none",
+          "--frame-width": box.width + "%",
+          "--frame-height": box.height + "%",
           "--device-bg": appearance?.background || "#211e29",
           "--device-text": appearance?.textColor || "#eee1e9",
           "--device-font": appearance?.font || "Arial",
