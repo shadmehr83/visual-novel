@@ -1,3 +1,5 @@
+import { integrateLibraryUpdate, importPublishedArtwork } from "./libraryUpdate";
+import { AssetPicker, assetFolder, artworkFolders } from "./AssetPicker";
 import { integrateDeparture, updateDepartureRuntime } from "./projectUpdates";
 import { saveProjectUpdate } from "./storage";
 import { SoundControls } from "./SoundControls";
@@ -29,9 +31,8 @@ import {
 } from "./authoring";
 import { CinematicControls } from "./CinematicControls";
 import { SceneTransition } from "./SceneTransition";
-import { PhoneUI } from "./PhoneUI";
+import { DeviceOverlay as PhoneUI } from "./DeviceOverlay";
 import { SelfReply } from "./SelfReply";
-import { FullscreenButton } from "./FullscreenButton";
 import { SelectionToolbar } from "./SelectionToolbar";
 import { useWorkspace, contrast } from "./workspace";
 import { WorkspaceControls } from "./WorkspaceSettings";
@@ -76,6 +77,7 @@ import { demo } from "./demo";
 import { savedProject } from "./savedProject";
 import {
   advance,
+  putAwayDevice,
   respond,
   enter,
   start,
@@ -258,6 +260,7 @@ export default function App() {
     "Add gentle rain to the café window and dim the background slightly.",
   );
   const [assetId, setAssetId] = useState("");
+  const [artFolder, setArtFolder] = useState("");
   const input = useRef<HTMLInputElement>(null);
   const importInput = useRef<HTMLInputElement>(null);
   const revision = useRef(0);
@@ -315,11 +318,12 @@ export default function App() {
         if (workspace) {
           try {
             const demoUpdated = integrateDemoUpdates(workspace.project, savedProject()) || workspace.project;
-            const updated = integrateDeviceUpdate(demoUpdated, savedProject()) || (demoUpdated !== workspace.project ? demoUpdated : null);
+            const deviceUpdated = integrateDeviceUpdate(demoUpdated, savedProject()) || demoUpdated;
+            const updated = integrateLibraryUpdate(deviceUpdated, savedProject()) || (deviceUpdated !== workspace.project ? deviceUpdated : null);
             if (updated) {
               await saveProjectUpdate(updated, workspace.runtime, workspace);
               workspace = { project: updated, runtime: workspace.runtime };
-              setSnapshotNotice("Restored outfit cards and added sound, phone icons and temporary views. Your artwork and café edits were kept; a recovery copy is available.");
+              setSnapshotNotice("Added missing GitHub artwork, restored outfit cards and connected window and wardrobe sub-scenes. Your custom artwork and café edits were kept; a recovery copy is available.");
             }
           } catch (e) {
             setSnapshotNotice("Your saved project is unchanged. The demo content update could not be applied: " + String(e));
@@ -549,7 +553,8 @@ export default function App() {
   async function importFile(f?: File) {
     if (!f) return;
     try {
-      const p = await readProject(f);
+      const imported = await readProject(f);
+      const p = integrateLibraryUpdate(imported, savedProject()) || imported;
       setView("editor");
       edit((current) => replaceProjectContents(current, p));
       setRuntime(null);
@@ -767,6 +772,44 @@ export default function App() {
     setWorkspace,
     loaded && view === "editor",
   );
+  const toolNavigation = (
+            <nav className={"rail" + (workspace.toolsPlacement === "top" ? " rail-top" : "")} aria-label="Studio tools">
+              {[
+                [Film, "Scenes"],
+                [ImagePlus, "Assets"],
+                [BookOpen, "Characters"],
+                [Code2, "State"],
+                [Sparkles, "Assistant"],
+                [Volume2, "Tools"],
+              ].map(([Icon, label]) => {
+                const I = Icon as typeof Film;
+                return (
+                  <button
+                    key={String(label)}
+                    title={String(label)}
+                    aria-label={String(label)}
+                    aria-expanded={tab === label && !workspace.libraryCollapsed}
+                    className={tab === label && !workspace.libraryCollapsed ? "active" : ""}
+                    onClick={() => {
+                      setTab(String(label));
+                      setWorkspace((s) => ({ ...s, libraryCollapsed: tab === label ? !s.libraryCollapsed : false }));
+                    }}
+                  >
+                    <I size={20} /><span className="tool-name">{String(label)}</span>
+                  </button>
+                );
+              })}
+              <span className="rail-spacer" />
+              <button
+                title="Project settings"
+                aria-label="Project settings"
+                onClick={() => setModal("settings")}
+              >
+                <Settings2 size={20} />
+              </button>
+              <span className="avatar">Y</span>
+            </nav>
+  );
   if (!loaded)
     return (
       <div className="loading-screen">
@@ -777,6 +820,8 @@ export default function App() {
   return (
     <PlaySession
       playing={playing}
+      project={project}
+      runtime={runtime}
       onExit={() => setPlaying(false)}
       onRestart={() => play(true)}
     >
@@ -889,52 +934,24 @@ export default function App() {
           effects={effectSummary(scene, project.settings.reducedEffects).length}
           placement={placement}
         />
+        <div className="visible-layout-controls">
+          <label>Tools <select aria-label="Tools placement" value={workspace.toolsPlacement} onChange={e => setWorkspace(w => ({...w, toolsPlacement:e.target.value as "left" | "top"}))}><option value="left">Left</option><option value="top">Top</option></select></label>
+          <label>Controls <select aria-label="Quick controls placement" value={placement} onChange={e => setPlacement(e.target.value)}><option value="right">Right</option><option value="left">Left</option><option value="top">Top</option><option value="float">Floating</option></select></label>
+          <button onClick={() => setModal("settings")}>Layout & project settings</button>
+        </div>
+        {workspace.toolsPlacement === "top" && (view === "editor" || playing) && toolNavigation}
         {view === "editor" || playing ? (
           <div
             id="studio-editor"
             className={
-              "workspace controls-" +
+              "workspace tools-" + workspace.toolsPlacement + " controls-" +
               placement +
               (workspace.libraryCollapsed ? " library-collapsed" : "") +
               (workspace.splitDocks ? " split-docks" : "") +
               (workspace.previewCustom ? " preview-custom" : "")
             }
           >
-            <nav className="rail">
-              {[
-                [Film, "Scenes"],
-                [ImagePlus, "Assets"],
-                [BookOpen, "Characters"],
-                [Code2, "State"],
-                [Sparkles, "Assistant"],
-                [Volume2, "Tools"],
-              ].map(([Icon, label]) => {
-                const I = Icon as typeof Film;
-                return (
-                  <button
-                    key={String(label)}
-                    title={String(label)}
-                    aria-label={String(label)}
-                    className={tab === label ? "active" : ""}
-                    onClick={() => {
-                      setTab(String(label));
-                      setWorkspace((s) => ({ ...s, libraryCollapsed: false }));
-                    }}
-                  >
-                    <I size={20} />
-                  </button>
-                );
-              })}
-              <span className="rail-spacer" />
-              <button
-                title="Project settings"
-                aria-label="Project settings"
-                onClick={() => setModal("settings")}
-              >
-                <Settings2 size={20} />
-              </button>
-              <span className="avatar">Y</span>
-            </nav>
+            {workspace.toolsPlacement === "left" && toolNavigation}
             <aside className="library ui-pane" style={paneStyle("library")}>
               <ResizeHandle
                 label="Resize story library"
@@ -1041,6 +1058,8 @@ export default function App() {
                     PNG, JPEG or WebP · up to 15 MB. Originals stay in your
                     project.
                   </p>
+                  <label>Artwork folder<select aria-label="Artwork folder" value={artFolder} onChange={e => setArtFolder(e.target.value)}><option value="">All folders</option>{artworkFolders(project.assets).map(f => <option key={f}>{f}</option>)}</select></label>
+                  <button className="wide" data-help="Add every missing image from the committed GitHub project to your library. Your current images and scene backgrounds are kept." onClick={() => edit(p => importPublishedArtwork(p, savedProject()))}>Import missing GitHub artwork</button>
                   {project.assets.length === 0 && (
                     <div className="empty">
                       <ImagePlus />
@@ -1048,7 +1067,7 @@ export default function App() {
                       <small>Import a background, reference or portrait.</small>
                     </div>
                   )}
-                  {project.assets.map((a) => (
+                  {project.assets.filter(a => !artFolder || assetFolder(a) === artFolder).map((a) => (
                     <button
                       key={a.id}
                       className={
@@ -1085,6 +1104,7 @@ export default function App() {
                           }
                         />
                       </label>
+                      <label>Move to artwork folder<input aria-label="Move to artwork folder" list="artwork-folders" value={assetFolder(asset)} maxLength={80} onChange={e => edit(p => {p.assets.find(a => a.id === asset.id)!.folder = e.target.value || "Other artwork";})} /><datalist id="artwork-folders">{artworkFolders(project.assets).map(f => <option key={f} value={f} />)}</datalist></label>
                       <label>
                         Tags
                         <input
@@ -1382,7 +1402,7 @@ export default function App() {
                         }
                       />
                     )}
-                    {playing && <FullscreenButton />}
+
                     <span>16:9</span>
                     <span className="live-dot" /> <small>LIVE PREVIEW</small>
                   </div>
@@ -1485,6 +1505,7 @@ export default function App() {
                         placingLight === null &&
                         !regionEditor && (
                           <PhoneUI
+                            onPutAway={() => setRuntime(r => r && putAwayDevice(project, r))}
                             onNotification={() => setRuntime(r => r && openNotification(project, r))}
                             onRestart={() => play(true)}
                             key={scene.id}
@@ -2429,6 +2450,8 @@ export default function App() {
                   {inspector === "Workspace" ? (
                     <WorkspaceControls
                       value={workspace}
+                      placement={placement}
+                      onPlacement={setPlacement}
                       onChange={setWorkspace}
                     />
                   ) : inspector === "Appearance" ? (
@@ -2720,27 +2743,7 @@ export default function App() {
                           }
                         />
                       </label>
-                      <label>
-                        Source
-                        <select
-                          aria-label="Background source"
-                          value={selected.background || ""}
-                          onChange={(ev) =>
-                            updateScene((s) => {
-                              s.background = ev.target.value || null;
-                            })
-                          }
-                        >
-                          <option value="">Included illustration</option>
-                          {project.assets
-                            .filter((a) => !a.reference)
-                            .map((a) => (
-                              <option key={a.id} value={a.id}>
-                                {a.name}
-                              </option>
-                            ))}
-                        </select>
-                      </label>
+                      <AssetPicker project={{...project, assets:project.assets.filter(a => !a.reference)}} label="Background source" initialFolder="Background scenes" value={selected.background} empty="Included illustration" onChange={id => updateScene(s => {s.background=id;})} />
                       <button
                         className="wide"
                         onClick={() => input.current?.click()}
@@ -2961,6 +2964,8 @@ export default function App() {
                     GitHub automatically. Undo can restore your local project
                     after loading the snapshot.
                   </p>
+                  <WorkspaceControls value={workspace} onChange={setWorkspace} placement={placement} onPlacement={setPlacement} />
+                  <details><summary>Interface colours and fonts</summary><WorkspaceControls value={workspace} onChange={setWorkspace} appearance /><StoryAppearance project={project} edit={edit} /></details>
                   <Toggle
                     label="Reduced effects"
                     value={project.settings.reducedEffects}

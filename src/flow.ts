@@ -135,7 +135,7 @@ export function flowGraph(
                 ];
           return {
             id: "node:" + n.id,
-            title: `${i + 1}. ${n.speaker}`,
+            title: `${i + 1}. ${n.speaker}${n.view ? " · Sub-scene" : ""}`,
             text: n.text,
             scene: current.id,
             node: n.id,

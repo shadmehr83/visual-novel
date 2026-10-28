@@ -34,6 +34,10 @@ export function removeDialogue(scene: Scene, id: string) {
     [scene.phone.schedule.start, scene.phone.schedule.end].includes(id)
   )
     delete scene.phone.schedule;
+  if (scene.phone?.returnControl && [scene.phone.returnControl.start, scene.phone.returnControl.end, scene.phone.returnControl.target].includes(id))
+    delete scene.phone.returnControl;
+  if (scene.phone?.dialogueRange && [scene.phone.dialogueRange.start, scene.phone.dialogueRange.end].includes(id))
+    delete scene.phone.dialogueRange;
   if (scene.items)
     scene.items.options = scene.items.options.filter((item) =>
       scene.nodes.some((n) => n.choices.some((c) => c.id === item.choice)),
@@ -96,7 +100,8 @@ export function applyEffectPreset(
 export const dialogueLabel = (p: Project, scene: Scene, id: string) => {
   const i = scene.nodes.findIndex((n) => n.id === id);
   const n = scene.nodes[i];
-  return `Scene ${p.scenes.indexOf(scene) + 1} · Dialogue ${i + 1} · ${n?.speaker || ""}: ${n?.text.slice(0, 35) || ""}`;
+  const view = scene.subscenes?.find(v => v.id === n?.view);
+  return `Scene ${p.scenes.indexOf(scene) + 1} · Dialogue ${i + 1}${view ? " · Sub-scene: " + view.title : ""} · ${n?.speaker || ""}: ${n?.text.slice(0, 35) || ""}`;
 };
 
 // Opening a complete project replaces optional metadata as well as required fields.

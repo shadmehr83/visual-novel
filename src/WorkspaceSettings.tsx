@@ -5,10 +5,14 @@ export function WorkspaceControls({
   value,
   onChange,
   appearance = false,
+  placement,
+  onPlacement,
 }: {
   value: WorkspaceSettings;
   onChange: Dispatch<SetStateAction<WorkspaceSettings>>;
   appearance?: boolean;
+  placement?: string;
+  onPlacement?: (v:string)=>void;
 }) {
   const set = <K extends keyof WorkspaceSettings>(
     key: K,
@@ -103,6 +107,12 @@ export function WorkspaceControls({
         </>
       ) : (
         <>
+          <label>Tools bar location<select aria-label="Tools bar location" value={value.toolsPlacement} onChange={e => set("toolsPlacement", e.target.value as "left" | "top")}><option value="left">Left edge</option><option value="top">Top bar</option></select></label>
+          {onPlacement && <label>Effects and properties location<select aria-label="Effects and properties location" value={placement} onChange={e => onPlacement(e.target.value)}><option value="right">Right</option><option value="left">Left</option><option value="top">Top</option><option value="float">Floating window</option></select></label>}
+          <label><input type="checkbox" checked={value.splitDocks} onChange={e => set("splitDocks", e.target.checked)} />Separate effects and properties into two docks</label>
+          <label><input type="checkbox" checked={value.previewLocked} onChange={e => set("previewLocked", e.target.checked)} />Lock game preview window</label>
+          <label><input type="checkbox" checked={value.previewCustom} onChange={e => set("previewCustom", e.target.checked)} />Use a custom preview window size</label>
+          {value.previewCustom && (["previewWidth", "previewHeight"] as const).map(key => <label key={key}>{key === "previewWidth" ? "Preview width" : "Preview height"} (px)<RangeInput aria-label={key === "previewWidth" ? "Preview width" : "Preview height"} type="range" min={key === "previewWidth" ? 280 : 180} max={key === "previewWidth" ? 3200 : 1800} value={value[key]} onChange={e => set(key, +e.target.value)} /></label>)}
           <label className="toggle-row">
             Show story library
             <input

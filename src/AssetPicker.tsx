@@ -1,0 +1,31 @@
+import { useState } from "react";
+import type { Project } from "./model";
+type Asset = Project["assets"][number];
+export const ART_FOLDERS = ["Background scenes", "Outfits & items", "Profiles & app icons", "Other artwork"];
+export function assetFolder(a: Asset) {
+  if (a.folder) return a.folder;
+  if (/^outfit-|outfit item/i.test(a.id + " " + a.name)) return "Outfits & items";
+  if (/profile|portrait|studio-icon-|app icon/i.test(a.id + " " + a.name)) return "Profiles & app icons";
+  if (/first-match-|environment|café conversation|background/i.test(a.id + " " + a.name)) return "Background scenes";
+  return "Other artwork";
+}
+export function artworkFolders(assets: Asset[]) {
+  return [...new Set([...ART_FOLDERS, ...assets.map(assetFolder)])];
+}
+export function AssetPicker({ project, value, onChange, label, empty = "No image", initialFolder = "" }: {
+  project: Project; value?: string | null; onChange: (id: string | null) => void; label: string; empty?: string; initialFolder?: string;
+}) {
+  const [folder, setFolder] = useState(initialFolder);
+  const selected = project.assets.find(a => a.id === value);
+  // A current selection is always available, even if its folder differs from the filter.
+  const assets = project.assets.filter(a => !folder || assetFolder(a) === folder || a.id === value);
+  return <div className="artwork-picker">
+    <label>{label} folder<select aria-label={label + " folder"} value={folder} onChange={e => setFolder(e.target.value)} data-help="Filter the saved artwork by folder. Changing this filter does not replace the currently selected image.">
+      <option value="">All folders</option>{artworkFolders(project.assets).map(f => <option key={f}>{f}</option>)}
+    </select></label>
+    <label>{label}<select aria-label={label} value={value || ""} onChange={e => onChange(e.target.value || null)}>
+      <option value="">{empty}</option>{artworkFolders(assets).map(f => <optgroup label={f} key={f}>{assets.filter(a => assetFolder(a) === f).map(a => <option value={a.id} key={a.id}>{a.name}</option>)}</optgroup>)}
+    </select></label>
+    {selected && <img className="artwork-selection" src={selected.data} alt={selected.name} />}
+  </div>;
+}

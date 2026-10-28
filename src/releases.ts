@@ -1,4 +1,4 @@
-export const ENGINE_VERSION = "2.5.0";
+export const ENGINE_VERSION = "2.6.0";
 export type ReleaseFeature = {
   name: string;
   description: string;
@@ -19,7 +19,13 @@ const f = (
   action?: string,
 ): ReleaseFeature => ({ name, description, steps: path.split(" → "), action });
 export const releases: Release[] = [
-  {version:"2.5.0", name:"Independent devices and rainy window views", date:"2026-10-28", features:[f("Independent texting activation", "Ordinary story actions never become messages. Configure dialogue placement and texting start/end in Advanced devices. Monitor interaction opens the desktop separately; window and monitor close-ups have glass-specific rain.", "Advanced devices → Dialogue & replies → Dialogue placement or Texting start/end", "devices")]},
+  {version:"2.6.0", name:"Artwork folders, device return routes and player progress", date:"2026-10-29", features:[
+    f("Artwork folders and restored clothing", "Missing published images are added to compatible saved projects with a recovery copy. Choose backgrounds, clothing and profile artwork from named folders. The room window and wardrobe now open their matching sub-scenes, and outfit cards retain inspect-before-confirm.", "Editor → Assets → Artwork folder; or Outfits & Items → Inspect a saved outfit → Choose it", "wardrobe"),
+    f("Dialogue-based device return controls", "Enable a put-away button for a dialogue range or an individual dialogue. Return to a selected point or the last choice menu; reopening the original route resumes your phone or computer dialogue without replaying its state actions. Existing phone apps are unchanged.", "Advanced devices → Timing → Put device away · return route", "devices"),
+    f("Visible layout placement and toggleable tools", "Click the selected tool again to close its library panel. Move tools to the top or left, place controls on any dock, and adjust panel sizes and dialogue layout from the visible placement strip or Project settings.", "Editor → Tools placement or Controls placement → Layout & project settings", "workspace"),
+    f("Fullscreen pause menu and route viewer", "Pause and fullscreen controls stay inside the game area, including fullscreen. The pause menu includes fullscreen and a read-only progress map showing visited dialogues, chosen replies and question marks for unexplored routes.", "Play story → Pause menu → View Current Progress")
+  ]},
+  {version:"2.5.0", commit:"d1bcec5", name:"Independent devices and rainy window views", date:"2026-10-28", features:[f("Independent texting activation", "Ordinary story actions never become messages. Configure dialogue placement and texting start/end in Advanced devices. Monitor interaction opens the desktop separately; window and monitor close-ups have glass-specific rain.", "Advanced devices → Dialogue & replies → Dialogue placement or Texting start/end", "devices")]},
   {
     version: "2.4.0", commit: "bef5f98", name: "Sound, wardrobe and close-up storytelling", date: "2026-10-28",
     features: [

@@ -76,7 +76,7 @@ export function FlowEditor({
       <optgroup label="Dialogues in this scene">
         {scene.nodes.map((n, i) => (
           <option key={n.id} value={"node:" + n.id}>
-            {i + 1}. {n.speaker}: {n.text.slice(0, 35)}
+            {i + 1}. {n.speaker}: {n.text.slice(0, 35)}{n.view ? " · Sub-scene" : ""}
           </option>
         ))}
       </optgroup>

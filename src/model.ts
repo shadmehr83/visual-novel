@@ -1,4 +1,5 @@
 import { deviceScreen, deviceDialogue, allowsReply } from "./interactions";
+import { canPutAway, returnDestination } from "./deviceReturn";
 import { z } from "zod";
 export const soundCueSchema = z.object({
   asset: z.string(),
@@ -46,6 +47,7 @@ export const poseSchema = z.object({
   asset: z.string().optional(),
 });
 const node = z.object({
+  deviceReturn: z.boolean().optional(),
   deviceDialogue: z.boolean().optional(),
   deviceKind: z.enum(["phone", "desktop"]).optional(),
   autoAdvance: z.number().min(0.5).max(30).optional(),
@@ -260,6 +262,7 @@ export const deviceAppearanceSchema = z.object({
     .default([]),
 });
 export const deviceSchema = z.object({
+  returnControl: z.object({ enabled: z.boolean(), start: z.string(), end: z.string(), target: z.string().optional() }).optional(),
   dialogueRange: z.object({enabled: z.boolean(), start: z.string(), end: z.string()}).optional(),
   notificationSound: soundCueSchema.optional(),
   frameWidth: z.number().min(5).max(95).optional(),
@@ -362,6 +365,7 @@ const scene = z.object({
   entry: z.array(action).default([]),
 });
 const asset = z.object({
+  folder: z.string().min(1).max(80).optional(),
   id: z.string(),
   name: z.string(),
   mime: z.enum(["image/png", "image/jpeg", "image/webp"]),
@@ -463,6 +467,7 @@ export type Node = Scene["nodes"][number];
 export type Choice = Node["choices"][number];
 export type Effects = Scene["effects"];
 export type Runtime = {
+  deviceBookmark?: { scene: string; node: string; entry: string; path: string[] };
   scene: string;
   node: string;
   values: Project["variables"];
@@ -492,6 +497,11 @@ export function validateProject(input: unknown): Project {
     if (ids.has(s.id)) throw Error("Duplicate scene id: " + s.id);
     ids.add(s.id);
     const nodes = new Set(s.nodes.map((n) => n.id));
+    if (s.phone?.returnControl) {
+      const r = s.phone.returnControl;
+      if (![r.start, r.end, ...(r.target ? [r.target] : [])].every(id => nodes.has(id)))
+        throw Error("Missing device return dialogue");
+    }
     const checkSound = (cue?: z.infer<typeof soundCueSchema>) => {
       if (cue && !p.audioAssets?.some((a) => a.id === cue.asset))
         throw Error("Missing sound cue asset");
@@ -633,6 +643,18 @@ export function start(p: Project): Runtime {
     ),
   );
 }
+/** Leave an interaction without committing a dialogue response or replaying state actions. */
+export function putAwayDevice(p: Project, r: Runtime): Runtime {
+  const scene = p.scenes.find(s => s.id === r.scene)!, node = scene.nodes.find(n => n.id === r.node)!;
+  const visits = r.nodeVisits?.filter(v => v.scene === scene.id).map(v => v.node) || [node.id];
+  if (!canPutAway(scene, node, visits) || node.qte || r.ended) return r;
+  const target = returnDestination(scene, node, r);
+  if (!target || target === node.id) return r;
+  const at = visits.lastIndexOf(target), path = at >= 0 ? visits.slice(at + 1) : [node.id];
+  return recordPhone(p, { ...r, node: target, ended: false,
+    deviceBookmark: { scene: scene.id, node: node.id, entry: path[0] || node.id, path },
+    history: [...r.history, "Put device away"].slice(-200) });
+}
 function advanceCore(p: Project, r: Runtime, choiceId?: string): Runtime {
   if (r.ended) return r;
   const s = p.scenes.find((s) => s.id === r.scene)!;
@@ -642,6 +664,10 @@ function advanceCore(p: Project, r: Runtime, choiceId?: string): Runtime {
     const c = n.choices.find((c) => c.id === choiceId);
     if (!c || (c.condition && r.values[c.condition.key] !== c.condition.equals))
       throw Error("Choice unavailable");
+    const bookmark = r.deviceBookmark;
+    if (bookmark?.scene === s.id && c.target === bookmark.entry && s.nodes.some(n => n.id === bookmark.node))
+      return { ...r, node: bookmark.node, ended: false, deviceBookmark: undefined,
+        nodeVisits: [...(r.nodeVisits || []), ...bookmark.path.map(node => ({ scene: s.id, node }))].slice(-1000) };
     let next = actions(p, r, c.actions);
     next = {
       ...next,

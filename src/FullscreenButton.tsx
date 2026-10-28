@@ -15,6 +15,7 @@ export function FullscreenButton() {
         changed();
       }
     };
+    changed();
     document.addEventListener("fullscreenchange", changed);
     document.addEventListener("keydown", escape);
     return () => {

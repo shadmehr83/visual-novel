@@ -5,13 +5,13 @@ import { deviceScreen } from "./interactions";
 import { PlaybackControls } from "./PlaybackControls";
 import { ItemOverlay, hasItemUI } from "./ItemOverlay";
 import { SceneTransition } from "./SceneTransition";
-import { PhoneUI } from "./PhoneUI";
+import { DeviceOverlay as PhoneUI } from "./DeviceOverlay";
 import { openNotification } from "./notifications";
 import { SelfReply } from "./SelfReply";
 import { FullscreenButton } from "./FullscreenButton";
 import { useState } from "react";
 import { createRoot } from "react-dom/client";
-import { start, advance, respond, validateProject } from "./model";
+import { start, advance, respond, putAwayDevice, validateProject } from "./model";
 import { Stage } from "./Stage";
 import { Qte, SceneAudio } from "./EngineTools";
 function Player() {
@@ -25,7 +25,7 @@ function Player() {
   const scene = project.scenes.find((s) => s.id === runtime.scene)!;
   const node = scene.nodes.find((n) => n.id === runtime.node)!;
   return (
-    <PlaySession playing onRestart={() => setRuntime(start(project))}>
+    <PlaySession playing project={project} runtime={runtime} onRestart={() => setRuntime(start(project))}>
       <main
         className="standalone-experience"
         style={
@@ -94,6 +94,7 @@ function Player() {
                   .map((v) => v.node),
               ) !== "off" ? (
               <PhoneUI
+                onPutAway={() => setRuntime(r => putAwayDevice(project, r))}
                 onNotification={() => setRuntime(r => openNotification(project, r))}
                 key={scene.id}
                 onAppearance={(a) =>

@@ -188,7 +188,7 @@
             },
             {
               "id": "clothes-32",
-              "text": "Look at the clothes on the chair",
+              "text": "Check the wardrobe",
               "target": "clothes",
               "actions": [
                 {
@@ -263,7 +263,8 @@
           "allowCustomResponse": true,
           "next": "room",
           "deviceScreen": "off",
-          "deviceDialogue": false
+          "deviceDialogue": false,
+          "view": "wardrobe-closeup"
         },
         {
           "id": "browse-feed",
@@ -448,7 +449,8 @@
               "note": "",
               "sendAsMessage": false
             }
-          ]
+          ],
+          "deviceReturn": true
         }
       ],
       "entry": [],
@@ -502,6 +504,12 @@
         "notificationSound": {
           "asset": "studio-phone-notification",
           "volume": 0.42
+        },
+        "returnControl": {
+          "enabled": true,
+          "start": "browse-feed",
+          "end": "discover",
+          "target": "room"
         }
       },
       "audio": [
@@ -692,6 +700,15 @@
                 ]
               }
             ]
+          }
+        },
+        {
+          "id": "wardrobe-closeup",
+          "title": "Wardrobe · clothes and outfits",
+          "background": "first-match-wardrobe",
+          "transition": {
+            "style": "fade",
+            "seconds": 0.65
           }
         }
       ]
@@ -4309,7 +4326,8 @@
       "tags": "",
       "notes": "",
       "approved": false,
-      "reference": false
+      "reference": false,
+      "folder": "Background scenes"
     },
     {
       "id": "first-match-bedroom",
@@ -4321,7 +4339,8 @@
       "tags": "painterly, charcoal, amber, scene environment",
       "notes": "Created from the user-supplied mood board and café painting as style references. Replaceable authoring artwork.",
       "approved": false,
-      "reference": false
+      "reference": false,
+      "folder": "Background scenes"
     },
     {
       "id": "first-match-wardrobe",
@@ -4333,7 +4352,8 @@
       "tags": "painterly, charcoal, amber, scene environment",
       "notes": "Created from the user-supplied mood board and café painting as style references. Replaceable authoring artwork.",
       "approved": false,
-      "reference": false
+      "reference": false,
+      "folder": "Background scenes"
     },
     {
       "id": "first-match-journey",
@@ -4345,7 +4365,8 @@
       "tags": "painterly, charcoal, amber, scene environment",
       "notes": "Created from the user-supplied mood board and café painting as style references. Replaceable authoring artwork.",
       "approved": false,
-      "reference": false
+      "reference": false,
+      "folder": "Background scenes"
     },
     {
       "id": "outfit-comfortable",
@@ -4357,7 +4378,8 @@
       "tags": "transparent, inventory, wardrobe",
       "notes": "Isolated outfit item generated from the approved café art reference, not a new scene.",
       "approved": false,
-      "reference": false
+      "reference": false,
+      "folder": "Outfits & items"
     },
     {
       "id": "outfit-smart",
@@ -4369,7 +4391,8 @@
       "tags": "transparent, inventory, wardrobe",
       "notes": "Isolated outfit item generated from the approved café art reference, not a new scene.",
       "approved": false,
-      "reference": false
+      "reference": false,
+      "folder": "Outfits & items"
     },
     {
       "id": "outfit-familiar",
@@ -4381,7 +4404,8 @@
       "tags": "transparent, inventory, wardrobe",
       "notes": "Isolated outfit item generated from the approved café art reference, not a new scene.",
       "approved": false,
-      "reference": false
+      "reference": false,
+      "folder": "Outfits & items"
     },
     {
       "id": "maria-device-profile",
@@ -4393,7 +4417,8 @@
       "tags": "Maria, phone, portrait",
       "notes": "Generated from the café character reference in a new rainy street composition. Café scene preserved.",
       "approved": true,
-      "reference": false
+      "reference": false,
+      "folder": "Profiles & app icons"
     },
     {
       "id": "first-match-departure",
@@ -4405,7 +4430,8 @@
       "tags": "background, departure, rain, wet pavement, The First Match",
       "notes": "Generated downward view of rainy pavement and warm café reflections, matching the protected café artwork. Original PNG retained in references/generated. WebP encoding preserves dimensions for a compact portable export.",
       "approved": true,
-      "reference": false
+      "reference": false,
+      "folder": "Background scenes"
     },
     {
       "id": "first-match-monitor",
@@ -4417,7 +4443,8 @@
       "tags": "demo, monitor",
       "notes": "Original generated illustration for Stillframe 2.4",
       "approved": true,
-      "reference": false
+      "reference": false,
+      "folder": "Background scenes"
     },
     {
       "id": "studio-icon-chat",
@@ -4429,7 +4456,8 @@
       "tags": "demo, chat",
       "notes": "Original generated illustration for Stillframe 2.4",
       "approved": true,
-      "reference": false
+      "reference": false,
+      "folder": "Profiles & app icons"
     },
     {
       "id": "studio-icon-feed",
@@ -4441,7 +4469,8 @@
       "tags": "demo, feed",
       "notes": "Original generated illustration for Stillframe 2.4",
       "approved": true,
-      "reference": false
+      "reference": false,
+      "folder": "Profiles & app icons"
     },
     {
       "id": "studio-icon-settings",
@@ -4453,7 +4482,8 @@
       "tags": "demo, settings",
       "notes": "Original generated illustration for Stillframe 2.4",
       "approved": true,
-      "reference": false
+      "reference": false,
+      "folder": "Profiles & app icons"
     },
     {
       "id": "first-match-window",
@@ -4465,7 +4495,8 @@
       "tags": "window, sub-scene",
       "notes": "Original generated illustration",
       "approved": true,
-      "reference": false
+      "reference": false,
+      "folder": "Background scenes"
     }
   ],
   "characters": [
@@ -4578,6 +4609,7 @@
   ],
   "contentUpdates": [
     "2.4.0",
-    "2.5.0"
+    "2.5.0",
+    "2.6.0"
   ]
 }

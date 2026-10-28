@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { useState, useEffect } from "react";
 export const workspaceSchema = z.object({
+  toolsPlacement: z.enum(["left", "top"]).default("left"),
   previewLocked: z.boolean().default(true),
   previewCustom: z.boolean().default(false),
   previewWidth: z.number().min(280).max(3200).default(1000),

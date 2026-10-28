@@ -1,3 +1,4 @@
+import { AssetPicker } from "./AssetPicker";
 import { useState } from "react";
 import { deviceAppearanceSchema, type Project, type Scene } from "./model";
 import { readImage } from "./storage";
@@ -114,21 +115,7 @@ export function DeviceAppearanceControls({
               onChange={(e) => set("fontSize", +e.target.value)}
             />
           </label>
-          <label>
-            Device wallpaper
-            <select
-              aria-label="Device wallpaper"
-              value={appearance.wallpaper || ""}
-              onChange={(e) => set("wallpaper", e.target.value || null)}
-            >
-              <option value="">Solid background</option>
-              {project.assets.map((a) => (
-                <option key={a.id} value={a.id}>
-                  {a.name}
-                </option>
-              ))}
-            </select>
-          </label>
+          <AssetPicker project={project} label="Device wallpaper" value={appearance.wallpaper} empty="Solid background" onChange={id => set("wallpaper", id)} />
           {onUpload && upload("wallpaper")}
         </>
       )}
@@ -138,39 +125,13 @@ export function DeviceAppearanceControls({
           <p>Custom app shortcuts open one of the built-in offline screens.</p>
           {["chat", "feed", "settings"].map((id) => (
             <div key={id}>
-              <label>
-                {id === "chat"
-                  ? "Ember messages"
-                  : id === "feed"
-                    ? "Insta"
-                    : "Settings"}{" "}
-                icon
-                <select
-                  aria-label={id + " app icon"}
-                  value={appearance.icons[id] || ""}
-                  onChange={(e) =>
-                    set("icons", { ...appearance.icons, [id]: e.target.value })
-                  }
-                >
-                  <option value="">Default symbol</option>
-                  {project.assets.map((a) => (
-                    <option key={a.id} value={a.id}>
-                      {a.name}
-                    </option>
-                  ))}
-                </select>
-              </label>
+              <AssetPicker project={project} label={id + " app icon"} initialFolder="Profiles & app icons" value={appearance.icons[id]} empty="Default symbol" onChange={image => set("icons", {...appearance.icons, [id]: image || ""})} />
               {onUpload && upload(id)}
             </div>
           ))}
           <h4>App profile pictures</h4>
           {["chat", "feed"].map(id => <div key={id}>
-            <label>{id === "chat" ? "Ember" : "Insta"} profile image
-              <select aria-label={id + " profile image"} value={appearance.profiles[id] || ""} onChange={e => set("profiles", { ...appearance.profiles, [id]: e.target.value })}>
-                <option value="">No profile image</option>
-                {project.assets.map(a => <option key={a.id} value={a.id}>{a.name}</option>)}
-              </select>
-            </label>
+            <AssetPicker project={project} label={id + " profile image"} initialFolder="Profiles & app icons" value={appearance.profiles[id]} empty="No profile image" onChange={image => set("profiles", {...appearance.profiles, [id]: image || ""})} />
             {appearance.profiles[id] && <img className="device-profile-picture" alt={id + " profile"} src={project.assets.find(a => a.id === appearance.profiles[id])?.data} />}
             {onUpload && upload("profile:" + id, (id === "chat" ? "Ember" : "Insta") + " profile image")}
           </div>)}

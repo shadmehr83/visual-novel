@@ -1,6 +1,7 @@
 import { savedProject } from "./savedProject";
 import { DeviceAppearanceControls, withDeviceUpload } from "./DeviceAppearance";
 import type { Project, Scene } from "./model";
+import { DeviceReturnControls } from "./DeviceReturnControls";
 export function InteractionControls({
   project,
   scene,
@@ -60,6 +61,7 @@ export function InteractionControls({
         <>
           {section !== "appearance" && (
             <>
+              <DeviceReturnControls scene={scene} nodeId={nodeId} update={update} />
               <label>
                 <input
                   type="checkbox"

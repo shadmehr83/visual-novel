@@ -26,6 +26,7 @@ try {
   a.joints=[{id:'hand',name:'Hand',enabled:true,pivotX:300,pivotY:200,transition:{style:'smooth',seconds:.15},region:{id:'r',name:'Hand',enabled:true,points:[{x:200,y:200},{x:400,y:200},{x:350,y:300}]},poses:[pose('a'),{...pose('b'),angle:25}]}];
   b.phone.typingSeconds=.1;
   b.nodes=[{id:'hello',speaker:'Maria',text:'Hello.',choices:[{id:'hi',text:'Hello Maria.',target:'reply',actions:[],note:''}]},{id:'reply',speaker:'Maria',text:'Nice to meet you.',choices:[],next:'end'},{id:'end',speaker:'Narrator',text:'Goodbye',choices:[]}];
+  b.phone.dialogueRange={enabled:true,start:'hello',end:'end'};
   await page.locator('input[type=file][accept=".json"]').setInputFiles({name:'cinematics.json',mimeType:'application/json',buffer:Buffer.from(JSON.stringify(p))});
   await page.getByLabel('Project title').waitFor();
   assert.equal(await page.getByRole('alert').count(),0,'offline fixture imports successfully');

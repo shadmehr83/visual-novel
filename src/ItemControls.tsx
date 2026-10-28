@@ -1,3 +1,4 @@
+import { AssetPicker } from "./AssetPicker";
 import { useState } from "react";
 import { readImage } from "./storage";
 import { RangeInput } from "./RangeInput";
@@ -176,6 +177,7 @@ export function ItemControls({
                     try {
                       const asset = await readImage(f);
                       edit((p) => {
+                        asset.folder = "Outfits & items";
                         p.assets.push(asset);
                         const sceneItem = p.scenes
                           .find((s) => s.id === scene.id)
@@ -196,24 +198,7 @@ export function ItemControls({
                   alt={item.label}
                 />
               )}
-              <label>
-                PNG / image
-                <select
-                  value={item.asset || ""}
-                  onChange={(e) =>
-                    update((s) => {
-                      s.items!.options[i].asset = e.target.value || null;
-                    })
-                  }
-                >
-                  <option value="">No image yet</option>
-                  {project.assets.map((a) => (
-                    <option key={a.id} value={a.id}>
-                      {a.name}
-                    </option>
-                  ))}
-                </select>
-              </label>
+              <AssetPicker project={project} label={"Image for " + item.label} initialFolder="Outfits & items" value={item.asset} onChange={id => update(s => { s.items!.options[i].asset = id; })} />
               <label>
                 Confirm follows choice
                 <select

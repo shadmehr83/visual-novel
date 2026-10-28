@@ -3,6 +3,13 @@ export function specificHelp(
   element: HTMLElement,
 ): string | undefined {
   const name = label.toLowerCase().replace(/ exact value$/, "");
+  if (name.includes("device return start")) return "First dialogue on the played route that enables Put phone away or Step back from computer.";
+  if (name.includes("device return end")) return "Last dialogue with the put-away button available. The following dialogue continues on the device unless it has its own override.";
+  if (name.includes("device return destination")) return "Choose the dialogue to revisit when the player puts the device down. Automatic finds their most recent choice menu; with none, hide the device and offer to reopen it.";
+  if (name.includes("put-away button on this dialogue")) return "Follow the configured start/end range, force the return button on here, or hide it here so the conversation continues on the device.";
+  if (name.includes("tools placement") || name.includes("tools bar location")) return "Move Scenes, Assets, Characters, State, Assistant, Tools and Project settings between the left edge and top. Clicking the selected tool again closes its panel.";
+  if (name.includes("artwork folder") || name.endsWith(" folder")) return "Filter saved images by their artwork folder. Backgrounds, clothing, profiles and app icons stay embedded in the project for export.";
+  if (name.includes("after this sub-scene")) return "Set the next dialogue after this temporary view. Choose a dialogue in the main view to return there, or another sub-scene to continue exploring. If choices exist, configure their targets in Dialogue.";
   if (name.includes("after end dialogue"))
     return "Hide removes the moved layer after leaving its end dialogue. Hold keeps the final pose visible without further movement.";
 

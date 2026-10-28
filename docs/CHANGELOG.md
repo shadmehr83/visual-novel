@@ -1,6 +1,10 @@
 # Stillframe engine update history
 
-Current version: **2.5.0**. Earlier version numbers were assigned retrospectively from Git milestones. Directions below point to their current location; the in-app Update history tab also offers feature shortcuts. Dates use Australia/Sydney time. Project format remains schemaVersion 1.
+Current version: **2.6.0**. Earlier version numbers were assigned retrospectively from Git milestones. Directions below point to their current location; the in-app Update history tab also offers feature shortcuts. Dates use Australia/Sydney time. Project format remains schemaVersion 1.
+
+## v2.6.0 — Artwork folders, device returns and player progress (2026-10-29)
+
+Compatible saved projects receive missing published artwork, the wardrobe sub-scene and repaired outfit image links with a recovery copy. Folder selectors organize backgrounds, clothing, profiles and icons. Phone/computer put-away controls can follow a dialogue range or individual overrides and resume their exact dialogue after returning to a choice menu. The tools bar opens/closes on repeated clicks and can move between the left edge and top. Project settings now include workspace placement and sizing. Pause/fullscreen controls stay inside the game view, and View Current Progress shows the chosen route without revealing unexplored replies. The existing phone interface and café visuals are preserved. See [Artwork, return routes and progress](ARTWORK_RETURN_AND_PROGRESS.md).
 
 ## v2.5.0 — Independent devices and rainy window views
 
