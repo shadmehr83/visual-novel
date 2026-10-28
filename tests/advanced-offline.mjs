@@ -3,10 +3,11 @@ import {readFile} from 'node:fs/promises';
 import assert from 'node:assert/strict';
 const browser=await chromium.launch({executablePath:process.env.CHROMIUM_PATH||undefined,headless:true});
 try{
+ const version=JSON.parse(await readFile('package.json','utf8')).version;
  const html=await readFile('dist/stillframe-studio.html','utf8');
  const context=await browser.newContext({serviceWorkers:'block',viewport:{width:1500,height:1000}}),page=await context.newPage(),errors=[];
  page.on('pageerror',e=>errors.push(e.message));await page.route('https://advanced-studio.test/**',r=>r.fulfill({contentType:'text/html',body:html}));await context.setOffline(true);await page.goto('https://advanced-studio.test/');
- await page.getByRole('button',{name:'Stillframe v2.0.0',exact:true}).waitFor();await page.getByRole('tab',{name:'Update history',exact:true}).click();await page.getByLabel('Search update history').fill('Individual light favourites');await page.getByRole('heading',{name:'Individual light favourites',exact:true}).waitFor();
+ await page.getByRole('button',{name:'Stillframe v'+version,exact:true}).waitFor();await page.getByRole('tab',{name:'Update history',exact:true}).click();await page.getByLabel('Search update history').fill('Individual light favourites');await page.getByRole('heading',{name:'Individual light favourites',exact:true}).waitFor();
  await page.getByRole('tab',{name:'Dialogue advanced',exact:true}).click();await page.getByLabel('Advanced map scene').selectOption('bedroom');const heading=page.locator('[data-flow-card="node:wake"] .flow-card-heading');await heading.focus();await page.keyboard.press('ArrowRight');
  const download=page.waitForEvent('download');await page.locator('.studio-menu').getByText('File',{exact:true}).click();await page.getByRole('button',{name:'Export project JSON',exact:true}).click();const p=JSON.parse(await readFile(await (await download).path(),'utf8'));assert.ok(p.flowLayout.dialogues.bedroom['node:wake']);assert.equal(p.schemaVersion,1);
  const original=JSON.parse(await readFile('projects/published.stillframe.json','utf8'));assert.deepEqual(p.scenes,original.scenes);assert.deepEqual(p.assets,original.assets);assert.deepEqual(errors,[]);

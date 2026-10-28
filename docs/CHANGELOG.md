@@ -1,8 +1,37 @@
 # Stillframe engine update history
 
-Current version: **2.0.0**. Earlier version numbers were assigned retrospectively from Git milestones. Directions below point to their current location in 2.0; the in-app Update history tab also offers feature shortcuts. Dates use Australia/Sydney time. Project format remains schemaVersion 1.
+Current version: **2.1.0**. Earlier version numbers were assigned retrospectively from Git milestones. Directions below point to their current location; the in-app Update history tab also offers feature shortcuts. Dates use Australia/Sydney time. Project format remains schemaVersion 1.
+
+## v2.1.0 — After the café (2026-10-28)
+
+### Separate rainy departure scene
+
+The café goodbye, second-meeting choices and follow-up messages now continue in a separate scene after the café, preserving all branches and the original café visuals.
+
+1. Editor
+2. Scenes library
+3. After the café; during playback choose Step outside after the café reflection
+
+### Return to Maria’s phone chat
+
+The departure plays through the existing phone interface. Maria’s follow-up is an incoming message with authored replies, and the ending closes the phone. Declining a second meeting still skips the follow-up.
+
+1. Editor
+2. Select After the café
+3. Phone; Play story from the café to continue into the phone sequence
+
+### Rainy pavement background
+
+A new downward-looking illustration shows rain ripples on wet paving and warm reflected café light. It is embedded in portable project exports and leaves the café’s original background untouched.
+
+1. Editor
+2. Select After the café
+3. Scene properties
+4. Background
 
 ## v2.0.0 — Connected story workspace (2026-10-28)
+
+[Source milestone 77b169e](https://github.com/shadmehr83/visual-novel/commit/77b169e)
 
 ### Scenes advanced
 

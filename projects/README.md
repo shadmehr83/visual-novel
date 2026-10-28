@@ -48,3 +48,9 @@ Simple phone ranges, independent app navigation, device Settings/custom icons an
 ## Stillframe 2.0 — advanced story maps
 
 The engine now has a version badge, searchable [update history](../docs/CHANGELOG.md), top File/Edit/View/Effects/Instructions menus, and separate **Scenes advanced** and **Dialogue advanced** workspaces. The original editor remains available. Graph route edits use the same story; coordinates are optional `flowLayout` data included in future project exports. New author-facing `routeLabel` values do not alter player reply text. File format remains `schemaVersion: 1` and existing local projects are retained. Controls can also dock at the top with a resizable height. See [the advanced-workspace guide](../docs/ADVANCED_WORKSPACES.md). This update preserves the published café artwork/effects.
+
+## Stillframe 2.1 — After the café
+
+The published project now has a seventh scene, **After the café**. The café’s 14 goodbye/doorway/follow-up nodes moved here with their existing state actions and conditional branches; one short establishing line and a new downward-looking rainy pavement background introduce the scene. The café reflections now offer **Step outside** to continue. Maria’s follow-up uses the phone chat, while the final demo narration closes the phone. Declining a second meeting still skips that follow-up. The café’s background and visual configuration remain unchanged.
+
+Load the updated authored checkpoint using **Load GitHub snapshot**, or `https://visual-novel-8b9.pages.dev/?snapshot=github`; different local work receives a recovery copy. Select **After the café** to edit the new section. This explicit snapshot action is needed to see authored project changes on a browser that already has an older local copy; an engine update alone preserves that copy.

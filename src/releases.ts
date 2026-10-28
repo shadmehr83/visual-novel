@@ -1,4 +1,4 @@
-export const ENGINE_VERSION = "2.0.0";
+export const ENGINE_VERSION = "2.1.0";
 export type ReleaseFeature = {
   name: string;
   description: string;
@@ -20,7 +20,33 @@ const f = (
 ): ReleaseFeature => ({ name, description, steps: path.split(" → "), action });
 export const releases: Release[] = [
   {
+    version: "2.1.0",
+    name: "After the café",
+    date: "2026-10-28",
+    features: [
+      f(
+        "Separate rainy departure scene",
+        "The café goodbye, second-meeting choices and follow-up messages now continue in a separate scene after the café, preserving all branches and the original café visuals.",
+        "Editor → Scenes library → After the café; during playback choose Step outside after the café reflection",
+        "library:Scenes",
+      ),
+      f(
+        "Return to Maria’s phone chat",
+        "The departure plays through the existing phone interface. Maria’s follow-up is an incoming message with authored replies, and the ending closes the phone. Declining a second meeting still skips the follow-up.",
+        "Editor → Select After the café → Phone; Play story from the café to continue into the phone sequence",
+        "effect:Phone",
+      ),
+      f(
+        "Rainy pavement background",
+        "A new downward-looking illustration shows rain ripples on wet paving and warm reflected café light. It is embedded in portable project exports and leaves the café’s original background untouched.",
+        "Editor → Select After the café → Scene properties → Background",
+        "background",
+      ),
+    ],
+  },
+  {
     version: "2.0.0",
+    commit: "77b169e",
     name: "Connected story workspace",
     date: "2026-10-28",
     features: [

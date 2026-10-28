@@ -4,12 +4,14 @@ The user's story bible and aesthetic brief inform the authored project in `proje
 
 ## Playable sequence
 
-1. **Another evening:** wake, inspect the window/monitor/clothes through optional dialogue-menu interactions, check the first Nearside notification, open/ignore/dismiss, discover the second message or leave the app unopened.
+1. **Another evening:** wake, inspect the window/monitor/clothes through optional dialogue-menu interactions, check the first Ember notification, open/ignore/dismiss, discover the second message or leave the app unopened.
 2. **A small possibility:** Maria's profile, playful/direct/guarded message exchanges, follow-up about horror films, and optional questions about what she wants.
 3. **An invitation:** public Lantern Room café at four; accept, flirt, ask details, state a boundary, defer or decline. Refusal/deferment ends this slice without forcing the date.
 4. **Getting ready:** three cosmetic outfits, mirror reflection, optional address/message check.
 5. **The Lantern Room:** wet-street transition; go inside or notify Maria and head home.
-6. **A table by the window:** arrival, seating, all twelve café beats, bounded tone choices, drink selection, app conversation, profile detail, interests, vulnerability, orange-peel recommendation, personal-life boundaries, apology, humour, one selected reflection, second-date choices and optional final message.
+6. **A table by the window:** arrival, seating, all twelve café beats, bounded tone choices, drink selection, app conversation, profile detail, interests, vulnerability, orange-peel recommendation, personal-life boundaries, apology, humour, one selected reflection, then Step outside into the departure scene.
+
+7. **After the café:** downward view of wet pavement, a return to Maria’s phone interface, goodbye messages, second-meeting choices, optional follow-up, then the demo ending. All three café reflection routes enter this scene.
 
 Maria's knowledge refers to a visible protagonist profile detail (bad horror films and “strong opinions about very unimportant things”), replacing the bible's template fields. Neutral/warm reflections use accumulated warmth; the player can explicitly remain undecided instead. Facts and interpretation remain distinct. Declining a second meeting skips her follow-up. No API is required and no new facts are invented by AI during playback.
 
@@ -21,7 +23,7 @@ Three refreshed embedded PNG environments follow the supplied reference board an
 
 ## Deliberate simplifications
 
-Room inspections use menu choices rather than spatial hotspots. Seat/outfit choices store flags and flavour without moving the preserved café image or changing attraction. Sound cues are described in the source brief but no new recorded audio is claimed. Café departure/follow-up is narrated over the preserved café image so the café remains the final scene. There are no later acts, AI-generated conversations, or new branching engine mechanics in this adaptation. Non-choice authored lines use Continue, with a compact expandable Self-reply option restored in the cinematic/device update. Replies are recorded and follow the authored next line; they do not generate AI dialogue.
+Room inspections use menu choices rather than spatial hotspots. Seat/outfit choices store flags and flavour without moving the preserved café image or changing attraction. Sound cues are described in the source brief but no new recorded audio is claimed. Café departure/follow-up now lives in its own final rainy-pavement scene and uses the phone interface. The café artwork/effects remain unchanged; the final narration closes the phone. There are no later acts, AI-generated conversations, or new branching engine mechanics in this adaptation. Non-choice authored lines use Continue, with a compact expandable Self-reply option restored in the cinematic/device update. Replies are recorded and follow the authored next line; they do not generate AI dialogue.
 
 ## Opening on another device
 
