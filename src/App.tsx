@@ -1,3 +1,4 @@
+import { AuthorNavigation } from "./AuthorNavigation";
 import { choiceAvailable } from "./choices";
 import { AdvancedExport } from "./AdvancedExport";
 import { ImagePreview } from "./ImagePreview";
@@ -1458,6 +1459,7 @@ export default function App() {
                 </div>
                 {playing && authorPlay && <div className="author-play-toolbar" data-no-advance>
                   <strong>Author’s playthrough</strong>
+                  {runtime && <AuthorNavigation project={project} runtime={runtime} onChange={setRuntime} />}
                   <span>{dialogueLabel(project, scene, node.id)}</span>
                   <button onClick={() => {
                     setBottom("Dialogue"); setCollapseBottom(false);

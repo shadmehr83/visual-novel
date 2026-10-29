@@ -1,4 +1,4 @@
-export const ENGINE_VERSION = "2.20.2";
+export const ENGINE_VERSION = "2.20.3";
 export type ReleaseFeature = {
   name: string;
   description: string;
@@ -20,6 +20,7 @@ const f = (
   action?: string,
 ): ReleaseFeature => ({ name, description, steps: path.split(" → "), action });
 export const releases: Release[] = [
+ {version:"2.20.3",name:"Navigate author playthrough dialogue",date:"2026-10-30",timestamp:"2026-10-29T14:55:56.168300+00:00",features:[f("Previous, next and direct dialogue jumps", "Restore previous visited story positions or jump to numbered dialogue without restarting. Direct jumps keep current variables without applying skipped branch actions; project edits remain saved.", "Author’s playthrough → Previous dialogue or dialogue selector", "author-play")]},
  {version:"2.20.2",name:"Item picker closes cleanly",date:"2026-10-30",timestamp:"2026-10-29T14:46:40.176816+00:00",features:[f("Item window visibility and background", "The picker closes on unrelated dialogue after choosing an outfit. Limit its appearance to a selected dialogue and choose or reset its panel background colour.", "Outfits & Items → Show item picker on", "items")]},
  {version:"2.20.1",name:"Ember dialogue stays in Ember",date:"2026-10-30",timestamp:"2026-10-29T14:26:03.266993+00:00",features:[
  f("Chat dialogue stays inside its app", "Returning Home or browsing Insta, Weather or Settings hides Ember dialogue and replies instead of moving them outside. Reopening Ember restores the conversation; deliberate separate narration is retained.", "Phone → Ember → Back to Home → Ember", "devices"),
