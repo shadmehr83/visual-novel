@@ -42,3 +42,9 @@ The **Quick connected dialogue** panel also accepts an explicit incoming dialogu
 ## Existing workspaces
 
 On normal reload, compatible First Match projects receive these additions once. Custom artwork, uploaded sounds, app icons, clothing descriptions and existing routes are retained. Original wardrobe cards are repaired where missing, the café is not modified, and the complete previous workspace is saved atomically as a recovery copy. The missing-departure update and this update share one transaction when both are needed. Use **Restore previous local project** to review that copy. Other novels are not automatically changed. JSON exports include all new views, audio, images and routing; project schema remains version 1.
+
+## Phone vibration and moving an existing light
+
+The second bedroom dialogue, “Then my phone vibrates, and the day remembers me first,” has an original 0.95-second double motor buzz. **Sound → This dialogue sound** selects it; the adjacent volume control adjusts it. The sound travels inside JSON exports and the single-file editor. Compatible older saved projects receive only the missing cue, with a recovery copy; edited text and custom sound assignments are retained.
+
+In **Lighting**, each local light using **Soft radial light** now has **Move light with mouse** directly above its coordinates. Click the button, then click the scene once to move that light’s centre. X/Y update immediately; its colour, radius, intensity, cycle and dedicated mask remain unchanged. **Cancel light move** cancels before placement, and **Undo** reverses a completed move. Use X/Y afterwards for exact adjustment. **Light Library → Place lights on scene** continues to create new lights from the selected favourite instead.

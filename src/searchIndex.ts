@@ -20,6 +20,7 @@ const defs:[string,string,string,string?][]=[
  ['Insta feed videos and comments','Upload videos, reorder posts, edit captions and fictional comments, and set autoplay and feed audio volume.','devices','instagram insta social feed like heart video upload comments'],
  ['Advanced devices','Open phone and computer frames, apps, timing, return routes and appearance.','devices','phone laptop desktop ui screen home feed messages'],
  ['Rain settings','Adjust falling rain, density, speed, angle, glass streaks and affected regions.','effect:Rain','weather drops mask brush wand'],
+ ['Move light with mouse','In Lighting, open a local radial light and press Move light with mouse, then click its new centre on the scene. X/Y update together without changing its loop or colour.','effect:Lighting','mouse position click move lamp coordinates'],
  ['Lighting settings','Adjust brightness, tint, illumination and local light zones.','effect:Lighting','luminosity candle intensity color'],
  ['Motion and wind','Animate selected cloth, leaves or other pixels with gentle sway and distortion.','effect:Motion','cloth flower foliage distortion wind'],
  ['Hinges and poses','Move selected foreground objects around a pivot; set poses and dialogue ranges.','effect:Cinematics','joint finger facial expression hinge foreground'],

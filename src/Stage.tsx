@@ -231,7 +231,7 @@ export function Stage({
       className={
         "stage " +
         (itemFocus ? "item-focus " : "") +
-        (maskMode || regionEditor ? "masking" : "")
+        (maskMode || regionEditor || onPlaceLight ? "masking" : "")
       }
       style={
         {
@@ -885,6 +885,7 @@ export function Stage({
           </g>
         )}
       </svg>
+      {onPlaceLight && <div className="mask-hint" style={{ pointerEvents: "none" }}>Click the scene to place the light centre.</div>}
       {wandError && (
         <div className="mask-hint" role="alert">
           {wandError}

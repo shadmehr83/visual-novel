@@ -15,7 +15,11 @@ export function Zones({
   update,
   editor,
   setEditor,
+  movingLight,
+  onMoveLight,
 }: {
+  movingLight?: string;
+  onMoveLight?: (id: string | null) => void;
   scene: Scene;
   update: (fn: (s: Scene) => void) => void;
   editor: RegionEditor | null;
@@ -289,6 +293,18 @@ export function Zones({
                 </select>
               </label>
             )}
+            {l.kind === "local" && l.shape !== "region" && onMoveLight && (
+              <div>
+                <button
+                  aria-pressed={movingLight === l.id}
+                  data-help="Move this existing light without adding a new one. Press this button, then click its new centre on the scene. X and Y update together; colour, radius, intensity and loop stay the same."
+                  onClick={() => onMoveLight(movingLight === l.id ? null : l.id)}
+                >
+                  {movingLight === l.id ? "Cancel light move" : "Move light with mouse"}
+                </button>
+                {movingLight === l.id && <p role="status">Click the scene to place {l.name}. This moves this light once; X/Y remain available for fine adjustment.</p>}
+              </div>
+            )}
             {(
               [
                 "intensity",
@@ -303,7 +319,7 @@ export function Zones({
                   aria-label={l.name + " " + k}
                   data-help={
                     k === "x"
-                      ? "Horizontal centre of this local lamp in scene units (0–1000). Use Light Library click placement instead of guessing a coordinate."
+                      ? "Horizontal centre of this local lamp in scene units (0–1000). Use Move light with mouse above to pick its centre directly on the scene."
                       : k === "y"
                         ? "Vertical centre of this local lamp in scene units (0–563). This moves the light, not the background."
                         : k === "intensity"
@@ -391,6 +407,7 @@ export function Zones({
               onClick={() => {
                 update((s) => s.effects.lights!.splice(i, 1));
                 if (editor?.id === l.id) setEditor(null);
+                if (movingLight === l.id) onMoveLight?.(null);
               }}
             >
               Delete light

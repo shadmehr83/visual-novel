@@ -194,7 +194,7 @@ export default function App() {
   const [nodeId, setNodeId] = useState("arrival");
   const [runtime, setRuntime] = useState<Runtime | null>(null);
   const [playing, setPlaying] = useState(false);
-  const [placingLight, setPlacingLight] = useState<string | null>(null);
+  const [placingLight, setPlacingLight] = useState<{ preset?: string; light?: string } | null>(null);
   const [tab, setTab] = useState("Scenes");
   const [effectPanel, setEffectPanel] = useState("All");
   const [placement, setPlacementState] = useState(() => {
@@ -1411,19 +1411,24 @@ export default function App() {
                       }
                       onPlaceLight={
                         !playing && placingLight !== null
-                          ? (x, y) =>
+                          ? (x, y) => {
                               updateScene((s) => {
-                                if ((s.effects.lights?.length || 0) < 20)
+                                if (placingLight.light) {
+                                  const light = s.effects.lights?.find(l => l.id === placingLight.light);
+                                  if (light) { light.x = Math.round(x); light.y = Math.round(y); }
+                                } else if ((s.effects.lights?.length || 0) < 20)
                                   (s.effects.lights ??= []).push(
                                     makePlacedLight(
                                       project.lightPresets?.find(
-                                        (p) => p.id === placingLight,
+                                        (p) => p.id === placingLight.preset,
                                       )?.light,
                                       x,
                                       y,
                                     ),
                                   );
-                              })
+                              });
+                              if (placingLight.light) setPlacingLight(null);
+                            }
                           : undefined
                       }
                       itemFocus={
@@ -2259,9 +2264,9 @@ export default function App() {
                     project={project}
                     scene={selected}
                     edit={edit}
-                    placing={placingLight}
+                    placing={placingLight?.preset ?? null}
                     onPlace={(id) => {
-                      setPlacingLight(id);
+                      setPlacingLight(id === null ? null : { preset: id });
                       setRegionEditor(null);
                       setMaskMode(false);
                     }}
@@ -2336,7 +2341,14 @@ export default function App() {
                     scene={selected}
                     update={updateScene}
                     editor={regionEditor}
+                    movingLight={placingLight?.light}
+                    onMoveLight={(id) => {
+                      setPlacingLight(id ? { light: id } : null);
+                      setRegionEditor(null);
+                      setMaskMode(false);
+                    }}
                     setEditor={(v) => {
+                      setPlacingLight(null);
                       setRegionEditor(v);
                       if (v) setMaskMode(false);
                     }}
