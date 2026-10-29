@@ -131,3 +131,11 @@ ambient sound. Hearts toggle a saved local like; comment panels contain authored
 reactions and accept local player replies. **Advanced devices → Insta feed** has
 video uploads, order, captions, comments, autoplay and volume. Complete project and
 playable HTML exports embed clips. See [the Insta feed guide](docs/INSTA_VIDEO_FEED.md).
+
+### Chapters and mouse resizing (2.11)
+
+Drag the dialogue editor's top divider to change height and the FX dock's inner
+edge to change width. Only the six-dot grip moves a window; floating windows have
+resize edges. **Chapters advanced** groups scenes, selects starting scenarios from
+previous story state, marks chapter endings and previews rule outcomes. Chapter two
+includes six short editable opening drafts. See [the guide](docs/CHAPTERS_AND_WINDOW_RESIZING.md).

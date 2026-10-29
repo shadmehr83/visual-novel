@@ -1,5 +1,7 @@
 import { deviceScreen, deviceDialogue, allowsReply } from "./interactions";
 import { instaFeedSchema } from "./feedSchema";
+import { chapterSchema } from "./chapterSchema";
+import { chapterForScene, resolveChapterStart } from "./chapterRuntime";
 import { canPutAway, returnDestination } from "./deviceReturn";
 import { z } from "zod";
 export const soundCueSchema = z.object({
@@ -381,6 +383,7 @@ const asset = z.object({
   reference: z.boolean(),
 });
 export const projectSchema = z.object({
+  chapters: z.array(chapterSchema).min(1).max(40).optional(),
   instaFeed: instaFeedSchema.optional(),
   deviceDefaults: z.object({ appearance: deviceAppearanceSchema.optional(), avatar: z.string().nullable().optional() }).optional(),
   flowLayout: z
@@ -472,6 +475,7 @@ export type Node = Scene["nodes"][number];
 export type Choice = Node["choices"][number];
 export type Effects = Scene["effects"];
 export type Runtime = {
+  completedChapters?: string[];
   deviceBookmark?: { scene: string; node: string; entry: string; path: string[] };
   scene: string;
   node: string;
@@ -497,6 +501,26 @@ export type Runtime = {
 };
 export function validateProject(input: unknown): Project {
   const p = projectSchema.parse(input);
+  const chapterIds=new Set<string>(), chapterScenes=new Set<string>();
+  for(const chapter of p.chapters||[]) {
+    if(chapterIds.has(chapter.id)||p.scenes.some(s=>s.id===chapter.id))throw Error('Chapter IDs must be unique and distinct from scene IDs.');
+    chapterIds.add(chapter.id);
+    for(const id of chapter.scenes){
+      if(!p.scenes.some(s=>s.id===id)||chapterScenes.has(id))throw Error('Each chapter scene must exist and belong to only one chapter.');
+      chapterScenes.add(id);
+    }
+    if(!chapter.scenes.includes(chapter.startScene)||chapter.starts.some(r=>!chapter.scenes.includes(r.scene)))throw Error('A chapter opening must be one of its own scenes.');
+    if(chapter.next && (chapter.next===chapter.id||!p.chapters!.some(c=>c.id===chapter.next)))throw Error('Choose another existing chapter as the destination.');
+    if(new Set(chapter.starts.map(r=>r.id)).size!==chapter.starts.length)throw Error('Chapter start rule IDs must be unique.');
+    for(const rule of chapter.starts)for(const c of rule.conditions){
+      if(!(c.key in p.variables)||typeof p.variables[c.key]!==typeof c.value)throw Error('Chapter condition must use an existing variable with a matching value type.');
+      if(!['eq','ne'].includes(c.op)&&typeof c.value!=='number')throw Error('Ordered chapter comparisons require a number.');
+    }
+    for(const exit of chapter.exits){
+      const node=p.scenes.find(s=>s.id===exit.scene)?.nodes.find(n=>n.id===exit.node);
+      if(!chapter.scenes.includes(exit.scene)||!node)throw Error('A chapter exit must be an ending dialogue in one of its scenes.');
+    }
+  }
   const defaults = p.deviceDefaults;
   for (const id of [defaults?.avatar, defaults?.appearance?.wallpaper,
     ...Object.values(defaults?.appearance?.icons || {}),
@@ -650,7 +674,7 @@ export function start(p: Project): Runtime {
         choices: [],
         ended: false,
       },
-      p.scenes[0].id,
+      p.chapters?.length ? resolveChapterStart(p.chapters[0],p.variables).scene : p.scenes[0].id,
     ),
   );
 }
@@ -699,9 +723,18 @@ function advanceCore(p: Project, r: Runtime, choiceId?: string): Runtime {
       : { ...next, node: c.target };
   }
   if (n.choices.length) throw Error("Choose a reply first");
-  return n.next
-    ? { ...r, node: n.next }
-    : { ...r, ended: true, history: [...r.history, "Demo complete"] };
+  if(n.next)return {...r,node:n.next};
+  const chapter=chapterForScene(p,s.id);
+  if(chapter?.exits.some(e=>e.scene===s.id&&e.node===n.id)) {
+    const completedChapters=[...new Set([...(r.completedChapters||[]),chapter.id])];
+    const next=p.chapters?.find(c=>c.id===chapter.next);
+    if(next){
+      const opening=resolveChapterStart(next,r.values);
+      return enter(p,{...r,completedChapters,history:[...r.history,`Completed ${chapter.title}`,`Starting ${next.title}: ${opening.rule}`].slice(-200)},opening.scene);
+    }
+    return {...r,completedChapters,ended:true,history:[...r.history,`Completed ${chapter.title}`].slice(-200)};
+  }
+  return { ...r, ended: true, history: [...r.history, "Story complete"] };
 }
 
 function recordPhone(p: Project, r: Runtime): Runtime {

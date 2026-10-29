@@ -1,3 +1,5 @@
+import { pruneChapterExits } from "./chapters";
+import { chapterForScene } from "./chapterRuntime";
 import { DialogueDeviceControls } from "./DialogueDeviceControls";
 import { useState } from "react";
 import { validateProject, type Project, type Scene } from "./model";
@@ -62,6 +64,7 @@ export function FlowEditor({
     try {
       const next = structuredClone(project);
       fn(next);
+      pruneChapterExits(next);
       validateProject(next);
       edit((p) => Object.assign(p, next));
       setError("");
@@ -173,7 +176,7 @@ export function FlowEditor({
                 const s = createFlowScene(scene);
                 if (
                   commit((p) => {
-                    p.scenes.push(s);
+                    p.scenes.push(s);const c=chapterForScene(p,scene.id);if(c)c.scenes.push(s.id);
                   }, "New scene added. Connect its input to a route when ready.")
                 )
                   onSelect(s.id, s.nodes[0].id);

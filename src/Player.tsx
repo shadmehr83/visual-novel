@@ -1,3 +1,4 @@
+import { ChapterBadge } from "./ChapterWorkspace";
 import { effectiveDevice, saveDeviceAppearance } from "./deviceShared";
 import { RecoveryBoundary } from "./RecoveryBoundary";
 import { PlaySession } from "./PlaySession";
@@ -41,7 +42,7 @@ function Player() {
       >
         <h1>{project.title}</h1>
         <FullscreenButton />
-        <PlaybackControls
+        <ChapterBadge project={project} scene={scene.id} /><PlaybackControls
           mode={project.settings.progression || "continue"}
           onMode={(mode) =>
             setProject((p) => ({

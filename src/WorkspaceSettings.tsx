@@ -153,7 +153,7 @@ export function WorkspaceControls({
                       ? 600
                       : key === "libraryWidth"
                         ? 400
-                        : 450
+                        : 650
                   }
                   value={value[key]}
                   onChange={(e) => set(key, +e.target.value)}

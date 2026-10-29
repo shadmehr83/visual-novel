@@ -10,7 +10,7 @@ try {
  await page.route('https://insta-offline.test/',r=>r.fulfill({contentType:'text/html',body:html}));
  await context.setOffline(true);await page.goto('https://insta-offline.test/');
  await page.getByRole('button',{name:'Play story',exact:true}).waitFor();
- const p=JSON.parse(await readFile('projects/published.stillframe.json','utf8'));p.id='insta-offline-test';p.title='Insta offline test';p.scenes=p.scenes.slice(0,1);
+ const p=JSON.parse(await readFile('projects/published.stillframe.json','utf8'));delete p.chapters;p.id='insta-offline-test';p.title='Insta offline test';p.scenes=p.scenes.slice(0,1);
  const s=p.scenes[0];s.nodes=[{id:'browse',speaker:'Narrator',text:'Keep scrolling.',deviceVisible:true,deviceScreen:'feed',choices:[]}];
  delete s.joints;delete s.subscenes;delete s.camera;delete s.phone.schedule;delete s.phone.returnControl;delete s.phone.dialogueRange;
  s.phone.defaultScreen='feed';s.phone.typingSeconds=0;s.phone.frameWidth=26;s.phone.frameHeight=96;s.phone.x=60;s.phone.y=2;s.phone.anchor='top-left';s.phone.entrance={style:'cut',seconds:.1};

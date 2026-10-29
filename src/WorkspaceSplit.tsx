@@ -2,7 +2,7 @@ import { useRef, type ReactNode } from "react";
 import type { StudioView } from "./StudioMenu";
 import {DockPanel,useDockPanels} from './DockPanels';
 import {panelLayout} from './docking';
-export const WORKSPACES: [StudioView,string][] = [["editor","Editor"],["scenes","Scenes advanced"],["dialogues","Dialogue advanced"],["devices","Advanced devices"],["updates","Update history"]];
+export const WORKSPACES: [StudioView,string][] = [["editor","Editor"],["chapters","Chapters advanced"],["scenes","Scenes advanced"],["dialogues","Dialogue advanced"],["devices","Advanced devices"],["updates","Update history"]];
 export function WorkspaceSplit({active,ratio,direction,reversed,onResize,primary,secondary}:{active:boolean;ratio:number;direction:"side-by-side"|"stacked";reversed:boolean;onResize:(n:number)=>void;primary:ReactNode;secondary:ReactNode}) {
   const container = useRef<HTMLDivElement>(null), dragging = useRef(false);
   const dock=useDockPanels(),mainDetached=!!dock?.active&&panelLayout(dock.layouts,'workspace-main').mode!=='home',sideDetached=!!dock?.active&&panelLayout(dock.layouts,'workspace-second').mode!=='home';

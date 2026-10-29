@@ -25,7 +25,7 @@ try {
   await page.locator('.device-shell').evaluate(el=>Promise.all(el.getAnimations().map(animation=>animation.finished)));
   await page.screenshot({path:'/tmp/stillframe-device-preview.png'});
   const p=JSON.parse(await readFile('projects/published.stillframe.json','utf8'));
-  p.id='offline-cinematic-fixture';p.assets=[];
+  p.id='offline-cinematic-fixture';delete p.chapters;p.assets=[];
   const a=p.scenes[0],b=p.scenes[1];p.scenes=[a,b];
   for(const s of p.scenes){s.background=null;s.effects.rain=false;s.effects.glass=false;delete s.camera;s.joints=[];delete s.subscenes;if(s.phone){s.phone.avatar=null;delete s.phone.appearance;delete s.phone.schedule;}}
   delete a.phone;

@@ -22,8 +22,8 @@ test('dialogue floats, edits, snaps on drag, finds another free dock on restore 
  const floating=page.locator('[data-floating-panel="dialogue"]');await expect(floating).toBeVisible();
  await floating.getByLabel('Dialogue text',{exact:true}).fill('Edited in a floating window.');
  await expect(page.locator('.scene-in .dialogue-overlay p')).toHaveText('Edited in a floating window.');
- const handle=await floating.locator(':scope > .panel-chrome').boundingBox(),surface=await page.locator('.dock-surface').boundingBox();
- await page.mouse.move(handle!.x+65,handle!.y+12);await page.mouse.down();await page.mouse.move(surface!.x+8,surface!.y+surface!.height*.55,{steps:12});
+ const handle=await floating.getByRole('button',{name:'Drag Dialogue editor window',exact:true}).boundingBox(),surface=await page.locator('.dock-surface').boundingBox();
+ await page.mouse.move(handle!.x+handle!.width/2,handle!.y+handle!.height/2);await page.mouse.down();await page.mouse.move(surface!.x+8,surface!.y+surface!.height*.55,{steps:12});
  await expect(page.getByLabel('Window snap targets',{exact:true})).toBeVisible();await page.mouse.up();
  await expect(page.locator('[data-dock-slot="left"] [data-resident-panel="dialogue"]')).toBeVisible();
  await place(page,'Dialogue editor','float');await place(page,'Story library','left');

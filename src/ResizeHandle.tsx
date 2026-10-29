@@ -34,6 +34,7 @@ export function ResizeHandle({
       data-help="Drag this divider to give the scene more or less space. You can also focus it and use the arrow keys."
       onPointerDown={(e) => {
         e.preventDefault();
+        e.stopPropagation();
         e.currentTarget.setPointerCapture(e.pointerId);
         start.current = { x: e.clientX, y: e.clientY, value };
       }}

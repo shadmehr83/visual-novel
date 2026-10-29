@@ -4,8 +4,10 @@ import { validateProject, start } from "./model";
 import { integrateDeparture, updateDepartureRuntime } from "./projectUpdates";
 import { deviceScreen } from "./interactions";
 function legacy() {
-  const p = savedProject(),
-    departure = p.scenes.pop()!,
+  const p = savedProject();
+  p.scenes=p.scenes.filter(s=>!s.id.startsWith("chapter2-"));
+  delete p.chapters;
+  const departure = p.scenes.pop()!,
     cafe = p.scenes.find((s) => s.id === "cafe")!;
   cafe.nodes.push(...departure.nodes.filter((n) => n.id !== "leaving-cafe"));
   for (const id of ["reflect-neutral", "reflect-warm", "reflect-guarded"]) {
@@ -74,7 +76,7 @@ it("keeps added farewell dialogue reachable and declines to delete custom loops 
 });
 it("does not modify an existing departure or an unrelated project automatically", () => {
   const p = savedProject();
-  p.scenes.at(-1)!.title = "My edited departure";
+  p.scenes.find(s=>s.id==="departure")!.title = "My edited departure";
   expect(integrateDeparture(p, savedProject()).project).toBe(p);
   const other = legacy();
   other.id = "another-novel";

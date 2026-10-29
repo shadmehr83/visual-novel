@@ -1,3 +1,6 @@
+import { pruneChapterExits } from "./chapters";
+import { ChapterWorkspace, ChapterBadge } from "./ChapterWorkspace";
+import { chapterForScene } from "./chapterRuntime";
 import { DialogueDeviceControls } from "./DialogueDeviceControls";
 import { effectiveDevice, saveDeviceAppearance } from "./deviceShared";
 import { FeatureSearch } from "./FeatureSearch";
@@ -336,7 +339,7 @@ export default function App() {
             if (updated) {
               await saveProjectUpdate(updated, workspace.runtime, workspace);
               workspace = { project: updated, runtime: workspace.runtime };
-              setSnapshotNotice("Added missing GitHub artwork, restored outfit cards and connected window and wardrobe sub-scenes. Your custom artwork and café edits were kept; a recovery copy is available.");
+              setSnapshotNotice("Applied missing project updates, including chapters when available. Your custom artwork, dialogue and café edits were kept; a recovery copy is available.");
             }
           } catch (e) {
             setSnapshotNotice("Your saved project is unchanged. The demo content update could not be applied: " + String(e));
@@ -358,7 +361,7 @@ export default function App() {
                 s.nodes.some((n) => n.id === restoredRuntime.node),
             )
           )
-            setRuntime(workspace.runtime);
+            setRuntime(workspace.runtime?.ended && projectHasNextChapter(workspace.project,workspace.runtime) ? {...workspace.runtime,ended:false} : workspace.runtime);
         }
         setHasRecovery(!!(await loadSnapshotRecovery()));
         setCanSave(true);
@@ -506,6 +509,7 @@ export default function App() {
     setProject((p) => {
       const next = clone(p);
       fn(next);
+      pruneChapterExits(next);
       setUndo((u) => [...u.slice(-39), p]);
       setRedo([]);
       return next;
@@ -682,9 +686,9 @@ export default function App() {
     if (side === "editor") return editorContent;
     const openEditor = (sid:string,nid?:string) => { chooseSharedDialogue(sid,nid); if (view !== "editor") chooseSecondWorkspace("editor"); };
     return <div className="secondary-workspace">
-      {side === "devices" ? <DeviceWorkspace project={project} sceneId={selected.id} nodeId={nodeId} edit={edit} onSelect={chooseSharedDialogue} onOriginal={openEditor} />
+      {side === "chapters" ? <ChapterWorkspace project={project} sceneId={selected.id} edit={edit} onSelect={chooseSharedDialogue} onOriginal={openEditor} /> : side === "devices" ? <DeviceWorkspace project={project} sceneId={selected.id} nodeId={nodeId} edit={edit} onSelect={chooseSharedDialogue} onOriginal={openEditor} />
         : side === "updates" ? <ReleaseHistory onNavigate={action => {
-          if (["scenes","dialogues","devices","editor"].includes(action)) chooseSecondWorkspace(action as StudioView);
+          if (["chapters","scenes","dialogues","devices","editor"].includes(action)) chooseSecondWorkspace(action as StudioView);
           else navigate(action);
         }} />
         : <FlowEditor key={side + ":" + selected.id} project={project} mode={side} sceneId={selected.id} nodeId={nodeId} edit={edit}
@@ -750,7 +754,7 @@ export default function App() {
     if(action === "restore-artwork") {void restoreArtwork();return;}
     if(action === "split-view") {setPlaying(false);setWorkspace(w=>({...w,splitWorkspace:true,secondWorkspace:view === w.secondWorkspace ? (view === "dialogues" ? "scenes" : "dialogues") : w.secondWorkspace}));return;}
     if (
-      ["editor", "scenes", "dialogues", "devices", "updates"].includes(action)
+      ["editor", "chapters", "scenes", "dialogues", "devices", "updates"].includes(action)
     ) {
       chooseMainWorkspace(action as StudioView);
       return;
@@ -949,7 +953,7 @@ export default function App() {
                     onClick={() => {
                       const id = crypto.randomUUID();
                       edit((p) =>
-                        p.scenes.push({ ...createFlowScene(selected), id }),
+                        { p.scenes.push({ ...createFlowScene(selected), id }); const c=chapterForScene(p,selected.id);if(c)c.scenes.push(id); },
                       );
                       setSceneId(id);
                       setNodeId("");
@@ -964,11 +968,12 @@ export default function App() {
                   <div className="section-label">
                     SCENES{" "}
                     <span>
-                      {String(project.scenes.length).padStart(2, "0")}
+                      {String(chapterForScene(project,scene.id)?.scenes.length ?? project.scenes.length).padStart(2, "0")}
                     </span>
                   </div>
+                  {project.chapters && <div className="chapter-library"><label>Story chapter<select aria-label="Story chapter" value={chapterForScene(project,scene.id)?.id||""} onChange={e=>{const c=project.chapters!.find(c=>c.id===e.target.value);if(c)selectScene(c.startScene);else {const unassigned=project.scenes.find(s=>!chapterForScene(project,s.id));if(unassigned)selectScene(unassigned.id);}}}><option value="" disabled={!project.scenes.some(s=>!chapterForScene(project,s.id))}>Unassigned scenes</option>{project.chapters.map((c,i)=><option key={c.id} value={c.id}>{i+1}. {c.title} · {c.scenes.length} scenes</option>)}</select></label><button onClick={()=>chooseMainWorkspace("chapters")}>Chapters advanced · {project.chapters.length} chapters</button></div>}
                   <div className="scene-list">
-                    {project.scenes.map((s, i) => (
+                    {project.scenes.filter(s=>!project.chapters || (chapterForScene(project,scene.id)?.scenes.includes(s.id) ?? !chapterForScene(project,s.id))).map((s, i) => (
                       <button
                         key={s.id}
                         className={
@@ -1011,7 +1016,7 @@ export default function App() {
                     ))}
                   </div>
                   <div className="story-note">
-                    <span className="section-label">OPENING CHAPTER</span>
+                    <span className="section-label">{chapterForScene(project,scene.id)?.title||"OPENING CHAPTER"}</span>
                     <p>
                       Small decisions.
                       <br />
@@ -1341,7 +1346,7 @@ export default function App() {
                 <div className="preview-header">
                   <div>
                     <span className="eyebrow">{scene.subtitle}</span>
-                    <h1>{scene.title}</h1>
+                    <h1>{scene.title}</h1><ChapterBadge project={project} scene={scene.id} />
                   </div>
                   <div className="preview-tools">
                     {!playing && (
@@ -2132,13 +2137,16 @@ export default function App() {
               data-inspector={inspector}
               style={{
                 ...paneStyle("inspector"),
+                ...(workspace.splitDocks ? {gridTemplateColumns:workspace.effectsFraction+"% minmax(0,1fr)"} : {}),
                 ...(placement === "float"
                   ? { left: floatPosition.x, top: floatPosition.y }
                   : {}),
               }}
             >
+              {placement !== "top" && <ResizeHandle label="Resize effects and interactions" className={"controls-resize controls-resize-"+placement} value={workspace.controlsWidth} min={250} max={650} reverse={placement!=="left"} onChange={n=>setWorkspace(w=>({...w,controlsWidth:n}))} />}
               <DockPanel id="effects" tools={workspace.splitDocks || panelLayout(workspace.docks,"effects").mode !== "home"}>
               <div className="effects-dock" data-panel={effectPanel} data-inspector={inspector}>
+                {workspace.splitDocks && <ResizeHandle label="Resize effects and properties split" className="effects-split-resize" value={workspace.controlsWidth*2*workspace.effectsFraction/100} min={workspace.controlsWidth*2*.2} max={workspace.controlsWidth*2*.8} onChange={n=>setWorkspace(w=>({...w,effectsFraction:Math.max(20,Math.min(80,n/(w.controlsWidth*2)*100))}))} />}
                 <h3 className="dock-title">Effects & interactions</h3>
                 <div className="panel-layout">
                   <label>
@@ -2970,7 +2978,7 @@ export default function App() {
         {workspace.toolsPlacement === "top" && (view === "editor" || playing || (workspace.splitWorkspace && workspace.secondWorkspace === "editor")) && toolNavigation}
         <DockSurface layouts={workspace.docks} onChange={setDocks} active={!playing}>
         <WorkspaceSplit active={workspace.splitWorkspace && !playing} ratio={workspace.workspaceRatio} direction={workspace.splitDirection} reversed={workspace.reverseWorkspaces} onResize={n => setWorkspace(w => ({...w, workspaceRatio:n}))} secondary={companionWorkspace()} primary={
-        view === "editor" || playing ? editorContent : view === "devices" ? (
+        view === "editor" || playing ? editorContent : view === "chapters" ? <ChapterWorkspace project={project} sceneId={selected.id} edit={edit} onSelect={chooseSharedDialogue} onOriginal={showOriginal} /> : view === "devices" ? (
           <div id="studio-devices" className="secondary-workspace">
             <DeviceWorkspace
               project={project}
@@ -3016,7 +3024,7 @@ export default function App() {
             <span className="live-dot" /> All yours. Stored locally.
           </span>
           <span>
-            CHAPTER 01 <span className="footer-sep">/</span>{" "}
+            {project.chapters?.length||1} CHAPTER{(project.chapters?.length||1)===1?"":"S"} <span className="footer-sep">/</span>{" "}
             {project.scenes.length} SCENES <span className="footer-sep">/</span>{" "}
             {project.scenes.reduce((a, s) => a + s.nodes.length, 0)} NODES
           </span>
@@ -3180,3 +3188,5 @@ export default function App() {
     </PlaySession>
   );
 }
+
+function projectHasNextChapter(project:Project,r:Runtime){const c=chapterForScene(project,r.scene);return !!c?.next&&!!c.exits.some(e=>e.scene===r.scene&&e.node===r.node);}

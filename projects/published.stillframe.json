@@ -426,7 +426,7 @@
         {
           "id": "stay",
           "speaker": "Narrator",
-          "text": "The message can wait. I put the phone away. Nothing has to happen today.\n\nEND OF DEMO — THE FIRST MATCH",
+          "text": "The message can wait. I put the phone away. Nothing has to happen today.\n\nEND OF CHAPTER ONE — THE FIRST MATCH",
           "choices": [],
           "allowCustomResponse": true,
           "deviceScreen": "off",
@@ -1650,14 +1650,14 @@
         {
           "id": "deferred",
           "speaker": "Narrator",
-          "text": "The conversation stays open. There is no appointment to keep, and no debt attached to being asked.\n\nEND OF DEMO — THE FIRST MATCH",
+          "text": "The conversation stays open. There is no appointment to keep, and no debt attached to being asked.\n\nEND OF CHAPTER ONE — THE FIRST MATCH",
           "choices": [],
           "allowCustomResponse": true
         },
         {
           "id": "declined",
           "speaker": "Narrator",
-          "text": "I set the phone down. It was an invitation, and I gave an answer. That is allowed.\n\nEND OF DEMO — THE FIRST MATCH",
+          "text": "I set the phone down. It was an invitation, and I gave an answer. That is allowed.\n\nEND OF CHAPTER ONE — THE FIRST MATCH",
           "choices": [],
           "allowCustomResponse": true
         }
@@ -2207,7 +2207,7 @@
         {
           "id": "turn-home",
           "speaker": "Narrator",
-          "text": "I let her know instead of leaving her waiting. “Thanks for telling me. Get home safe,” she replies.\n\nEND OF DEMO — THE FIRST MATCH",
+          "text": "I let her know instead of leaving her waiting. “Thanks for telling me. Get home safe,” she replies.\n\nEND OF CHAPTER ONE — THE FIRST MATCH",
           "choices": [],
           "allowCustomResponse": true
         }
@@ -4240,7 +4240,7 @@
         {
           "id": "end",
           "speaker": "Narrator",
-          "text": "END OF DEMO — THE FIRST MATCH\n\nThe evening stays what it was. What it means can wait.",
+          "text": "END OF CHAPTER ONE — THE FIRST MATCH\n\nThe evening stays what it was. What it means can wait.",
           "choices": [],
           "allowCustomResponse": true,
           "deviceScreen": "off"
@@ -4313,6 +4313,1377 @@
         "footstepVolume": 0.28,
         "footstepAsset": "studio-footstep-wet-pavement"
       }
+    },
+    {
+      "id": "chapter2-warm",
+      "title": "A small reason to smile",
+      "subtitle": "BEDROOM · THE NEXT MORNING",
+      "art": "bedroom",
+      "background": "first-match-bedroom",
+      "fit": "cover",
+      "x": 0,
+      "y": 0,
+      "scale": 1,
+      "effects": {
+        "lights": [
+          {
+            "id": "bedside-lamp",
+            "name": "Bedside Lamp",
+            "enabled": true,
+            "kind": "local",
+            "intensity": 0.13,
+            "color": "#ffd4a1",
+            "x": 130,
+            "y": 210,
+            "radius": 85,
+            "spread": 0.01,
+            "cycle": {
+              "enabled": true,
+              "values": [
+                0.98,
+                1,
+                1.015,
+                0.99,
+                1.005,
+                0.985
+              ],
+              "stepSeconds": 2.6
+            }
+          },
+          {
+            "id": "desk-lamp",
+            "name": "Desk Lamp",
+            "enabled": true,
+            "kind": "local",
+            "intensity": 0.13,
+            "color": "#ffd4a1",
+            "x": 605,
+            "y": 230,
+            "radius": 55,
+            "spread": 0.01,
+            "cycle": {
+              "enabled": true,
+              "values": [
+                0.98,
+                1,
+                1.015,
+                0.99,
+                1.005,
+                0.985
+              ],
+              "stepSeconds": 2.6
+            }
+          }
+        ],
+        "motionZones": [],
+        "rain": true,
+        "density": 32,
+        "speed": 0.6,
+        "angle": -3,
+        "length": 9,
+        "opacity": 0.12,
+        "color": "#b7d1dc",
+        "glass": false,
+        "brightness": 1,
+        "contrast": 1,
+        "tint": "#7c6689",
+        "tintOpacity": 0,
+        "light": 0,
+        "lightX": 68,
+        "lightY": 36,
+        "mask": [],
+        "invert": false,
+        "vignette": false,
+        "rainZones": [
+          {
+            "id": "bed-window-left",
+            "name": "Upper left window",
+            "enabled": true,
+            "points": [
+              {
+                "x": 225,
+                "y": 20
+              },
+              {
+                "x": 345,
+                "y": 20
+              },
+              {
+                "x": 345,
+                "y": 240
+              },
+              {
+                "x": 225,
+                "y": 240
+              }
+            ]
+          },
+          {
+            "id": "bed-window-right",
+            "name": "Upper right window",
+            "enabled": true,
+            "points": [
+              {
+                "x": 390,
+                "y": 20
+              },
+              {
+                "x": 450,
+                "y": 20
+              },
+              {
+                "x": 450,
+                "y": 240
+              },
+              {
+                "x": 390,
+                "y": 240
+              }
+            ]
+          }
+        ]
+      },
+      "nodes": [
+        {
+          "id": "morning",
+          "speaker": "Narrator",
+          "text": "Morning light finds the same room. Yesterday was a date, not a promise about everything after it. Still, I catch myself checking the phone.",
+          "choices": [
+            {
+              "id": "read",
+              "text": "Read the message",
+              "target": "message",
+              "actions": [],
+              "note": "Chapter-two opening draft. Editable in Dialogue advanced.",
+              "sendAsMessage": false
+            },
+            {
+              "id": "later",
+              "text": "Leave it until later",
+              "target": "later",
+              "actions": [],
+              "note": "Chapter-two opening draft. Editable in Dialogue advanced.",
+              "sendAsMessage": false
+            }
+          ],
+          "deviceVisible": false
+        },
+        {
+          "id": "message",
+          "speaker": "Maria",
+          "text": "Morning. I was going to send a very composed message, but I put my tea beside the kettle and forgot to make it. Strong start.",
+          "choices": [
+            {
+              "id": "reply-0",
+              "text": "A good start by my standards. How is the tea situation now?",
+              "target": "reply-0",
+              "actions": [],
+              "note": "Chapter-two opening draft. Editable in Dialogue advanced.",
+              "sendAsMessage": true
+            },
+            {
+              "id": "reply-1",
+              "text": "Morning. I have a few things to do first; I’ll message later.",
+              "target": "reply-1",
+              "actions": [],
+              "note": "Chapter-two opening draft. Editable in Dialogue advanced.",
+              "sendAsMessage": true
+            }
+          ],
+          "deviceVisible": true,
+          "deviceScreen": "chat"
+        },
+        {
+          "id": "reply-0",
+          "speaker": "Maria",
+          "text": "The tea exists now. I am calling that progress. How is your morning going?",
+          "next": "end",
+          "choices": [],
+          "deviceVisible": true,
+          "deviceScreen": "chat"
+        },
+        {
+          "id": "reply-1",
+          "speaker": "Maria",
+          "text": "Of course. Talk when you feel like it.",
+          "next": "end",
+          "choices": [],
+          "deviceVisible": true,
+          "deviceScreen": "chat"
+        },
+        {
+          "id": "later",
+          "speaker": "Narrator",
+          "text": "I set the phone down. Replying later does not turn a good conversation into a broken promise.",
+          "next": "end",
+          "choices": [],
+          "deviceVisible": false
+        },
+        {
+          "id": "end",
+          "speaker": "Narrator",
+          "text": "CHAPTER TWO · OPENING DRAFT\n\nThe rest of this chapter is not written yet. Continue authoring from this scene.",
+          "choices": [],
+          "deviceVisible": false
+        }
+      ],
+      "entry": [],
+      "transition": {
+        "style": "fade",
+        "seconds": 0.8
+      },
+      "phone": {
+        "enabled": true,
+        "device": "phone",
+        "contact": "Maria",
+        "title": "Ember · Online",
+        "avatar": "maria-device-profile",
+        "x": 67,
+        "y": 50,
+        "width": 44,
+        "entrance": {
+          "style": "slide",
+          "seconds": 0.5
+        },
+        "typingSeconds": 0.65,
+        "keyboard": false,
+        "mode": "phone-system",
+        "defaultScreen": "chat",
+        "appearance": {
+          "background": "#211e29",
+          "textColor": "#eee1e9",
+          "fontSize": 14,
+          "font": "Arial",
+          "wallpaper": null,
+          "apps": [],
+          "icons": {
+            "chat": "studio-icon-chat",
+            "feed": "studio-icon-feed",
+            "settings": "studio-icon-settings"
+          },
+          "profiles": {}
+        },
+        "notificationSound": {
+          "asset": "studio-phone-notification",
+          "volume": 0.42
+        }
+      },
+      "audio": [
+        {
+          "id": "studio-rain-room-muffled",
+          "volume": 0.4,
+          "loop": true
+        }
+      ],
+      "joints": [],
+      "sprites": []
+    },
+    {
+      "id": "chapter2-slow",
+      "title": "Room to take it slowly",
+      "subtitle": "BEDROOM · THE NEXT MORNING",
+      "art": "bedroom",
+      "background": "first-match-bedroom",
+      "fit": "cover",
+      "x": 0,
+      "y": 0,
+      "scale": 1,
+      "effects": {
+        "lights": [
+          {
+            "id": "bedside-lamp",
+            "name": "Bedside Lamp",
+            "enabled": true,
+            "kind": "local",
+            "intensity": 0.13,
+            "color": "#ffd4a1",
+            "x": 130,
+            "y": 210,
+            "radius": 85,
+            "spread": 0.01,
+            "cycle": {
+              "enabled": true,
+              "values": [
+                0.98,
+                1,
+                1.015,
+                0.99,
+                1.005,
+                0.985
+              ],
+              "stepSeconds": 2.6
+            }
+          },
+          {
+            "id": "desk-lamp",
+            "name": "Desk Lamp",
+            "enabled": true,
+            "kind": "local",
+            "intensity": 0.13,
+            "color": "#ffd4a1",
+            "x": 605,
+            "y": 230,
+            "radius": 55,
+            "spread": 0.01,
+            "cycle": {
+              "enabled": true,
+              "values": [
+                0.98,
+                1,
+                1.015,
+                0.99,
+                1.005,
+                0.985
+              ],
+              "stepSeconds": 2.6
+            }
+          }
+        ],
+        "motionZones": [],
+        "rain": true,
+        "density": 32,
+        "speed": 0.6,
+        "angle": -3,
+        "length": 9,
+        "opacity": 0.12,
+        "color": "#b7d1dc",
+        "glass": false,
+        "brightness": 1,
+        "contrast": 1,
+        "tint": "#7c6689",
+        "tintOpacity": 0,
+        "light": 0,
+        "lightX": 68,
+        "lightY": 36,
+        "mask": [],
+        "invert": false,
+        "vignette": false,
+        "rainZones": [
+          {
+            "id": "bed-window-left",
+            "name": "Upper left window",
+            "enabled": true,
+            "points": [
+              {
+                "x": 225,
+                "y": 20
+              },
+              {
+                "x": 345,
+                "y": 20
+              },
+              {
+                "x": 345,
+                "y": 240
+              },
+              {
+                "x": 225,
+                "y": 240
+              }
+            ]
+          },
+          {
+            "id": "bed-window-right",
+            "name": "Upper right window",
+            "enabled": true,
+            "points": [
+              {
+                "x": 390,
+                "y": 20
+              },
+              {
+                "x": 450,
+                "y": 20
+              },
+              {
+                "x": 450,
+                "y": 240
+              },
+              {
+                "x": 390,
+                "y": 240
+              }
+            ]
+          }
+        ]
+      },
+      "nodes": [
+        {
+          "id": "morning",
+          "speaker": "Narrator",
+          "text": "The café was real. I am still working out what I want from another meeting. This morning does not need to turn either of those things into a decision.",
+          "choices": [
+            {
+              "id": "read",
+              "text": "Read the message",
+              "target": "message",
+              "actions": [],
+              "note": "Chapter-two opening draft. Editable in Dialogue advanced.",
+              "sendAsMessage": false
+            },
+            {
+              "id": "later",
+              "text": "Leave it until later",
+              "target": "later",
+              "actions": [],
+              "note": "Chapter-two opening draft. Editable in Dialogue advanced.",
+              "sendAsMessage": false
+            }
+          ],
+          "deviceVisible": false
+        },
+        {
+          "id": "message",
+          "speaker": "Maria",
+          "text": "Morning. No need to make plans today. I hope the rest of your evening was all right.",
+          "choices": [
+            {
+              "id": "reply-0",
+              "text": "It was. I liked talking; I’m still figuring out the rest.",
+              "target": "reply-0",
+              "actions": [],
+              "note": "Chapter-two opening draft. Editable in Dialogue advanced.",
+              "sendAsMessage": true
+            },
+            {
+              "id": "reply-1",
+              "text": "Thanks. I’d like a quiet morning; I’ll reply when I’m ready.",
+              "target": "reply-1",
+              "actions": [],
+              "note": "Chapter-two opening draft. Editable in Dialogue advanced.",
+              "sendAsMessage": true
+            }
+          ],
+          "deviceVisible": true,
+          "deviceScreen": "chat"
+        },
+        {
+          "id": "reply-0",
+          "speaker": "Maria",
+          "text": "That is fine. We can have conversations that are not committee meetings about what they mean.",
+          "next": "end",
+          "choices": [],
+          "deviceVisible": true,
+          "deviceScreen": "chat"
+        },
+        {
+          "id": "reply-1",
+          "speaker": "Maria",
+          "text": "Of course. Talk when you feel like it.",
+          "next": "end",
+          "choices": [],
+          "deviceVisible": true,
+          "deviceScreen": "chat"
+        },
+        {
+          "id": "later",
+          "speaker": "Narrator",
+          "text": "I set the phone down. Replying later does not turn a good conversation into a broken promise.",
+          "next": "end",
+          "choices": [],
+          "deviceVisible": false
+        },
+        {
+          "id": "end",
+          "speaker": "Narrator",
+          "text": "CHAPTER TWO · OPENING DRAFT\n\nThe rest of this chapter is not written yet. Continue authoring from this scene.",
+          "choices": [],
+          "deviceVisible": false
+        }
+      ],
+      "entry": [],
+      "transition": {
+        "style": "fade",
+        "seconds": 0.8
+      },
+      "phone": {
+        "enabled": true,
+        "device": "phone",
+        "contact": "Maria",
+        "title": "Ember · Online",
+        "avatar": "maria-device-profile",
+        "x": 67,
+        "y": 50,
+        "width": 44,
+        "entrance": {
+          "style": "slide",
+          "seconds": 0.5
+        },
+        "typingSeconds": 0.65,
+        "keyboard": false,
+        "mode": "phone-system",
+        "defaultScreen": "chat",
+        "appearance": {
+          "background": "#211e29",
+          "textColor": "#eee1e9",
+          "fontSize": 14,
+          "font": "Arial",
+          "wallpaper": null,
+          "apps": [],
+          "icons": {
+            "chat": "studio-icon-chat",
+            "feed": "studio-icon-feed",
+            "settings": "studio-icon-settings"
+          },
+          "profiles": {}
+        },
+        "notificationSound": {
+          "asset": "studio-phone-notification",
+          "volume": 0.42
+        }
+      },
+      "audio": [
+        {
+          "id": "studio-rain-room-muffled",
+          "volume": 0.4,
+          "loop": true
+        }
+      ],
+      "joints": [],
+      "sprites": []
+    },
+    {
+      "id": "chapter2-goodbye",
+      "title": "A goodbye can stay a goodbye",
+      "subtitle": "BEDROOM · THE NEXT MORNING",
+      "art": "bedroom",
+      "background": "first-match-bedroom",
+      "fit": "cover",
+      "x": 0,
+      "y": 0,
+      "scale": 1,
+      "effects": {
+        "lights": [
+          {
+            "id": "bedside-lamp",
+            "name": "Bedside Lamp",
+            "enabled": true,
+            "kind": "local",
+            "intensity": 0.13,
+            "color": "#ffd4a1",
+            "x": 130,
+            "y": 210,
+            "radius": 85,
+            "spread": 0.01,
+            "cycle": {
+              "enabled": true,
+              "values": [
+                0.98,
+                1,
+                1.015,
+                0.99,
+                1.005,
+                0.985
+              ],
+              "stepSeconds": 2.6
+            }
+          },
+          {
+            "id": "desk-lamp",
+            "name": "Desk Lamp",
+            "enabled": true,
+            "kind": "local",
+            "intensity": 0.13,
+            "color": "#ffd4a1",
+            "x": 605,
+            "y": 230,
+            "radius": 55,
+            "spread": 0.01,
+            "cycle": {
+              "enabled": true,
+              "values": [
+                0.98,
+                1,
+                1.015,
+                0.99,
+                1.005,
+                0.985
+              ],
+              "stepSeconds": 2.6
+            }
+          }
+        ],
+        "motionZones": [],
+        "rain": true,
+        "density": 32,
+        "speed": 0.6,
+        "angle": -3,
+        "length": 9,
+        "opacity": 0.12,
+        "color": "#b7d1dc",
+        "glass": false,
+        "brightness": 1,
+        "contrast": 1,
+        "tint": "#7c6689",
+        "tintOpacity": 0,
+        "light": 0,
+        "lightX": 68,
+        "lightY": 36,
+        "mask": [],
+        "invert": false,
+        "vignette": false,
+        "rainZones": [
+          {
+            "id": "bed-window-left",
+            "name": "Upper left window",
+            "enabled": true,
+            "points": [
+              {
+                "x": 225,
+                "y": 20
+              },
+              {
+                "x": 345,
+                "y": 20
+              },
+              {
+                "x": 345,
+                "y": 240
+              },
+              {
+                "x": 225,
+                "y": 240
+              }
+            ]
+          },
+          {
+            "id": "bed-window-right",
+            "name": "Upper right window",
+            "enabled": true,
+            "points": [
+              {
+                "x": 390,
+                "y": 20
+              },
+              {
+                "x": 450,
+                "y": 20
+              },
+              {
+                "x": 450,
+                "y": 240
+              },
+              {
+                "x": 390,
+                "y": 240
+              }
+            ]
+          }
+        ]
+      },
+      "nodes": [
+        {
+          "id": "morning",
+          "speaker": "Narrator",
+          "text": "The next morning, there is no new message from Maria. I said I did not think it was a match. She heard me.",
+          "choices": [
+            {
+              "id": "day",
+              "text": "Get on with my day",
+              "target": "day",
+              "actions": [],
+              "note": "Chapter-two opening draft. Editable in Dialogue advanced.",
+              "sendAsMessage": false
+            },
+            {
+              "id": "remember",
+              "text": "Think about the evening for a moment",
+              "target": "remember",
+              "actions": [],
+              "note": "Chapter-two opening draft. Editable in Dialogue advanced.",
+              "sendAsMessage": false
+            }
+          ],
+          "deviceVisible": false
+        },
+        {
+          "id": "remember",
+          "speaker": "Narrator",
+          "text": "I can remember the warmth of the café without turning it into a reason to go back. A pleasant evening does not owe anybody a sequel.",
+          "next": "end",
+          "choices": [],
+          "deviceVisible": false
+        },
+        {
+          "id": "day",
+          "speaker": "Narrator",
+          "text": "There are ordinary things waiting: a book left open, a cup to wash, people I can make plans with. The day is still mine.",
+          "next": "end",
+          "choices": [],
+          "deviceVisible": false
+        },
+        {
+          "id": "end",
+          "speaker": "Narrator",
+          "text": "CHAPTER TWO · OPENING DRAFT\n\nThe rest of this chapter is not written yet. Continue authoring from this scene.",
+          "choices": [],
+          "deviceVisible": false
+        }
+      ],
+      "entry": [],
+      "transition": {
+        "style": "fade",
+        "seconds": 0.8
+      },
+      "audio": [
+        {
+          "id": "studio-rain-room-muffled",
+          "volume": 0.4,
+          "loop": true
+        }
+      ],
+      "joints": [],
+      "sprites": []
+    },
+    {
+      "id": "chapter2-deferred",
+      "title": "An open conversation",
+      "subtitle": "BEDROOM · THE NEXT MORNING",
+      "art": "bedroom",
+      "background": "first-match-bedroom",
+      "fit": "cover",
+      "x": 0,
+      "y": 0,
+      "scale": 1,
+      "effects": {
+        "lights": [
+          {
+            "id": "bedside-lamp",
+            "name": "Bedside Lamp",
+            "enabled": true,
+            "kind": "local",
+            "intensity": 0.13,
+            "color": "#ffd4a1",
+            "x": 130,
+            "y": 210,
+            "radius": 85,
+            "spread": 0.01,
+            "cycle": {
+              "enabled": true,
+              "values": [
+                0.98,
+                1,
+                1.015,
+                0.99,
+                1.005,
+                0.985
+              ],
+              "stepSeconds": 2.6
+            }
+          },
+          {
+            "id": "desk-lamp",
+            "name": "Desk Lamp",
+            "enabled": true,
+            "kind": "local",
+            "intensity": 0.13,
+            "color": "#ffd4a1",
+            "x": 605,
+            "y": 230,
+            "radius": 55,
+            "spread": 0.01,
+            "cycle": {
+              "enabled": true,
+              "values": [
+                0.98,
+                1,
+                1.015,
+                0.99,
+                1.005,
+                0.985
+              ],
+              "stepSeconds": 2.6
+            }
+          }
+        ],
+        "motionZones": [],
+        "rain": true,
+        "density": 32,
+        "speed": 0.6,
+        "angle": -3,
+        "length": 9,
+        "opacity": 0.12,
+        "color": "#b7d1dc",
+        "glass": false,
+        "brightness": 1,
+        "contrast": 1,
+        "tint": "#7c6689",
+        "tintOpacity": 0,
+        "light": 0,
+        "lightX": 68,
+        "lightY": 36,
+        "mask": [],
+        "invert": false,
+        "vignette": false,
+        "rainZones": [
+          {
+            "id": "bed-window-left",
+            "name": "Upper left window",
+            "enabled": true,
+            "points": [
+              {
+                "x": 225,
+                "y": 20
+              },
+              {
+                "x": 345,
+                "y": 20
+              },
+              {
+                "x": 345,
+                "y": 240
+              },
+              {
+                "x": 225,
+                "y": 240
+              }
+            ]
+          },
+          {
+            "id": "bed-window-right",
+            "name": "Upper right window",
+            "enabled": true,
+            "points": [
+              {
+                "x": 390,
+                "y": 20
+              },
+              {
+                "x": 450,
+                "y": 20
+              },
+              {
+                "x": 450,
+                "y": 240
+              },
+              {
+                "x": 390,
+                "y": 240
+              }
+            ]
+          }
+        ]
+      },
+      "nodes": [
+        {
+          "id": "morning",
+          "speaker": "Narrator",
+          "text": "No café table to replay this morning. We agreed to keep talking rather than fit an afternoon into a calendar invitation. That is all we agreed to.",
+          "choices": [
+            {
+              "id": "read",
+              "text": "Read the message",
+              "target": "message",
+              "actions": [],
+              "note": "Chapter-two opening draft. Editable in Dialogue advanced.",
+              "sendAsMessage": false
+            },
+            {
+              "id": "later",
+              "text": "Leave it until later",
+              "target": "later",
+              "actions": [],
+              "note": "Chapter-two opening draft. Editable in Dialogue advanced.",
+              "sendAsMessage": false
+            }
+          ],
+          "deviceVisible": false
+        },
+        {
+          "id": "message",
+          "speaker": "Maria",
+          "text": "Morning. I found a horror film with a review that just says “technically a film.” A powerful recommendation.",
+          "choices": [
+            {
+              "id": "reply-0",
+              "text": "That sounds like an excellent use of a bad review.",
+              "target": "reply-0",
+              "actions": [],
+              "note": "Chapter-two opening draft. Editable in Dialogue advanced.",
+              "sendAsMessage": true
+            },
+            {
+              "id": "reply-1",
+              "text": "Morning. I’m keeping today fairly quiet. Maybe we can talk later.",
+              "target": "reply-1",
+              "actions": [],
+              "note": "Chapter-two opening draft. Editable in Dialogue advanced.",
+              "sendAsMessage": true
+            }
+          ],
+          "deviceVisible": true,
+          "deviceScreen": "chat"
+        },
+        {
+          "id": "reply-0",
+          "speaker": "Maria",
+          "text": "The review also says the door acting is better than the people. I feel obliged to investigate.",
+          "next": "end",
+          "choices": [],
+          "deviceVisible": true,
+          "deviceScreen": "chat"
+        },
+        {
+          "id": "reply-1",
+          "speaker": "Maria",
+          "text": "Of course. Talk when you feel like it.",
+          "next": "end",
+          "choices": [],
+          "deviceVisible": true,
+          "deviceScreen": "chat"
+        },
+        {
+          "id": "later",
+          "speaker": "Narrator",
+          "text": "I set the phone down. Replying later does not turn a good conversation into a broken promise.",
+          "next": "end",
+          "choices": [],
+          "deviceVisible": false
+        },
+        {
+          "id": "end",
+          "speaker": "Narrator",
+          "text": "CHAPTER TWO · OPENING DRAFT\n\nThe rest of this chapter is not written yet. Continue authoring from this scene.",
+          "choices": [],
+          "deviceVisible": false
+        }
+      ],
+      "entry": [],
+      "transition": {
+        "style": "fade",
+        "seconds": 0.8
+      },
+      "phone": {
+        "enabled": true,
+        "device": "phone",
+        "contact": "Maria",
+        "title": "Ember · Online",
+        "avatar": "maria-device-profile",
+        "x": 67,
+        "y": 50,
+        "width": 44,
+        "entrance": {
+          "style": "slide",
+          "seconds": 0.5
+        },
+        "typingSeconds": 0.65,
+        "keyboard": false,
+        "mode": "phone-system",
+        "defaultScreen": "chat",
+        "appearance": {
+          "background": "#211e29",
+          "textColor": "#eee1e9",
+          "fontSize": 14,
+          "font": "Arial",
+          "wallpaper": null,
+          "apps": [],
+          "icons": {
+            "chat": "studio-icon-chat",
+            "feed": "studio-icon-feed",
+            "settings": "studio-icon-settings"
+          },
+          "profiles": {}
+        },
+        "notificationSound": {
+          "asset": "studio-phone-notification",
+          "volume": 0.42
+        }
+      },
+      "audio": [
+        {
+          "id": "studio-rain-room-muffled",
+          "volume": 0.4,
+          "loop": true
+        }
+      ],
+      "joints": [],
+      "sprites": []
+    },
+    {
+      "id": "chapter2-declined",
+      "title": "A day without an appointment",
+      "subtitle": "BEDROOM · THE NEXT MORNING",
+      "art": "bedroom",
+      "background": "first-match-bedroom",
+      "fit": "cover",
+      "x": 0,
+      "y": 0,
+      "scale": 1,
+      "effects": {
+        "lights": [
+          {
+            "id": "bedside-lamp",
+            "name": "Bedside Lamp",
+            "enabled": true,
+            "kind": "local",
+            "intensity": 0.13,
+            "color": "#ffd4a1",
+            "x": 130,
+            "y": 210,
+            "radius": 85,
+            "spread": 0.01,
+            "cycle": {
+              "enabled": true,
+              "values": [
+                0.98,
+                1,
+                1.015,
+                0.99,
+                1.005,
+                0.985
+              ],
+              "stepSeconds": 2.6
+            }
+          },
+          {
+            "id": "desk-lamp",
+            "name": "Desk Lamp",
+            "enabled": true,
+            "kind": "local",
+            "intensity": 0.13,
+            "color": "#ffd4a1",
+            "x": 605,
+            "y": 230,
+            "radius": 55,
+            "spread": 0.01,
+            "cycle": {
+              "enabled": true,
+              "values": [
+                0.98,
+                1,
+                1.015,
+                0.99,
+                1.005,
+                0.985
+              ],
+              "stepSeconds": 2.6
+            }
+          }
+        ],
+        "motionZones": [],
+        "rain": true,
+        "density": 32,
+        "speed": 0.6,
+        "angle": -3,
+        "length": 9,
+        "opacity": 0.12,
+        "color": "#b7d1dc",
+        "glass": false,
+        "brightness": 1,
+        "contrast": 1,
+        "tint": "#7c6689",
+        "tintOpacity": 0,
+        "light": 0,
+        "lightX": 68,
+        "lightY": 36,
+        "mask": [],
+        "invert": false,
+        "vignette": false,
+        "rainZones": [
+          {
+            "id": "bed-window-left",
+            "name": "Upper left window",
+            "enabled": true,
+            "points": [
+              {
+                "x": 225,
+                "y": 20
+              },
+              {
+                "x": 345,
+                "y": 20
+              },
+              {
+                "x": 345,
+                "y": 240
+              },
+              {
+                "x": 225,
+                "y": 240
+              }
+            ]
+          },
+          {
+            "id": "bed-window-right",
+            "name": "Upper right window",
+            "enabled": true,
+            "points": [
+              {
+                "x": 390,
+                "y": 20
+              },
+              {
+                "x": 450,
+                "y": 20
+              },
+              {
+                "x": 450,
+                "y": 240
+              },
+              {
+                "x": 390,
+                "y": 240
+              }
+            ]
+          }
+        ]
+      },
+      "nodes": [
+        {
+          "id": "morning",
+          "speaker": "Narrator",
+          "text": "I chose not to meet yesterday. The room is the same this morning; there is no date to reconstruct and no apology waiting to be written.",
+          "choices": [
+            {
+              "id": "day",
+              "text": "Make a plan for myself",
+              "target": "day",
+              "actions": [],
+              "note": "Chapter-two opening draft. Editable in Dialogue advanced.",
+              "sendAsMessage": false
+            },
+            {
+              "id": "quiet",
+              "text": "Keep the morning quiet",
+              "target": "quiet",
+              "actions": [],
+              "note": "Chapter-two opening draft. Editable in Dialogue advanced.",
+              "sendAsMessage": false
+            }
+          ],
+          "deviceVisible": false
+        },
+        {
+          "id": "day",
+          "speaker": "Narrator",
+          "text": "A walk, perhaps. A message to someone I already know. I do not need to turn saying no to one thing into saying no to everything.",
+          "next": "end",
+          "choices": [],
+          "deviceVisible": false
+        },
+        {
+          "id": "quiet",
+          "speaker": "Narrator",
+          "text": "I leave the phone face down and open a book. Nothing has happened that needs correcting.",
+          "next": "end",
+          "choices": [],
+          "deviceVisible": false
+        },
+        {
+          "id": "end",
+          "speaker": "Narrator",
+          "text": "CHAPTER TWO · OPENING DRAFT\n\nThe rest of this chapter is not written yet. Continue authoring from this scene.",
+          "choices": [],
+          "deviceVisible": false
+        }
+      ],
+      "entry": [],
+      "transition": {
+        "style": "fade",
+        "seconds": 0.8
+      },
+      "audio": [
+        {
+          "id": "studio-rain-room-muffled",
+          "volume": 0.4,
+          "loop": true
+        }
+      ],
+      "joints": [],
+      "sprites": []
+    },
+    {
+      "id": "chapter2-quiet",
+      "title": "The day carries on",
+      "subtitle": "BEDROOM · THE NEXT MORNING",
+      "art": "bedroom",
+      "background": "first-match-bedroom",
+      "fit": "cover",
+      "x": 0,
+      "y": 0,
+      "scale": 1,
+      "effects": {
+        "lights": [
+          {
+            "id": "bedside-lamp",
+            "name": "Bedside Lamp",
+            "enabled": true,
+            "kind": "local",
+            "intensity": 0.13,
+            "color": "#ffd4a1",
+            "x": 130,
+            "y": 210,
+            "radius": 85,
+            "spread": 0.01,
+            "cycle": {
+              "enabled": true,
+              "values": [
+                0.98,
+                1,
+                1.015,
+                0.99,
+                1.005,
+                0.985
+              ],
+              "stepSeconds": 2.6
+            }
+          },
+          {
+            "id": "desk-lamp",
+            "name": "Desk Lamp",
+            "enabled": true,
+            "kind": "local",
+            "intensity": 0.13,
+            "color": "#ffd4a1",
+            "x": 605,
+            "y": 230,
+            "radius": 55,
+            "spread": 0.01,
+            "cycle": {
+              "enabled": true,
+              "values": [
+                0.98,
+                1,
+                1.015,
+                0.99,
+                1.005,
+                0.985
+              ],
+              "stepSeconds": 2.6
+            }
+          }
+        ],
+        "motionZones": [],
+        "rain": true,
+        "density": 32,
+        "speed": 0.6,
+        "angle": -3,
+        "length": 9,
+        "opacity": 0.12,
+        "color": "#b7d1dc",
+        "glass": false,
+        "brightness": 1,
+        "contrast": 1,
+        "tint": "#7c6689",
+        "tintOpacity": 0,
+        "light": 0,
+        "lightX": 68,
+        "lightY": 36,
+        "mask": [],
+        "invert": false,
+        "vignette": false,
+        "rainZones": [
+          {
+            "id": "bed-window-left",
+            "name": "Upper left window",
+            "enabled": true,
+            "points": [
+              {
+                "x": 225,
+                "y": 20
+              },
+              {
+                "x": 345,
+                "y": 20
+              },
+              {
+                "x": 345,
+                "y": 240
+              },
+              {
+                "x": 225,
+                "y": 240
+              }
+            ]
+          },
+          {
+            "id": "bed-window-right",
+            "name": "Upper right window",
+            "enabled": true,
+            "points": [
+              {
+                "x": 390,
+                "y": 20
+              },
+              {
+                "x": 450,
+                "y": 20
+              },
+              {
+                "x": 450,
+                "y": 240
+              },
+              {
+                "x": 390,
+                "y": 240
+              }
+            ]
+          }
+        ]
+      },
+      "nodes": [
+        {
+          "id": "morning",
+          "speaker": "Narrator",
+          "text": "Morning arrives without making a plan for me. The street outside is already carrying on.",
+          "choices": [
+            {
+              "id": "window",
+              "text": "Stand by the window",
+              "target": "window",
+              "actions": [],
+              "note": "Chapter-two opening draft. Editable in Dialogue advanced.",
+              "sendAsMessage": false
+            },
+            {
+              "id": "book",
+              "text": "Pick up the book",
+              "target": "book",
+              "actions": [],
+              "note": "Chapter-two opening draft. Editable in Dialogue advanced.",
+              "sendAsMessage": false
+            }
+          ],
+          "deviceVisible": false
+        },
+        {
+          "id": "window",
+          "speaker": "Narrator",
+          "text": "People pass with bags, umbrellas, somewhere to be. I could go out later. For now, it is enough to notice them.",
+          "next": "end",
+          "choices": [],
+          "deviceVisible": false
+        },
+        {
+          "id": "book",
+          "speaker": "Narrator",
+          "text": "The bookmark is still on the same page. Some things are willing to wait without announcing it.",
+          "next": "end",
+          "choices": [],
+          "deviceVisible": false
+        },
+        {
+          "id": "end",
+          "speaker": "Narrator",
+          "text": "CHAPTER TWO · OPENING DRAFT\n\nThe rest of this chapter is not written yet. Continue authoring from this scene.",
+          "choices": [],
+          "deviceVisible": false
+        }
+      ],
+      "entry": [],
+      "transition": {
+        "style": "fade",
+        "seconds": 0.8
+      },
+      "audio": [
+        {
+          "id": "studio-rain-room-muffled",
+          "volume": 0.4,
+          "loop": true
+        }
+      ],
+      "joints": [],
+      "sprites": []
     }
   ],
   "assets": [
@@ -4611,6 +5982,160 @@
     "2.4.0",
     "2.5.0",
     "2.6.0",
-    "2.7.0"
+    "2.7.0",
+    "2.11.0"
+  ],
+  "chapters": [
+    {
+      "id": "chapter-one",
+      "title": "The First Match",
+      "notes": "Original bedroom-to-café demo and its non-date branches. Completing a marked ending carries the actual story state into chapter two.",
+      "scenes": [
+        "bedroom",
+        "messages",
+        "invitation",
+        "outfit",
+        "journey",
+        "cafe",
+        "departure"
+      ],
+      "startScene": "bedroom",
+      "starts": [],
+      "next": "chapter-two",
+      "exits": [
+        {
+          "scene": "bedroom",
+          "node": "stay"
+        },
+        {
+          "scene": "invitation",
+          "node": "deferred"
+        },
+        {
+          "scene": "invitation",
+          "node": "declined"
+        },
+        {
+          "scene": "journey",
+          "node": "turn-home"
+        },
+        {
+          "scene": "departure",
+          "node": "end"
+        }
+      ]
+    },
+    {
+      "id": "chapter-two",
+      "title": "The Space Between Messages",
+      "notes": "EDITABLE OPENING DRAFT. The source bible stops at the first date. These six starter scenarios extend its continuity rules without inventing evidence of danger, forcing another date, or overwriting the player’s impression. Slow and uncertain second-date answers share one cautious opening; declining a second date differs from not meeting at all. Only opening scenes are drafted.",
+      "scenes": [
+        "chapter2-warm",
+        "chapter2-slow",
+        "chapter2-goodbye",
+        "chapter2-deferred",
+        "chapter2-declined",
+        "chapter2-quiet"
+      ],
+      "startScene": "chapter2-quiet",
+      "starts": [
+        {
+          "id": "warm",
+          "label": "Wants to meet again",
+          "scene": "chapter2-warm",
+          "conditions": [
+            {
+              "key": "second_meeting_interest",
+              "op": "eq",
+              "value": "yes"
+            }
+          ],
+          "match": "all"
+        },
+        {
+          "id": "slow",
+          "label": "Taking time or still uncertain",
+          "scene": "chapter2-slow",
+          "conditions": [
+            {
+              "key": "second_meeting_interest",
+              "op": "eq",
+              "value": "slow"
+            },
+            {
+              "key": "second_meeting_interest",
+              "op": "eq",
+              "value": "uncertain"
+            }
+          ],
+          "match": "any"
+        },
+        {
+          "id": "goodbye",
+          "label": "Declined a second meeting",
+          "scene": "chapter2-goodbye",
+          "conditions": [
+            {
+              "key": "second_meeting_interest",
+              "op": "eq",
+              "value": "no"
+            }
+          ],
+          "match": "all"
+        },
+        {
+          "id": "declined",
+          "label": "Declined or cancelled the first date",
+          "scene": "chapter2-declined",
+          "conditions": [
+            {
+              "key": "date_declined",
+              "op": "eq",
+              "value": true
+            }
+          ],
+          "match": "all"
+        },
+        {
+          "id": "deferred",
+          "label": "Chose to keep chatting instead",
+          "scene": "chapter2-deferred",
+          "conditions": [
+            {
+              "key": "date_deferred",
+              "op": "eq",
+              "value": true
+            }
+          ],
+          "match": "all"
+        }
+      ],
+      "exits": [
+        {
+          "scene": "chapter2-warm",
+          "node": "end"
+        },
+        {
+          "scene": "chapter2-slow",
+          "node": "end"
+        },
+        {
+          "scene": "chapter2-goodbye",
+          "node": "end"
+        },
+        {
+          "scene": "chapter2-deferred",
+          "node": "end"
+        },
+        {
+          "scene": "chapter2-declined",
+          "node": "end"
+        },
+        {
+          "scene": "chapter2-quiet",
+          "node": "end"
+        }
+      ]
+    }
   ]
 }

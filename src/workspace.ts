@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 export const workspaceSchema = z.object({
   docks: z.record(dockPanelSchema).default({}),
   splitWorkspace: z.boolean().default(false),
-  secondWorkspace: z.enum(["editor", "scenes", "dialogues", "devices", "updates"]).default("dialogues"),
+  secondWorkspace: z.enum(["editor", "chapters", "scenes", "dialogues", "devices", "updates"]).default("dialogues"),
   splitDirection: z.enum(["side-by-side", "stacked"]).default("side-by-side"),
   workspaceRatio: z.number().min(25).max(75).default(55),
   reverseWorkspaces: z.boolean().default(false),
@@ -14,6 +14,7 @@ export const workspaceSchema = z.object({
   previewWidth: z.number().min(280).max(3200).default(1000),
   previewHeight: z.number().min(180).max(1800).default(600),
   topDockHeight: z.number().min(140).max(460).default(240),
+  effectsFraction: z.number().min(20).max(80).default(50),
   splitDocks: z.boolean().default(false),
   font: z
     .enum(["Arial", "Verdana", "Trebuchet MS", "Georgia", "monospace"])
@@ -21,7 +22,7 @@ export const workspaceSchema = z.object({
   fontSize: z.number().min(10).max(20).default(12),
   libraryCollapsed: z.boolean().default(false),
   libraryWidth: z.number().min(160).max(400).default(233),
-  controlsWidth: z.number().min(250).max(450).default(290),
+  controlsWidth: z.number().min(250).max(650).default(290),
   previewScale: z.number().min(0.5).max(2).default(1),
   bottomHeight: z.number().min(100).max(600).default(200),
   dialogueMode: z.enum(["pinned", "page", "hidden"]).default("pinned"),

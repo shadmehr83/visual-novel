@@ -40,6 +40,7 @@ it("records actual chosen phone replies, persists transcripts and includes self-
   const p = savedProject();
   const phone = p.scenes.find((s) => s.id === "messages")!;
   p.scenes = [phone];
+  delete p.chapters;
   phone.nodes = [
     {
       id: "hello",

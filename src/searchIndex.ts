@@ -4,6 +4,7 @@ import {activities,activitySetting} from './EffectSummary';
 export type FeatureRoute={id:string;title:string;description:string;action:string;target?:string;zone?:string;scene?:string;node?:string;asset?:string;keywords?:string};
 const defs:[string,string,string,string?][]=[
  ['Active effects','See enabled and disabled layers. Open a layer’s settings or use its separate on/off toggle.','active','enabled falling rain glass count'],
+ ['Chapters advanced','Organise scenes into chapters, set conditional opening scenarios from prior choices and test start rules.','chapters','chapter count next chapter start branch scenarios'],
  ['Scenes advanced','Edit the scene route map, connections, scene names and backgrounds.','scenes','graph branches'],
  ['Dialogue advanced','Edit dialogue boxes, choices, notes, connections and per-dialogue artwork.','dialogues','nodes flow graph'],
  ['Editor','Open the scene preview with visual controls and dialogue editing.','editor','main studio'],

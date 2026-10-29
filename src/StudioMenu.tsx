@@ -2,6 +2,7 @@ import { useEffect, useRef } from "react";
 import { ENGINE_VERSION, releases } from "./releases";
 export type StudioView =
   | "editor"
+  | "chapters"
   | "scenes"
   | "dialogues"
   | "devices"
@@ -174,6 +175,7 @@ export function StudioMenu({
         {(
           [
             ["editor", "Editor"],
+            ["chapters", "Chapters advanced"],
             ["scenes", "Scenes advanced"],
             ["dialogues", "Dialogue advanced"],
             ["devices", "Advanced devices"],

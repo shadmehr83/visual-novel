@@ -1,4 +1,4 @@
-export const ENGINE_VERSION = "2.10.0";
+export const ENGINE_VERSION = "2.11.0";
 export type ReleaseFeature = {
   name: string;
   description: string;
@@ -19,7 +19,12 @@ const f = (
   action?: string,
 ): ReleaseFeature => ({ name, description, steps: path.split(" → "), action });
 export const releases: Release[] = [
-  {version:"2.10.0", name:"Insta video feed and local reactions", date:"2026-10-29", features:[
+  {version:"2.11.0",name:"Mouse resizing and branching chapters",date:"2026-10-29",features:[
+    f("Resize edges and deliberate window dragging", "Resize dialogue vertically and effects horizontally by dragging their dividers. Floating panels resize at every edge. Only dragging the six-dot grip detaches a window; clicking the title or grip leaves it docked.", "Dialogue editor top edge → Drag up/down; Effects inner edge → Drag left/right", "windows"),
+    f("Chapters with conditional starting scenes", "Group scenes into chapters, author ordered all/any state rules, preview the selected starting scene and choose chapter ending dialogues. The next chapter retains prior choices and resolves its opening once on entry.", "Chapters advanced → Select chapter → Conditional starting scenarios", "chapters"),
+    f("Six editable chapter-two openings", "The Space Between Messages has short draft starts for warm, cautious, goodbye, deferred, declined and quiet routes. These extend the source bible’s continuity rules and stop at explicit draft endpoints. Existing artwork, phone apps and café effects are preserved.", "Story library → Story chapter → The Space Between Messages", "chapters")
+  ]},
+  {version:"2.10.0", commit:"3098c7e", name:"Insta video feed and local reactions", date:"2026-10-29", features:[
     f("Four original illustrated videos", "Watch four distinct 24-second clips with atmospheric rain, lamplight, gentle camera motion and original ambient sound, matching the game’s painterly style and the protagonist’s quiet, dryly funny interests. Home, Ember, notifications and dialogue schedules are preserved.", "Phone Home → Insta → Scroll videos", "devices"),
     f("Working likes and fictional comments", "Toggle one heart per post, read varied authored reactions and leave a local reply. Player reactions stay saved in the browser without changing story choices. Videos pause while comments or the pause menu are open and when scrolled away.", "Insta → Heart or Comments → Post locally", "devices"),
     f("Dedicated Insta authoring and portable clips", "Upload more videos, edit accounts, captions and authored comments, reorder posts and set autoplay, replay and feed volume in the new Insta feed tab. Complete project and playable HTML exports include media bytes for use on another device.", "Advanced devices → Insta feed → Upload more feed videos", "devices")

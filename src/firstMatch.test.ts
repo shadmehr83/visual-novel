@@ -7,6 +7,8 @@ function play(
   overrides: (text: string, scene: string) => boolean = () => false,
 ) {
   const p = savedProject();
+  // These regressions intentionally exercise the original first-chapter demo.
+  delete p.chapters;
   let r = start(p);
   const lines: string[] = [];
   for (let step = 0; step < 240 && !r.ended; step++) {
@@ -111,7 +113,7 @@ it("outfits are cosmetic and asking for a public place still permits the date", 
 it("keeps every departure branch in the new phone scene and leaves valid exits from each café reflection", () => {
   const p = savedProject(),
     cafe = p.scenes.find((s) => s.id === "cafe")!,
-    departure = p.scenes.at(-1)!;
+    departure = p.scenes.find(s=>s.id==="departure")!;
   expect(departure.id).toBe("departure");
   expect(departure.phone?.contact).toBe("Maria");
   expect(departure.phone?.enabled).toBe(true);
