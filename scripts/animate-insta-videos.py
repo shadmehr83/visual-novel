@@ -37,7 +37,7 @@ def render(name):
                     "[screenrgb]perspective=sense=destination:x0=199:y0=193:x1=287:y1=183:x2=192:y2=265:x3=284:y3=267[monitorrgb]",
                     "[screenalpha]alphaextract,perspective=sense=destination:x0=199:y0=193:x1=287:y1=183:x2=192:y2=265:x3=284:y3=267[monitormask]",
                     '[monitorrgb][monitormask]alphamerge[monitor]',
-                    '[base][monitor]overlay=shortest=1[desk]'];current='desk' 
+                    '[base][monitor]overlay=shortest=1[desk]'];current='desk'
     # Rain falls in different streak lengths and speeds; interior masks stop at glass.
     masks=['1','gt(X,168)*lt(Y,310)','lt(X,144)*lt(Y,218)','gt(X,115)*lt(X,185)*lt(Y,320)']
     drops=f"({masks[index]})*(lt(mod(X+Y*.16,29),1.2)*lt(mod(Y+T*145,83),19)*91+lt(mod(X+Y*.11+17,51),1)*lt(mod(Y+T*98,107),12)*48)"
@@ -66,7 +66,7 @@ def render(name):
         theta='.9*sin(PI*clip((mod(on/24,11)-5)/3.5,0,1))'
         projection=f"perspective=sense=destination:x0=120:y0=466:x1='120+200*cos({theta})':y1='466+43*cos({theta})-55*sin({theta})':x2=80:y2=546:x3='80+98*cos({theta})':y3='546+59*cos({theta})-55*sin({theta})':eval=frame"
         filters += ['[paper]split=2[papertexture][paperalpha]',f'[papertexture]{projection}[pagetexture]',f'[paperalpha]alphaextract,{projection}[pagemask]',
-                    '[pagetexture][pagemask]alphamerge[page]', '[hot][page]overlay=shortest=1[reading]'];current='reading' 
+                    '[pagetexture][pagemask]alphamerge[page]', '[hot][page]overlay=shortest=1[reading]'];current='reading'
     # Small camera movement follows the independent foreground action, not vice versa.
     bob=2 if index in [0,3] else .5
     filters.append(f"[{current}]scale=366:650,crop=360:640:x='3+sin(t*1.1)':y='5+{bob}*sin(t*{5.2 if index==0 else 3.3})',format=yuv420p[out]")

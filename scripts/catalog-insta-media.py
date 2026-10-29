@@ -74,5 +74,5 @@ for title,predicate in groups:
   label=Path(r['path']).name;detail=(f" · {r['seconds']:.2f}s" if 'seconds'in r else '')
   text+=f"- [{label}](../../{r['path']}){detail} · {r['bytes']/1024:.0f} KiB\n"
  text+='\n'
-(folder/'README.md').write_text(text)
+(folder/'README.md').write_text(text.rstrip()+'\n')
 print('Indexed',len(rows),'preserved image, audio, mask and video assets.')

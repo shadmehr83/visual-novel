@@ -121,4 +121,3 @@ A byte-for-byte copy of its original code is retained in the v1 archive for refe
 - [tea-old-perspective-preview.jpg](../../references/media/insta/experiments/tea-old-perspective-preview.jpg) · 21 KiB
 - [tea-unclipped-perspective.jpg](../../references/media/insta/experiments/tea-unclipped-perspective.jpg) · 19 KiB
 - [tea-unclipped-perspective.mp4](../../references/media/insta/experiments/tea-unclipped-perspective.mp4) · 24.00s · 1033 KiB
-
