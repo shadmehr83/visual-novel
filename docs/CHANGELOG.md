@@ -1037,3 +1037,7 @@ A built static package makes the studio available over HTTPS. Git-connected Page
 ## v2.16.0 — GIF film editor and precise transition timing (2026-10-29)
 
 Controlled GIF backgrounds now support 0.01–16× speed, exact frame seeking, paused defaults, single-cycle playback and dialogue play/resume/pause cues. A film preview and numbered cue markers sit below the scene background cards. Enter exact transition durations for scene entrances/exits, sub-scenes, main-view returns and individual dialogue overrides. The advanced map inspector widens when a GIF is selected and supports a draggable divider, slider and saved browser width. Existing project content is preserved; the same renderer is bundled into the offline editor and exported player. See [GIF film editor](GIF_FILM_EDITOR.md).
+
+## v2.17.0 — AI Demand Export and timestamped update history (2026-10-29)
+
+Assistant now includes a separate dictation-and-export panel for coding requests. Saved entries capture time, version and scene/dialogue context, travel in project exports and can be copied into ChatGPT or prepared as GitHub inbox files. Direct GitHub saving reuses the optional existing publisher. Requests are not submitted to an existing chat or executed automatically. Update history includes Sydney timestamps with seconds; the toolbar shows only the version. Chapter controls have short, action-specific hover help. See [AI Demand Export](AI_DEMAND_EXPORT.md) and [request inbox](../demands/README.md).

@@ -1,3 +1,4 @@
+import { demandSchema } from "./demandSchema";
 import { deviceScreen, deviceDialogue, allowsReply } from "./interactions";
 import { instaFeedSchema } from "./feedSchema";
 import { chapterSchema } from "./chapterSchema";
@@ -407,6 +408,7 @@ const asset = z.object({
   reference: z.boolean(),
 });
 export const projectSchema = z.object({
+  demands: z.array(demandSchema).max(500).optional(),
   chapters: z.array(chapterSchema).min(1).max(40).optional(),
   instaFeed: instaFeedSchema.optional(),
   deviceDefaults: z.object({ appearance: deviceAppearanceSchema.optional(), avatar: z.string().nullable().optional() }).optional(),

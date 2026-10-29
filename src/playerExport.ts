@@ -3,6 +3,8 @@ import { portableFeedProject } from "./feedLibrary";
 export async function exportPlayer(project: Project) {
   validateProject(project);
   project = await portableFeedProject(project);
+  // Coding requests belong to editable project backups, not the public game.
+  project = { ...project, demands: undefined };
   const embedded = document.getElementById("bundled-player")?.textContent;
   let code: string;
   if (embedded) {

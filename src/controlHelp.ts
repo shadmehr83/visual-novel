@@ -1,8 +1,11 @@
+import { chapterHelp } from "./chapterHelp";
 export function specificHelp(
   label: string,
   element: HTMLElement,
 ): string | undefined {
   const name = label.toLowerCase().replace(/ exact value$/, "");
+  const chapter = chapterHelp(name,element);
+  if(chapter)return chapter;
   const phoneHelp: Record<string,string> = {
     "device enabled": "Enable the scene’s scheduled phone or computer. Turning this off hides its scheduled device, but explicit Phone visible overrides on individual dialogue boxes still work.",
     "default phone screen": "Choose the first app used when no dialogue has its own app switch: Home shows icons, feed opens Insta, and chat opens Ember. This does not decide when the phone appears.",

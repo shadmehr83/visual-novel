@@ -1,4 +1,4 @@
-export const ENGINE_VERSION = "2.16.0";
+export const ENGINE_VERSION = "2.17.0";
 export type ReleaseFeature = {
   name: string;
   description: string;
@@ -9,6 +9,7 @@ export type Release = {
   version: string;
   name: string;
   date: string;
+  timestamp?: string;
   commit?: string;
   features: ReleaseFeature[];
 };
@@ -19,68 +20,73 @@ const f = (
   action?: string,
 ): ReleaseFeature => ({ name, description, steps: path.split(" → "), action });
 export const releases: Release[] = [
- {version:"2.16.0",name:"GIF film editor and precise transition timing",date:"2026-10-29",features:[
+ {version:"2.17.0",name:"AI Demand Export and timestamped update history",date:"2026-10-29",timestamp:"2026-10-29T10:26:17Z",features:[
+ f("AI Demand Export", "Dictate and log a change request with its scene, dialogue, timestamp and engine version. Copy/open ChatGPT, download the handoff or prepare a GitHub inbox file. Existing-chat submission still requires Send in ChatGPT.", "Assistant → AI Demand Export", "assistant"),
+ f("GitHub request inbox", "Request files live separately in demands/inbox. The GitHub draft flow uses your browser login; direct saving is available when the existing publisher is configured. A saved file does not execute a task.", "Assistant → AI Demand Export → Save request in GitHub", "assistant"),
+ f("Update times and concise controls", "Update history shows recorded times in Sydney, including seconds. The toolbar shows only the version; chapter controls have short, specific hover help.", "Update history → Recorded time or Chapters advanced", "updates")
+ ]},
+ {version:"2.16.0",commit:"227fad7",name:"GIF film editor and precise transition timing",date:"2026-10-29",timestamp:"2026-10-29T10:16:13Z",features:[
  f("Slow, pause and cue GIFs", "Scrub a GIF filmstrip, type exact source-frame times, choose 0.01–16× speed, hold a still frame or play once then freeze. Dialogue cues can play, resume, pause or run one cycle without changing the background asset.", "Scenes advanced → Background sequence → Click GIF thumbnail → GIF film editor", "scenes"),
  f("Editable transitions on the film timeline", "Scene entrances, exits, each sub-scene and returns to the main view have exact duration fields. Individual dialogues can override the transition, with settings retained in project and playable HTML exports.", "Scenes advanced → Background sequence → Transition duration", "scenes"),
  f("Resizable advanced inspector", "Clicking a GIF thumbnail widens its film editor. Drag the map’s right divider or use Panel width to choose the size; keyboard resizing and browser persistence are supported.", "Scenes advanced → Panel width or divider", "scenes")
  ]},
- {version:"2.15.0",commit:"ff24df9",name:"GIF backgrounds and visual background sequences",date:"2026-10-29",features:[
+ {version:"2.15.0",commit:"ff24df9",name:"GIF backgrounds and visual background sequences",date:"2026-10-29",timestamp:"2026-10-29T08:46:00Z",features:[
  f("Animated background uploads", "Upload GIFs using the normal background picker or the dedicated Upload GIF background button. Animation bytes stay in project exports and the offline editor, with matched still fallbacks for the included café loops.", "Background → Upload GIF background", "background"),
  f("Visual scene background sequence", "Scenes advanced displays thumbnail cards for main and sub-scene backgrounds, GIF labels, transition arrows, editable styles and exact dialogue triggers. Add a still or GIF directly to a chosen dialogue.", "Scenes advanced → Select scene → Background sequence", "scenes"),
  f("Steady café animation and forward street", "Café loops reuse the fixed original painting with local blink and flame patches, then cue a matched cake-on-table loop. The departure looks down a wet street toward a distant Ferris wheel and ice-cream lights.", "Story → A table by the window or After the café", "scenes")
  ]},
-  {version:"2.14.0",commit:"5fb7d63",name:"Character motion, chapter repair and wet streets",date:"2026-10-29",features:[
+  {version:"2.14.0",commit:"5fb7d63",name:"Character motion, chapter repair and wet streets",date:"2026-10-29",timestamp:"2026-10-29T07:54:25Z",features:[
     f("Chapters that create and retain their scenes", "Add chapter no longer navigates to an opening before it exists. Older First Match workspaces put the six morning openings into chapter two while retaining the farewell as chapter one’s ending.", "Chapters advanced → Add chapter", "chapters"),
     f("Masked character motion and saved snippets", "Hinges support gentle repeating head tilt, eye drift and short eyelid blinks alongside dialogue poses and activation ranges. Extract selected pixels into the Character snippets folder, move a patch by dragging and optionally cover its old position with an aligned clean plate.", "Cinematics → Add hinge region → Character motion", "effect:Cinematics"),
     f("Rain impact ripples and layered sound", "Reflective puddles on the approach and farewell have masked impact rings instead of pavement distortion. Original splash and heel-to-toe sounds layer with rain, and morning openings use a matching daylight bedroom with phone chat only on message dialogues.", "Motion → Rain impacts or Sound → Add background ambience", "effect:Motion")
   ]},
-  { version: "2.13.0", commit:"78deec2", name: "Author’s playthrough and live editing", date: "2026-10-29", features: [
+  { version: "2.13.0", commit:"78deec2", name: "Author’s playthrough and live editing", date: "2026-10-29",timestamp:"2026-10-29T06:48:45Z", features: [
     f("Edit while playing", "Author’s playthrough keeps dialogue, replies, notes, backgrounds and normal scene controls editable. The editor follows the actual dialogue and scene, and changes autosave with Undo available.", "Header → Author’s playthrough → Edit current dialogue", "author-play"),
     f("Safe live debugging", "Automatic dialogue steps and timed actions wait while you type. Route links and dialogue deletion stay locked during playback. Phone messages update when their current authored line is edited, without replaying choices.", "Author’s playthrough → Dialogue or scene controls", "author-play"),
     f("Phone buzz and mouse light placement", "The second bedroom dialogue plays an original double vibration. Local radial lights have a Move light with mouse button beside their X/Y coordinates; one scene click moves the selected light without changing its loop.", "Lighting → Local light → Move light with mouse", "effect:Lighting")
   ]},
-  {version:"2.12.0",commit:"2962460",name:"Draggable comments and animated feed scenes",date:"2026-10-29",features:[
+  {version:"2.12.0",commit:"2962460",name:"Draggable comments and animated feed scenes",date:"2026-10-29",timestamp:"2026-10-29T04:46:16Z",features:[
     f("Compact comments with finger-like mouse gestures", "Comments use a short header and a single-line reply composer. Drag the sheet header up to the phone’s top or down to shrink it; drag the comments themselves to scroll. Likes, saved replies and story choices stay intact.", "Insta → Comments → Drag header or comment list", "devices"),
     f("Independent scene action and original sound", "The four 24-second feed clips add windblown leaves, puddle splashes, moving book pages, curling steam, an animated monitor and a passing city view. New original sound designs include a short piano composition for the reading clip.", "Phone Home → Insta → Play and unmute", "devices"),
     f("Reusable media archive", "Original paintings, earlier clips and exact soundtracks remain saved alongside new animation assets, audio stems, effects and music. Older embedded backups can opt into the new included video sources without replacing uploads or post settings.", "Advanced devices → Insta feed → Use updated included animations or GitHub media archive", "devices")
   ]},
-  {version:"2.11.0",commit:"98e674b",name:"Mouse resizing and branching chapters",date:"2026-10-29",features:[
+  {version:"2.11.0",commit:"98e674b",name:"Mouse resizing and branching chapters",date:"2026-10-29",timestamp:"2026-10-29T03:46:26Z",features:[
     f("Resize edges and deliberate window dragging", "Resize dialogue vertically and effects horizontally by dragging their dividers. Floating panels resize at every edge. Only dragging the six-dot grip detaches a window; clicking the title or grip leaves it docked.", "Dialogue editor top edge → Drag up/down; Effects inner edge → Drag left/right", "windows"),
     f("Chapters with conditional starting scenes", "Group scenes into chapters, author ordered all/any state rules, preview the selected starting scene and choose chapter ending dialogues. The next chapter retains prior choices and resolves its opening once on entry.", "Chapters advanced → Select chapter → Conditional starting scenarios", "chapters"),
     f("Six editable chapter-two openings", "The Space Between Messages has short draft starts for warm, cautious, goodbye, deferred, declined and quiet routes. These extend the source bible’s continuity rules and stop at explicit draft endpoints. Existing artwork, phone apps and café effects are preserved.", "Story library → Story chapter → The Space Between Messages", "chapters")
   ]},
-  {version:"2.10.0", commit:"3098c7e", name:"Insta video feed and local reactions", date:"2026-10-29", features:[
+  {version:"2.10.0", commit:"3098c7e", name:"Insta video feed and local reactions", date:"2026-10-29",timestamp:"2026-10-29T03:12:32Z", features:[
     f("Four original illustrated videos", "Watch four distinct 24-second clips with atmospheric rain, lamplight, gentle camera motion and original ambient sound, matching the game’s painterly style and the protagonist’s quiet, dryly funny interests. Home, Ember, notifications and dialogue schedules are preserved.", "Phone Home → Insta → Scroll videos", "devices"),
     f("Working likes and fictional comments", "Toggle one heart per post, read varied authored reactions and leave a local reply. Player reactions stay saved in the browser without changing story choices. Videos pause while comments or the pause menu are open and when scrolled away.", "Insta → Heart or Comments → Post locally", "devices"),
     f("Dedicated Insta authoring and portable clips", "Upload more videos, edit accounts, captions and authored comments, reorder posts and set autoplay, replay and feed volume in the new Insta feed tab. Complete project and playable HTML exports include media bytes for use on another device.", "Advanced devices → Insta feed → Upload more feed videos", "devices")
   ]},
-  {version:"2.9.0", commit:"e3c2989", name:"Phone controls made clear", date:"2026-10-29", features:[
+  {version:"2.9.0", commit:"e3c2989", name:"Phone controls made clear", date:"2026-10-29",timestamp:"2026-10-28T17:45:19Z", features:[
     f("Phone switches on every dialogue", "Show or hide the phone directly in the dialogue map, original editor or simple Phone panel. Keep story dialogue separate, or integrate it into Ember chat. Choose Home, Insta or Ember without opening Advanced devices. Overrides affect only the selected dialogue; reset returns to the existing schedule.", "Dialogue advanced → Select a box → Phone on this dialogue", "dialogues"),
     f("Shared contact portraits and app icons", "Phone appearance is shared by default: saved icons, wallpaper and contact portrait follow the device across scenes and survive project export. Disable sharing in Advanced devices for an independent scene. Existing scene artwork, outfits and effect settings remain intact.", "Advanced devices → Use shared phone appearance → Apps or Frame & placement", "devices"),
     f("Visible switches and independent settings bars", "On/off switches now have bounded tracks and explicit ON/OFF states. Effects and interactions form one labelled tool row, while scene and workspace settings form another. Selecting Phone highlights Phone without also highlighting Atmosphere.", "Editor → Effects & interactions → Phone", "effect:Phone"),
     f("Published docking and search update", "The previously unpublished v2.8 docking windows, direct effect links and main feature search are included with this release. The studio displays both its version number and release name.", "Studio header → Search features or Update history")
   ]},
-  {version:"2.8.0", commit:"9371bc8", name:"Direct effect settings, docking windows and studio search", date:"2026-10-29", features:[
+  {version:"2.8.0", commit:"9371bc8", name:"Direct effect settings, docking windows and studio search", date:"2026-10-29",timestamp:"2026-10-28T17:27:04Z", features:[
     f("Active layers open their own settings", "Click an effect name in Active to open its settings, including named light, motion and hinge layers. The independent checkbox still toggles the layer; opening settings never enables or disables it.", "Editor → Active → Click an effect name", "active"),
     f("Floating panels, restore and snap docking", "Panel title bars have small Pop out and Move icons. Float, resize, restore or dock the library, controls, preview, dialogue and workspace panes. Drag near an edge to preview snapping; restore chooses another free dock if the old one is occupied. Separate effects and properties docks can float independently.", "Panel title bar → Pop out or Move → Drag to a highlighted edge; Windows & docking → Restore all window positions", "windows"),
     f("Movable dialogue editor", "Place dialogue above the scene, at an edge, in a floating window or in a separate split column. The same dialogue, notes, items, state and event log remain synchronized with the preview.", "Dialogue editor title bar → Move → Dock top, Floating window or Split beside workspace", "dialogue"),
     f("Main studio feature search", "Search features, settings, scene names, dialogue, artwork and current effects from the main header. Results open the correct workspace or setting and highlight the requested control. Search stays local and does not execute an effect toggle.", "Search features or Ctrl+K / Command+K → Type a feature → Select a result"),
     f("Specific help for new workspace tools", "Delayed hover descriptions explain pop-out, restore, docking, snap targets, shared workspace selectors, search results and dialogue artwork instead of repeating a generic description.", "Hover a new icon, button or selector for a moment → Read its description", "appearance")
   ]},
-  {version:"2.7.0", commit:"38906b4", name:"Populated artwork folders and shared split workspaces", date:"2026-10-29", features:[
+  {version:"2.7.0", commit:"38906b4", name:"Populated artwork folders and shared split workspaces", date:"2026-10-29",timestamp:"2026-10-28T16:23:07Z", features:[
     f("Recovered artwork library and GitHub image folders", "Older saved projects now import all image dependencies before adding new sub-scenes, fixing the Missing sub-scene background update failure. Restore artwork retries a focused merge with a recovery copy. Every published image and all available generation originals are also archived as ordinary files in GitHub folders.", "Editor → Restore artwork → Assets → Artwork folder; GitHub → artwork"),
     f("Shared side-by-side and stacked workspaces", "Split view opens two workspaces sharing one project and selected dialogue. Edit alongside scene or dialogue maps, device settings or update history. Choose the pair, swap sides and resize their divider; playback temporarily uses one game view.", "Studio workspaces → Split view → Choose Second workspace → Drag the divider"),
     f("Artwork selection directly from dialogue maps", "Select a dialogue box and choose its background image from populated artwork folders in the map details. Each dialogue can have its own temporary image without changing a shared view or the main scene background. The companion editor previews that same dialogue immediately.", "Dialogue advanced → Select a box → Image for this dialogue → Choose a folder and image", "dialogues")
   ]},
-  {version:"2.6.0", commit:"84515e4", name:"Artwork folders, device return routes and player progress", date:"2026-10-29", features:[
+  {version:"2.6.0", commit:"84515e4", name:"Artwork folders, device return routes and player progress", date:"2026-10-29",timestamp:"2026-10-28T15:49:52Z", features:[
     f("Artwork folders and restored clothing", "Missing published images are added to compatible saved projects with a recovery copy. Choose backgrounds, clothing and profile artwork from named folders. The room window and wardrobe now open their matching sub-scenes, and outfit cards retain inspect-before-confirm.", "Editor → Assets → Artwork folder; or Outfits & Items → Inspect a saved outfit → Choose it", "wardrobe"),
     f("Dialogue-based device return controls", "Enable a put-away button for a dialogue range or an individual dialogue. Return to a selected point or the last choice menu; reopening the original route resumes your phone or computer dialogue without replaying its state actions. Existing phone apps are unchanged.", "Advanced devices → Timing → Put device away · return route", "devices"),
     f("Visible layout placement and toggleable tools", "Click the selected tool again to close its library panel. Move tools to the top or left, place controls on any dock, and adjust panel sizes and dialogue layout from the visible placement strip or Project settings.", "Editor → Tools placement or Controls placement → Layout & project settings", "workspace"),
     f("Fullscreen pause menu and route viewer", "Pause and fullscreen controls stay inside the game area, including fullscreen. The pause menu includes fullscreen and a read-only progress map showing visited dialogues, chosen replies and question marks for unexplored routes.", "Play story → Pause menu → View Current Progress")
   ]},
-  {version:"2.5.0", commit:"d1bcec5", name:"Independent devices and rainy window views", date:"2026-10-28", features:[f("Independent texting activation", "Ordinary story actions never become messages. Configure dialogue placement and texting start/end in Advanced devices. Monitor interaction opens the desktop separately; window and monitor close-ups have glass-specific rain.", "Advanced devices → Dialogue & replies → Dialogue placement or Texting start/end", "devices")]},
+  {version:"2.5.0", commit:"d1bcec5", name:"Independent devices and rainy window views", date:"2026-10-28",timestamp:"2026-10-28T09:47:10Z", features:[f("Independent texting activation", "Ordinary story actions never become messages. Configure dialogue placement and texting start/end in Advanced devices. Monitor interaction opens the desktop separately; window and monitor close-ups have glass-specific rain.", "Advanced devices → Dialogue & replies → Dialogue placement or Texting start/end", "devices")]},
   {
-    version: "2.4.0", commit: "bef5f98", name: "Sound, wardrobe and close-up storytelling", date: "2026-10-28",
+    version: "2.4.0", commit: "bef5f98", name: "Sound, wardrobe and close-up storytelling", date: "2026-10-28",timestamp:"2026-10-28T09:21:25Z",
     features: [
       f("Restored clothing cards and visible chosen outfits", "The three saved clothing images can be inspected, worn and reconsidered. The chosen image stays visible with its result dialogue; missing links in compatible older projects are repaired with a recovery copy.", "Editor → Items & outfits → Open saved outfit selection; during playback inspect a card, choose it, or See the other outfits", "wardrobe"),
       f("Reusable sound library and master volume", "Original notification, rain, muffled room rain, wet footsteps, closet and coat sound designs are included. Assign ambience or dialogue/reply/item cues and upload additional audio. Walking is enabled in scenes five and seven; rain in one, four and seven.", "Editor → Effect panels → Sound → Add background ambience or assign a sound cue; Play story → Sound volume", "effect:Sound"),
@@ -95,7 +101,7 @@ export const releases: Release[] = [
     version: "2.3.0",
     commit: "3c16fbf",
     name: "Phone navigation and missing story updates",
-    date: "2026-10-28",
+    date: "2026-10-28", timestamp:"2026-10-28T08:31:33Z",
     features: [
       f(
         "Integrate the missing café departure into saved projects",
@@ -133,7 +139,7 @@ export const releases: Release[] = [
     version: "2.2.0",
     commit: "24935cf",
     name: "Dedicated devices and a flexible preview",
-    date: "2026-10-28",
+    date: "2026-10-28", timestamp:"2026-10-28T04:36:30Z",
     features: [
       f(
         "Advanced devices workspace",
@@ -183,7 +189,7 @@ export const releases: Release[] = [
     version: "2.1.0",
     commit: "0aa0629",
     name: "After the café",
-    date: "2026-10-28",
+    date: "2026-10-28", timestamp:"2026-10-28T04:16:23Z",
     features: [
       f(
         "Separate rainy departure scene",
@@ -209,7 +215,7 @@ export const releases: Release[] = [
     version: "2.0.0",
     commit: "77b169e",
     name: "Connected story workspace",
-    date: "2026-10-28",
+    date: "2026-10-28", timestamp:"2026-10-28T03:45:25Z",
     features: [
       f(
         "Scenes advanced",
@@ -258,7 +264,7 @@ export const releases: Release[] = [
   {
     version: "1.15.0",
     name: "Simpler devices and safer playback",
-    date: "2026-10-28",
+    date: "2026-10-28", timestamp:"2026-10-28T02:26:16Z",
     commit: "16b90c1",
     features: [
       f(
@@ -332,7 +338,7 @@ export const releases: Release[] = [
   {
     version: "1.14.0",
     name: "Scheduled screens and light favourites",
-    date: "2026-10-28",
+    date: "2026-10-28", timestamp:"2026-10-27T13:48:43Z",
     commit: "254cc74",
     features: [
       f(
@@ -376,7 +382,7 @@ export const releases: Release[] = [
   {
     version: "1.13.0",
     name: "Items, presets and authoring refinements",
-    date: "2026-10-27",
+    date: "2026-10-27", timestamp:"2026-10-27T12:37:00Z",
     commit: "e5b7548",
     features: [
       f(
@@ -432,7 +438,7 @@ export const releases: Release[] = [
   {
     version: "1.12.0",
     name: "Hinges and foreground devices",
-    date: "2026-10-27",
+    date: "2026-10-27", timestamp:"2026-10-27T08:52:54Z",
     commit: "6390bb2",
     features: [
       f(
@@ -476,7 +482,7 @@ export const releases: Release[] = [
   {
     version: "1.11.2",
     name: "Reference archive",
-    date: "2026-10-27",
+    date: "2026-10-27", timestamp:"2026-10-27T08:17:12Z",
     commit: "282f111",
     features: [
       f(
@@ -489,7 +495,7 @@ export const releases: Release[] = [
   {
     version: "1.11.1",
     name: "Opening and café reference board",
-    date: "2026-10-27",
+    date: "2026-10-27", timestamp:"2026-10-27T08:14:05Z",
     commit: "5359105",
     features: [
       f(
@@ -502,7 +508,7 @@ export const releases: Release[] = [
   {
     version: "1.11.0",
     name: "The First Match story adaptation",
-    date: "2026-10-27",
+    date: "2026-10-27", timestamp:"2026-10-27T07:40:07Z",
     commit: "d0ca7ec",
     features: [
       f(
@@ -527,7 +533,7 @@ export const releases: Release[] = [
   {
     version: "1.10.1",
     name: "Portable authored checkpoint",
-    date: "2026-10-27",
+    date: "2026-10-27", timestamp:"2026-10-26T14:00:58Z",
     commit: "35de011",
     features: [
       f(
@@ -541,7 +547,7 @@ export const releases: Release[] = [
   {
     version: "1.10.0",
     name: "Unified selection and brush tools",
-    date: "2026-10-27",
+    date: "2026-10-27", timestamp:"2026-10-26T13:42:46Z",
     commit: "d9e1e5a",
     features: [
       f(
@@ -567,7 +573,7 @@ export const releases: Release[] = [
   {
     version: "1.9.1",
     name: "Dialogue layout refinement",
-    date: "2026-10-27",
+    date: "2026-10-27", timestamp:"2026-10-26T13:26:14Z",
     commit: "9232d40",
     features: [
       f(
@@ -581,7 +587,7 @@ export const releases: Release[] = [
   {
     version: "1.9.0",
     name: "Camera depth and workspace comfort",
-    date: "2026-10-27",
+    date: "2026-10-27", timestamp:"2026-10-26T13:22:23Z",
     commit: "2df1e97",
     features: [
       f(
@@ -625,7 +631,7 @@ export const releases: Release[] = [
   {
     version: "1.8.0",
     name: "Dockable controls and selective motion",
-    date: "2026-10-26",
+    date: "2026-10-26", timestamp:"2026-10-26T12:31:25Z",
     commit: "bf8b8f2",
     features: [
       f(
@@ -657,7 +663,7 @@ export const releases: Release[] = [
   {
     version: "1.7.0",
     name: "Multiple effect zones and project publishing",
-    date: "2026-10-26",
+    date: "2026-10-26", timestamp:"2026-10-26T11:55:47Z",
     commit: "4df4a84",
     features: [
       f(
@@ -701,7 +707,7 @@ export const releases: Release[] = [
   {
     version: "1.6.1",
     name: "Snapshot recovery",
-    date: "2026-10-26",
+    date: "2026-10-26", timestamp:"2026-10-26T11:24:22Z",
     commit: "adfd600",
     features: [
       f(
@@ -715,7 +721,7 @@ export const releases: Release[] = [
   {
     version: "1.6.0",
     name: "Cross-device project checkpoint",
-    date: "2026-10-26",
+    date: "2026-10-26", timestamp:"2026-10-26T21:41:40+11:00",
     commit: "6c45162",
     features: [
       f(
@@ -729,7 +735,7 @@ export const releases: Release[] = [
   {
     version: "1.5.0",
     name: "Editable light intensity loops",
-    date: "2026-10-26",
+    date: "2026-10-26", timestamp:"2026-10-26T19:45:23+11:00",
     commit: "4d8d93e",
     features: [
       f(
@@ -743,7 +749,7 @@ export const releases: Release[] = [
   {
     version: "1.4.0",
     name: "Café ambience",
-    date: "2026-10-26",
+    date: "2026-10-26", timestamp:"2026-10-26T19:33:46+11:00",
     commit: "d9a4aa3",
     features: [
       f(
@@ -757,7 +763,7 @@ export const releases: Release[] = [
   {
     version: "1.3.0",
     name: "Hosting and AI handoff",
-    date: "2026-10-26",
+    date: "2026-10-26", timestamp:"2026-10-26T07:29:57Z",
     commit: "0a63b09",
     features: [
       f(
@@ -771,7 +777,7 @@ export const releases: Release[] = [
   {
     version: "1.2.0",
     name: "Single-file local studio",
-    date: "2026-10-26",
+    date: "2026-10-26", timestamp:"2026-10-26T07:20:16Z",
     commit: "4feca74",
     features: [
       f(
@@ -785,7 +791,7 @@ export const releases: Release[] = [
   {
     version: "1.1.0",
     name: "AI, sound and interactive playback",
-    date: "2026-10-26",
+    date: "2026-10-26", timestamp:"2026-10-26T04:01:13Z",
     commit: "b36af25",
     features: [
       f(
@@ -829,7 +835,7 @@ export const releases: Release[] = [
   {
     version: "1.0.0",
     name: "Stillframe studio foundation",
-    date: "2026-10-26",
+    date: "2026-10-26", timestamp:"2026-10-26T03:30:12Z",
     commit: "24b4a6e",
     features: [
       f(

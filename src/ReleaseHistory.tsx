@@ -1,3 +1,4 @@
+import { sydneyTimestamp } from "./time";
 import { useState } from "react";
 import { ENGINE_VERSION, releases } from "./releases";
 export function ReleaseHistory({
@@ -40,9 +41,10 @@ export function ReleaseHistory({
       </div>
       <p className="release-provenance">
         Versions before 2.0 were named retrospectively from the repository’s
-        recorded milestones. Dates use Sydney time. Feature directions point to
-        their current location in this release. This history is separate from
-        the playthrough event log.
+        recorded milestones. Dates and times use Sydney time; past times come
+        from recorded Git commits. Feature directions point to their current
+        location in this release. This history is separate from the playthrough
+        event log.
       </p>
       <div className="release-list">
         {matches.map((r, index) => (
@@ -56,12 +58,16 @@ export function ReleaseHistory({
               <span>
                 <b>{r.name}</b>
                 <small>
-                  {new Intl.DateTimeFormat("en-AU", {
-                    day: "numeric",
-                    month: "long",
-                    year: "numeric",
-                    timeZone: "Australia/Sydney",
-                  }).format(new Date(r.date + "T00:00:00+11:00"))}{" "}
+                  {r.timestamp ? (
+                    <time
+                      dateTime={r.timestamp}
+                      data-help="Recorded update time in Sydney. Historical times come from Git commits; this is not the exact time a Cloudflare deployment finished."
+                    >
+                      {sydneyTimestamp(r.timestamp)}
+                    </time>
+                  ) : (
+                    r.date + " · time not recorded"
+                  )}{" "}
                   · {r.features.length} updates
                 </small>
               </span>

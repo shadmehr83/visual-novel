@@ -1291,6 +1291,8 @@ export default function App() {
               )}
               {tab === "Assistant" && (
                 <Assistant
+                  nodeId={nodeId}
+                  edit={edit}
                   project={project}
                   sceneId={sceneId}
                   apply={(next) => edit((p) => Object.assign(p, next))}

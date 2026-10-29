@@ -3,6 +3,7 @@ import {releases} from './releases';
 import {activities,activitySetting} from './EffectSummary';
 export type FeatureRoute={id:string;title:string;description:string;action:string;target?:string;zone?:string;scene?:string;node?:string;asset?:string;keywords?:string};
 const defs:[string,string,string,string?][]=[
+ ["AI Demand Export", "Dictate a change request, save its scene context and time, and copy/open ChatGPT or prepare a GitHub inbox file. Requests are not submitted or executed automatically.", "assistant", "demand request export github voice dictation command chatgpt handoff log"],
  ["GIF film editor", "Select a GIF thumbnail in Scenes advanced to slow playback, scrub exact frames, pause, play once and add dialogue cues. Drag the right divider to widen the film editor.", "scenes", "gif animation speed film timeline blink frame pause stop play once hold"],
  ["Background transition duration", "Type exact seconds under background sequence cards for entrances, exits, sub-scenes and returns. Dialogue overrides also appear in the GIF editor and dialogue artwork controls.", "scenes", "timing seconds duration fade crossfade cut transition"],
  ['Character motion and blinking','Select a hinge region, then configure eyelid blink, eye drift or gentle head tilt. Save transparent snippets, use dialogue poses, loops and start/end ranges.','effect:Cinematics','blink face head eyes puppet skeletal joint snippets mask'],
