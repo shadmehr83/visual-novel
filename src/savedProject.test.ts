@@ -43,7 +43,7 @@ it("loads the complete uploaded artwork and authored rain, lighting, motion and 
   expect(project.scenes.find((s) => s.id === "bedroom")?.background).toBe(
     "first-match-bedroom",
   );
-  expect(project.assets).toHaveLength(19);
+  expect(project.assets).toHaveLength(20);
   const portrait = project.assets.find((a) => a.id === "maria-device-profile")!;
   expect(portrait.data).toMatch(/^data:image\/png;base64,/);
   expect(portrait.id).not.toBe(cafe.background);

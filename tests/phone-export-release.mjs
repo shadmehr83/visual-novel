@@ -10,7 +10,7 @@ try {
  await context.setOffline(true);
  await page.goto('https://offline-phone.test/?snapshot=github');
  await page.getByRole('button',{name:'Keep local project',exact:true}).click();
- await page.getByRole('button',{name:'v2.20.0',exact:true}).waitFor();
+ await page.getByRole('button',{name:'v2.20.1',exact:true}).waitFor();
  const download=page.waitForEvent('download');
  await page.getByRole('button',{name:'Export phone game',exact:true}).click();
  const file=await download;assert.equal(file.suggestedFilename(),'visual-novel-phone.html');

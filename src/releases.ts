@@ -1,4 +1,4 @@
-export const ENGINE_VERSION = "2.20.0";
+export const ENGINE_VERSION = "2.20.1";
 export type ReleaseFeature = {
   name: string;
   description: string;
@@ -20,6 +20,10 @@ const f = (
   action?: string,
 ): ReleaseFeature => ({ name, description, steps: path.split(" → "), action });
 export const releases: Release[] = [
+ {version:"2.20.1",name:"Ember dialogue stays in Ember",date:"2026-10-30",timestamp:"2026-10-29T14:26:03.266993+00:00",features:[
+ f("Chat dialogue stays inside its app", "Returning Home or browsing Insta, Weather or Settings hides Ember dialogue and replies instead of moving them outside. Reopening Ember restores the conversation; deliberate separate narration is retained.", "Phone → Ember → Back to Home → Ember", "devices"),
+ f("Painted Weather app icon", "Weather has a matching painterly umbrella icon, including in existing saved projects and offline exports. Change it with the other app icons.", "Advanced devices → Apps → weather app icon", "devices")
+ ]},
  {version:"2.20.0",name:"Compact phone exports and reversible replies",date:"2026-10-30",timestamp:"2026-10-29T13:58:39.184037+00:00",features:[
  f("Enable or disable a reply", "Hide a reply during play without deleting its destination, text, conditions or state actions. Restore it with the same Enabled checkbox.", "Dialogue editor → Choice → Enabled", "editor"),
  f("Phone-optimized playable game", "Export a viewport-filling phone player with larger device, compact dialogue and tap-to-continue. Desktop exports retain authored text and device sizes.", "Library footer → Export phone game", "export-player"),

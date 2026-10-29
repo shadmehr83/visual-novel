@@ -146,7 +146,9 @@ export function PhoneUI({
   );
   const storyNotice =
     node.phoneNotice || (node.speaker === "Phone" ? node.text : undefined);
-  const narrativeOutside = !texting || screen !== "chat";
+  // Dialogue placement belongs to the authored node, not the app being browsed.
+  // Leaving Ember must hide its messages/replies rather than move them outside.
+  const narrativeOutside = !texting;
   return (
     <>
       <section

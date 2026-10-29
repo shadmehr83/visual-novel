@@ -6396,6 +6396,19 @@
       "notes": "Fixed reference composition; local animation patches only.",
       "approved": false,
       "reference": false
+    },
+    {
+      "id": "studio-icon-weather",
+      "name": "Weather app icon.webp",
+      "mime": "image/webp",
+      "width": 96,
+      "height": 96,
+      "data": "data:image/webp;base64,UklGRhgFAABXRUJQVlA4IAwFAADwGACdASpgAGAAPsFYo00npSMlqBcdCPAYCUv+yplAppD2Y2gNNupbFDX2tzQmGenOaEL3jsDXwvib8ZjUYqCwRg4NT+4+JIW4J2qlyHow82bWTgxrFpZGn8m+eZyi7LUiCDvoMzq0/SwDl4bMsd7V6AxXZ9zgt187rjN4fTzYmaq+5BcHz7w0xFdc31WN7TGp6xCt40lxuTO/ZhHr8o1Mrsi9o6yDhx7coE6mWfwfEE0X2pmzQrjovD/nix6EHBjnZ5jSC0LYiMxToqubVTIAAP71hE2MjhUe/Pv96uEHaBn4d6Z9JiFgDxrNkwwc/WWzbGqFiUCK3U/4xZRFYTqSyIhX3GX1hlqzcYnBpVRGwb330YysmYObDN5Se5xOvEow2oSPIOIoN4nLlo+zPc4YfRO9MRsSm8b4/JLT8JWGJIig0KThTZ6tlQ9MWXs0/NefhBYRwGVDQHNRTBSW/3nW1NPhWlG3k9LaIBFVTtqnC4UWR7KnxFfYOwrF8o86zZjspHXGxDSvhjtMknuxt89KZMW5y2crK5i1hkUDFkPYC4kn+yo6gZtqvkFryDo2JX6M3tAPHdrLfBNcS23sS5YhUU5R0BIQAsPmQA0uzaJoygBpIGPgdNPSVvKgv1WvzYxu9Kl3OkQIAWsO9gRoQRiBZuphGZPi0Jy/j8bSsIZLAm2BieYKmsNEy3y4CJzMt0ZfYrW0urAmco4dZ+tUau66o2b2UVVEYoiPa4gGxCaUhA1D5w9jkaZdcgI/XXCr9jXGc5LlcEoXFHCYXcPDzOmvShXTpkdWVHeDKbeKjYRGGZBDgLSR7cfR1o7kxAYusqx52S//ZMIJboyifScZ1/fLp490QHCtecCWAvi4EbvqAnzYWQ/Mx8+xLOIE4QRw/0G9ph4YzoOYCbbB9Ybvl3mqWo6ncljDA9phYrGw4ssBY5ycIhaqT6TGFpgSUqMrPFvxR9QwGqvpWopsV27mB+zKOPku8D8tyRalTzq671Anlf7udBE+6hjuRxPv27mmnCYSJunnkrarmefWmI8eXfwTDL+OCzrdCGGCp8T72Zc2OiGNJLlF4thhISzSviQrHVrur1h1dkjVeh9j3u22Ok2pD6D1iCftjVCHMw814gSZbTGb3UpEKw57mU4ODH7VwRKbdGVbch+uIubdzQnDRjXg3WlRs2pP4WHFjHBoKp8uZIxn//abZTM5uRjm2lJIHs4qC47MzaYD7uVkHxztOFOYTT8T4IJkswJO2leq2wqiGDb9qU1U6vLW/W6i+9dYQzRzS26kiAludhJO1pyeEGFg3IuKwfATQ83n+a5F+GOF2poO+9c8O/IVAkuoRUtB4/BJ3Z5rknjfp9+WpOJHQ0CWpq7IKzaBRqtBCe29HtlvYskk5KhdKPaQ5uL/YSfJ2jW9Me557rMgeJC6ac9CvjDzg6v8NEzR3N0tJK0I8OdNNBFjxO6Je5N0mGrLvxozMkf4ZmhXoQbsc2RaAPhr1/efWgG9xqCacSxdksp3+QGkeEBnjhnQEEYItvtTn5lWMHV9I1PQTN8XkcwbDGhLNz2p8jgDXvJEtI5CA4AEFk3OMJvPe3QNIxuDeU4DkqXwWglpryW/J0k8UFz4Ytpp8OXLZy0viMcAcECS0zyX1wk9ZNp/f4jXwZs12DYGCtGHPsV816BWaj5r62+GgX+Cp9iUEgsTwhkU1sMyuWRXNYYsUwGizfFA1uHAYBqgAA==",
+      "tags": "weather rain umbrella app icon",
+      "notes": "Original generated icon matching the Ember, Insta and Settings artwork.",
+      "approved": true,
+      "reference": false,
+      "folder": "Profiles & app icons"
     }
   ],
   "characters": [

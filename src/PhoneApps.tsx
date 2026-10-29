@@ -1,3 +1,4 @@
+import { weatherIconData } from "./weatherIcon";
 import { WeatherWidget } from "./PhoneWeather";
 import type { Project, Scene } from "./model";
 import { InstaFeed } from "./InstaFeed";
@@ -14,7 +15,7 @@ export function PhoneApps({
 }) {
   const icon = (id: string, symbol: string) => {
     const asset = project.assets.find((a) => a.id === appearance?.icons[id]);
-    return asset ? <img src={asset.data} alt="" /> : symbol;
+    return asset || id === "weather" ? <img src={asset?.data || weatherIconData} alt="" /> : symbol;
   };
   return screen === "home" ? (
     <div className="phone-home-screen" data-no-advance>
@@ -55,7 +56,7 @@ export function PhoneApps({
           </button>
         ))}
         <button onClick={() => onOpen("weather")} data-help="Open a seven-day story forecast with rain every day. No live weather or location is needed.">
-          <span>☂</span>Weather<small>Rain all week</small>
+          <span>{icon("weather", "☂")}</span>Weather<small>Rain all week</small>
         </button>
       </div>
       <p className="small muted">

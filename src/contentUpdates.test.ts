@@ -34,7 +34,7 @@ it('every published image belongs to a populated folder',()=>{
  expect(folders).toEqual(['Background scenes','Outfits & items','Profiles & app icons']);
  for(const a of p.assets)expect(a.folder).toBeTruthy();
  expect(p.assets.filter(a=>assetFolder(a)==='Outfits & items')).toHaveLength(3);
- expect(p.assets.filter(a=>assetFolder(a)==='Profiles & app icons')).toHaveLength(4);
+ expect(p.assets.filter(a=>assetFolder(a)==='Profiles & app icons')).toHaveLength(5);
 });
 it('assigning map artwork creates a private dialogue view and preserves other users of a shared view',()=>{
  const s=savedProject().scenes[0],a=s.nodes.find(n=>n.id==='window')!,b=s.nodes.find(n=>n.id==='clothes')!;

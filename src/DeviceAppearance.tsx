@@ -36,6 +36,7 @@ export function DeviceAppearanceControls({
             chat: "Ember icon",
             feed: "Insta icon",
             settings: "Settings icon",
+            weather: "Weather icon",
           } as Record<string, string>
         )[target] || "app icon",
   ) => (
@@ -128,7 +129,7 @@ export function DeviceAppearanceControls({
         <>
           <h4>App icons & shortcuts</h4>
           <p>Custom app shortcuts open one of the built-in offline screens.</p>
-          {["chat", "feed", "settings"].map((id) => (
+          {["chat", "feed", "settings", "weather"].map((id) => (
             <div key={id}>
               <AssetPicker project={project} label={id + " app icon"} initialFolder="Profiles & app icons" value={appearance.icons[id]} empty="Default symbol" onChange={image => set("icons", {...appearance.icons, [id]: image || ""})} />
               {onUpload && upload(id)}
