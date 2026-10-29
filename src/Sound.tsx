@@ -4,10 +4,11 @@ type SoundState = {
   volume: number;
   play: (data?: string, volume?: number, event?: string) => void;
   onBlocked: () => void;
+  controls?: ReactNode;
 };
 const SoundContext = createContext<SoundState>({ enabled: false, volume: 0.65, play: () => {}, onBlocked: () => {} });
 export const useSound = () => useContext(SoundContext);
-export function SoundSession({ children, playing, paused }: { children: ReactNode; playing: boolean; paused: boolean }) {
+export function SoundSession({ children, playing, paused, showControls = true }: { children: ReactNode; playing: boolean; paused: boolean; showControls?: boolean }) {
   const [enabled, setEnabled] = useState(true), [volume, setVolume] = useState(0.65), [blocked, setBlocked] = useState(false);
   const live = useRef({ enabled, volume, playing, paused });
   live.current = { enabled, volume, playing, paused };
@@ -35,12 +36,16 @@ export function SoundSession({ children, playing, paused }: { children: ReactNod
     if (!playing) lastChoiceEvent.current = "";
   }, [playing, paused, enabled]);
   useEffect(() => () => { voices.current.forEach(a => { a.pause(); a.src = ""; }); }, []);
-  return <SoundContext.Provider value={{ enabled: enabled && playing && !paused, volume, play, onBlocked }}>
-    {playing && <div className="story-sound" data-no-advance>
-      <button onClick={() => { if (blocked) { setEnabled(false); setTimeout(() => setEnabled(true), 0); } else setEnabled(!enabled); setBlocked(false); }}>{blocked ? "Enable sound" : enabled ? "Mute sound" : "Enable sound"}</button>
-      <label>Sound volume <input aria-label="Story sound volume" type="range" min="0" max="1" step="0.01" value={volume} onChange={e => setVolume(+e.target.value)} /></label>
+  const controls = playing ? <div className="story-sound" data-no-advance>
+      <button data-help="Enable or mute story audio. If autoplay was blocked, tap here to allow playback in this browser." onClick={() => { if (blocked) { setEnabled(false); setTimeout(() => setEnabled(true), 0); } else setEnabled(!enabled); setBlocked(false); }}>{blocked ? "Enable sound" : enabled ? "Mute sound" : "Enable sound"}</button>
+      <label>Sound volume <input aria-label="Story sound volume" data-help="Set the master volume for the story, including ambience and effects. Individual authored track volumes are kept." type="range" min="0" max="1" step="0.01" value={volume} onChange={e => setVolume(+e.target.value)} /></label>
       {blocked && <small>Tap Enable sound if your browser blocks autoplay.</small>}
-    </div>}
+    </div> : null;
+
+  return <SoundContext.Provider value={{ enabled: enabled && playing && !paused, volume, play, onBlocked, controls }}>
+    {showControls && controls}
     {children}
   </SoundContext.Provider>;
 }
+
+export function SessionSoundControls() { return <>{useSound().controls}</>; }

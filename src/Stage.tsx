@@ -30,6 +30,7 @@ export function Stage({
   onPose,
   onPlaceLight,
   visits = [],
+  fillViewport = false,
   gifFrozenTime,
   onGifPosition,
 }: {
@@ -46,6 +47,7 @@ export function Stage({
   idPrefix?: string;
   itemFocus?: boolean;
   visits?: string[];
+  fillViewport?: boolean;
   gifFrozenTime?: number;
   onGifPosition?: (time: number) => void;
   onPlaceLight?: (x: number, y: number) => void;
@@ -252,6 +254,7 @@ export function Stage({
       <svg
         ref={svg}
         viewBox="0 0 1000 563"
+        preserveAspectRatio={fillViewport ? "xMidYMid slice" : "xMidYMid meet"}
         role="img"
         aria-label={scene.title + " live stage"}
         data-background-asset={asset?.id || scene.art}

@@ -1,0 +1,34 @@
+import { chromium } from 'playwright';
+import {readFile} from 'node:fs/promises';
+import assert from 'node:assert/strict';
+const browser=await chromium.launch({executablePath:process.env.CHROMIUM_PATH || undefined,headless:true});
+try {
+ const context=await browser.newContext({serviceWorkers:'block',viewport:{width:1400,height:1000}}), page=await context.newPage(), errors=[];
+ page.on('pageerror',e=>errors.push(e.message));
+ const html=await readFile('dist/stillframe-studio.html','utf8');
+ await page.route('https://offline-phone.test/**',route=>route.fulfill({contentType:'text/html',body:html}));
+ await context.setOffline(true);
+ await page.goto('https://offline-phone.test/?snapshot=github');
+ await page.getByRole('button',{name:'Keep local project',exact:true}).click();
+ await page.getByRole('button',{name:'v2.20.0',exact:true}).waitFor();
+ const download=page.waitForEvent('download');
+ await page.getByRole('button',{name:'Export phone game',exact:true}).click();
+ const file=await download;assert.equal(file.suggestedFilename(),'visual-novel-phone.html');
+ const game=await readFile(await file.path(),'utf8');
+ await page.route('https://phone-game.test/**',route=>route.fulfill({contentType:'text/html',body:game}));
+ await page.goto('https://phone-game.test/');
+ await page.setViewportSize({width:390,height:844});
+ await page.locator('.phone-export[data-progression=screen]').waitFor();
+ assert.equal(await page.getByRole('heading',{level:1}).count(),0);
+ assert.equal(await page.locator('.scene-in .stage').evaluate(el=>el.getBoundingClientRect().height),844);
+ await page.locator('.dialogue-overlay p').click();
+ const line=await page.locator('.scene-in .dialogue-overlay p').textContent();
+ await page.getByRole('button',{name:'Pause menu',exact:true}).click();
+ await page.getByRole('button',{name:'Save and quit',exact:true}).click();
+ await page.reload();
+ await page.getByRole('button',{name:'Continue saved game',exact:true}).click();
+ assert.equal(await page.locator('.scene-in .dialogue-overlay p').textContent(),line);
+ await page.screenshot({path:'/tmp/phone-export-full-story.png'});
+ assert.deepEqual(errors,[]);
+ console.log('PASS: built offline editor exports the complete story and embedded media to a phone player offline; viewport, tap advancement and saved position survive reload with no page errors.');
+} finally {await browser.close();}

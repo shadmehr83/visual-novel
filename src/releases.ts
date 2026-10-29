@@ -1,4 +1,4 @@
-export const ENGINE_VERSION = "2.19.0";
+export const ENGINE_VERSION = "2.20.0";
 export type ReleaseFeature = {
   name: string;
   description: string;
@@ -20,6 +20,12 @@ const f = (
   action?: string,
 ): ReleaseFeature => ({ name, description, steps: path.split(" → "), action });
 export const releases: Release[] = [
+ {version:"2.20.0",name:"Compact phone exports and reversible replies",date:"2026-10-30",timestamp:"2026-10-29T13:58:39.184037+00:00",features:[
+ f("Enable or disable a reply", "Hide a reply during play without deleting its destination, text, conditions or state actions. Restore it with the same Enabled checkbox.", "Dialogue editor → Choice → Enabled", "editor"),
+ f("Phone-optimized playable game", "Export a viewport-filling phone player with larger device, compact dialogue and tap-to-continue. Desktop exports retain authored text and device sizes.", "Library footer → Export phone game", "export-player"),
+ f("All game settings in Pause", "Both exports put sound, volume, progression and fullscreen inside Pause, alongside Save and quit and Quit without saving. Saved progress resumes in the same browser.", "Playable game → Pause menu → Save and quit", "editor"),
+ f("Continuous invitation chat", "Invitation replies stay inside Ember; the deliberate question and Keep talking menu stays separate. Authored devices start with their decorative keyboard hidden.", "Scene 3 → Invitation chat", "devices")
+ ]},
  {version:"2.19.0",name:"Cross-device saves and scoped exports",date:"2026-10-29",timestamp:"2026-10-29T13:00:22.749680+00:00",features:[
  f("Clear local and GitHub saving", "Choose a save destination and explicitly publish a complete project when connected. On opening, choose the latest GitHub save or retain local work with recovery protection.", "Save project file → Save destination", "save"),
  f("Individual image expansion", "Every artwork card has its own expand icon, so large previews no longer require scrolling to the end of the library.", "Assets → Image expand icon", "library:Assets"),

@@ -1,3 +1,4 @@
+import { choiceAvailable } from "./choices";
 import { AdvancedExport } from "./AdvancedExport";
 import { ImagePreview } from "./ImagePreview";
 import { cloneData as structuredClone } from "./cloneData";
@@ -709,9 +710,7 @@ export default function App() {
 
   const availableChoices = node.choices.filter(
     (c) =>
-      !playing ||
-      !c.condition ||
-      runtime?.values[c.condition.key] === c.condition.equals,
+      !playing || choiceAvailable(c, runtime?.values),
   );
   function chooseMainWorkspace(next: StudioView) {
     setPlaying(false);
@@ -1335,6 +1334,7 @@ export default function App() {
                 >
                   <Download size={15} /> Export playable HTML
                 </button>
+                <button data-help="Download a phone-optimized playable HTML file: full game viewport, larger phone, compact text and tap-to-continue. Sound, fullscreen and save/quit live in Pause menu. Your editable project stays unchanged." onClick={() => exportPlayer(project, undefined, "phone").catch(e => setError(String(e)))}><Download size={15} /> Export phone game</button>
                 <AdvancedExport project={project} />
                 <button onClick={() => importInput.current?.click()}>
                   <FolderOpen size={15} /> Open project
@@ -1689,7 +1689,7 @@ export default function App() {
                                       </button>
                                     ))}
                                   </div>
-                                ) : (
+                                ) : node.choices.length ? <p role="status">No replies are currently available.</p> : (
                                   <button
                                     className="continue"
                                     onClick={() => step()}
@@ -1698,7 +1698,7 @@ export default function App() {
                                   </button>
                                 )}
                                 {!runtime?.ended &&
-                                  node.allowCustomResponse !== false && (
+                                  node.allowCustomResponse !== false && (!node.choices.length || availableChoices.length > 0) && (
                                     <SelfReply
                                       choices={availableChoices}
                                       nodeId={node.id}
@@ -1858,6 +1858,7 @@ export default function App() {
                           onClick={() => setNodeId(n.id)}
                         >
                           <span>{String(i + 1).padStart(2, "0")}</span>
+
                           <div>
                             {n.speaker}
                             <small>{n.view ? "▣ Sub-scene · " : ""}{n.text.slice(0, 42)}…</small>
@@ -2020,6 +2021,11 @@ export default function App() {
                       {node.choices.map((c, i) => (
                         <div className="choice-editor" key={c.id}>
                           <span>{String(i + 1).padStart(2, "0")}</span>
+                          <label className="choice-enable" data-help="Turn this reply on or off during play. Turning it off keeps its text, destination, conditions and actions so you can restore it later.">
+                            <input type="checkbox" aria-label={"Enable choice " + (i + 1)} disabled={playing} checked={c.enabled !== false} onChange={e => updateScene(s => { s.nodes.find(n => n.id === node.id)!.choices[i].enabled = e.target.checked; })} />
+                            {c.enabled === false ? "Disabled" : "Enabled"}
+                          </label>
+
                           <input
                             disabled={editingLocked}
                             aria-label={"Choice " + (i + 1)}
@@ -2201,6 +2207,7 @@ export default function App() {
                       runtime.history.map((x, i) => (
                         <p key={i}>
                           <span>{String(i + 1).padStart(2, "0")}</span>
+
                           {x}
                         </p>
                       ))

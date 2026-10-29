@@ -26,6 +26,7 @@ export function FullscreenButton() {
   return (
     <button
       type="button"
+      data-help="Fill the screen with the game, or return to the normal browser view. Open Pause menu again to exit fullscreen; browser and system exit gestures also work."
       onClick={async (e) => {
         const area = e.currentTarget.closest<HTMLElement>(
           ".preview-area, .standalone-experience",

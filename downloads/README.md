@@ -17,3 +17,7 @@ Open `stillframe-studio.html` on GitHub and choose **Download raw file**, then s
 ## Complete handoff document
 
 [Visual_Novel_Studio_Complete_Handoff.docx](Visual_Novel_Studio_Complete_Handoff.docx) collects the original specification, project history, source/HTML/hosting links, implemented features, verification limits, all setup methods, AI and voice configuration, data migration instructions, and a continuation prompt for the destination website-building assistant. Open the file page and select **Download raw file**. No credential values are included.
+
+## Playing on a phone
+
+In the editor's library footer choose **Export phone game**. It downloads a separate HTML player with compact dialogue, a larger phone interface, tap-to-continue and a viewport-filling stage. Use **Advanced playable export → Player layout → Phone** for a chapter or dialogue range. Both phone and normal exports put volume, advance mode and fullscreen inside **Pause menu**, together with **Save and quit** and **Quit without saving**. Progress saves stay in that browser; they do not sync through GitHub. See [player instructions](../docs/PHONE_EXPORT_AND_PAUSE.md).

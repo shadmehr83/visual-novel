@@ -63,7 +63,7 @@ export function makeDevice(scene: Scene, contact = "Maria"): Device {
     width: 44,
     entrance: { style: "slide", seconds: 0.7 },
     typingSeconds: 0.65,
-    keyboard: true,
+    keyboard: false,
     schedule: {
       start: scene.nodes[0].id,
       end: scene.nodes.at(-1)!.id,

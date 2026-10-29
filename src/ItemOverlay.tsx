@@ -1,3 +1,4 @@
+import { choiceAvailable } from "./choices";
 import { useEffect, useState } from "react";
 import type { Project, Scene, Node, Runtime } from "./model";
 import { useSound } from "./Sound";
@@ -31,8 +32,7 @@ export function ItemOverlay({
       node.choices.some(
         (c) =>
           c.id === item.choice &&
-          (!c.condition ||
-            runtime?.values[c.condition.key] === c.condition.equals),
+          choiceAvailable(c, runtime?.values),
       ),
     ) || [];
   const current = options.find((x) => x.id === selected);
@@ -44,11 +44,12 @@ export function ItemOverlay({
     <div className="item-detail">
       {picture(outcome.asset) && <img src={picture(outcome.asset)} alt={outcome.label} />}
       <p>{outcome.description}</p>
-      {node.choices.length ? node.choices.filter(c => !c.condition || runtime?.values[c.condition.key] === c.condition.equals).map(c => <button key={c.id} onClick={() => onStep(c.id)}>{c.text}</button>) : <button onClick={() => onStep()}>Continue</button>}
-      {onReply && node.allowCustomResponse !== false && <SelfReply choices={node.choices} nodeId={node.id} onSend={onReply} />}
+      {node.choices.length ? node.choices.filter(c => choiceAvailable(c, runtime?.values)).map(c => <button key={c.id} onClick={() => onStep(c.id)}>{c.text}</button>) : <button onClick={() => onStep()}>Continue</button>}
+      {onReply && node.allowCustomResponse !== false && (!node.choices.length || node.choices.some(c => choiceAvailable(c, runtime?.values))) && <SelfReply choices={node.choices.filter(c => choiceAvailable(c, runtime?.values))} nodeId={node.id} onSend={onReply} />}
     </div>
   </section>;
-  if (!scene.items?.enabled || !options.length) return null;
+  if (!scene.items?.enabled) return null;
+  if (!options.length) return <section className="item-overlay"><p>{node.text}</p><p role="status">No items are currently available.</p></section>;
   const playCue = (cue?: {asset: string; volume: number}) => sound.play(project.audioAssets?.find(a => a.id === cue?.asset)?.data, cue?.volume);
   return (
     <section className="item-overlay" aria-label="Item selection">

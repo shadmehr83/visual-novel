@@ -1,3 +1,4 @@
+import { choiceAvailable } from "./choices";
 import { PhoneWeather } from "./PhoneWeather";
 import { effectiveDevice } from "./deviceShared";
 import { deviceBox } from "./deviceFrame";
@@ -137,7 +138,7 @@ export function PhoneUI({
   }, [messages.length, typing, node.id]);
   const choices = node.choices.filter(
     (c) =>
-      !c.condition || runtime?.values[c.condition.key] === c.condition.equals,
+      choiceAvailable(c, runtime?.values),
   );
   const avatar = project.assets.find((a) => a.id === config.avatar);
   const currentIsMessage = messages.some(
@@ -359,7 +360,7 @@ export function PhoneUI({
                         </button>
                       ))}
                     </div>
-                  ) : (
+                  ) : node.choices.length ? <p role="status">No replies are currently available.</p> : (
                     <button
                       className="device-continue"
                       onClick={() => onStep()}
@@ -367,7 +368,7 @@ export function PhoneUI({
                       Continue
                     </button>
                   )}
-                  {allowsReply(scene, node, true) && (
+                  {allowsReply(scene, node, true) && (!node.choices.length || choices.length > 0) && (
                     <SelfReply
                       choices={choices}
                       nodeId={node.id}
@@ -413,7 +414,6 @@ export function PhoneUI({
       {narrativeOutside && (
         <aside
           className="device-story-progress"
-          data-no-advance
           aria-label="Story controls outside device"
         >
           <p>{node.text}</p>
@@ -425,7 +425,7 @@ export function PhoneUI({
                 {c.text}
               </button>
             ))
-          ) : (
+          ) : node.choices.length ? <p role="status">No replies are currently available.</p> : (
             <button className="device-story-continue" onClick={() => onStep()}>
               Continue story
             </button>

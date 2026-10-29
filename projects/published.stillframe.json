@@ -969,7 +969,10 @@
               "sendAsMessage": true
             }
           ],
-          "allowCustomResponse": true
+          "allowCustomResponse": true,
+          "deviceDialogue": true,
+          "deviceVisible": true,
+          "deviceScreen": "chat"
         },
         {
           "id": "followup-reply-0",
@@ -1053,7 +1056,10 @@
               "sendAsMessage": true
             }
           ],
-          "allowCustomResponse": true
+          "allowCustomResponse": true,
+          "deviceDialogue": true,
+          "deviceVisible": true,
+          "deviceScreen": "chat"
         },
         {
           "id": "delete",
@@ -1109,7 +1115,8 @@
               "sendAsMessage": true
             }
           ],
-          "allowCustomResponse": true
+          "allowCustomResponse": true,
+          "deviceDialogue": false
         },
         {
           "id": "wants-reply-0",
@@ -1215,7 +1222,10 @@
               "sendAsMessage": true
             }
           ],
-          "allowCustomResponse": true
+          "allowCustomResponse": true,
+          "deviceDialogue": true,
+          "deviceVisible": true,
+          "deviceScreen": "chat"
         },
         {
           "id": "to-invite",
@@ -1231,7 +1241,10 @@
               "sendAsMessage": false
             }
           ],
-          "allowCustomResponse": true
+          "allowCustomResponse": true,
+          "deviceDialogue": true,
+          "deviceVisible": true,
+          "deviceScreen": "chat"
         }
       ],
       "entry": [],
@@ -1253,7 +1266,7 @@
           "seconds": 0.75
         },
         "typingSeconds": 0.65,
-        "keyboard": true,
+        "keyboard": false,
         "mode": "phone-system",
         "defaultScreen": "chat",
         "appearance": {
@@ -1575,7 +1588,10 @@
               "sendAsMessage": true
             }
           ],
-          "allowCustomResponse": true
+          "allowCustomResponse": true,
+          "deviceDialogue": true,
+          "deviceVisible": true,
+          "deviceScreen": "chat"
         },
         {
           "id": "confirm",
@@ -1625,7 +1641,10 @@
               "sendAsMessage": true
             }
           ],
-          "allowCustomResponse": true
+          "allowCustomResponse": true,
+          "deviceDialogue": true,
+          "deviceVisible": true,
+          "deviceScreen": "chat"
         },
         {
           "id": "logistics",
@@ -1685,7 +1704,7 @@
           "seconds": 0.75
         },
         "typingSeconds": 0.65,
-        "keyboard": true,
+        "keyboard": false,
         "mode": "phone-system",
         "defaultScreen": "chat",
         "appearance": {
@@ -5109,7 +5128,7 @@
           "seconds": 0.7
         },
         "typingSeconds": 0.65,
-        "keyboard": true,
+        "keyboard": false,
         "mode": "phone-system",
         "defaultScreen": "chat",
         "schedule": {
@@ -6509,7 +6528,8 @@
     "2.7.0",
     "2.11.0",
     "2.14.0",
-    "2.15.0"
+    "2.15.0",
+    "2.20.0"
   ],
   "chapters": [
     {

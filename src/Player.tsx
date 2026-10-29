@@ -1,6 +1,7 @@
+import { playerSaveKey, readPlayerSave, savePlayerProgress } from "./playerSave";
+import { choiceAvailable } from "./choices";
 import { startScope, limitScope, type ExportScope } from "./exportScope";
 import { cloneData as structuredClone } from "./cloneData";
-import { ChapterBadge } from "./ChapterWorkspace";
 import { effectiveDevice, saveDeviceAppearance } from "./deviceShared";
 import { RecoveryBoundary } from "./RecoveryBoundary";
 import { PlaySession } from "./PlaySession";
@@ -12,7 +13,6 @@ import { SceneTransition } from "./SceneTransition";
 import { DeviceOverlay as PhoneUI } from "./DeviceOverlay";
 import { openNotification } from "./notifications";
 import { SelfReply } from "./SelfReply";
-import { FullscreenButton } from "./FullscreenButton";
 import { useState } from "react";
 import { createRoot } from "react-dom/client";
 import { start, advance, respond, putAwayDevice, validateProject, type Runtime } from "./model";
@@ -24,39 +24,43 @@ function Player() {
       JSON.parse(document.getElementById("story-data")!.textContent!),
     ),
   );
-  const [reply, setReply] = useState("");
+  const mobile = document.getElementById("player-target")?.textContent === '"phone"';
+  const [mode, setMode] = useState<"continue" | "enter" | "screen">(mobile ? "screen" : project.settings.progression || "continue");
   const scope: ExportScope | undefined = JSON.parse(document.getElementById("story-range")?.textContent || "null") || undefined;
+  const [saveKey] = useState(() => playerSaveKey(project,scope));
+  const [saved, setSaved] = useState(() => {
+    try { return readPlayerSave(localStorage,saveKey,project,scope); } catch { return null; }
+  });
+  const [atTitle, setAtTitle] = useState(!!saved);
+  const [saveError,setSaveError] = useState("");
   const [runtime, rawSetRuntime] = useState(() => startScope(project,scope));
   const setRuntime = (next: Runtime | ((r:Runtime)=>Runtime)) => rawSetRuntime(before=>limitScope(before,typeof next === 'function' ? next(before):next,scope));
   const scene = project.scenes.find((s) => s.id === runtime.scene)!;
   const node = scene.nodes.find((n) => n.id === runtime.node)!;
+  const exitFullscreen = () => {
+    document.querySelector(".presentation")?.classList.remove("presentation");
+    if(document.fullscreenElement) void document.exitFullscreen().catch(()=>{});
+  };
+  const quit = () => { exitFullscreen(); setSaveError(""); setAtTitle(true); };
+  const saveQuit = () => {
+    try { savePlayerProgress(localStorage,saveKey,runtime); setSaved(runtime); quit(); }
+    catch { setSaveError("Progress could not be saved in this browser. Free storage or allow local storage, then try again. The story is still open."); }
+  };
+  const restart = () => { setRuntime(startScope(project,scope)); setAtTitle(false); };
+  if(atTitle) return <main className="player-title"><h1>{project.title}</h1>
+    {saved && <button data-help="Resume your last saved dialogue, choices and chat transcript in this browser." onClick={()=>{setRuntime(saved);setAtTitle(false);}}>Continue saved game</button>}
+    <button data-help="Begin this exported story from its opening. The previous saved checkpoint is kept until you choose Save and quit again." onClick={restart}>Start new game</button>
+    <p>Progress stays in this browser on this device. Reopen the same exported game to continue.</p>
+  </main>;
   return (
-    <PlaySession playing project={project} runtime={runtime} onRestart={() => setRuntime(startScope(project,scope))}>
-      <main
-        className="standalone-experience"
-        style={
-          {
-            maxWidth: 1100,
-            margin: "30px auto",
-            padding: 15,
-            "--story-font": project.settings.dialogueFont || "Georgia",
-            "--story-size": (project.settings.dialogueSize || 17) + "px",
-          } as React.CSSProperties
-        }
-      >
-        <h1>{project.title}</h1>
-        <FullscreenButton />
-        <ChapterBadge project={project} scene={scene.id} /><PlaybackControls
-          mode={project.settings.progression || "continue"}
-          onMode={(mode) =>
-            setProject((p) => ({
-              ...p,
-              settings: { ...p.settings, progression: mode },
-            }))
-          }
-          advance={() => setRuntime((r) => advance(project, r))}
-          canAdvance={!runtime.ended && !node.choices.length && !node.qte}
-        />
+    <PlaySession key="game" playing project={project} runtime={runtime} onRestart={restart}
+      exportControls={{mode,onMode:setMode,onSaveQuit:saveQuit,onQuit:quit,error:saveError}}>
+      <main className={"standalone-experience exported-game " + (mobile ? "phone-export" : "desktop-export")}
+        data-progression={mode}
+        style={{"--story-font":project.settings.dialogueFont || "Georgia", "--story-size":(project.settings.dialogueSize || 17)+"px"} as React.CSSProperties}>
+        <PlaybackControls mode={mode} onMode={setMode} showSetting={false}
+          advance={() => setRuntime(r=>advance(project,r))}
+          canAdvance={!runtime.ended && !node.choices.length && !node.qte} />
 
         <SceneTransition
           scene={scene}
@@ -68,6 +72,7 @@ function Player() {
           }
         >
           <Stage
+            fillViewport={mobile}
             visits={runtime.nodeVisits
               ?.filter((v) => v.scene === scene.id)
               .map((v) => v.node)}
@@ -158,12 +163,11 @@ function Player() {
                   </button>
                 ) : node.choices.length ? (
                   <div className="play-choices">
+                    {!node.choices.some(c => choiceAvailable(c, runtime.values)) && <p role="status">No replies are currently available.</p>}
                     {node.choices
                       .filter(
                         (c) =>
-                          !c.condition ||
-                          runtime.values[c.condition.key] ===
-                            c.condition.equals,
+                          choiceAvailable(c, runtime.values),
                       )
                       .map((c) => (
                         <button
@@ -177,18 +181,17 @@ function Player() {
                       ))}
                   </div>
                 ) : (
-                  <button
+                  <button className="player-continue"
                     onClick={() => setRuntime((r) => advance(project, r))}
                   >
                     Continue
                   </button>
                 )}
-                {!runtime.ended && node.allowCustomResponse !== false && (
+                {!runtime.ended && node.allowCustomResponse !== false && (!node.choices.length || node.choices.some(c => choiceAvailable(c, runtime.values))) && (
                   <SelfReply
                     choices={node.choices.filter(
                       (c) =>
-                        !c.condition ||
-                        runtime.values[c.condition.key] === c.condition.equals,
+                        choiceAvailable(c, runtime.values),
                     )}
                     nodeId={node.id}
                     onSend={(text, branch) =>
@@ -200,10 +203,6 @@ function Player() {
             )}
           </Stage>
         </SceneTransition>
-        <p>
-          This standalone player contains your authored project and original
-          assets. No AI connection is needed.
-        </p>
       </main>
     </PlaySession>
   );

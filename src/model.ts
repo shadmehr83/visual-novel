@@ -29,6 +29,7 @@ const choice = z.object({
     .optional(),
   note: z.string().default(""),
   sendAsMessage: z.boolean().optional(),
+  enabled: z.boolean().optional(),
 });
 export const qteSchema = z.object({
   prompt: z.string().max(500),
@@ -317,7 +318,7 @@ export const deviceSchema = z.object({
   width: z.number().min(20).max(90),
   entrance: transitionSchema,
   typingSeconds: z.number().min(0).max(5),
-  keyboard: z.boolean(),
+  keyboard: z.boolean().default(false),
 });
 const scene = z.object({
   subscenes: z.array(z.object({
@@ -729,7 +730,7 @@ function advanceCore(p: Project, r: Runtime, choiceId?: string): Runtime {
   if (!n) throw Error("Dialogue not found");
   if (choiceId) {
     const c = n.choices.find((c) => c.id === choiceId);
-    if (!c || (c.condition && r.values[c.condition.key] !== c.condition.equals))
+    if (!c || c.enabled === false || (c.condition && r.values[c.condition.key] !== c.condition.equals))
       throw Error("Choice unavailable");
     const bookmark = r.deviceBookmark;
     if (bookmark?.scene === s.id && c.target === bookmark.entry && s.nodes.some(n => n.id === bookmark.node))
