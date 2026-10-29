@@ -4,6 +4,27 @@ export function specificHelp(
   element: HTMLElement,
 ): string | undefined {
   const name = label.toLowerCase().replace(/ exact value$/, "");
+  const layout:Record<string,string>={
+ "project title":"Name of your editable novel, included in project exports.",
+ "map scene name":"Rename this scene in the story library and route map.",
+ "scene name":"Rename the selected scene without changing its dialogue connections.",
+ "dialogue text":"Words shown at this dialogue step. Branching choices are edited separately.",
+ "map dialogue text":"Edit the words in this dialogue box. Its existing destinations remain connected.",
+ "speaker":"Name displayed above this dialogue. Match a character name to use that character’s name colour.",
+ "map dialogue speaker":"Choose who speaks this line. This does not change the next dialogue or branch.",
+ "fit":"Cover crops the image to fill the scene; contain shows the whole image; stretch changes its proportions.",
+ "background scale":"Zoom the background image inside the scene. This does not change the camera animation.",
+ "dialogue author note":"Private authoring note for this line, saved with the editable project.",
+
+ "preview width":"Preferred preview width in pixels. It is capped to the available space without changing the saved preference.",
+ "preview height":"Preferred preview height in pixels. Extra height leaves less room for the dialogue editor.",
+ "workspace arrangement":"Choose side-by-side or stacked workspaces. Each pane keeps its own scrolling area.",
+ "main workspace":"Choose the first pane’s editor. Choosing the other pane’s content exchanges the two views.",
+ "second workspace":"Choose the companion pane. Both panes edit the same project and share the current scene selection.",
+ "controls placement":"Move effect controls between their supported docks; scene content is unchanged.",
+ "restore all window positions":"Clear dock positions and stale custom preview geometry. Manual resizing remains available afterward."
+ };
+ if(layout[name])return layout[name];
   const chapter = chapterHelp(name,element);
   if(chapter)return chapter;
   const phoneHelp: Record<string,string> = {
@@ -194,7 +215,7 @@ export function specificHelp(
       "Close this item’s description and return to the other cards. No choice is committed.",
     ],
     [
-      /choose .*|inspect item/,
+      /^choose (outfit|item|book)|inspect item/,
       "Inspecting opens a description. Choose confirms this item and follows its authored dialogue path.",
     ],
     [

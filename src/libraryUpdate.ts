@@ -1,3 +1,4 @@
+import { cloneData as structuredClone } from "./cloneData";
 import { validateProject, type Project } from "./model";
 import { assetFolder } from "./AssetPicker";
 import { restoreSavedOutfits } from "./outfits";

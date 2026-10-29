@@ -1,3 +1,4 @@
+import { cloneData as structuredClone } from "./cloneData";
 import { sceneView } from "./SceneViews";
 import { usePaused, useAuthorEditing } from "./PlaySession";
 import { RangeInput } from "./RangeInput";

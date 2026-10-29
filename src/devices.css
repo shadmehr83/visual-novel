@@ -196,7 +196,7 @@
 .preview-area {
   position: relative;
 }
-.workspace.preview-custom > main .preview-area {
+.workspace.preview-custom > main > .preview-area {
   width: min(100%, var(--preview-window-width));
   height: var(--preview-window-height);
   flex: 0 0 auto;
@@ -204,7 +204,7 @@
   max-height: var(--preview-window-max);
   min-height: 180px;
 }
-.workspace.preview-custom > main .bottom-panel:not(.collapsed) {
+.workspace.preview-custom > main > .bottom-panel:not(.collapsed) {
   flex: 1 1 0;
   height: 0;
   max-height: none;
@@ -219,7 +219,7 @@
   font-size: 10px;
   padding: 5px;
 }
-.workspace.preview-custom > main .preview-area:not(.preview-locked) {
+.workspace.preview-custom > main > .preview-area:not(.preview-locked) {
   outline: 1px dashed #b59875;
   outline-offset: -2px;
 }

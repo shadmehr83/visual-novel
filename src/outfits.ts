@@ -1,3 +1,4 @@
+import { cloneData as structuredClone } from "./cloneData";
 import type { Project } from "./model";
 export function restoreSavedOutfits(target: Project, saved: Project) {
   const source = saved.scenes.find((s) => s.id === "outfit")!,

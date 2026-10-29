@@ -1,3 +1,4 @@
+import { cloneData as structuredClone } from "./cloneData";
 import { deviceAppearanceSchema, type Project, type Scene } from "./model";
 import { makeDevice } from "./deviceFrame";
 type Appearance = NonNullable<NonNullable<Scene["phone"]>["appearance"]>;

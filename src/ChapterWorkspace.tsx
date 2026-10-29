@@ -1,3 +1,4 @@
+import { cloneData as structuredClone } from "./cloneData";
 import { useState } from "react";
 import { validateProject, type Project } from "./model";
 import type { Chapter, ChapterCondition } from "./chapterSchema";

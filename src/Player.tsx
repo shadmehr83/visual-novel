@@ -1,3 +1,4 @@
+import { cloneData as structuredClone } from "./cloneData";
 import { ChapterBadge } from "./ChapterWorkspace";
 import { effectiveDevice, saveDeviceAppearance } from "./deviceShared";
 import { RecoveryBoundary } from "./RecoveryBoundary";

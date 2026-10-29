@@ -6,7 +6,9 @@ export type PanelLayout=z.infer<typeof dockPanelSchema>;
 export type DockLayouts=Record<string,PanelLayout>;
 export function panelLayout(layouts:DockLayouts,id:string):PanelLayout {
  const large=/preview|workspace/.test(id),dialogue=id==='dialogue';
- return layouts[id]||{mode:'home',x:100,y:160,width:large?850:dialogue?700:320,height:large?580:dialogue?380:600};
+ const saved=layouts[id];
+ if(saved)return id.startsWith('workspace-') && !['home','float'].includes(saved.mode)?{...saved,mode:'home'}:saved;
+ return {mode:'home',x:100,y:160,width:large?850:dialogue?700:320,height:large?580:dialogue?380:600};
 }
 export function restoreDock(layouts:DockLayouts,id:string):DockMode {
  const wanted=layouts[id]?.returnTo||'home';

@@ -107,6 +107,7 @@ export function GifCanvas({
       published = -Infinity,
       previousIndex = -1;
     const tick = (now: number) => {
+      if(now-last<32){frame=requestAnimationFrame(tick);return;}
       const dt = Math.max(0, (now - last) / 1000);
       last = now;
       if (
@@ -142,7 +143,7 @@ export function GifCanvas({
             ? "playing"
             : "paused";
       }
-      if (now - published > 100) {
+      if (latest.current.onTime && now - published > 100) {
         latest.current.onTime?.(state.current.time, state.current.running);
         published = now;
       }

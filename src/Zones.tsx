@@ -1,3 +1,4 @@
+import { cloneData as structuredClone } from "./cloneData";
 import { RangeInput } from "./RangeInput";
 import { useState } from "react";
 import type { Scene, Region, ZoneLight } from "./model";

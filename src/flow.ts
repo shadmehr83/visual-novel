@@ -1,3 +1,4 @@
+import { cloneData as structuredClone } from "./cloneData";
 import type { Project, Scene, Node, Choice } from "./model";
 export type Point = { x: number; y: number };
 export type LinkRef = {

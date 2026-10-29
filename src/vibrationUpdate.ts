@@ -1,3 +1,4 @@
+import { cloneData as structuredClone } from "./cloneData";
 import { validateProject, type Project } from "./model";
 const UPDATE = "phone-vibration-1";
 /** Add the requested cue once without overwriting any user-authored audio. */

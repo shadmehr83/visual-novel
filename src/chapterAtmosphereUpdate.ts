@@ -1,3 +1,4 @@
+import { cloneData as structuredClone } from "./cloneData";
 import { validateProject, type Project } from "./model";
 const UPDATE = "2.14.0";
 /** Repair older chapter grouping and add missing ambience without replacing user art. */

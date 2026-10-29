@@ -1,3 +1,4 @@
+import { cloneData as structuredClone } from "./cloneData";
 import {RangeInput} from "./RangeInput";
 import type { RegionEditor } from "./Zones";
 import type { Region } from "./model";

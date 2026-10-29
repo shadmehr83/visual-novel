@@ -1,3 +1,4 @@
+import { cloneData as structuredClone } from "./cloneData";
 import saved from "../projects/published.stillframe.json";
 import { validateProject } from "./model";
 

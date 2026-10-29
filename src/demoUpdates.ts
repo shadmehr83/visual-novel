@@ -1,3 +1,4 @@
+import { cloneData as structuredClone } from "./cloneData";
 import { validateProject, type Project } from "./model";
 import { restoreSavedOutfits } from "./outfits";
 export const DEMO_UPDATE = "2.4.0";

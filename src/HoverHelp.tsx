@@ -13,7 +13,7 @@ export function describeControl(el: HTMLElement) {
     el.dataset.help ||
     el.closest("label")?.dataset.help ||
     specificHelp(label, el);
-  if (help) return { label, text: help };
+  if (help) return { label, text: (el.dataset.recent ? "New in v"+el.dataset.recent+". " : "") + help };
   const rules: [RegExp, string][] = [
     [
       /hinge|pivot|pose|expression replacement/i,

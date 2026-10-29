@@ -91,13 +91,21 @@ export function ReleaseHistory({
               )}
               {r.features.map((feature) => (
                 <article className="release-feature" key={feature.name}>
-                  <h3>{feature.name}</h3>
+                  <h3>{feature.action ? <button onClick={()=>onNavigate(feature.action!)} data-help={feature.description}>{feature.name}</button> : feature.name}</h3>
                   <p>{feature.description}</p>
                   <ol aria-label={"How to find " + feature.name}>
                     {feature.steps.map((step, i) => (
                       <li key={i}>{step}</li>
                     ))}
                   </ol>
+                  <div className="feature-destinations">{[
+                    [/phone|device|app/i,"devices","Phone & device settings"],
+                    [/chapter/i,"chapters","Chapter rules"],
+                    [/dialogue/i,"dialogues","Dialogue editor"],
+                    [/light|rain|motion|effect/i,"effect:All","Effect controls"],
+                    [/window|panel|workspace|dock/i,"windows","Windows & docking"],
+                    [/request|demand|provider|assistant/i,"assistant","Assistant"]
+                  ].filter(([pattern])=>(pattern as RegExp).test(feature.name+" "+feature.description)).map(([,action,label])=><button key={String(action)} data-help={"Open "+label+" for this part of the update."} onClick={()=>onNavigate(String(action))}>{String(label)}</button>)}</div>
                   {feature.action && (
                     <button onClick={() => onNavigate(feature.action!)}>
                       Open feature location

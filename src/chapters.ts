@@ -1,3 +1,4 @@
+import { cloneData as structuredClone } from "./cloneData";
 import type { Project } from "./model";
 import type { Chapter } from "./chapterSchema";
 import { createFlowScene } from "./flow";

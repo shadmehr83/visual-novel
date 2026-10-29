@@ -1,4 +1,4 @@
-export const ENGINE_VERSION = "2.17.0";
+export const ENGINE_VERSION = "2.18.0";
 export type ReleaseFeature = {
   name: string;
   description: string;
@@ -20,7 +20,13 @@ const f = (
   action?: string,
 ): ReleaseFeature => ({ name, description, steps: path.split(" → "), action });
 export const releases: Release[] = [
- {version:"2.17.0",name:"AI Demand Export and timestamped update history",date:"2026-10-29",timestamp:"2026-10-29T10:26:17Z",features:[
+ {version:"2.18.0",name:"Smoothness, stable workspaces and provider routing",date:"2026-10-29",timestamp:"2026-10-29T11:03:30.659208+00:00",features:[
+ f("Stable workspace resets", "Reset clears stale preview geometry. Whole workspaces cannot dock inside their own child panels; resizing and floating remain available.", "Windows & docking → Restore all window positions", "windows"),
+ f("Lighter editing and animation", "Edits share unchanged project data instead of copying embedded media. GIF rendering is capped near 30 frames per second.", "Editor → Scene controls", "editor"),
+ f("Cilia provider assignments", "Assign OpenAI or Claude separately to dialogue, system UI suggestions and effects. Each selected provider needs its own server key.", "Assistant → API assistant → Assistant task", "assistant"),
+ f("Recent features and individual destinations", "Recent controls are marked for two releases. Update entries have clickable titles, descriptions and links to individual affected areas.", "Update history → Select an update", "updates")
+ ]},
+ {version:"2.17.0",commit:"b135e0f",name:"AI Demand Export and timestamped update history",date:"2026-10-29",timestamp:"2026-10-29T10:26:17Z",features:[
  f("AI Demand Export", "Dictate and log a change request with its scene, dialogue, timestamp and engine version. Copy/open ChatGPT, download the handoff or prepare a GitHub inbox file. Existing-chat submission still requires Send in ChatGPT.", "Assistant → AI Demand Export", "assistant"),
  f("GitHub request inbox", "Request files live separately in demands/inbox. The GitHub draft flow uses your browser login; direct saving is available when the existing publisher is configured. A saved file does not execute a task.", "Assistant → AI Demand Export → Save request in GitHub", "assistant"),
  f("Update times and concise controls", "Update history shows recorded times in Sydney, including seconds. The toolbar shows only the version; chapter controls have short, specific hover help.", "Update history → Recorded time or Chapters advanced", "updates")

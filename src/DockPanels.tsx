@@ -371,7 +371,7 @@ export function DockPanel({
   }, [savedMode, id]);
   if (!ctx) return children;
   const p = panelLayout(ctx.layouts, id),
-    mode = ctx.active ? p.mode : "home";
+    mode = ctx.active ? (id.startsWith("workspace-") && p.mode !== "float" ? "home" : p.mode) : "home";
   const chrome =
     ctx.active && tools ? (
       <div

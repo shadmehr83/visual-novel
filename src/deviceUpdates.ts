@@ -1,3 +1,4 @@
+import { cloneData as structuredClone } from "./cloneData";
 import {validateProject, type Project} from './model';
 export function integrateDeviceUpdate(local:Project, source:Project):Project|null {
  if(local.id!==source.id || local.contentUpdates?.includes('2.5.0'))return null;

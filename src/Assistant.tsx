@@ -1,3 +1,4 @@
+import { taskHelp, type Provider, type AssistantTask } from "./aiProviders";
 import { DemandExport } from "./DemandExport";
 import { useEffect, useRef, useState } from "react";
 import { applyProposal, aiContext, proposalSchema, type Proposal } from "./ai";
@@ -16,6 +17,9 @@ export function Assistant({
   apply: (p: Project) => void;
 }) {
   const [mode, setMode] = useState<"demand" | "provider">("demand");
+  const [task,setTask]=useState<AssistantTask>("dialogue");
+  const [routes,setRoutes]=useState<Record<AssistantTask,Provider>>(()=>{try{return {dialogue:"openai","system-ui":"openai",effects:"openai",...JSON.parse(localStorage.getItem("stillframe-ai-routes")||"{}")};}catch{return {dialogue:"openai","system-ui":"openai",effects:"openai"};}});
+  const [available,setAvailable]=useState<Record<string,boolean>>({});
   const [prompt, setPrompt] = useState(
     "Add gentle rain and dim this scene slightly.",
   );
@@ -40,6 +44,7 @@ export function Assistant({
       .then((r) => r.json())
       .then((v) => {
         setConfigured(v.configured === true);
+        setAvailable(v.providers || {openai:v.configured});
         setStatus(
           v.configured
             ? "AI connected. Review each proposal before applying."
@@ -130,6 +135,7 @@ export function Assistant({
           body: JSON.stringify({
             prompt: prompt + " Selected scene: " + sceneId,
             context: aiContext(project),
+            provider:routes[task], task,
           }),
         });
         result = await r.json();
@@ -183,7 +189,10 @@ export function Assistant({
           <span className="badge">
             {configured ? "SERVER AI" : "OFFLINE MODE"}
           </span>
-          <h3>Your creative assistant</h3>
+          <h3>Cilia AI assistant</h3>
+          <label>Assistant task<select aria-label="Assistant task" data-help="Choose the task whose provider assignment you want to use. Each task remembers its own provider in this browser." value={task} onChange={e=>setTask(e.target.value as AssistantTask)}>{Object.entries(taskHelp).map(([id,text])=><option key={id} value={id}>{id}</option>)}</select></label>
+          <p className="small">{taskHelp[task]}</p>
+          <label>Provider for this task<select aria-label="AI task provider" data-help="Assign OpenAI or Claude to this task. Server keys are required for the chosen provider; assignments do not send requests automatically." value={routes[task]} onChange={e=>{const next={...routes,[task]:e.target.value as Provider};setRoutes(next);localStorage.setItem("stillframe-ai-routes",JSON.stringify(next));}}><option value="openai">OpenAI / ChatGPT {available.openai?"· ready":"· not configured"}</option><option value="anthropic">Anthropic / Claude {available.anthropic?"· ready":"· not configured"}</option></select></label>
           <p className="small muted">
             Ask for mood changes, dialogue rewrites or scene titles. The
             assistant proposes edits; you stay in control.

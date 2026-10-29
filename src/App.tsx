@@ -1,3 +1,7 @@
+import { cloneData as structuredClone } from "./cloneData";
+import { RecentFeatures } from "./RecentFeatures";
+import { produce, setAutoFreeze } from "immer";
+setAutoFreeze(false);
 import { SubsceneList } from "./SubsceneList";
 import { sceneView } from "./SceneViews";
 import { syncActiveDialogue } from "./authorPlay";
@@ -531,9 +535,7 @@ export default function App() {
     scene.nodes[0];
   function edit(fn: (p: Project) => void) {
     setProject((p) => {
-      const next = clone(p);
-      fn(next);
-      pruneChapterExits(next);
+      const next = produce(p, draft => { fn(draft as Project); pruneChapterExits(draft as Project); });
       setUndo((u) => [...u.slice(-39), p]);
       setRedo([]);
       return next;
@@ -3147,7 +3149,7 @@ export default function App() {
             ev.target.value = "";
           }}
         />
-        <HoverHelp enabled={workspace.help} />
+        <RecentFeatures/><HoverHelp enabled={workspace.help} />
         {error && (
           <div className="error-toast" role="alert">
             <span>{error}</span>
@@ -3186,7 +3188,7 @@ export default function App() {
                     ? "Your workspace"
                     : "A new beginning"}
               </h2>
-              {modal === "windows" ? <PanelLayoutSettings layouts={workspace.docks} onMove={moveWindow} onReset={()=>setWorkspace(w=>({...w,docks:{}}))}/> : modal === "save" ? (
+              {modal === "windows" ? <PanelLayoutSettings layouts={workspace.docks} onMove={moveWindow} onReset={()=>setWorkspace(w=>({...w,docks:{},previewCustom:false,previewLocked:true}))}/> : modal === "save" ? (
                 <ProjectSave project={project} />
               ) : modal === "settings" ? (
                 <>
@@ -3201,7 +3203,7 @@ export default function App() {
                     GitHub automatically. Undo can restore your local project
                     after loading the snapshot.
                   </p>
-                  <PanelLayoutSettings layouts={workspace.docks} onMove={moveWindow} onReset={()=>setWorkspace(w=>({...w,docks:{}}))}/>
+                  <PanelLayoutSettings layouts={workspace.docks} onMove={moveWindow} onReset={()=>setWorkspace(w=>({...w,docks:{},previewCustom:false,previewLocked:true}))}/>
                   <WorkspaceControls value={workspace} onChange={setWorkspace} placement={placement} onPlacement={setPlacement} />
                   <details><summary>Interface colours and fonts</summary><WorkspaceControls value={workspace} onChange={setWorkspace} appearance /><StoryAppearance project={project} edit={edit} /></details>
                   <Toggle

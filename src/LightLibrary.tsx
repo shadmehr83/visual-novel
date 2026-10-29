@@ -1,3 +1,4 @@
+import { cloneData as structuredClone } from "./cloneData";
 import { useState } from "react";
 import type { Project, Scene, ZoneLight } from "./model";
 export function makePlacedLight(

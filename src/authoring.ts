@@ -1,3 +1,4 @@
+import { cloneData as structuredClone } from "./cloneData";
 import type { Project, Scene } from "./model";
 export function removeDialogue(scene: Scene, id: string) {
   if (scene.nodes.length <= 1)
