@@ -69,6 +69,10 @@ export function DeviceAppearanceControls({
         Only the device changes. Scene artwork and the Stillframe editor keep
         their own appearance.
       </p>
+      <label data-help="Show a rainy-weather widget below the phone’s home-screen clock. Switch off to hide only the widget; the Weather app stays available.">
+        <input type="checkbox" aria-label="Show weather widget" checked={appearance.weatherWidget !== false} onChange={e => set("weatherWidget", e.target.checked)} />
+        Show weather widget
+      </label>
       {area !== "apps" && (
         <>
           <label>
@@ -174,7 +178,7 @@ export function DeviceAppearanceControls({
                     )
                   }
                 >
-                  {["home", "chat", "feed", "settings"].map((s) => (
+                  {["home", "chat", "feed", "settings", "weather"].map((s) => (
                     <option key={s}>{s}</option>
                   ))}
                 </select>

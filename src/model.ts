@@ -258,6 +258,7 @@ export const jointSchema = z.object({
 export type Joint = z.infer<typeof jointSchema>;
 export type Pose = z.infer<typeof poseSchema>;
 export const deviceAppearanceSchema = z.object({
+  weatherWidget: z.boolean().optional(),
   profiles: z.record(z.string()).default({}),
   background: z
     .string()
@@ -279,7 +280,7 @@ export const deviceAppearanceSchema = z.object({
         id: z.string(),
         name: z.string().min(1).max(40),
         icon: z.string().nullable(),
-        screen: z.enum(["home", "feed", "chat", "settings"]),
+        screen: z.enum(["home", "feed", "chat", "settings", "weather"]),
       }),
     )
     .max(12)

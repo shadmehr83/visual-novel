@@ -7,7 +7,7 @@ import {
   setDeviceIndependent,
 } from "./deviceShared";
 import { useState } from "react";
-import type { Project, Scene } from "./model";
+import { deviceAppearanceSchema, type Project, type Scene } from "./model";
 import { DeviceFrameControls } from "./DeviceFrameControls";
 import { DeviceAppearanceControls, withDeviceUpload } from "./DeviceAppearance";
 import { InteractionControls } from "./InteractionControls";
@@ -34,7 +34,7 @@ export function DeviceSummary({
     <section className="property-section" data-effect-panel="Phone">
       <h3>Phone & computer</h3>
       <p>
-        Home, Ember messages, scrolling Insta and Settings remain available.
+        Home, Ember messages, scrolling Insta, Weather and Settings remain available.
         Their full settings now have a dedicated workspace.
       </p>
       <DialogueDeviceControls
@@ -57,6 +57,13 @@ export function DeviceSummary({
               }
             />
             Device enabled
+          </label>
+          <label data-help="Show the rainy-weather widget under the phone’s home-screen clock. Hiding it leaves the Weather app available. Shared phone appearance applies this preference to other linked scenes.">
+            <input type="checkbox" aria-label="Show weather widget" checked={effectiveDevice(project, scene).appearance?.weatherWidget !== false} onChange={e => edit(p => {
+              const s = p.scenes.find(s => s.id === scene.id)!;
+              saveDeviceAppearance(p, s.id, { ...deviceAppearanceSchema.parse(effectiveDevice(p, s).appearance || {}), weatherWidget: e.target.checked });
+            })} />
+            Show weather widget
           </label>
           <p>
             {scene.phone.device === "phone" ? "Phone" : "Computer"} ·{" "}

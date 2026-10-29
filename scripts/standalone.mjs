@@ -30,7 +30,7 @@ for (const name of ['rain-walk', 'tea-and-pages', 'midnight-monitor', 'last-tram
 // Decode locally using the browser's native gzip support. This is lossless and
 // keeps the single-file editor below Pages' 25 MiB asset limit as the UI grows.
 const payload = `window.__stillframeFeedMedia=${JSON.stringify(media)};const player=document.createElement('script');player.type='application/json';player.id='bundled-player';player.textContent=${JSON.stringify(JSON.stringify(player))};document.body.appendChild(player);\n${js}`;
-const compressed = gzipSync(payload, { level: 9 });
+const compressed = gzipSync(payload, { level: 9, memLevel: 9 });
 const packed = encode85(compressed);
 const loader = `(async()=>{try{if(typeof DecompressionStream!=="function")throw Error("Please use a current Chrome, Edge, Firefox or Safari browser.");const bytes=(${decode85.toString()})(${JSON.stringify(packed)},${JSON.stringify(alphabet85)},${compressed.length});const code=await new Response(new Blob([bytes]).stream().pipeThrough(new DecompressionStream("gzip"))).text();const script=document.createElement("script");script.textContent=code;document.body.appendChild(script);}catch(error){const root=document.getElementById("root");root.setAttribute("role","alert");root.textContent="Could not open the offline editor. "+error.message;}})();`;
 const html = `<!doctype html><html lang="en" data-stillframe-standalone="true"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#171a1c"><title>Stillframe — Local Visual Novel Studio</title><style>${css.replace(/<\/style/gi, "<\\/style")}</style></head><body><div id="root">Opening your studio…</div><script>${loader}</script></body></html>`;

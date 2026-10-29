@@ -1,3 +1,4 @@
+import { PhoneWeather } from "./PhoneWeather";
 import { effectiveDevice } from "./deviceShared";
 import { deviceBox } from "./deviceFrame";
 import { PhoneApps } from "./PhoneApps";
@@ -23,7 +24,7 @@ export function PhoneUI({
   screenOverride,
   onNotification,
 }: {
-  screenOverride?: "home" | "chat" | "feed" | "settings";
+  screenOverride?: "home" | "chat" | "feed" | "settings" | "weather";
   onNotification?: () => void;
   project: Project;
   scene: Scene;
@@ -55,7 +56,8 @@ export function PhoneUI({
   const box = deviceBox(config);
   const paused = usePaused();
   const [localAppearance, setLocalAppearance] = useState(config.appearance);
-  const appearance = config.appearance || localAppearance;
+  useEffect(() => setLocalAppearance(config.appearance), [scene.id, scene.phone?.appearance, scene.phone?.independentAppearance, project.deviceDefaults?.appearance]);
+  const appearance = localAppearance || config.appearance;
   const wallpaper = project.assets.find((a) => a.id === appearance?.wallpaper);
   const effective =
     screenOverride ||
@@ -66,7 +68,7 @@ export function PhoneUI({
         ?.filter((v) => v.scene === scene.id)
         .map((v) => v.node),
     );
-  const [screen, setScreen] = useState<"home" | "feed" | "chat" | "settings">(
+  const [screen, setScreen] = useState<"home" | "feed" | "chat" | "settings" | "weather">(
     effective === "off" ? "home" : effective,
   );
   useEffect(() => {
@@ -181,7 +183,7 @@ export function PhoneUI({
             <span>16:00</span>
             <span>◔ ▰</span>
           </div>
-          <header className="device-contact">
+          {screen !== "home" && <header className={screen === "chat" ? "device-contact" : "phone-app-heading"}>
             <button
               type="button"
               aria-label="Back to phone home"
@@ -190,19 +192,21 @@ export function PhoneUI({
             >
               ‹
             </button>
-            {avatar ? (
+            {screen === "chat" && (avatar ? (
               <img src={avatar.data} alt="" />
             ) : (
               <span className="contact-monogram">
                 {config.contact.slice(0, 1)}
               </span>
-            )}
+            ))}
             <div>
               <b>
                 {screen === "chat"
                   ? config.contact
                   : screen === "feed"
                     ? "Insta"
+                    : screen === "weather"
+                      ? "Weather"
                     : screen === "settings"
                       ? "Settings"
                       : config.device === "desktop"
@@ -217,8 +221,8 @@ export function PhoneUI({
                     : "Local device"}
               </small>
             </div>
-            <span>···</span>
-          </header>
+            {screen === "chat" && <span>···</span>}
+          </header>}
           {screen !== "home" && (
             <nav className="phone-app-nav" data-no-advance>
               <button onClick={() => setScreen("home")}>Home</button>
@@ -259,7 +263,7 @@ export function PhoneUI({
               <small>Open notification</small>
             </button>
           )}
-          {screen === "settings" ? (
+          {screen === "weather" ? <PhoneWeather /> : screen === "settings" ? (
             <div className="phone-settings-screen">
               <label>
                 <input

@@ -2062,3 +2062,17 @@ html:has(.app),body:has(.app),#root:has(.app){height:100%;overflow:hidden}.app{h
 .image-preview-dialog header { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 12px; }
 .image-preview-dialog small { display: block; margin-top: 5px; }
 .image-preview-dialog > img { display: block; width: 100%; height: auto; max-height: calc(94dvh - 110px); object-fit: contain; }
+
+.phone-weather-widget { display:flex; align-items:center; gap:12px; width:100%; padding:12px; margin:0 0 18px; border:1px solid #baa5c355; border-radius:14px; background:#7c749333; color:inherit; text-align:left; }
+.phone-weather-widget>span:first-child { font-size:28px; }
+.phone-weather-widget small { display:block; font-size:11px; margin-top:4px; }
+.phone-weather-screen { flex:1; min-height:0; overflow:auto; padding:18px 12px; background:linear-gradient(#59556bd9,#282b40e8); color:#f5f0fa; text-align:center; }
+.phone-weather-screen h2 { font-size:20px; }
+.phone-weather-screen .weather-temperature { font-size:48px; margin:8px; }
+.phone-weather-screen ul { list-style:none; margin:12px 0; padding:0; }
+.phone-weather-screen li { display:flex; justify-content:space-between; gap:7px; padding:12px 0; border-bottom:1px solid #fff2; font-size:12px; }
+.phone-weather-screen li b { min-width:76px; text-align:left; }
+.phone-weather-screen small { font-size:10px; }
+.phone-app-heading { display:flex; align-items:center; gap:8px; padding:8px; flex-shrink:0; }
+.phone-app-heading button { background:transparent; border:0; color:inherit; font-size:22px; padding:2px 8px; }
+.phone-app-heading small { display:block; font-size:10px; opacity:.7; }

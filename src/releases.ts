@@ -1,4 +1,4 @@
-export const ENGINE_VERSION = "2.18.1";
+export const ENGINE_VERSION = "2.18.2";
 export type ReleaseFeature = {
   name: string;
   description: string;
@@ -20,6 +20,10 @@ const f = (
   action?: string,
 ): ReleaseFeature => ({ name, description, steps: path.split(" → "), action });
 export const releases: Release[] = [
+ {version:"2.18.2",name:"Phone weather and app-specific headers",date:"2026-10-29",timestamp:"2026-10-29T12:47:15.633714+00:00",features:[
+ f("Rainy-week Weather app", "Open Weather from the phone home screen to see all seven rainy days. Toggle the clock’s weather widget in Advanced devices, standard phone appearance or the phone’s Settings app.", "Advanced devices → Appearance → Show weather widget", "devices"),
+ f("Contact strip only in chat", "The contact portrait and conversation name appear only in Ember messages. Other apps use a simple navigation heading, without changing your artwork.", "Phone Home → Ember or Insta", "devices")
+ ]},
  {version:"2.18.1",name:"Leaner saves and artwork previews",date:"2026-10-29",timestamp:"2026-10-29T12:38:23.981636+00:00",features:[
  f("Lightweight progress saves", "Story advances save progress separately from unchanged artwork. Library thumbnails load on demand and hidden-tab scene animation pauses.", "Editor → Play story", "editor"),
  f("Expand artwork", "Select an asset and open Expand image, or click an artwork picker preview. View the image larger and close with Escape or Close preview.", "Assets → Select an image → Expand image", "library:Assets")

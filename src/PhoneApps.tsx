@@ -1,3 +1,4 @@
+import { WeatherWidget } from "./PhoneWeather";
 import type { Project, Scene } from "./model";
 import { InstaFeed } from "./InstaFeed";
 export function PhoneApps({
@@ -9,7 +10,7 @@ export function PhoneApps({
   project: Project;
   appearance?: NonNullable<Scene["phone"]>["appearance"];
   screen: "home" | "feed";
-  onOpen: (screen: "home" | "feed" | "chat" | "settings") => void;
+  onOpen: (screen: "home" | "feed" | "chat" | "settings" | "weather") => void;
 }) {
   const icon = (id: string, symbol: string) => {
     const asset = project.assets.find((a) => a.id === appearance?.icons[id]);
@@ -20,6 +21,7 @@ export function PhoneApps({
       <div className="phone-clock">
         16:00<small>A quiet afternoon</small>
       </div>
+      {appearance?.weatherWidget !== false && <WeatherWidget onOpen={() => onOpen("weather")} />}
       <div className="phone-app-grid">
         <button
           data-help="Open Ember messages on this fictional phone. This does not send anything to a real person or advance the story."
@@ -52,12 +54,12 @@ export function PhoneApps({
             {app.name}
           </button>
         ))}
-        <div className="phone-app-disabled">
-          ☀<small>Weather · decorative</small>
-        </div>
+        <button onClick={() => onOpen("weather")} data-help="Open a seven-day story forecast with rain every day. No live weather or location is needed.">
+          <span>☂</span>Weather<small>Rain all week</small>
+        </button>
       </div>
       <p className="small muted">
-        Ember and Insta open. Other icons are scenery.
+        Ember, Insta and Weather open on this fictional phone.
       </p>
     </div>
   ) : (
