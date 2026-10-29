@@ -148,5 +148,45 @@
     "height": 941,
     "bytes": 227072,
     "sha256": "306ae526846c6a2e4773fb806d3b7e59cb9ffbe2a2943fa16f9cf24f3d3650a3"
+  },
+  {
+    "id": "cafe-idle-gif",
+    "name": "Café · blink and candle loop.gif",
+    "folder": "Background scenes",
+    "path": "artwork/background-scenes/cafe-idle-gif.gif",
+    "width": 768,
+    "height": 512,
+    "bytes": 327460,
+    "sha256": "06505f0d2c075abcd081b5ab71ea2449079f1364e08b8c84609594d29140d747"
+  },
+  {
+    "id": "cafe-cake-gif",
+    "name": "Café · cake arrives, blink and candle.gif",
+    "folder": "Background scenes",
+    "path": "artwork/background-scenes/cafe-cake-gif.gif",
+    "width": 768,
+    "height": 512,
+    "bytes": 324754,
+    "sha256": "0c002ce6600218df5fd9852444ff97a53e0860e10120466df537a1b2665c61d6"
+  },
+  {
+    "id": "cafe-cake-still",
+    "name": "Café · cake on the table.webp",
+    "folder": "Background scenes",
+    "path": "artwork/background-scenes/cafe-cake-still.webp",
+    "width": 960,
+    "height": 640,
+    "bytes": 47028,
+    "sha256": "0c2a1cb0971a2d4cb2eebb42ab34560b2fd075a1616c3fc032bdeeb2dd7b880e"
+  },
+  {
+    "id": "departure-forward-street",
+    "name": "After café · street toward the fairground.webp",
+    "folder": "Background scenes",
+    "path": "artwork/background-scenes/departure-forward-street.webp",
+    "width": 1672,
+    "height": 941,
+    "bytes": 272906,
+    "sha256": "c6b3b901cb117d32d9d5841157e6d54b626f9ff8db177a3088a0bf6bd25b01f9"
   }
 ]

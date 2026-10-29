@@ -35,6 +35,6 @@ const packed = encode85(compressed);
 const loader = `(async()=>{try{if(typeof DecompressionStream!=="function")throw Error("Please use a current Chrome, Edge, Firefox or Safari browser.");const bytes=(${decode85.toString()})(${JSON.stringify(packed)},${JSON.stringify(alphabet85)},${compressed.length});const code=await new Response(new Blob([bytes]).stream().pipeThrough(new DecompressionStream("gzip"))).text();const script=document.createElement("script");script.textContent=code;document.body.appendChild(script);}catch(error){const root=document.getElementById("root");root.setAttribute("role","alert");root.textContent="Could not open the offline editor. "+error.message;}})();`;
 const html = `<!doctype html><html lang="en" data-stillframe-standalone="true"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#171a1c"><title>Stillframe — Local Visual Novel Studio</title><style>${css.replace(/<\/style/gi, "<\\/style")}</style></head><body><div id="root">Opening your studio…</div><script>${loader}</script></body></html>`;
 if (Buffer.byteLength(html) >= 25 * 1024 * 1024)
-  throw Error("Standalone editor exceeds Cloudflare's 25 MiB per-file limit.");
+  throw Error(`Standalone editor exceeds Cloudflare's 25 MiB per-file limit: ${Buffer.byteLength(html)} bytes.`);
 await writeFile("dist/stillframe-studio.html", html);
 console.log("Built self-contained editor:", Buffer.byteLength(html), "bytes");

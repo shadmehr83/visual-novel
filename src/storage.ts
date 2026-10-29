@@ -84,8 +84,8 @@ export async function readProject(file: File) {
 export async function readImage(
   file: File,
 ): Promise<Project["assets"][number]> {
-  if (!["image/png", "image/jpeg", "image/webp"].includes(file.type))
-    throw Error("Choose a PNG, JPEG or WebP image.");
+  if (!["image/png", "image/jpeg", "image/webp", "image/gif"].includes(file.type))
+    throw Error("Choose a PNG, JPEG, WebP or animated GIF image.");
   if (file.size > 15 * 1024 * 1024)
     throw Error("Image exceeds 15 MB. Resize a copy before importing.");
   const data = await new Promise<string>((resolve, reject) => {

@@ -1,0 +1,157 @@
+import { useState } from "react";
+import type { Project, Scene } from "./model";
+import { readImage } from "./storage";
+export function BackgroundStoryboard({
+  project,
+  scene,
+  edit,
+  onOpen,
+}: {
+  project: Project;
+  scene: Scene;
+  edit: (fn: (p: Project) => void) => void;
+  onOpen: (node?: string) => void;
+}) {
+  const [trigger, setTrigger] = useState(scene.nodes[0].id),
+    [error, setError] = useState("");
+  const card = (id: string | null, title: string) => {
+    const a = project.assets.find((a) => a.id === id);
+    return (
+      <div className="background-shot">
+        {a ? (
+          <img src={a.data} alt={title} />
+        ) : (
+          <div>Included illustration</div>
+        )}
+        <strong>{title}</strong>
+        <small>
+          {a?.mime === "image/gif" ? "▶ Animated GIF" : "▣ Still image"} ·{" "}
+          {a?.name || "Built-in artwork"}
+        </small>
+      </div>
+    );
+  };
+  return (
+    <details className="background-storyboard" open>
+      <summary>
+        Background sequence · {1 + (scene.subscenes?.length || 0)} views
+      </summary>
+      <p>
+        Scene entrance: {scene.transition?.style || "cut"} ·{" "}
+        {scene.transition?.seconds || 0}s
+      </p>
+      <div className="background-sequence">
+        {card(scene.background, "Main scene")}
+        {scene.subscenes?.map((v) => (
+          <div key={v.id}>
+            <div className="background-link">
+              → {v.transition.style} · {v.transition.seconds}s
+            </div>
+            {card(v.background, v.title)}
+            {scene.nodes
+              .filter((n) => n.view === v.id)
+              .map((n) => (
+                <button key={n.id} onClick={() => onOpen(n.id)}>
+                  Dialogue {scene.nodes.indexOf(n) + 1} · {n.text.slice(0, 55)}
+                </button>
+              ))}
+            <label>
+              Cue this view at dialogue
+              <select
+                aria-label={v.title + " assign dialogue"}
+                value=""
+                onChange={(e) => {
+                  const id = e.target.value;
+                  if (id)
+                    edit((p) => {
+                      p.scenes
+                        .find((s) => s.id === scene.id)!
+                        .nodes.find((n) => n.id === id)!.view = v.id;
+                    });
+                }}
+              >
+                <option value="">Choose dialogue…</option>
+                {scene.nodes.map((n, i) => (
+                  <option key={n.id} value={n.id}>
+                    {i + 1}. {n.text.slice(0, 55)}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label>
+              Transition
+              <select
+                aria-label={v.title + " visual transition"}
+                value={v.transition.style}
+                onChange={(e) =>
+                  edit((p) => {
+                    p.scenes
+                      .find((s) => s.id === scene.id)!
+                      .subscenes!.find((x) => x.id === v.id)!.transition.style =
+                      e.target.value as typeof v.transition.style;
+                  })
+                }
+              >
+                {["cut", "smooth", "fade", "slide", "snappy"].map((t) => (
+                  <option key={t}>{t}</option>
+                ))}
+              </select>
+            </label>
+          </div>
+        ))}
+      </div>
+      <p>
+        Each card is a view, not an automatic next slide. Its dialogue buttons
+        show exactly where it is triggered. Unassigned dialogues return to the
+        main background.
+      </p>
+      <label>
+        Trigger new view at dialogue
+        <select
+          aria-label="New background trigger dialogue"
+          value={trigger}
+          onChange={(e) => setTrigger(e.target.value)}
+        >
+          {scene.nodes.map((n, i) => (
+            <option key={n.id} value={n.id}>
+              {i + 1}. {n.text.slice(0, 65)}
+            </option>
+          ))}
+        </select>
+      </label>
+      <label>
+        Add still / GIF sub-scene
+        <input
+          aria-label="Add storyboard background"
+          type="file"
+          accept="image/png,image/jpeg,image/webp,image/gif"
+          onChange={async (e) => {
+            const f = e.target.files?.[0];
+            e.target.value = "";
+            if (!f) return;
+            try {
+              const a = await readImage(f);
+              const id = crypto.randomUUID();
+              edit((p) => {
+                a.folder = "Background scenes";
+                p.assets.push(a);
+                const s = p.scenes.find((s) => s.id === scene.id)!;
+                (s.subscenes ??= []).push({
+                  id,
+                  title: f.name,
+                  background: a.id,
+                  transition: { style: "smooth", seconds: 0.45 },
+                });
+                s.nodes.find((n) => n.id === trigger)!.view = id;
+              });
+              setError("");
+            } catch (e) {
+              setError(String(e));
+            }
+          }}
+        />
+      </label>
+      {error && <p role="alert">{error}</p>}
+    </details>
+  );
+}

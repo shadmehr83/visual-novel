@@ -374,13 +374,14 @@ const scene = z.object({
   entry: z.array(action).default([]),
 });
 const asset = z.object({
+  poster: z.string().optional(),
   folder: z.string().min(1).max(80).optional(),
   id: z.string(),
   name: z.string(),
-  mime: z.enum(["image/png", "image/jpeg", "image/webp"]),
+  mime: z.enum(["image/png", "image/jpeg", "image/webp", "image/gif"]),
   width: z.number().positive(),
   height: z.number().positive(),
-  data: z.string().regex(/^data:image\/(png|jpeg|webp);base64,/),
+  data: z.string().regex(/^data:image\/(png|jpeg|webp|gif);base64,/),
   tags: z.string(),
   notes: z.string(),
   approved: z.boolean(),

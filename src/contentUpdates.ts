@@ -1,3 +1,4 @@
+import { integrateCafeMotion } from "./cafeMotionUpdate";
 import { integrateChapterAtmosphere } from "./chapterAtmosphereUpdate";
 import { integrateChapterUpdate } from "./chapters";
 import type { Project } from "./model";
@@ -12,5 +13,6 @@ export function integrateContentUpdates(local: Project, source: Project, forceAr
   const library = integrateLibraryUpdate(device, source, forceArtwork) || device;
   const chapter = integrateChapterUpdate(library, source) || library;
   const vibration = integrateVibration(chapter, source) || chapter;
-  return integrateChapterAtmosphere(vibration, source) || (vibration !== local ? vibration : null);
+  const atmosphere = integrateChapterAtmosphere(vibration, source) || vibration;
+  return integrateCafeMotion(atmosphere, source) || (atmosphere !== local ? atmosphere : null);
 }

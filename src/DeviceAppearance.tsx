@@ -42,7 +42,7 @@ export function DeviceAppearanceControls({
       Upload {name}
       <input
         type="file"
-        accept="image/png,image/jpeg,image/webp"
+        accept="image/png,image/jpeg,image/webp,image/gif"
         onChange={async (e) => {
           const f = e.target.files?.[0];
           e.target.value = "";

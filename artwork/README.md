@@ -2,7 +2,7 @@
 
 These are ordinary image files extracted byte-for-byte from the published project. Open any folder and click an image to view or download it from any computer. The studio embeds these same images in project exports. `manifest.json` records image IDs, folders, dimensions, file sizes and SHA-256 checksums.
 
-## Background scenes (8)
+## Background scenes (12)
 
 - [Rainy Café Conversation.png](background-scenes/2021e333-3387-4b6e-ad86-281b140a8cca.png)
 - [The First Match — bedroom environment.png](background-scenes/first-match-bedroom.png)
@@ -12,6 +12,10 @@ These are ordinary image files extracted byte-for-byte from the published projec
 - [Bedroom · monitor close-up](background-scenes/first-match-monitor.webp)
 - [At the window · rainy city](background-scenes/first-match-window.webp)
 - [The First Match · next morning bedroom.webp](background-scenes/first-match-morning.webp)
+- [Café · blink and candle loop.gif](background-scenes/cafe-idle-gif.gif)
+- [Café · cake arrives, blink and candle.gif](background-scenes/cafe-cake-gif.gif)
+- [Café · cake on the table.webp](background-scenes/cafe-cake-still.webp)
+- [After café · street toward the fairground.webp](background-scenes/departure-forward-street.webp)
 
 ## Outfits & items (3)
 

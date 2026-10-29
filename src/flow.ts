@@ -135,7 +135,7 @@ export function flowGraph(
                 ];
           return {
             id: "node:" + n.id,
-            title: `${i + 1}. ${n.speaker}${n.view ? " · Sub-scene" : ""}`,
+            title: `${i + 1}. ${n.speaker}${n.view ? " · Sub-scene" + (p.assets.find(a=>a.id===current.subscenes?.find(v=>v.id===n.view)?.background)?.mime === "image/gif" ? " · GIF" : "") : ""}`,
             text: n.text,
             scene: current.id,
             node: n.id,

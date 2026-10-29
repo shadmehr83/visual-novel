@@ -32,7 +32,7 @@ export function SceneTransition({
   const selectedTransition = useRef(scene.transition);
   if (previous.current !== key)
     selectedTransition.current =
-      view?.transition || (previous.current.startsWith(scene.id + ":") ? { style: "fade", seconds: 0.65 } : lastScene.current.exitTransition || scene.transition);
+      view?.transition || (previous.current.startsWith(scene.id + ":") ? { style: "smooth", seconds: 0.45 } : lastScene.current.exitTransition || scene.transition);
   const transition = playing ? selectedTransition.current : scene.transition;
   useEffect(() => {
     setOutgoing(null);

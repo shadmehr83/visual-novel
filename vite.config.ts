@@ -1,14 +1,13 @@
+import { publishedDataPlugin } from "./scripts/published-data-plugin";
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 export default defineConfig({
-  plugins: [react()],
+  plugins: [publishedDataPlugin(), react()],
   build: {
     rollupOptions: {
       output: {
         manualChunks: (id: string) =>
-          id.includes("/projects/published.stillframe.json")
-            ? "published-story"
-            : undefined,
+          id.startsWith("\0virtual:published-media-") ? id.slice(1).replace(":", "-") : undefined,
       },
     },
   },

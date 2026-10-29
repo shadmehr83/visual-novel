@@ -169,7 +169,7 @@ export function ItemControls({
                 <input
                   aria-label={"Upload image for " + item.label}
                   type="file"
-                  accept="image/png,image/jpeg,image/webp"
+                  accept="image/png,image/jpeg,image/webp,image/gif"
                   onChange={async (e) => {
                     const f = e.target.files?.[0];
                     e.target.value = "";

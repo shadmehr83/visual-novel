@@ -1,4 +1,4 @@
-export const ENGINE_VERSION = "2.14.0";
+export const ENGINE_VERSION = "2.15.0";
 export type ReleaseFeature = {
   name: string;
   description: string;
@@ -19,7 +19,12 @@ const f = (
   action?: string,
 ): ReleaseFeature => ({ name, description, steps: path.split(" → "), action });
 export const releases: Release[] = [
-  {version:"2.14.0",name:"Character motion, chapter repair and wet streets",date:"2026-10-29",features:[
+ {version:"2.15.0",name:"GIF backgrounds and visual background sequences",date:"2026-10-29",features:[
+ f("Animated background uploads", "Upload GIFs using the normal background picker or the dedicated Upload GIF background button. Animation bytes stay in project exports and the offline editor, with matched still fallbacks for the included café loops.", "Background → Upload GIF background", "background"),
+ f("Visual scene background sequence", "Scenes advanced displays thumbnail cards for main and sub-scene backgrounds, GIF labels, transition arrows, editable styles and exact dialogue triggers. Add a still or GIF directly to a chosen dialogue.", "Scenes advanced → Select scene → Background sequence", "scenes"),
+ f("Steady café animation and forward street", "Café loops reuse the fixed original painting with local blink and flame patches, then cue a matched cake-on-table loop. The departure looks down a wet street toward a distant Ferris wheel and ice-cream lights.", "Story → A table by the window or After the café", "scenes")
+ ]},
+  {version:"2.14.0",commit:"5fb7d63",name:"Character motion, chapter repair and wet streets",date:"2026-10-29",features:[
     f("Chapters that create and retain their scenes", "Add chapter no longer navigates to an opening before it exists. Older First Match workspaces put the six morning openings into chapter two while retaining the farewell as chapter one’s ending.", "Chapters advanced → Add chapter", "chapters"),
     f("Masked character motion and saved snippets", "Hinges support gentle repeating head tilt, eye drift and short eyelid blinks alongside dialogue poses and activation ranges. Extract selected pixels into the Character snippets folder, move a patch by dragging and optionally cover its old position with an aligned clean plate.", "Cinematics → Add hinge region → Character motion", "effect:Cinematics"),
     f("Rain impact ripples and layered sound", "Reflective puddles on the approach and farewell have masked impact rings instead of pavement distortion. Original splash and heel-to-toe sounds layer with rain, and morning openings use a matching daylight bedroom with phone chat only on message dialogues.", "Motion → Rain impacts or Sound → Add background ambience", "effect:Motion")

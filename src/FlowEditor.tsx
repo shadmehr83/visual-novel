@@ -1,3 +1,4 @@
+import { BackgroundStoryboard } from "./BackgroundStoryboard";
 import { SubsceneList } from "./SubsceneList";
 import { pruneChapterExits } from "./chapters";
 import { chapterForScene } from "./chapterRuntime";
@@ -390,6 +391,7 @@ export function FlowEditor({
                       {scene.nodes.length} dialogue boxes. First dialogue:{" "}
                       {scene.nodes[0].text.slice(0, 80)}
                     </p>
+                    <BackgroundStoryboard key={scene.id} project={project} scene={scene} edit={edit} onOpen={id=>onOriginal(scene.id,id)} />
                     <SubsceneList scene={scene} update={updateScene} onOpen={id => onOriginal(scene.id, id)} />
                     <AssetPicker project={project} label="Map scene background" initialFolder="Background scenes" value={scene.background} empty="Included illustration" onChange={id => updateScene(s => {s.background=id;})} />
                     <button onClick={() => onDrill(scene.id)}>

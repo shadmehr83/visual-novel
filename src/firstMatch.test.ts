@@ -29,11 +29,12 @@ function play(
   return { r, lines };
 }
 
-it("preserves every cafe visual setting and the original PNG bytes", () => {
+it("keeps the original cafe PNG bytes alongside the new matched animation", () => {
   const p = savedProject();
   const { nodes, entry, ...visuals } = p.scenes.find((s) => s.id === "cafe")!;
-  expect(visuals).toEqual(preserved.scene);
-  const image = p.assets.find((a) => a.id === visuals.background)!;
+  expect(visuals.background).toBe("cafe-idle-gif");
+  expect(visuals.subscenes?.some(v=>v.id==="cake-arrives")).toBe(true);
+  const image = p.assets.find((a) => a.id === preserved.scene.background)!;
   let fingerprint = 2166136261;
   for (let i = 0; i < image.data.length; i++)
     fingerprint =

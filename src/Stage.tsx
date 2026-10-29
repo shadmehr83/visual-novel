@@ -181,7 +181,8 @@ export function Stage({
     project.settings.reducedEffects,
   ]);
   const points = e.mask.map((p) => `${p.x},${p.y}`).join(" ");
-  const asset = project.assets.find((a) => a.id === scene.background);
+  const originalAsset = project.assets.find((a) => a.id === scene.background);
+  const asset = originalAsset?.mime === "image/gif" && (project.settings.reducedEffects || reducedMotion) && originalAsset.poster ? project.assets.find(a=>a.id===originalAsset.poster) || originalAsset : originalAsset;
   const transform = asset
     ? `translate(${scene.x * 10} ${scene.y * 5.63}) translate(500 281.5) scale(${scene.scale}) translate(-500 -281.5)`
     : undefined;
@@ -248,6 +249,7 @@ export function Stage({
         viewBox="0 0 1000 563"
         role="img"
         aria-label={scene.title + " live stage"}
+        data-background-asset={asset?.id || scene.art}
         data-light-level={lightLevel}
         data-global-light-level={globalLevel}
         style={{ touchAction: regionEditor ? "none" : undefined }}

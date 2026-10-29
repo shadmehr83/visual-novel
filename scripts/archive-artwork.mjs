@@ -5,7 +5,7 @@ const p=JSON.parse(await readFile('projects/published.stillframe.json','utf8'));
 const folders={'Background scenes':'background-scenes','Outfits & items':'outfits-and-items','Profiles & app icons':'profiles-and-app-icons'};
 const manifest=[];
 for(const asset of p.assets){
- const match=asset.data.match(/^data:image\/(png|jpeg|webp);base64,(.*)$/s);
+ const match=asset.data.match(/^data:image\/(png|jpeg|webp|gif);base64,(.*)$/s);
  if(!match)throw Error('Unsupported image data: '+asset.id);
  const folder=folders[asset.folder]||'other-artwork';
  const id=asset.id.replace(/[^a-zA-Z0-9_-]/g,'-');

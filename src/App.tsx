@@ -1087,7 +1087,7 @@ export default function App() {
                     <Upload size={16} /> Import artwork
                   </button>
                   <p className="muted small">
-                    PNG, JPEG or WebP · up to 15 MB. Originals stay in your
+                    PNG, JPEG, WebP or animated GIF · up to 15 MB. Originals stay in your
                     project.
                   </p>
                   <a className="artwork-github-link" href="https://github.com/shadmehr83/visual-novel/tree/main/artwork" target="_blank" rel="noreferrer">Browse saved artwork folders on GitHub ↗</a>
@@ -2824,6 +2824,8 @@ export default function App() {
                       >
                         <Upload size={14} /> Import background
                       </button>
+                      <button onClick={()=>input.current?.click()}>Upload GIF background</button>
+                      <p>PNG, JPEG, WebP or animated GIF. GIFs play directly as backgrounds and stay animated in exports.</p>
                       <label>
                         Image fit
                         <select
@@ -3126,7 +3128,7 @@ export default function App() {
           hidden
           ref={input}
           type="file"
-          accept="image/png,image/jpeg,image/webp"
+          accept="image/png,image/jpeg,image/webp,image/gif"
           multiple
           onChange={(ev) => {
             void images(ev.target.files);
