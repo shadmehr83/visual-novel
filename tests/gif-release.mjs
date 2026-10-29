@@ -13,7 +13,7 @@ const browser=await chromium.launch({executablePath:process.env.CHROMIUM_PATH||'
 try {
  const context=await browser.newContext({serviceWorkers:'block',viewport:{width:1500,height:1000}});
  const page=await context.newPage(),errors=[];page.on('pageerror',e=>errors.push(e.message));
- const html=await readFile('dist/stillframe-studio.html','utf8');
+ const html=await readFile('downloads/stillframe-studio.html','utf8');
  await page.route('https://gif-offline.test/**',r=>r.fulfill({contentType:'text/html',body:html}));
  await context.setOffline(true);await page.goto('https://gif-offline.test/');
  await page.locator('input[accept=".json"]').setInputFiles({name:'gif.json',mimeType:'application/json',buffer:Buffer.from(JSON.stringify(p))});

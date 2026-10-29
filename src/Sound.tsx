@@ -42,7 +42,7 @@ export function SoundSession({ children, playing, paused, showControls = true }:
       {blocked && <small>Tap Enable sound if your browser blocks autoplay.</small>}
     </div> : null;
 
-  return <SoundContext.Provider value={{ enabled: enabled && playing && !paused, volume, play, onBlocked, controls }}>
+  return <SoundContext.Provider value={{ enabled: enabled && playing, volume, play, onBlocked, controls }}>
     {showControls && controls}
     {children}
   </SoundContext.Provider>;

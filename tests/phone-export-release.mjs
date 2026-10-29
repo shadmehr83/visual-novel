@@ -5,12 +5,12 @@ const browser=await chromium.launch({executablePath:process.env.CHROMIUM_PATH ||
 try {
  const context=await browser.newContext({serviceWorkers:'block',viewport:{width:1400,height:1000}}), page=await context.newPage(), errors=[];
  page.on('pageerror',e=>errors.push(e.message));
- const html=await readFile('dist/stillframe-studio.html','utf8');
+ const html=await readFile('downloads/stillframe-studio.html','utf8');
  await page.route('https://offline-phone.test/**',route=>route.fulfill({contentType:'text/html',body:html}));
  await context.setOffline(true);
  await page.goto('https://offline-phone.test/?snapshot=github');
  await page.getByRole('button',{name:'Keep local project',exact:true}).click();
- await page.getByRole('button',{name:'v2.20.3',exact:true}).waitFor();
+ await page.getByRole('button',{name:'v2.21.0',exact:true}).waitFor();
  const download=page.waitForEvent('download');
  await page.getByRole('button',{name:'Export phone game',exact:true}).click();
  const file=await download;assert.equal(file.suggestedFilename(),'visual-novel-phone.html');

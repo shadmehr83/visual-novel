@@ -5,7 +5,7 @@ const browser=await chromium.launch({executablePath:process.env.CHROMIUM_PATH||'
 try {
  const context=await browser.newContext({serviceWorkers:'block',viewport:{width:1450,height:1000}}),page=await context.newPage(),errors=[];
  page.on('pageerror',e=>errors.push(e.message));
- const html=await readFile('dist/stillframe-studio.html','utf8');
+ const html=await readFile('downloads/stillframe-studio.html','utf8');
  await page.route('https://demand-offline.test/**',r=>r.fulfill({contentType:'text/html',body:html}));await context.setOffline(true);await page.goto('https://demand-offline.test/');
  await page.getByRole('button',{name:'v'+JSON.parse(await readFile('package.json','utf8')).version,exact:true}).waitFor();
  await page.getByRole('button',{name:'Assistant',exact:true}).click();await page.getByLabel('AI demand request',{exact:true}).fill('Adjust this lamp after reviewing the scene.');await page.getByRole('button',{name:'Save request',exact:true}).click();

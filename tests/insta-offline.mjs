@@ -3,7 +3,7 @@ import { readFile } from 'node:fs/promises';
 import assert from 'node:assert/strict';
 const browser=await chromium.launch({executablePath:process.env.CHROMIUM_PATH||undefined,headless:true});
 try {
- const html=await readFile('dist/stillframe-studio.html','utf8');
+ const html=await readFile('downloads/stillframe-studio.html','utf8');
  const context=await browser.newContext({serviceWorkers:'block',viewport:{width:1440,height:1000}});
  const page=await context.newPage(), errors=[],mediaRequests=[];
  page.on('pageerror',e=>errors.push(e.message));page.on('request',r=>{if(r.url().includes('/media/insta/'))mediaRequests.push(r.url());});

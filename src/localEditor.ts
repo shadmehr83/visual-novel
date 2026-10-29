@@ -1,10 +1,13 @@
 export async function downloadLocalEditor() {
-  const response = await fetch("/stillframe-studio.html");
+  const response = await fetch("/stillframe-studio.html.gz");
   if (!response.ok)
     throw Error(
       "The local editor download is available from a production build.",
     );
-  const html = await response.text();
+  const bytes = new Uint8Array(await response.arrayBuffer());
+  const html = bytes[0] === 31 && bytes[1] === 139
+    ? await new Response(new Blob([bytes]).stream().pipeThrough(new DecompressionStream("gzip"))).text()
+    : new TextDecoder().decode(bytes);
   if (!html.includes('data-stillframe-standalone="true"'))
     throw Error(
       "No standalone editor was found. Please use the latest deployed app.",

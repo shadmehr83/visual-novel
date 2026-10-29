@@ -1,3 +1,4 @@
+import {integrateCafeMusic} from "./cafeMusicUpdate";
 import { integratePlayerContent } from "./playerContentUpdate";
 import { integrateCafeMotion } from "./cafeMotionUpdate";
 import { integrateChapterAtmosphere } from "./chapterAtmosphereUpdate";
@@ -16,5 +17,6 @@ export function integrateContentUpdates(local: Project, source: Project, forceAr
   const vibration = integrateVibration(chapter, source) || chapter;
   const atmosphere = integrateChapterAtmosphere(vibration, source) || vibration;
   const cafe = integrateCafeMotion(atmosphere, source) || atmosphere;
-  return integratePlayerContent(cafe, source) || (cafe !== local ? cafe : null);
+  const player = integratePlayerContent(cafe, source) || cafe;
+  return integrateCafeMusic(player,source) || (player !== local ? player : null);
 }

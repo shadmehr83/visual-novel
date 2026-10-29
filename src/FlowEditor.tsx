@@ -1,3 +1,4 @@
+import {SceneAudioTracks} from "./SceneAudioTracks";
 import { cloneData as structuredClone } from "./cloneData";
 import { FlowPanelSize, useFlowPanelSize } from "./FlowPanelSize";
 import { BackgroundStoryboard } from "./BackgroundStoryboard";
@@ -497,6 +498,7 @@ export function FlowEditor({
                       {scene.nodes.length} dialogue boxes. First dialogue:{" "}
                       {scene.nodes[0].text.slice(0, 80)}
                     </p>
+                    <SceneAudioTracks project={project} scene={scene} update={updateScene} />
                     <BackgroundStoryboard
                       key={scene.id}
                       project={project}

@@ -4,7 +4,7 @@ import assert from 'node:assert/strict';
 const browser=await chromium.launch({executablePath:process.env.CHROMIUM_PATH||undefined,headless:true});
 try{
  const version=JSON.parse(await readFile('package.json','utf8')).version;
- const html=await readFile('dist/stillframe-studio.html','utf8');
+ const html=await readFile('downloads/stillframe-studio.html','utf8');
  const context=await browser.newContext({serviceWorkers:'block',viewport:{width:1500,height:1000}}),page=await context.newPage(),errors=[];
  page.on('pageerror',e=>errors.push(e.message));await page.route('https://advanced-studio.test/**',r=>r.fulfill({contentType:'text/html',body:html}));await context.setOffline(true);await page.goto('https://advanced-studio.test/');
  await page.getByRole('button',{name:'v'+version,exact:true}).waitFor();await page.getByRole('tab',{name:'Update history',exact:true}).click();await page.getByLabel('Search update history').fill('Individual light favourites');await page.getByRole('heading',{name:'Individual light favourites',exact:true}).waitFor();

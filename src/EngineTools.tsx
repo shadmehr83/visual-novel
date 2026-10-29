@@ -162,39 +162,22 @@ export function SceneAudio({
     const sound = source?.find(c => c.id === id)?.sound;
     if (sound) play(project.audioAssets?.find(a => a.id === sound.asset)?.data, sound.volume, "choice:" + choiceCount + ":" + choiceSource?.scene + ":" + choiceSource?.node + ":" + id);
   }, [choiceCount, enabled]);
-  const audioRef = useRef<(HTMLAudioElement | null)[]>([]);
+  const sceneTracks = useRef(new Map<string, HTMLAudioElement>());
+  const audioScene = useRef(scene.id);
   useEffect(() => {
-    audioRef.current.forEach((a) => {
-      if (!a) return;
-      if (sessionPaused) a.pause();
-      else if (enabled)
-        void a.play().catch(() => setError("Toggle sound to retry."));
-    });
-  }, [sessionPaused]);
-  useEffect(() => {
-    if (!enabled) return;
-    const tracks = (scene.audio || []).map((t) => {
-      const asset = project.audioAssets?.find((a) => a.id === t.id);
-      if (!asset) return null;
-      const audio = new Audio(asset.data);
-      audio.volume = t.volume * volume;
-      audio.loop = t.loop;
-      if (!sessionPaused)
-        audio
-          .play()
-          .catch(() =>
-            { setError("Audio playback was blocked. Enable sound to retry."); onBlocked(); },
-          );
-      return audio;
-    });
-    audioRef.current = tracks;
-    return () =>
-      tracks.forEach((a) => {
-        a?.pause();
-        if (a) a.src = "";
-      });
-  }, [enabled, scene.id, JSON.stringify(scene.audio)]);
-  useEffect(() => { audioRef.current.forEach((a, i) => { if (a) a.volume = (scene.audio?.[i]?.volume || 0) * volume; }); }, [volume]);
+    const tracks = sceneTracks.current;
+    const wanted = new Set((scene.audio || []).map(t => t.id));
+    for (const [id,a] of tracks) if (audioScene.current !== scene.id || !wanted.has(id)) {a.pause();a.src="";tracks.delete(id);}
+    audioScene.current=scene.id;
+    for (const track of scene.audio || []) {
+      let a=tracks.get(track.id);
+      if(!a){const asset=project.audioAssets?.find(a=>a.id===track.id);if(!asset)continue;a=new Audio(asset.data);tracks.set(track.id,a);}
+      a.volume=track.volume*volume;a.loop=track.loop;
+      if(!enabled || sessionPaused)a.pause();
+      else if(!a.ended)void a.play().catch(()=>{setError("Audio playback was blocked. Enable sound to retry.");onBlocked();});
+    }
+  },[enabled,sessionPaused,scene.id,JSON.stringify(scene.audio),volume]);
+  useEffect(()=>()=>{sceneTracks.current.forEach(a=>{a.pause();a.src="";});sceneTracks.current.clear();},[]);
   return error ? <small className="sound-control">{error}</small> : null;
 }
 export function EngineTools({

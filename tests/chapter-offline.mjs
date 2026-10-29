@@ -5,7 +5,7 @@ const browser=await chromium.launch({executablePath:process.env.CHROMIUM_PATH||u
 try{
  const page=await browser.newPage({viewport:{width:1440,height:1000},serviceWorkers:'block'}),errors=[];
  page.on('pageerror',e=>errors.push(e.message));const context=page.context();
- const html=await readFile('dist/stillframe-studio.html','utf8');
+ const html=await readFile('downloads/stillframe-studio.html','utf8');
  await page.route('https://chapter-offline.test/',r=>r.fulfill({contentType:'text/html',body:html}));
  await context.setOffline(true);await page.goto('https://chapter-offline.test/');
  await page.getByRole('tab',{name:'Chapters advanced',exact:true}).click();

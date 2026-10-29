@@ -62,6 +62,7 @@ function Player() {
           advance={() => setRuntime(r=>advance(project,r))}
           canAdvance={!runtime.ended && !node.choices.length && !node.qte} />
 
+            <SceneAudio project={project} scene={scene} nodeId={node.id} choices={runtime.choices} choiceSource={runtime.memories?.at(-1)} onAdvance={() => setRuntime(r => advance(project, r))} />
         <SceneTransition
           scene={scene}
           nodeId={node.id}
@@ -86,7 +87,7 @@ function Player() {
             maskMode={false}
             onMask={() => {}}
           >
-            <SceneAudio project={project} scene={scene} nodeId={node.id} choices={runtime.choices} choiceSource={runtime.memories?.at(-1)} onAdvance={() => setRuntime(r => advance(project, r))} />
+
             {hasItemUI(scene, node) ? (
               <ItemOverlay
                 onReply={(text, branch) => setRuntime(r => respond(project, r, text, branch))}

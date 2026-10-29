@@ -21,3 +21,5 @@ Open `stillframe-studio.html` on GitHub and choose **Download raw file**, then s
 ## Playing on a phone
 
 In the editor's library footer choose **Export phone game**. It downloads a separate HTML player with compact dialogue, a larger phone interface, tap-to-continue and a viewport-filling stage. Use **Advanced playable export → Player layout → Phone** for a chapter or dialogue range. Both phone and normal exports put volume, advance mode and fullscreen inside **Pause menu**, together with **Save and quit** and **Quit without saving**. Progress saves stay in that browser; they do not sync through GitHub. See [player instructions](../docs/PHONE_EXPORT_AND_PAUSE.md).
+
+Scene six includes the original 2:49 café piano loop **Between the Rain and Four O’clock**. In **Scenes advanced → select scene → Soundtracks in this scene**, preview/seek the track and adjust its volume and looping. The complete local editor includes the music; the website decompresses the download before saving the usual single HTML file.

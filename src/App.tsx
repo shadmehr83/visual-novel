@@ -1469,6 +1469,9 @@ export default function App() {
                   <small>{authorTyping ? "Story timers held while typing" : "Edits save to your project · Undo available"}</small>
                 </div>}
                 {activeView && <p role="status">Editing sub-scene: <strong>{activeView.title}</strong> · Lighting, rain and ambience controls apply to this view.</p>}
+                      {playing && (
+                        <SceneAudio project={project} scene={scene} nodeId={node.id} choices={runtime?.choices} choiceSource={runtime?.memories?.at(-1)} onAdvance={() => step()} />
+                      )}
                 <div className="stage-frame">
                   <SceneTransition
                     scene={scene}
@@ -1534,9 +1537,7 @@ export default function App() {
                       regionEditor={editingLocked ? null : regionEditor}
                       onRegion={changeSelectedRegion}
                     >
-                      {playing && (
-                        <SceneAudio project={project} scene={scene} nodeId={node.id} choices={runtime?.choices} choiceSource={runtime?.memories?.at(-1)} onAdvance={() => step()} />
-                      )}
+
                       {playing && runtime && node.qte && (
                         <Qte
                           key={
