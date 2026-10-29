@@ -5,8 +5,11 @@ import { FullscreenButton } from "./FullscreenButton";
 import { ProgressView } from "./ProgressView";
 import type { Project, Runtime } from "./model";
 const PauseContext = createContext(false);
+const AuthorEditingContext = createContext(false);
+export const useAuthorEditing = () => useContext(AuthorEditingContext);
 export const usePaused = () => useContext(PauseContext);
-export function PlaySession({ children, playing, onExit, onRestart, project, runtime }: {
+export function PlaySession({ children, playing, onExit, onRestart, project, runtime, authorEditing = false }: {
+  authorEditing?: boolean;
   children: ReactNode; playing: boolean; onExit?: () => void; onRestart: () => void; project?: Project; runtime?: Runtime | null;
 }) {
   const [paused, setPaused] = useState(false), [progress, setProgress] = useState(false);
@@ -54,7 +57,7 @@ export function PlaySession({ children, playing, onExit, onRestart, project, run
       </>}
     </section></div>}
   </>;
-  return <PauseContext.Provider value={playing && paused}><SoundSession playing={playing} paused={paused}>
+  return <AuthorEditingContext.Provider value={authorEditing}><PauseContext.Provider value={playing && paused}><SoundSession playing={playing} paused={paused}>
     <div className={playing && paused ? "play-session session-paused" : "play-session"}><div className="session-content">{children}</div>{host ? createPortal(controls, host) : controls}</div>
-  </SoundSession></PauseContext.Provider>;
+  </SoundSession></PauseContext.Provider></AuthorEditingContext.Provider>;
 }

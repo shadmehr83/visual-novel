@@ -14,6 +14,7 @@ export function StudioMenu({
   canUndo,
   canRedo,
   playing,
+  authorPlay = false,
   collapsed,
   effects,
   placement,
@@ -26,6 +27,7 @@ export function StudioMenu({
   canUndo: boolean;
   canRedo: boolean;
   playing: boolean;
+  authorPlay?: boolean;
   collapsed: boolean;
   effects: number;
   placement: string;
@@ -80,8 +82,8 @@ export function StudioMenu({
         <details>
           <summary>Edit</summary>
           <div className="studio-menu-popover">
-            {command("Undo", "undo", !canUndo || playing)}
-            {command("Redo", "redo", !canRedo || playing)}
+            {command("Undo", "undo", !canUndo || (playing && !authorPlay))}
+            {command("Redo", "redo", !canRedo || (playing && !authorPlay))}
             {command("Original dialogue editor", "dialogue")}
             {command("Outfit & item picker", "items")}
             {command("Saved outfit selection", "wardrobe")}

@@ -1,4 +1,4 @@
-export const ENGINE_VERSION = "2.12.0";
+export const ENGINE_VERSION = "2.13.0";
 export type ReleaseFeature = {
   name: string;
   description: string;
@@ -19,7 +19,12 @@ const f = (
   action?: string,
 ): ReleaseFeature => ({ name, description, steps: path.split(" → "), action });
 export const releases: Release[] = [
-  {version:"2.12.0",name:"Draggable comments and animated feed scenes",date:"2026-10-29",features:[
+  { version: "2.13.0", name: "Author’s playthrough and live editing", date: "2026-10-29", features: [
+    f("Edit while playing", "Author’s playthrough keeps dialogue, replies, notes, backgrounds and normal scene controls editable. The editor follows the actual dialogue and scene, and changes autosave with Undo available.", "Header → Author’s playthrough → Edit current dialogue", "author-play"),
+    f("Safe live debugging", "Automatic dialogue steps and timed actions wait while you type. Route links and dialogue deletion stay locked during playback. Phone messages update when their current authored line is edited, without replaying choices.", "Author’s playthrough → Dialogue or scene controls", "author-play"),
+    f("Phone buzz and mouse light placement", "The second bedroom dialogue plays an original double vibration. Local radial lights have a Move light with mouse button beside their X/Y coordinates; one scene click moves the selected light without changing its loop.", "Lighting → Local light → Move light with mouse", "effect:Lighting")
+  ]},
+  {version:"2.12.0",commit:"2962460",name:"Draggable comments and animated feed scenes",date:"2026-10-29",features:[
     f("Compact comments with finger-like mouse gestures", "Comments use a short header and a single-line reply composer. Drag the sheet header up to the phone’s top or down to shrink it; drag the comments themselves to scroll. Likes, saved replies and story choices stay intact.", "Insta → Comments → Drag header or comment list", "devices"),
     f("Independent scene action and original sound", "The four 24-second feed clips add windblown leaves, puddle splashes, moving book pages, curling steam, an animated monitor and a passing city view. New original sound designs include a short piano composition for the reading clip.", "Phone Home → Insta → Play and unmute", "devices"),
     f("Reusable media archive", "Original paintings, earlier clips and exact soundtracks remain saved alongside new animation assets, audio stems, effects and music. Older embedded backups can opt into the new included video sources without replacing uploads or post settings.", "Advanced devices → Insta feed → Use updated included animations or GitHub media archive", "devices")

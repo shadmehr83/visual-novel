@@ -1,4 +1,4 @@
-import { usePaused } from "./PlaySession";
+import { usePaused, useAuthorEditing } from "./PlaySession";
 import { RangeInput } from "./RangeInput";
 import { useFootsteps } from "./Footsteps";
 import { useSound } from "./Sound";
@@ -22,7 +22,9 @@ export function Qte({
   const node = project.scenes
     .find((s) => s.id === runtime.scene)!
     .nodes.find((n) => n.id === runtime.node)!;
-  const sessionPaused = usePaused();
+  const sessionIsPaused = usePaused();
+  const authorEditing = useAuthorEditing();
+  const sessionPaused = sessionIsPaused || authorEditing;
   const q = node.qte!;
   const [remaining, setRemaining] = useState(
     q.seconds * (project.settings.timing || 1),
@@ -122,6 +124,7 @@ export function SceneAudio({
   onAdvance?: () => void;
 }) {
   const sessionPaused = usePaused();
+  const authorEditing = useAuthorEditing();
   const { enabled, volume, play, onBlocked } = useSound();
   const [error, setError] = useState("");
   useFootsteps(project, scene, enabled && !sessionPaused, setError, volume);
@@ -132,10 +135,10 @@ export function SceneAudio({
   const advanceRef = useRef(onAdvance);
   advanceRef.current = onAdvance;
   useEffect(() => {
-    if (!node?.autoAdvance || node.choices.length || node.qte || sessionPaused) return;
+    if (!node?.autoAdvance || node.choices.length || node.qte || sessionPaused || authorEditing) return;
     const timer = setTimeout(() => advanceRef.current?.(), node.autoAdvance * 1000);
     return () => clearTimeout(timer);
-  }, [scene.id, nodeId, sessionPaused]);
+  }, [scene.id, nodeId, sessionPaused, authorEditing]);
   useEffect(() => {
     const key = scene.id + ":" + nodeId;
     if (!enabled || lastCue.current === key) return;

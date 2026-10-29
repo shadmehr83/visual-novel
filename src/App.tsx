@@ -1,3 +1,4 @@
+import { syncActiveDialogue } from "./authorPlay";
 import { pruneChapterExits } from "./chapters";
 import { ChapterWorkspace, ChapterBadge } from "./ChapterWorkspace";
 import { chapterForScene } from "./chapterRuntime";
@@ -194,6 +195,24 @@ export default function App() {
   const [nodeId, setNodeId] = useState("arrival");
   const [runtime, setRuntime] = useState<Runtime | null>(null);
   const [playing, setPlaying] = useState(false);
+  const [authorPlay, setAuthorPlay] = useState(false);
+  const [authorTyping, setAuthorTyping] = useState(false);
+  const editingLocked = playing && !authorPlay;
+  const previousAuthorProject = useRef(project);
+  useEffect(() => {
+    const previous = previousAuthorProject.current;
+    previousAuthorProject.current = project;
+    if (playing && authorPlay)
+      setRuntime(r => r ? syncActiveDialogue(previous, project, r) : r);
+  }, [project, playing, authorPlay]);
+  useEffect(() => {
+    if (!playing || !authorPlay || !runtime) return;
+    setSceneId(runtime.scene);
+    setNodeId(runtime.node);
+    setRegionEditor(null);
+    setMaskMode(false);
+    setPlacingLight(null);
+  }, [playing, authorPlay, runtime?.scene, runtime?.node]);
   const [placingLight, setPlacingLight] = useState<{ preset?: string; light?: string } | null>(null);
   const [tab, setTab] = useState("Scenes");
   const [effectPanel, setEffectPanel] = useState("All");
@@ -497,7 +516,7 @@ export default function App() {
     return () => window.removeEventListener("beforeunload", warn);
   }, [status]);
   const selected =
-    project.scenes.find((s) => s.id === sceneId) || project.scenes[0];
+    project.scenes.find((s) => s.id === (playing && authorPlay ? runtime?.scene : sceneId)) || project.scenes[0];
   const scene =
     playing && runtime
       ? project.scenes.find((s) => s.id === runtime.scene) || selected
@@ -516,7 +535,7 @@ export default function App() {
     });
   }
   function updateScene(fn: (s: Scene) => void) {
-    edit((p) => fn(p.scenes.find((s) => s.id === sceneId)!));
+    edit((p) => fn(p.scenes.find((s) => s.id === selected.id)!));
   }
   function effect<K extends keyof Effects>(key: K, value: Effects[K]) {
     updateScene((s) => {
@@ -557,6 +576,14 @@ export default function App() {
       setError(String(e));
     }
   }
+  function startAuthorPlaythrough() {
+    if (playing && authorPlay) { setAuthorPlay(false); return; }
+    setAuthorPlay(true);
+    setBottom("Dialogue");
+    setCollapseBottom(false);
+    setWorkspace(w => ({ ...w, dialogueMode: w.dialogueMode === "hidden" ? "pinned" : w.dialogueMode }));
+    if (!playing) play();
+  }
   function step(id?: string) {
     try {
       if (runtime) setRuntime(advance(project, runtime, id));
@@ -571,7 +598,7 @@ export default function App() {
       for (const f of Array.from(files)) imported.push(await readImage(f));
       edit((p) => {
         p.assets.push(...imported);
-        p.scenes.find((s) => s.id === sceneId)!.background = imported[0].id;
+        p.scenes.find((s) => s.id === selected.id)!.background = imported[0].id;
       });
       setAssetId(imported[0].id);
       setTab("Assets");
@@ -750,6 +777,12 @@ export default function App() {
     return()=>{clearTimeout(timer);clearTimeout(remove);highlighted?.classList.remove('feature-reveal');};
   },[revealControl,inspector,effectPanel,view,playing]);
   function navigate(action: string) {
+    if (action === "author-play") { startAuthorPlaythrough(); return; }
+    if (action === "dialogue" && playing && authorPlay) {
+      setBottom("Dialogue"); setCollapseBottom(false);
+      setWorkspace(w => ({ ...w, dialogueMode: w.dialogueMode === "hidden" ? "pinned" : w.dialogueMode }));
+      return;
+    }
     if(action === "windows") {setModal("windows");return;}
     if(action === "restore-artwork") {void restoreArtwork();return;}
     if(action === "split-view") {setPlaying(false);setWorkspace(w=>({...w,splitWorkspace:true,secondWorkspace:view === w.secondWorkspace ? (view === "dialogues" ? "scenes" : "dialogues") : w.secondWorkspace}));return;}
@@ -787,7 +820,7 @@ export default function App() {
       return;
     }
     if (action === "undo" || action === "redo") {
-      if (!playing) history(action === "undo");
+      if (!editingLocked) history(action === "undo");
       return;
     }
     if (action === "save") {
@@ -822,8 +855,8 @@ export default function App() {
       setWorkspace((w) => ({ ...w, libraryCollapsed: !w.libraryCollapsed }));
       return;
     }
-    setPlaying(false);
-    chooseMainWorkspace("editor");
+    if (!(playing && authorPlay && (action.startsWith("effect:") || ["layout", "appearance", "active", "background", "transitions"].includes(action)))) setPlaying(false);
+    if (!playing) chooseMainWorkspace("editor");
     if (action.startsWith("effect:")) {
       setEffectPanel(action.slice(7));
       setInspector("Atmosphere");
@@ -1380,6 +1413,7 @@ export default function App() {
                             p.settings.progression = mode;
                           })
                         }
+                        playing={!authorPlay || (!placingLight && !regionEditor && !maskMode)}
                         advance={() => step()}
                         canAdvance={
                           !runtime?.ended && !node.choices.length && !node.qte
@@ -1391,6 +1425,16 @@ export default function App() {
                     <span className="live-dot" /> <small>LIVE PREVIEW</small>
                   </div>
                 </div>
+                {playing && authorPlay && <div className="author-play-toolbar" data-no-advance>
+                  <strong>Author’s playthrough</strong>
+                  <span>{dialogueLabel(project, scene, node.id)}</span>
+                  <button onClick={() => {
+                    setBottom("Dialogue"); setCollapseBottom(false);
+                    setWorkspace(w => ({ ...w, dialogueMode: w.dialogueMode === "hidden" ? "pinned" : w.dialogueMode }));
+                    requestAnimationFrame(() => document.querySelector<HTMLTextAreaElement>('[aria-label="Dialogue text"]')?.focus());
+                  }}>Edit current dialogue</button>
+                  <small>{authorTyping ? "Story timers held while typing" : "Edits save to your project · Undo available"}</small>
+                </div>}
                 <div className="stage-frame">
                   <SceneTransition
                     scene={scene}
@@ -1410,7 +1454,7 @@ export default function App() {
                           : undefined
                       }
                       onPlaceLight={
-                        !playing && placingLight !== null
+                        !editingLocked && placingLight !== null
                           ? (x, y) => {
                               updateScene((s) => {
                                 if (placingLight.light) {
@@ -1437,7 +1481,7 @@ export default function App() {
                       project={project}
                       scene={scene}
                       playing={playing}
-                      maskMode={maskMode && !playing}
+                      maskMode={maskMode && !editingLocked}
                       onMask={(v) => effect("mask", v)}
                       nodeId={node.id}
                       onPivot={(x, y) =>
@@ -1452,7 +1496,7 @@ export default function App() {
                         })
                       }
                       previewTick={cameraPreview}
-                      regionEditor={playing ? null : regionEditor}
+                      regionEditor={editingLocked ? null : regionEditor}
                       onRegion={changeSelectedRegion}
                     >
                       {playing && (
@@ -1754,7 +1798,7 @@ export default function App() {
                 </div>
                 {bottom === "Items & outfits" && (
                   <fieldset
-                    disabled={playing}
+                    disabled={editingLocked}
                     style={{ border: 0, padding: 0, margin: 0 }}
                   >
                     <DialogueItems
@@ -1798,7 +1842,7 @@ export default function App() {
                         <label>
                           Speaker
                           <input
-                            disabled={playing}
+                            disabled={editingLocked}
                             aria-label="Speaker"
                             value={node.speaker}
                             onChange={(ev) =>
@@ -1832,12 +1876,14 @@ export default function App() {
                           </select>
                         </label>
                       </div>
-                      <DialogueDeviceControls project={project} scene={selected} nodeId={node.id} edit={edit} />
+                      <fieldset disabled={editingLocked} style={{ border: 0, padding: 0, margin: 0 }}>
+                        <DialogueDeviceControls project={project} scene={selected} nodeId={node.id} edit={edit} />
+                      </fieldset>
                       <label>
                         Author note
                         <textarea
                           aria-label="Dialogue author note"
-                          disabled={playing}
+                          disabled={editingLocked}
                           value={node.notes || ""}
                           onChange={(e) =>
                             updateScene((s) => {
@@ -1862,7 +1908,7 @@ export default function App() {
                       <label className="consent">
                         <input
                           type="checkbox"
-                          disabled={playing}
+                          disabled={editingLocked}
                           checked={node.allowCustomResponse !== false}
                           onChange={(ev) =>
                             updateScene(
@@ -1878,7 +1924,7 @@ export default function App() {
                       <label className="consent">
                         <input
                           type="checkbox"
-                          disabled={playing}
+                          disabled={editingLocked}
                           checked={
                             (node.allowPhoneCustomResponse ??
                               node.allowCustomResponse) !== false
@@ -1894,7 +1940,7 @@ export default function App() {
                         Allow custom response in device dialogue
                       </label>
                       <textarea
-                        disabled={playing}
+                        disabled={editingLocked}
                         aria-label="Dialogue text"
                         value={node.text}
                         rows={3}
@@ -1942,7 +1988,7 @@ export default function App() {
                         <div className="choice-editor" key={c.id}>
                           <span>{String(i + 1).padStart(2, "0")}</span>
                           <input
-                            disabled={playing}
+                            disabled={editingLocked}
                             aria-label={"Choice " + (i + 1)}
                             value={c.text}
                             onChange={(ev) =>
@@ -2004,7 +2050,7 @@ export default function App() {
                               placeholder="Friendly route, Hostile route…"
                               value={c.routeLabel || ""}
                               maxLength={120}
-                              disabled={playing}
+                              disabled={editingLocked}
                               onChange={(ev) =>
                                 updateScene((s) => {
                                   s.nodes.find(
@@ -2258,7 +2304,7 @@ export default function App() {
                     </button>
                   ))}
                 </div>
-                <fieldset className="specialized-controls" disabled={playing}>
+                <fieldset className="specialized-controls" disabled={editingLocked}>
                   {" "}
                   <LightLibrary
                     project={project}
@@ -2397,7 +2443,7 @@ export default function App() {
                     </button>
                   ))}
                 </div>
-                {regionEditor && selectedRegion && !playing && (
+                {regionEditor && selectedRegion && !editingLocked && (
                   <SelectionToolbar
                     editor={regionEditor}
                     region={selectedRegion}
@@ -2449,7 +2495,7 @@ export default function App() {
                 )}
                 <fieldset
                   disabled={
-                    playing &&
+                    editingLocked &&
                     (inspector === "Atmosphere" || inspector === "Background")
                   }
                 >
@@ -2861,14 +2907,21 @@ export default function App() {
       playing={playing}
       project={project}
       runtime={runtime}
+      authorEditing={playing && authorPlay && authorTyping}
       onExit={() => setPlaying(false)}
       onRestart={() => play(true)}
     >
       <div
         data-theme={workspace.theme}
+        onFocusCapture={(event) => {
+          const target = event.target;
+          setAuthorTyping(target instanceof HTMLTextAreaElement || (target instanceof HTMLInputElement && ["text", "number", "search"].includes(target.type)));
+        }}
+        onBlurCapture={() => setAuthorTyping(false)}
         className={
           "app " +
           (playing ? "is-playing " : "") +
+          (playing && authorPlay ? "author-play " : "") +
           (workspace.dialogueMode === "page" ? "page-layout" : "")
         }
         style={
@@ -2930,7 +2983,7 @@ export default function App() {
             <button
               title="Undo"
               aria-label="Undo"
-              disabled={!undo.length || playing}
+              disabled={!undo.length || editingLocked}
               onClick={() => history(true)}
             >
               <Undo2 size={16} />
@@ -2938,7 +2991,7 @@ export default function App() {
             <button
               title="Redo"
               aria-label="Redo"
-              disabled={!redo.length || playing}
+              disabled={!redo.length || editingLocked}
               onClick={() => history(false)}
             >
               <Redo2 size={16} />
@@ -2948,8 +3001,13 @@ export default function App() {
               <Settings2 size={17} />
             </button>
             <button
+              aria-pressed={playing && authorPlay}
+              data-help="Play with normal scene and dialogue controls unlocked. The editor follows the current line; changes autosave to your project. Click again during play to lock author tools. Structural dialogue changes remain in the editor."
+              onClick={startAuthorPlaythrough}
+            >Author’s playthrough</button>
+            <button
               className="primary"
-              onClick={() => (playing ? setPlaying(false) : play())}
+              onClick={() => { if (playing) setPlaying(false); else { setAuthorPlay(false); play(); } }}
             >
               {playing ? (
                 <Square size={14} />
@@ -2966,6 +3024,7 @@ export default function App() {
           onAction={navigate}
           canUndo={!!undo.length}
           canRedo={!!redo.length}
+          authorPlay={authorPlay}
           playing={playing}
           collapsed={workspace.libraryCollapsed}
           effects={effectSummary(scene, project.settings.reducedEffects).length}

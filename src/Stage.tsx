@@ -291,6 +291,9 @@ export function Stage({
           setStrokePreview(null);
         }}
         onClick={async (event) => {
+          // Author tools consume this gesture before React can re-enable the
+          // document-level story click shortcut after a one-shot placement.
+          if (onPlaceLight || regionEditor || maskMode) event.stopPropagation();
           if (onPlaceLight) {
             const p = new DOMPoint(
               event.clientX,
