@@ -7,7 +7,7 @@ export function selectedItem(scene: Scene, node: Node) {
   return scene.items?.showSelected ? scene.items.options.find(item => scene.nodes.some(n => n.choices.some(c => c.id === item.choice && c.target === node.id))) : undefined;
 }
 export function hasItemUI(scene: Scene, node: Node) {
-  return !!scene.items?.enabled && (!!selectedItem(scene, node) || scene.items.options.some(i => node.choices.some(c => c.id === i.choice)));
+  return !!scene.items?.enabled && (!scene.items.onlyAt || scene.items.onlyAt === node.id) && (!!selectedItem(scene, node) || scene.items.options.some(i => node.choices.some(c => c.id === i.choice)));
 }
 export function ItemOverlay({
   project,
@@ -39,7 +39,9 @@ export function ItemOverlay({
   const picture = (id: string | null) =>
     project.assets.find((a) => a.id === id)?.data;
   const outcome = selectedItem(scene, node);
-  if (scene.items?.enabled && outcome) return <section className="item-overlay" aria-label="Selected outfit">
+  if (!hasItemUI(scene, node)) return null;
+  const panelStyle = scene.items?.backgroundColor ? {background: scene.items.backgroundColor} : undefined;
+  if (scene.items?.enabled && outcome) return <section className="item-overlay" style={panelStyle} aria-label="Selected outfit">
     <h2>{outcome.label}</h2><p className="item-original-text">{node.text}</p>
     <div className="item-detail">
       {picture(outcome.asset) && <img src={picture(outcome.asset)} alt={outcome.label} />}
@@ -52,7 +54,7 @@ export function ItemOverlay({
   if (!options.length) return <section className="item-overlay"><p>{node.text}</p><p role="status">No items are currently available.</p></section>;
   const playCue = (cue?: {asset: string; volume: number}) => sound.play(project.audioAssets?.find(a => a.id === cue?.asset)?.data, cue?.volume);
   return (
-    <section className="item-overlay" aria-label="Item selection">
+    <section className="item-overlay" style={panelStyle} aria-label="Item selection">
       <h2>{scene.items.title}</h2>
       <p className="item-original-text">{node.text}</p>
       {current ? (

@@ -340,6 +340,8 @@ const scene = z.object({
       title: z.string(),
       blur: z.number().min(0).max(15),
       showSelected: z.boolean().optional(),
+      backgroundColor: z.string().regex(/^#[0-9a-fA-F]{6}$/).optional(),
+      onlyAt: z.string().optional(),
       inspectSound: soundCueSchema.optional(),
       chooseSound: soundCueSchema.optional(),
       options: z

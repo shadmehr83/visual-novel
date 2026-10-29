@@ -1547,7 +1547,7 @@ export default function App() {
                           onResolve={setRuntime}
                         />
                       )}
-                      {scene.items?.enabled && placingLight === null && (
+                      {hasItemUI(scene, node) && placingLight === null && (
                         <ItemOverlay
                           onReply={playing ? (text, branch) => { if (runtime) setRuntime(respond(project, runtime, text, branch)); } : undefined}
                           project={project}

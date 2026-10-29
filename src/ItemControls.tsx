@@ -61,6 +61,9 @@ export function ItemControls({
             <input type="checkbox" aria-label="Keep selected outfit visible" checked={scene.items.showSelected ?? false} onChange={e => update(s => { s.items!.showSelected = e.target.checked; })} />
             Keep selected item visible on its result dialogue
           </label>
+          <label data-help="Limit the item picker to one dialogue. Automatic shows it only on dialogues connected to item choices. Other dialogue and scene artwork stay unchanged.">Show item picker on<select aria-label="Item picker dialogue" value={scene.items.onlyAt || ""} onChange={e => update(s => {s.items!.onlyAt = e.target.value || undefined;})}><option value="">Automatic · connected item choices</option>{scene.nodes.map((n,i)=><option key={n.id} value={n.id}>{i+1}. {n.text.slice(0,55)}</option>)}</select></label>
+          <label data-help="Choose the item window’s background colour. This changes the overlay panel, not the scene artwork behind it.">Item window background<input type="color" aria-label="Item window background" value={scene.items.backgroundColor || "#29222e"} onChange={e=>update(s=>{s.items!.backgroundColor=e.target.value;})} /></label>
+          <button data-help="Restore the original translucent item window background. Scene backgrounds and blur are kept." onClick={()=>update(s=>{delete s.items!.backgroundColor;})}>Reset item window background</button>
           <label>
             Overlay title
             <input
