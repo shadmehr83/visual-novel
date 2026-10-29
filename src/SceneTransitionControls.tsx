@@ -61,12 +61,12 @@ export function SceneTransitionControls({
                 }
                 type="number"
                 min=".05"
-                max="10"
+                max="120"
                 step=".05"
                 value={t.seconds}
                 onChange={(e) => {
                   const seconds = +e.target.value;
-                  if (seconds >= 0.05 && seconds <= 10)
+                  if (seconds >= 0.05 && seconds <= 120)
                     update((s) => {
                       s[key] = { ...t, seconds };
                     });

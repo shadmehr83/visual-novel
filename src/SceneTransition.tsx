@@ -1,3 +1,5 @@
+import { usePaused } from "./PlaySession";
+import { viewKey, viewTransition } from "./viewTransitions";
 import { SceneAudio, Qte } from "./EngineTools";
 import {
   useEffect,
@@ -22,17 +24,39 @@ export function SceneTransition({
   children: ReactNode;
   nodeId?: string;
 }) {
-  const view = scene.subscenes?.find(v => v.id === scene.nodes.find(n => n.id === nodeId)?.view);
-  const key = scene.id + ":" + (view?.id || "main");
+  const key =
+    viewKey(scene, nodeId) +
+    (scene.nodes.find((n) => n.id === nodeId)?.viewTransition
+      ? ":cue:" + nodeId
+      : "");
+  const incoming = useRef<HTMLDivElement>(null);
+  const position = useRef<number | undefined>(undefined);
+  const content = isValidElement<{ onGifPosition?: (time: number) => void }>(
+    children,
+  )
+    ? cloneElement(children, {
+        onGifPosition: (time) => {
+          position.current = time;
+        },
+      })
+    : children;
   const previous = useRef(key),
-    timer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
+    timer = useRef(0);
+  const paused = usePaused(),
+    pausedRef = useRef(paused);
+  pausedRef.current = paused;
   const [outgoing, setOutgoing] = useState<ReactNode>(null);
-  const last = useRef(children);
+  const last = useRef(content);
   const lastScene = useRef(scene);
-  const selectedTransition = useRef(scene.transition);
+  const lastNode = useRef(nodeId);
+  const selectedTransition = useRef(viewTransition(scene, nodeId));
   if (previous.current !== key)
-    selectedTransition.current =
-      view?.transition || (previous.current.startsWith(scene.id + ":") ? { style: "smooth", seconds: 0.45 } : lastScene.current.exitTransition || scene.transition);
+    selectedTransition.current = viewTransition(
+      scene,
+      nodeId,
+      lastScene.current,
+      lastNode.current,
+    );
   const transition = playing ? selectedTransition.current : scene.transition;
   useEffect(() => {
     setOutgoing(null);
@@ -43,16 +67,28 @@ export function SceneTransition({
       transition &&
       !["cut", "snappy"].includes(transition.style)
     ) {
+      // Restart the visual entrance without remounting a GIF on the same view.
+      incoming.current?.getAnimations().forEach((a) => {
+        a.currentTime = 0;
+        a.play();
+      });
       const old = last.current;
       setOutgoing(
         isValidElement<{
           playing: boolean;
           children: ReactNode;
           idPrefix: string;
+          gifFrozenTime?: number;
+          onGifPosition?: (time: number) => void;
         }>(old)
           ? cloneElement(
               old,
-              { playing: false, idPrefix: "leaving-" },
+              {
+                playing: false,
+                idPrefix: "leaving-",
+                gifFrozenTime: position.current,
+                onGifPosition: undefined,
+              },
               Children.toArray(old.props.children).filter(
                 (child) =>
                   !isValidElement(child) ||
@@ -61,23 +97,31 @@ export function SceneTransition({
             )
           : old,
       );
-      timer.current = setTimeout(
-        () => setOutgoing(null),
-        transition.seconds * 1000,
-      );
+      let elapsed = 0,
+        lastTime = performance.now();
+      const tick = (now: number) => {
+        if (!pausedRef.current) elapsed += now - lastTime;
+        lastTime = now;
+        if (elapsed >= transition.seconds * 1000) setOutgoing(null);
+        else timer.current = requestAnimationFrame(tick);
+      };
+      timer.current = requestAnimationFrame(tick);
     }
     previous.current = key;
     lastScene.current = scene;
-    return () => clearTimeout(timer.current);
+    return () => cancelAnimationFrame(timer.current);
   }, [key, playing, reduced]);
   useEffect(() => {
-    last.current = children;
+    last.current = content;
     lastScene.current = scene;
+    lastNode.current = nodeId;
   });
   const active = playing && !reduced && transition;
   return (
     <div
       className="scene-transition"
+      data-transition-seconds={transition?.seconds || 0}
+      data-transition-style={transition?.style || "cut"}
       style={
         {
           "--scene-duration": `${transition?.seconds || 0.5}s`,
@@ -94,10 +138,11 @@ export function SceneTransition({
         </div>
       )}
       <div
-        key={key}
+        ref={incoming}
+        key={viewKey(scene, nodeId)}
         className={`scene-in ${active ? "scene-in-" + transition.style : ""}`}
       >
-        {children}
+        {content}
       </div>
     </div>
   );

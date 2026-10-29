@@ -1033,3 +1033,7 @@ A built static package makes the studio available over HTTPS. Git-connected Page
 1. Internet browser
 2. Open visual-novel-8b9.pages.dev; hosting instructions are in docs/DEPLOY_CLOUDFLARE.md
 
+
+## v2.16.0 — GIF film editor and precise transition timing (2026-10-29)
+
+Controlled GIF backgrounds now support 0.01–16× speed, exact frame seeking, paused defaults, single-cycle playback and dialogue play/resume/pause cues. A film preview and numbered cue markers sit below the scene background cards. Enter exact transition durations for scene entrances/exits, sub-scenes, main-view returns and individual dialogue overrides. The advanced map inspector widens when a GIF is selected and supports a draggable divider, slider and saved browser width. Existing project content is preserved; the same renderer is bundled into the offline editor and exported player. See [GIF film editor](GIF_FILM_EDITOR.md).

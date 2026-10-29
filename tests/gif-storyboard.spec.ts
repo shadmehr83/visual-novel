@@ -7,7 +7,9 @@ test("GIF background import and visual sequence expose thumbnails, transitions a
   await page.goto("/?snapshot=github");
   await page.getByRole("tab", { name: "Scenes advanced", exact: true }).click();
   await expect(page.locator(".background-storyboard")).toBeVisible();
-  await expect(page.locator(".background-storyboard img")).toHaveCount(4);
+  await expect(
+    page.locator(".background-storyboard .background-shot"),
+  ).toHaveCount(4);
   await expect(
     page.getByLabel("Cake arrives · animated table visual transition", {
       exact: true,
@@ -22,7 +24,7 @@ test("GIF background import and visual sequence expose thumbnails, transitions a
     "cafe-idle-gif",
   );
   await expect(
-    page.locator('.scene-in image[href^="data:image/gif;"]').first(),
+    page.locator(".scene-in canvas.controlled-gif").first(),
   ).toHaveCount(1);
   const wait = page.waitForEvent("download");
   await page
@@ -81,13 +83,11 @@ test("cake dialogue changes to its matched animated view during playback", async
   p.scenes[0].joints = [];
   validateProject(p);
   await page.goto("/");
-  await page
-    .locator('input[accept=".json"]')
-    .setInputFiles({
-      name: "cue.json",
-      mimeType: "application/json",
-      buffer: Buffer.from(JSON.stringify(p)),
-    });
+  await page.locator('input[accept=".json"]').setInputFiles({
+    name: "cue.json",
+    mimeType: "application/json",
+    buffer: Buffer.from(JSON.stringify(p)),
+  });
   await expect(page.getByLabel("Project title")).toHaveValue(p.title);
   await page.getByRole("button", { name: "Play story", exact: true }).click();
   await page.getByRole("button", { name: "Visit café", exact: true }).click();

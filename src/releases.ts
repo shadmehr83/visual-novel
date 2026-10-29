@@ -1,4 +1,4 @@
-export const ENGINE_VERSION = "2.15.0";
+export const ENGINE_VERSION = "2.16.0";
 export type ReleaseFeature = {
   name: string;
   description: string;
@@ -19,7 +19,12 @@ const f = (
   action?: string,
 ): ReleaseFeature => ({ name, description, steps: path.split(" → "), action });
 export const releases: Release[] = [
- {version:"2.15.0",name:"GIF backgrounds and visual background sequences",date:"2026-10-29",features:[
+ {version:"2.16.0",name:"GIF film editor and precise transition timing",date:"2026-10-29",features:[
+ f("Slow, pause and cue GIFs", "Scrub a GIF filmstrip, type exact source-frame times, choose 0.01–16× speed, hold a still frame or play once then freeze. Dialogue cues can play, resume, pause or run one cycle without changing the background asset.", "Scenes advanced → Background sequence → Click GIF thumbnail → GIF film editor", "scenes"),
+ f("Editable transitions on the film timeline", "Scene entrances, exits, each sub-scene and returns to the main view have exact duration fields. Individual dialogues can override the transition, with settings retained in project and playable HTML exports.", "Scenes advanced → Background sequence → Transition duration", "scenes"),
+ f("Resizable advanced inspector", "Clicking a GIF thumbnail widens its film editor. Drag the map’s right divider or use Panel width to choose the size; keyboard resizing and browser persistence are supported.", "Scenes advanced → Panel width or divider", "scenes")
+ ]},
+ {version:"2.15.0",commit:"ff24df9",name:"GIF backgrounds and visual background sequences",date:"2026-10-29",features:[
  f("Animated background uploads", "Upload GIFs using the normal background picker or the dedicated Upload GIF background button. Animation bytes stay in project exports and the offline editor, with matched still fallbacks for the included café loops.", "Background → Upload GIF background", "background"),
  f("Visual scene background sequence", "Scenes advanced displays thumbnail cards for main and sub-scene backgrounds, GIF labels, transition arrows, editable styles and exact dialogue triggers. Add a still or GIF directly to a chosen dialogue.", "Scenes advanced → Select scene → Background sequence", "scenes"),
  f("Steady café animation and forward street", "Café loops reuse the fixed original painting with local blink and flame patches, then cue a matched cake-on-table loop. The departure looks down a wet street toward a distant Ferris wheel and ice-cream lights.", "Story → A table by the window or After the café", "scenes")

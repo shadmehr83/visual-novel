@@ -1,3 +1,4 @@
+import { FlowPanelSize, useFlowPanelSize } from "./FlowPanelSize";
 import { BackgroundStoryboard } from "./BackgroundStoryboard";
 import { SubsceneList } from "./SubsceneList";
 import { pruneChapterExits } from "./chapters";
@@ -38,6 +39,7 @@ export function FlowEditor({
   onDrill: (scene: string) => void;
   onOriginal: (scene: string, node?: string) => void;
 }) {
+  const panelSize = useFlowPanelSize();
   const scene =
       project.scenes.find((s) => s.id === sceneId) || project.scenes[0],
     node = scene.nodes.find((n) => n.id === nodeId) || scene.nodes[0];
@@ -47,7 +49,9 @@ export function FlowEditor({
     [reply, setReply] = useState("New reply"),
     [route, setRoute] = useState(""),
     [target, setTarget] = useState("");
-  const [incoming, setIncoming] = useState(""), [linkKind, setLinkKind] = useState<"continue" | "reply">("continue"), [outgoing, setOutgoing] = useState("");
+  const [incoming, setIncoming] = useState(""),
+    [linkKind, setLinkKind] = useState<"continue" | "reply">("continue"),
+    [outgoing, setOutgoing] = useState("");
   const graph = flowGraph(project, mode, scene.id),
     selected = mode === "scenes" ? "scene:" + scene.id : "node:" + node.id;
   const source = selectedLink
@@ -84,7 +88,8 @@ export function FlowEditor({
       <optgroup label="Dialogues in this scene">
         {scene.nodes.map((n, i) => (
           <option key={n.id} value={"node:" + n.id}>
-            {i + 1}. {n.speaker}: {n.text.slice(0, 35)}{n.view ? " · Sub-scene" : ""}
+            {i + 1}. {n.speaker}: {n.text.slice(0, 35)}
+            {n.view ? " · Sub-scene" : ""}
           </option>
         ))}
       </optgroup>
@@ -123,9 +128,17 @@ export function FlowEditor({
         fn(c);
       });
   };
-  const quickAdd = (from?: string, kind: "continue" | "reply" = "continue", to?: string) => {
+  const quickAdd = (
+    from?: string,
+    kind: "continue" | "reply" = "continue",
+    to?: string,
+  ) => {
     let id = "";
-    if (commit(p => { id = addConnectedDialogue(p, scene.id, from, kind, to); }, "Dialogue and its connections added. Edit the text here, or drag its input/output dots.")) {
+    if (
+      commit((p) => {
+        id = addConnectedDialogue(p, scene.id, from, kind, to);
+      }, "Dialogue and its connections added. Edit the text here, or drag its input/output dots.")
+    ) {
       setSelectedLink(null);
       onSelect(scene.id, id);
     }
@@ -178,7 +191,9 @@ export function FlowEditor({
                 const s = createFlowScene(scene);
                 if (
                   commit((p) => {
-                    p.scenes.push(s);const c=chapterForScene(p,scene.id);if(c)c.scenes.push(s.id);
+                    p.scenes.push(s);
+                    const c = chapterForScene(p, scene.id);
+                    if (c) c.scenes.push(s.id);
                   }, "New scene added. Connect its input to a route when ready.")
                 )
                   onSelect(s.id, s.nodes[0].id);
@@ -217,10 +232,19 @@ export function FlowEditor({
           the original editor.
         </span>
       </div>
-      <div className="flow-body">
+      <div
+        className="flow-body"
+        style={{
+          gridTemplateColumns: `minmax(0, 1fr) 10px min(${panelSize.width}px, 88%)`,
+        }}
+      >
         <FlowCanvas
           graph={graph}
-          onAdd={mode === "dialogues" ? (from, kind) => quickAdd(from, kind) : undefined}
+          onAdd={
+            mode === "dialogues"
+              ? (from, kind) => quickAdd(from, kind)
+              : undefined
+          }
           saved={saved || {}}
           selected={selected}
           onSelect={selectCard}
@@ -245,19 +269,100 @@ export function FlowEditor({
             )
           }
         />
+        <FlowPanelSize width={panelSize.width} onChange={panelSize.change} />
         <aside
           className="flow-details ui-pane"
           aria-label="Flow selection details"
         >
-          {mode === "dialogues" && <section className="property-section">
-            <h3>Quick connected dialogue</h3>
-            <label>Incoming dialogue<select aria-label="New dialogue incoming" value={incoming} onChange={e => setIncoming(e.target.value)}><option value="">Unconnected box</option>{scene.nodes.filter(n => !n.qte).map((n, i) => <option key={n.id} value={n.id}>{i + 1}. {n.speaker}: {n.text.slice(0, 35)}</option>)}</select></label>
-            <button onClick={() => setIncoming(node.id)}>Use selected box as incoming</button>
-            <label>Connection type<select aria-label="New dialogue connection type" value={linkKind} onChange={e => setLinkKind(e.target.value as typeof linkKind)}><option value="continue">Continue · no reply required</option><option value="reply">New reply route</option></select></label>
-            <label>Outgoing dialogue<select aria-label="New dialogue outgoing" value={outgoing} onChange={e => setOutgoing(e.target.value)}><option value="">Keep previous Continue, or end here</option>{scene.nodes.map((n, i) => <option key={n.id} value={n.id}>{i + 1}. {n.speaker}: {n.text.slice(0, 35)}</option>)}</select></label>
-            <button onClick={() => quickAdd(incoming || undefined, linkKind, outgoing || undefined)}>Add connected dialogue</button>
-            <p>Use + Dialogue or + Reply directly on a box. Existing routes remain connected; drag the dots to change destinations.</p>
-          </section>}
+          <div className="flow-panel-sizing" data-no-advance>
+            <label>
+              Panel width{" "}
+              <input
+                type="range"
+                aria-label="Advanced panel width"
+                min="240"
+                max="1200"
+                step="20"
+                value={panelSize.width}
+                onChange={(e) => panelSize.change(+e.target.value)}
+              />
+            </label>
+            <button
+              onClick={() =>
+                panelSize.change(panelSize.width >= 700 ? 340 : 720)
+              }
+            >
+              {panelSize.width >= 700 ? "Compact panel" : "Widen film editor"}
+            </button>
+          </div>
+          {mode === "dialogues" && (
+            <section className="property-section">
+              <h3>Quick connected dialogue</h3>
+              <label>
+                Incoming dialogue
+                <select
+                  aria-label="New dialogue incoming"
+                  value={incoming}
+                  onChange={(e) => setIncoming(e.target.value)}
+                >
+                  <option value="">Unconnected box</option>
+                  {scene.nodes
+                    .filter((n) => !n.qte)
+                    .map((n, i) => (
+                      <option key={n.id} value={n.id}>
+                        {i + 1}. {n.speaker}: {n.text.slice(0, 35)}
+                      </option>
+                    ))}
+                </select>
+              </label>
+              <button onClick={() => setIncoming(node.id)}>
+                Use selected box as incoming
+              </button>
+              <label>
+                Connection type
+                <select
+                  aria-label="New dialogue connection type"
+                  value={linkKind}
+                  onChange={(e) =>
+                    setLinkKind(e.target.value as typeof linkKind)
+                  }
+                >
+                  <option value="continue">Continue · no reply required</option>
+                  <option value="reply">New reply route</option>
+                </select>
+              </label>
+              <label>
+                Outgoing dialogue
+                <select
+                  aria-label="New dialogue outgoing"
+                  value={outgoing}
+                  onChange={(e) => setOutgoing(e.target.value)}
+                >
+                  <option value="">Keep previous Continue, or end here</option>
+                  {scene.nodes.map((n, i) => (
+                    <option key={n.id} value={n.id}>
+                      {i + 1}. {n.speaker}: {n.text.slice(0, 35)}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <button
+                onClick={() =>
+                  quickAdd(
+                    incoming || undefined,
+                    linkKind,
+                    outgoing || undefined,
+                  )
+                }
+              >
+                Add connected dialogue
+              </button>
+              <p>
+                Use + Dialogue or + Reply directly on a box. Existing routes
+                remain connected; drag the dots to change destinations.
+              </p>
+            </section>
+          )}
           {error && (
             <p className="flow-error" role="alert">
               {error}
@@ -391,9 +496,31 @@ export function FlowEditor({
                       {scene.nodes.length} dialogue boxes. First dialogue:{" "}
                       {scene.nodes[0].text.slice(0, 80)}
                     </p>
-                    <BackgroundStoryboard key={scene.id} project={project} scene={scene} edit={edit} onOpen={id=>onOriginal(scene.id,id)} />
-                    <SubsceneList scene={scene} update={updateScene} onOpen={id => onOriginal(scene.id, id)} />
-                    <AssetPicker project={project} label="Map scene background" initialFolder="Background scenes" value={scene.background} empty="Included illustration" onChange={id => updateScene(s => {s.background=id;})} />
+                    <BackgroundStoryboard
+                      key={scene.id}
+                      project={project}
+                      scene={scene}
+                      edit={edit}
+                      onOpen={(id) => onOriginal(scene.id, id)}
+                      onExpand={panelSize.expand}
+                    />
+                    <SubsceneList
+                      scene={scene}
+                      update={updateScene}
+                      onOpen={(id) => onOriginal(scene.id, id)}
+                    />
+                    <AssetPicker
+                      project={project}
+                      label="Map scene background"
+                      initialFolder="Background scenes"
+                      value={scene.background}
+                      empty="Included illustration"
+                      onChange={(id) =>
+                        updateScene((s) => {
+                          s.background = id;
+                        })
+                      }
+                    />
                     <button onClick={() => onDrill(scene.id)}>
                       Edit dialogue flow
                     </button>
@@ -403,8 +530,18 @@ export function FlowEditor({
                   </>
                 ) : (
                   <>
-                    <DialogueDeviceControls project={project} scene={scene} nodeId={node.id} edit={edit} />
-                    <DialogueArtwork project={project} scene={scene} nodeId={node.id} update={updateScene} />
+                    <DialogueDeviceControls
+                      project={project}
+                      scene={scene}
+                      nodeId={node.id}
+                      edit={edit}
+                    />
+                    <DialogueArtwork
+                      project={project}
+                      scene={scene}
+                      nodeId={node.id}
+                      update={updateScene}
+                    />
                     <label>
                       Speaker
                       <input

@@ -1,3 +1,4 @@
+import { BackgroundImage } from "./BackgroundImage";
 import { PuddleRipples } from "./PuddleRipples";
 import { usePaused } from "./PlaySession";
 import { sceneView } from "./SceneViews";
@@ -29,6 +30,8 @@ export function Stage({
   onPose,
   onPlaceLight,
   visits = [],
+  gifFrozenTime,
+  onGifPosition,
 }: {
   project: Project;
   scene: Scene;
@@ -43,6 +46,8 @@ export function Stage({
   idPrefix?: string;
   itemFocus?: boolean;
   visits?: string[];
+  gifFrozenTime?: number;
+  onGifPosition?: (time: number) => void;
   onPlaceLight?: (x: number, y: number) => void;
   onPivot?: (x: number, y: number) => void;
   onPose?: (dx: number, dy: number, angle?: number) => void;
@@ -371,7 +376,7 @@ export function Stage({
                     ...activeRegion,
                     points: [],
                     path: await imageMask(
-                      asset.data,
+                      svg.current?.querySelector<HTMLCanvasElement>("canvas.controlled-gif")?.toDataURL() || asset.data,
                       scene.fit,
                       x,
                       y,
@@ -418,26 +423,14 @@ export function Stage({
         }}
       >
         <defs>
-          {!!scene.joints?.length && (
-            <g id={idPrefix + "joint-source"}>
-              {asset ? (
-                <image
-                  href={asset.data}
-                  width="1000"
-                  height="563"
-                  preserveAspectRatio={
-                    scene.fit === "stretch"
-                      ? "none"
-                      : scene.fit === "cover"
-                        ? "xMidYMid slice"
-                        : "xMidYMid meet"
-                  }
-                />
-              ) : (
-                <Artwork idPrefix={idPrefix + "joint-art-"} kind={scene.art} />
-              )}
-            </g>
-          )}
+          {asset && <g id={idPrefix + "background-source"}>
+            <BackgroundImage asset={asset} fit={scene.fit} gif={scene.gif}
+              cue={gifFrozenTime!==undefined?{action:"pause",time:gifFrozenTime}:scene.nodes.find(n=>n.id===nodeId)?.gifCue} cueKey={scene.id+":"+nodeId+":"+(visits.length || 0)}
+              onPosition={onGifPosition} frozen={!!idPrefix} reduced={project.settings.reducedEffects || reducedMotion}/>
+          </g>}
+          {!!scene.joints?.length && <g id={idPrefix + "joint-source"}>
+            {asset ? <use href={"#"+idPrefix+"background-source"}/> : <Artwork idPrefix={idPrefix+"joint-art-"} kind={scene.art}/>}
+          </g>}
           <radialGradient id={idPrefix + "softLight"}>
             <stop stopColor="#ffdfab" stopOpacity={lightIntensity} />
             <stop offset="1" stopColor="#ffdfab" stopOpacity="0" />
@@ -620,18 +613,7 @@ export function Stage({
                 <g
                   transform={`translate(${scene.x * 10} ${scene.y * 5.63}) translate(500 281.5) scale(${scene.scale}) translate(-500 -281.5)`}
                 >
-                  <image
-                    href={asset.data}
-                    width="1000"
-                    height="563"
-                    preserveAspectRatio={
-                      scene.fit === "stretch"
-                        ? "none"
-                        : scene.fit === "cover"
-                          ? "xMidYMid slice"
-                          : "xMidYMid meet"
-                    }
-                  />
+                  <use href={"#" + idPrefix + "background-source"} />
                 </g>
               ) : (
                 <Artwork

@@ -67,6 +67,8 @@ function fixture() {
     entrance: { style: "slide", seconds: 0.2 },
     typingSeconds: 0.2,
     keyboard: true,
+    // Keep the final narration inside the chat while inspecting its transcript.
+    dialogueRange: {enabled:true, start:"hello", end:"end"},
   };
   phone.nodes = [
     {

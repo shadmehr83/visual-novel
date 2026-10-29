@@ -1,25 +1,46 @@
 import { useState } from "react";
 import type { Project, Scene } from "./model";
 import { readImage } from "./storage";
+import { GifCanvas } from "./GifCanvas";
+import { GifTimeline } from "./GifTimeline";
+import { TransitionFields } from "./TimelineControls";
 export function BackgroundStoryboard({
   project,
   scene,
   edit,
   onOpen,
+  onExpand,
 }: {
   project: Project;
   scene: Scene;
   edit: (fn: (p: Project) => void) => void;
   onOpen: (node?: string) => void;
+  onExpand?: () => void;
 }) {
   const [trigger, setTrigger] = useState(scene.nodes[0].id),
     [error, setError] = useState("");
+  const [active, setActive] = useState("main");
+  const update = (fn: (s: Scene) => void) =>
+    edit((p) => fn(p.scenes.find((s) => s.id === scene.id)!));
+  const activeView = scene.subscenes?.find((v) => v.id === active);
+  const selectedAsset = project.assets.find(
+    (a) => a.id === (activeView ? activeView.background : scene.background),
+  );
   const card = (id: string | null, title: string) => {
     const a = project.assets.find((a) => a.id === id);
     return (
       <div className="background-shot">
         {a ? (
-          <img src={a.data} alt={title} />
+          a.mime === "image/gif" ? (
+            <div className="gif-card-still">
+              <GifCanvas
+                data={a.data}
+                config={{ mode: "paused", speed: 1, startTime: 0 }}
+              />
+            </div>
+          ) : (
+            <img src={a.data} alt={title} />
+          )
         ) : (
           <div>Included illustration</div>
         )}
@@ -41,13 +62,71 @@ export function BackgroundStoryboard({
         {scene.transition?.seconds || 0}s
       </p>
       <div className="background-sequence">
-        {card(scene.background, "Main scene")}
+        <div>
+          <button
+            className={active === "main" ? "selected-shot" : ""}
+            data-help="Select the main background’s film editor. GIFs have precise playback and dialogue cues below the strip. This opens editing controls without changing the story’s artwork."
+            aria-label="Edit main background timing"
+            onClick={() => {
+              setActive("main");
+              if (
+                project.assets.find((a) => a.id === scene.background)?.mime ===
+                "image/gif"
+              )
+                onExpand?.();
+            }}
+          >
+            {card(scene.background, "Main scene")}
+          </button>
+          <TransitionFields
+            label="Scene entrance"
+            value={scene.transition}
+            onChange={(t) =>
+              update((s) => {
+                s.transition = t;
+              })
+            }
+          />
+          <TransitionFields
+            label="Scene exit"
+            value={scene.exitTransition}
+            optional
+            onChange={(t) =>
+              update((s) => {
+                s.exitTransition = t;
+              })
+            }
+          />
+          <TransitionFields
+            label="Return to main view"
+            value={scene.returnTransition || { style: "smooth", seconds: 0.45 }}
+            onChange={(t) =>
+              update((s) => {
+                s.returnTransition = t;
+              })
+            }
+          />
+        </div>
         {scene.subscenes?.map((v) => (
           <div key={v.id}>
             <div className="background-link">
               → {v.transition.style} · {v.transition.seconds}s
             </div>
-            {card(v.background, v.title)}
+            <button
+              className={active === v.id ? "selected-shot" : ""}
+              data-help="Select this background’s timing controls. For a GIF, scrub the film and save play or pause cues below. This does not change dialogue assignments."
+              aria-label={"Edit " + v.title + " timing"}
+              onClick={() => {
+                setActive(v.id);
+                if (
+                  project.assets.find((a) => a.id === v.background)?.mime ===
+                  "image/gif"
+                )
+                  onExpand?.();
+              }}
+            >
+              {card(v.background, v.title)}
+            </button>
             {scene.nodes
               .filter((n) => n.view === v.id)
               .map((n) => (
@@ -78,28 +157,35 @@ export function BackgroundStoryboard({
                 ))}
               </select>
             </label>
-            <label>
-              Transition
-              <select
-                aria-label={v.title + " visual transition"}
-                value={v.transition.style}
-                onChange={(e) =>
-                  edit((p) => {
-                    p.scenes
-                      .find((s) => s.id === scene.id)!
-                      .subscenes!.find((x) => x.id === v.id)!.transition.style =
-                      e.target.value as typeof v.transition.style;
-                  })
-                }
-              >
-                {["cut", "smooth", "fade", "slide", "snappy"].map((t) => (
-                  <option key={t}>{t}</option>
-                ))}
-              </select>
-            </label>
+            <TransitionFields
+              label={v.title + " visual"}
+              value={v.transition}
+              onChange={(t) =>
+                update((s) => {
+                  s.subscenes!.find((x) => x.id === v.id)!.transition = t!;
+                })
+              }
+            />
           </div>
         ))}
       </div>
+      {selectedAsset?.mime === "image/gif" && (
+        <GifTimeline
+          key={active + selectedAsset.id}
+          asset={selectedAsset}
+          scene={scene}
+          viewId={activeView?.id}
+          config={activeView?.gif || (!activeView ? scene.gif : undefined)}
+          update={update}
+          changeConfig={(gif) =>
+            update((s) => {
+              if (activeView)
+                s.subscenes!.find((v) => v.id === activeView.id)!.gif = gif;
+              else s.gif = gif;
+            })
+          }
+        />
+      )}
       <p>
         Each card is a view, not an automatic next slide. Its dialogue buttons
         show exactly where it is triggered. Unassigned dialogues return to the

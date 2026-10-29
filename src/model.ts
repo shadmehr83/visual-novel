@@ -37,8 +37,22 @@ export const qteSchema = z.object({
 });
 export const transitionSchema = z.object({
   style: z.enum(["cut", "snappy", "smooth", "slide", "fade"]),
-  seconds: z.number().min(0.05).max(10),
+  seconds: z.number().min(0.05).max(120),
 });
+export const gifPlaybackSchema = z.object({
+  mode: z.enum(["loop", "once", "paused"]),
+  speed: z.number().min(0.01).max(16),
+  startTime: z.number().min(0).max(3600),
+  pauseAt: z.number().min(0).max(3600).optional(),
+});
+export const gifCueSchema = z.object({
+  action: z.enum(["play", "resume", "once", "pause"]),
+  time: z.number().min(0).max(3600).optional(),
+  speed: z.number().min(0.01).max(16).optional(),
+  pauseAt: z.number().min(0).max(3600).optional(),
+});
+export type GifPlayback = z.infer<typeof gifPlaybackSchema>;
+export type GifCue = z.infer<typeof gifCueSchema>;
 export const poseSchema = z.object({
   node: z.string(),
   x: z.number().min(-1000).max(1000),
@@ -50,6 +64,8 @@ export const poseSchema = z.object({
   asset: z.string().optional(),
 });
 const node = z.object({
+  gifCue: gifCueSchema.optional(),
+  viewTransition: transitionSchema.optional(),
   deviceReturn: z.boolean().optional(),
   deviceDialogue: z.boolean().optional(),
   deviceVisible: z.boolean().optional(),
@@ -307,10 +323,13 @@ const scene = z.object({
     title: z.string().min(1).max(100),
     background: z.string().nullable(),
     transition: transitionSchema,
+    gif: gifPlaybackSchema.optional(),
     effects: effectsSchema.optional(),
     audio: z.array(z.object({ id: z.string(), volume: z.number().min(0).max(1), loop: z.boolean() })).optional(),
   })).max(40).optional(),
   effectBackup: z.record(z.number()).optional(),
+  gif: gifPlaybackSchema.optional(),
+  returnTransition: transitionSchema.optional(),
   keyframesEnabled: z.boolean().optional(),
   items: z
     .object({

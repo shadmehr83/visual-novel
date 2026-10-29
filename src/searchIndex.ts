@@ -3,6 +3,8 @@ import {releases} from './releases';
 import {activities,activitySetting} from './EffectSummary';
 export type FeatureRoute={id:string;title:string;description:string;action:string;target?:string;zone?:string;scene?:string;node?:string;asset?:string;keywords?:string};
 const defs:[string,string,string,string?][]=[
+ ["GIF film editor", "Select a GIF thumbnail in Scenes advanced to slow playback, scrub exact frames, pause, play once and add dialogue cues. Drag the right divider to widen the film editor.", "scenes", "gif animation speed film timeline blink frame pause stop play once hold"],
+ ["Background transition duration", "Type exact seconds under background sequence cards for entrances, exits, sub-scenes and returns. Dialogue overrides also appear in the GIF editor and dialogue artwork controls.", "scenes", "timing seconds duration fade crossfade cut transition"],
  ['Character motion and blinking','Select a hinge region, then configure eyelid blink, eye drift or gentle head tilt. Save transparent snippets, use dialogue poses, loops and start/end ranges.','effect:Cinematics','blink face head eyes puppet skeletal joint snippets mask'],
  ['Puddle rain impacts','Choose Motion, add a motion zone, set its type to Rain impact ripples and select only reflective wet ground.','effect:Motion','water splash wet puddle rings'],
  ['Author’s playthrough','Play with normal controls unlocked. Edit the current dialogue, replies and scene effects without stopping; the editor follows your route.','author-play','live editing debugging playtest dialogue fix'],
