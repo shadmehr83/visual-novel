@@ -1,4 +1,4 @@
-export const ENGINE_VERSION = "2.13.0";
+export const ENGINE_VERSION = "2.14.0";
 export type ReleaseFeature = {
   name: string;
   description: string;
@@ -19,7 +19,12 @@ const f = (
   action?: string,
 ): ReleaseFeature => ({ name, description, steps: path.split(" → "), action });
 export const releases: Release[] = [
-  { version: "2.13.0", name: "Author’s playthrough and live editing", date: "2026-10-29", features: [
+  {version:"2.14.0",name:"Character motion, chapter repair and wet streets",date:"2026-10-29",features:[
+    f("Chapters that create and retain their scenes", "Add chapter no longer navigates to an opening before it exists. Older First Match workspaces put the six morning openings into chapter two while retaining the farewell as chapter one’s ending.", "Chapters advanced → Add chapter", "chapters"),
+    f("Masked character motion and saved snippets", "Hinges support gentle repeating head tilt, eye drift and short eyelid blinks alongside dialogue poses and activation ranges. Extract selected pixels into the Character snippets folder, move a patch by dragging and optionally cover its old position with an aligned clean plate.", "Cinematics → Add hinge region → Character motion", "effect:Cinematics"),
+    f("Rain impact ripples and layered sound", "Reflective puddles on the approach and farewell have masked impact rings instead of pavement distortion. Original splash and heel-to-toe sounds layer with rain, and morning openings use a matching daylight bedroom with phone chat only on message dialogues.", "Motion → Rain impacts or Sound → Add background ambience", "effect:Motion")
+  ]},
+  { version: "2.13.0", commit:"78deec2", name: "Author’s playthrough and live editing", date: "2026-10-29", features: [
     f("Edit while playing", "Author’s playthrough keeps dialogue, replies, notes, backgrounds and normal scene controls editable. The editor follows the actual dialogue and scene, and changes autosave with Undo available.", "Header → Author’s playthrough → Edit current dialogue", "author-play"),
     f("Safe live debugging", "Automatic dialogue steps and timed actions wait while you type. Route links and dialogue deletion stay locked during playback. Phone messages update when their current authored line is edited, without replaying choices.", "Author’s playthrough → Dialogue or scene controls", "author-play"),
     f("Phone buzz and mouse light placement", "The second bedroom dialogue plays an original double vibration. Local radial lights have a Move light with mouse button beside their X/Y coordinates; one scene click moves the selected light without changing its loop.", "Lighting → Local light → Move light with mouse", "effect:Lighting")

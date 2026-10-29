@@ -34,6 +34,7 @@ export function useFootsteps(
       onError("Audio is unavailable in this browser.");
       return;
     }
+    let stride = 0;
     const step = () => {
       if (
         document.hidden ||
@@ -42,6 +43,8 @@ export function useFootsteps(
         return;
       if (sample) {
         sample.currentTime = 0;
+        sample.playbackRate = stride++ % 2 ? 1.025 : .975;
+        sample.volume = c.footstepVolume * masterVolume * (stride % 2 ? 1 : .92);
         sample
           .play()
           .catch(() =>

@@ -6,7 +6,7 @@ import { LightingLoopControls } from "./LightingLoopControls";
 export type RegionEditor = {
   kind: "rain" | "light" | "motion" | "joint";
   id: string;
-  mode: "polygon" | "wand" | "edge" | "brush" | "erase" | "pivot";
+  mode: "polygon" | "wand" | "edge" | "brush" | "erase" | "pivot" | "pose" | "rotate";
   radius?: number;
   tolerance: number;
 };

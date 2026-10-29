@@ -314,6 +314,10 @@ export function createFlowScene(template: Scene): Scene {
   s.entry = [];
   delete s.phone;
   delete s.items;
+  delete s.subscenes;
+  s.keyframes = [];
+  s.sprites = [];
+  delete s.effectBackup;
   s.joints = [];
   return s;
 }

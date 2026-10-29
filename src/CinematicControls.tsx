@@ -1,3 +1,4 @@
+import { SnippetControls } from "./SnippetControls";
 import { SceneTransitionControls } from "./SceneTransitionControls";
 import { RangeInput } from "./RangeInput";
 import type { Project, Scene } from "./model";
@@ -10,7 +11,9 @@ export function CinematicControls({
   update,
   setEditor,
   previewNode,
+  saveSnippet,
 }: {
+  saveSnippet?: (joint: string, asset: Project["assets"][number]) => void;
   scene: Scene;
   project: Project;
   nodeId: string;
@@ -28,7 +31,7 @@ export function CinematicControls({
         className="property-section cinematic-controls"
         data-effect-panel="Cinematics"
       >
-        <h3>Transitions & hinge poses</h3>
+        <h3>Character motion, transitions & hinge poses</h3>
         <SceneTransitionControls scene={scene} update={update} />
         <p className="small muted">
           Select a region, place its pivot, then save a different pose on
@@ -256,6 +259,19 @@ export function CinematicControls({
                   }}
                 />
               </label>
+              <fieldset><legend>Character motion · blink, gaze & head sway</legend>
+                <label><input type="checkbox" aria-label={joint.name + " loop enabled"} checked={joint.loop?.enabled || false} onChange={e=>patch(j=>{j.loop={kind:"sway",seconds:4,amount:1,...j.loop,enabled:e.target.checked};})}/>Loop character motion</label>
+                <label>Motion style<select data-help="Tilt rotates the selected head region about its pivot. Gaze shifts a small selected eye patch. Blink closes and opens the selected eye region over a matching eyelid colour; carefully paint just the eye opening." aria-label={joint.name + " loop style"} value={joint.loop?.kind||"sway"} onChange={e=>patch(j=>{j.loop={enabled:true,seconds:4,amount:1,...j.loop,kind:e.target.value as "sway"|"gaze"|"blink"};})}><option value="sway">Gentle head tilt</option><option value="gaze">Small eye / selected-patch drift</option><option value="blink">Blink selected eyelid region</option></select></label>
+                {joint.loop && <><label>Loop interval (seconds)<input aria-label={joint.name+" loop seconds"} type="number" min="0.5" max="30" step=".1" value={joint.loop.seconds} onChange={e=>{const v=+e.target.value;if(v>=.5&&v<=30)patch(j=>j.loop!.seconds=v);}}/></label>
+                <label>Amount (degrees for tilt, scene units for gaze)<RangeInput aria-label={joint.name+" loop amount"} min="0" max="20" step=".1" type="range" value={joint.loop.amount} onChange={e=>patch(j=>j.loop!.amount=+e.target.value)}/></label>
+                {joint.loop.kind === "blink" && <label>Eyelid / skin colour<input aria-label={joint.name+" eyelid colour"} type="color" value={joint.loop.eyelidColor||"#b18b7e"} onChange={e=>patch(j=>j.loop!.eyelidColor=e.target.value)}/></label>}</>}
+                <p>Select only the moving part, put its pivot at the joint, then use small amounts. For blinks select the eye opening and match the eyelid colour. Use a clean plate or cover colour to hide original pixels behind a moving head. This animates selected pixels; it does not reconstruct a face.</p>
+                <button onClick={()=>setEditor({kind:"joint",id:joint.id,mode:"pose",tolerance:45})}>Drag selected patch on scene</button>
+                <button onClick={()=>setEditor({kind:"joint",id:joint.id,mode:"rotate",tolerance:45})}>Drag head tilt on scene</button>
+                <label>Clean plate behind moving patch<select data-help="An aligned image of the area without the moving object. Only the selected region is drawn from this image behind the patch, hiding the original head or object without moving the rest of the background." aria-label={joint.name+" clean plate"} value={joint.cleanPlate||""} onChange={e=>patch(j=>j.cleanPlate=e.target.value||undefined)}><option value="">None — original or cover colour</option>{project.assets.map(a=><option key={a.id} value={a.id}>{a.name}</option>)}</select></label>
+                {saveSnippet && <SnippetControls project={project} scene={scene} nodeId={nodeId} joint={joint} onSave={a=>saveSnippet(joint.id,a)}/>}
+                <p>Dialogue poses below trigger smooth moves on entry. Combine them with the optional start/end range above; enable looping for repeated idle motion.</p>
+              </fieldset>
               <label>
                 Source image
                 <select

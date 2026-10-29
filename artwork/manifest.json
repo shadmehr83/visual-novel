@@ -138,5 +138,15 @@
     "height": 941,
     "bytes": 128128,
     "sha256": "eb055f49b49ef1aef072ff44d98fda5fe15d36a92bfdc6669b5ec24395b93c12"
+  },
+  {
+    "id": "first-match-morning",
+    "name": "The First Match · next morning bedroom.webp",
+    "folder": "Background scenes",
+    "path": "artwork/background-scenes/first-match-morning.webp",
+    "width": 1672,
+    "height": 941,
+    "bytes": 227072,
+    "sha256": "306ae526846c6a2e4773fb806d3b7e59cb9ffbe2a2943fa16f9cf24f3d3650a3"
   }
 ]

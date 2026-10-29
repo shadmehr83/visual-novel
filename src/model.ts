@@ -127,6 +127,7 @@ export const zoneLightSchema = z.object({
 export type Region = z.infer<typeof regionSchema>;
 export type ZoneLight = z.infer<typeof zoneLightSchema>;
 export const motionZoneSchema = z.object({
+  mode: z.enum(["sway", "puddle"]).optional(),
   id: z.string(),
   name: z.string(),
   enabled: z.boolean(),
@@ -214,6 +215,8 @@ export const cameraSchema = z.object({
   footstepAsset: z.string().optional(),
 });
 export const jointSchema = z.object({
+  loop: z.object({ enabled: z.boolean(), kind: z.enum(["sway", "gaze", "blink"]), seconds: z.number().min(0.5).max(30), amount: z.number().min(0).max(20), eyelidColor: z.string().regex(/^#[0-9a-fA-F]{6}$/).optional() }).optional(),
+  cleanPlate: z.string().optional(),
   range: z
     .object({
       start: z.string(),
@@ -567,6 +570,8 @@ export function validateProject(input: unknown): Project {
     for (const view of s.subscenes || [])
       for (const track of view.audio || [])
         if (!p.audioAssets?.some(a => a.id === track.id)) throw Error("Missing sub-scene audio asset");
+    for (const joint of s.joints || [])
+      if (joint.cleanPlate && !p.assets.some(a => a.id === joint.cleanPlate)) throw Error("Missing clean plate image");
     for (const track of s.audio || [])
       if (!p.audioAssets?.some((a) => a.id === track.id))
         throw Error("Missing audio asset");

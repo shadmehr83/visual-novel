@@ -84,7 +84,7 @@ it("does not modify an existing departure or an unrelated project automatically"
   expect(integrateDeparture(other, savedProject()).changed).toBe(false);
   expect(integrateDeparture(other, savedProject(), true).changed).toBe(true);
 });
-it("resumes an old farewell playthrough in the new phone scene without losing state or history", () => {
+it("resumes an old farewell in the separate departure scene while keeping in-person dialogue off the phone", () => {
   const p = legacy(),
     r = {
       ...start(p),
@@ -113,8 +113,7 @@ it("resumes an old farewell playthrough in the new phone scene without losing st
         .nodeVisits!.filter((v) => v.scene === "departure")
         .map((v) => v.node),
     ),
-  ).toBe("chat");
-  expect(next.phoneMessages?.at(-1)?.text).toBe(
-    s.nodes.find((n) => n.id === "good-time")!.text,
-  );
+  ).toBe("off");
+  // Farewells are spoken in person; chat starts only at the later message.
+  expect(s.nodes.find(n=>n.id==="after-message")!.deviceScreen).toBe("chat");
 });

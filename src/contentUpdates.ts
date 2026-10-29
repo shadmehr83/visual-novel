@@ -1,3 +1,4 @@
+import { integrateChapterAtmosphere } from "./chapterAtmosphereUpdate";
 import { integrateChapterUpdate } from "./chapters";
 import type { Project } from "./model";
 import { integrateDemoUpdates } from "./demoUpdates";
@@ -10,5 +11,6 @@ export function integrateContentUpdates(local: Project, source: Project, forceAr
   const device = integrateDeviceUpdate(demo, source) || demo;
   const library = integrateLibraryUpdate(device, source, forceArtwork) || device;
   const chapter = integrateChapterUpdate(library, source) || library;
-  return integrateVibration(chapter, source) || (chapter !== local ? chapter : null);
+  const vibration = integrateVibration(chapter, source) || chapter;
+  return integrateChapterAtmosphere(vibration, source) || (vibration !== local ? vibration : null);
 }

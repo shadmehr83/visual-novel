@@ -21,7 +21,7 @@
     "file": "exec-3eeae9d5-ae92-4752-b1f9-3f0e60976f5f.png",
     "bytes": 2190778,
     "sha256": "edbdc83d1154b2b4fc8b138a46549c90c0b2d9be2eef6b2868ff7e6b4d2dc0b4",
-    "publishedName": "The First Match \u2014 bedroom environment.png"
+    "publishedName": "The First Match — bedroom environment.png"
   },
   {
     "file": "exec-45b34099-7314-4c8f-b453-2e1b107f90d8.png",
@@ -39,7 +39,7 @@
     "file": "exec-6c74329c-074a-4915-af85-e7a4b3f8f838.png",
     "bytes": 2355363,
     "sha256": "915d98f963ebea2b46c64fe8e58d2b9caadcc6bd66c5db312b356219d1c748f5",
-    "publishedName": "Maria \u00b7 rainlit profile.png"
+    "publishedName": "Maria · rainlit profile.png"
   },
   {
     "file": "exec-713a87fb-6fbe-42d7-9ee2-217079135893.png",
@@ -51,7 +51,7 @@
     "file": "exec-887920e4-748f-4a4f-8d99-1f41441d0301.png",
     "bytes": 2904494,
     "sha256": "41e7d213ca4acfcbaba0f0c1488900c8f29258322d1c2d51198a060e998c3d56",
-    "publishedName": "The First Match \u2014 journey environment.png"
+    "publishedName": "The First Match — journey environment.png"
   },
   {
     "file": "exec-8c22b229-2f0b-4d4f-bcd2-46a902899f60.png",
@@ -93,12 +93,18 @@
     "file": "exec-db4b4791-b44f-4a0e-8e09-7bb6eeb4190b.png",
     "bytes": 2152964,
     "sha256": "6e45b16e3971a58f0c3ce8c63d2199f714d1e8726741932ad3a5f2e6c5124742",
-    "publishedName": "The First Match \u2014 wardrobe environment.png"
+    "publishedName": "The First Match — wardrobe environment.png"
   },
   {
     "file": "exec-fae724cf-6dcf-472e-9043-087174398d22.png",
     "bytes": 2639908,
     "sha256": "fb075df493ec661e396369c62647825ac357be74eaeb75a1b6890a88c460b11f",
     "publishedName": null
+  },
+  {
+    "file": "exec-f4a16e4b-06b7-42b6-b36a-bbebc0743624.png",
+    "bytes": 2362443,
+    "sha256": "f1990ace9204d674d224abbd1fcf748740786caa35f1bb12f9acdf6d79469d10",
+    "publishedName": "The First Match · next morning bedroom.webp"
   }
 ]

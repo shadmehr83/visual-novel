@@ -1,3 +1,4 @@
+import { animatedCharacterPose } from "./characterMotion";
 import { usePaused } from "./PlaySession";
 import { hingeWindow } from "./interactions";
 import { useEffect, useRef, useState } from "react";
@@ -62,8 +63,7 @@ function MovingPatch({
     if (
       reduced ||
       window.ended ||
-      joint.transition.style === "cut" ||
-      joint.transition.style === "snappy"
+      (!joint.loop?.enabled && (joint.transition.style === "cut" || joint.transition.style === "snappy"))
     ) {
       latest.current = to;
       setPose(to);
@@ -83,14 +83,16 @@ function MovingPatch({
       const t = Math.min(1, (now - origin) / (joint.transition.seconds * 1000));
       const next = samplePose(from, to, t, joint.transition.style);
       latest.current = next;
-      setPose(next);
-      if (t < 1) raf = requestAnimationFrame(tick);
+      setPose(animatedCharacterPose(next, window.ended ? undefined : joint.loop, (now - origin) / 1000));
+      if (t < 1 || (joint.loop?.enabled && !window.ended)) raf = requestAnimationFrame(tick);
     };
     raf = requestAnimationFrame(tick);
     return () => cancelAnimationFrame(raf);
   }, [
     JSON.stringify(chosen),
     JSON.stringify(joint.transition),
+    JSON.stringify(joint.loop),
+    window.ended,
     reduced,
     nodeId,
   ]);
@@ -99,6 +101,7 @@ function MovingPatch({
   const source = project.assets.find(
     (a) => a.id === (pose.asset || joint.source),
   );
+  const cleanPlate = project.assets.find(a => a.id === joint.cleanPlate);
   if (!window.visible) return null;
   return (
     <g data-joint-layer={joint.id} data-joint-angle={pose.angle}>
@@ -113,11 +116,12 @@ function MovingPatch({
           )}
         </clipPath>
       </defs>
-      {joint.coverColor && (
+      {cleanPlate && <image data-clean-plate={joint.id} href={cleanPlate.data} width="1000" height="563" preserveAspectRatio="xMidYMid slice" clipPath={`url(#${clip})`} />}
+      {(joint.coverColor || (joint.loop?.enabled && joint.loop.kind === "blink")) && (
         <rect
           width="1000"
           height="563"
-          fill={joint.coverColor}
+          fill={joint.coverColor || joint.loop?.eyelidColor || "#b18b7e"}
           clipPath={`url(#${clip})`}
         />
       )}

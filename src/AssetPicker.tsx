@@ -1,7 +1,7 @@
 import { useState } from "react";
 import type { Project } from "./model";
 type Asset = Project["assets"][number];
-export const ART_FOLDERS = ["Background scenes", "Outfits & items", "Profiles & app icons", "Other artwork"];
+export const ART_FOLDERS = ["Background scenes", "Outfits & items", "Profiles & app icons", "Character snippets", "Clean plates", "Other artwork"];
 export function assetFolder(a: Asset) {
   if (a.folder) return a.folder;
   if (/^outfit-|outfit item/i.test(a.id + " " + a.name)) return "Outfits & items";

@@ -66,3 +66,5 @@ Normal reload now adds **After the café** to compatible older saved First Match
 ## Stillframe 2.4 — sound, temporary views and restored wardrobe
 
 The checkpoint embeds six original sound designs, three app icons and a monitor close-up. Compatible older First Match workspaces receive the wardrobe repairs and demo additions once, with a recovery copy. Audio, view selections, app profiles and graph links travel with exported JSON. The café image and its visual settings remain protected. See [Sound and sub-scenes](../docs/SOUND_AND_SUBSCENES.md).
+
+The 2.14 checkpoint keeps scene 7 dialogue 15 as chapter one's ending and groups the six later opening scenarios in chapter two. It adds a matching morning bedroom, explicit phone visibility for room narration versus actual messages, masked outdoor puddle rings and layered splash/walking sounds. Café visuals remain unchanged. See [character motion and wet streets](../docs/CHARACTER_MOTION_AND_WET_STREETS.md) for the new hinge loops, mouse poses, transparent snippet gallery and clean plate workflow.

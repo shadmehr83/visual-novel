@@ -48,7 +48,7 @@ export function SelectionToolbar({
             ["brush", "Paint brush"],
             ["erase", "Eraser"],
             ...(editor.kind === "joint"
-              ? [["pivot", "Place pivot"] as const]
+              ? [["pivot", "Place pivot"] as const, ["pose", "Drag pose"] as const, ["rotate", "Drag tilt"] as const]
               : []),
           ] as const
         ).map(([mode, label]) => (

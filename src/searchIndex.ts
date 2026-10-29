@@ -3,6 +3,8 @@ import {releases} from './releases';
 import {activities,activitySetting} from './EffectSummary';
 export type FeatureRoute={id:string;title:string;description:string;action:string;target?:string;zone?:string;scene?:string;node?:string;asset?:string;keywords?:string};
 const defs:[string,string,string,string?][]=[
+ ['Character motion and blinking','Select a hinge region, then configure eyelid blink, eye drift or gentle head tilt. Save transparent snippets, use dialogue poses, loops and start/end ranges.','effect:Cinematics','blink face head eyes puppet skeletal joint snippets mask'],
+ ['Puddle rain impacts','Choose Motion, add a motion zone, set its type to Rain impact ripples and select only reflective wet ground.','effect:Motion','water splash wet puddle rings'],
  ['Author’s playthrough','Play with normal controls unlocked. Edit the current dialogue, replies and scene effects without stopping; the editor follows your route.','author-play','live editing debugging playtest dialogue fix'],
  ['Active effects','See enabled and disabled layers. Open a layer’s settings or use its separate on/off toggle.','active','enabled falling rain glass count'],
  ['Chapters advanced','Organise scenes into chapters, set conditional opening scenarios from prior choices and test start rules.','chapters','chapter count next chapter start branch scenarios'],

@@ -12,7 +12,7 @@ export function SoundControls({ project, scene, nodeId, edit, update }: { projec
   </div>;
   return <section className="property-section" data-effect-panel="Sound">
     <h3>Sound library & scene audio</h3>
-    <p>Use a looping ambience, a sound on this dialogue/reply, phone alerts, or item inspection. Sounds travel with project exports. Players control the master volume.</p>
+    <p>Use a looping ambience, a sound on this dialogue/reply, phone alerts, or item inspection. Stack multiple ambience tracks: upload each sound, then choose each one in Add background ambience. They play together with separate volumes. Sounds travel with project exports. Players control the master volume.</p>
     <label>Upload sound<input aria-label="Upload sound" type="file" accept="audio/*" onChange={async e => {
       const f = e.target.files?.[0]; e.target.value = ""; if (!f) return;
       try {

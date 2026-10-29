@@ -1503,6 +1503,7 @@ export default function App() {
                       maskMode={maskMode && !editingLocked}
                       onMask={(v) => effect("mask", v)}
                       nodeId={node.id}
+                      onPose={(dx,dy,angle=0)=>updateScene(s=>{const j=s.joints?.find(j=>j.id===regionEditor?.id);if(!j)return;let pose=j.poses.find(p=>p.node===node.id);if(!pose){pose={node:node.id,x:0,y:0,angle:0,scaleX:1,scaleY:1,opacity:1};j.poses.push(pose);}pose.angle=Math.max(-180,Math.min(180,pose.angle+angle));pose.x=Math.max(-1000,Math.min(1000,pose.x+dx));pose.y=Math.max(-563,Math.min(563,pose.y+dy));})}
                       onPivot={(x, y) =>
                         updateScene((s) => {
                           const j = s.joints?.find(
@@ -2390,8 +2391,9 @@ export default function App() {
                         : selected.nodes[0].id
                     }
                     update={updateScene}
-                    setEditor={setRegionEditor}
+                    setEditor={next=>{setRegionEditor(next);if(next){setMaskMode(false);setPlacingLight(null);}}}
                     previewNode={setNodeId}
+                    saveSnippet={(id,a)=>edit(p=>{p.assets.push(a);const j=p.scenes.find(s=>s.id===selected.id)?.joints?.find(j=>j.id===id);if(j)j.source=a.id;})}
                   />
                   <CameraControls
                     scene={selected}

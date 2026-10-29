@@ -121,7 +121,6 @@ export function ChapterWorkspace({
                 commit((p) => {
                   const c = addChapter(p);
                   setSelected(c.id);
-                  onSelect(c.startScene);
                 })
               }
             >
@@ -274,8 +273,7 @@ export function ChapterWorkspace({
                 disabled={project.scenes.length >= 100}
                 onClick={() =>
                   commit((p) => {
-                    const id = addChapterScene(p, chapter.id);
-                    onSelect(id);
+                    addChapterScene(p, chapter.id);
                   })
                 }
               >

@@ -1,3 +1,4 @@
+import { PuddleRipples } from "./PuddleRipples";
 import { usePaused } from "./PlaySession";
 import { sceneView } from "./SceneViews";
 import { JointLayers } from "./JointLayers";
@@ -25,6 +26,7 @@ export function Stage({
   idPrefix = "",
   itemFocus = false,
   onPivot,
+  onPose,
   onPlaceLight,
   visits = [],
 }: {
@@ -43,9 +45,11 @@ export function Stage({
   visits?: string[];
   onPlaceLight?: (x: number, y: number) => void;
   onPivot?: (x: number, y: number) => void;
+  onPose?: (dx: number, dy: number, angle?: number) => void;
 }) {
   const baseScene = scene;
   scene = useMemo(() => sceneView(baseScene, nodeId), [baseScene, nodeId]);
+  const poseDrag = useRef<{x:number;y:number} | null>(null);
   const stroke = useRef<{
     canvas: HTMLCanvasElement;
     ctx: CanvasRenderingContext2D;
@@ -248,6 +252,7 @@ export function Stage({
         data-global-light-level={globalLevel}
         style={{ touchAction: regionEditor ? "none" : undefined }}
         onPointerDown={(event) => {
+          if((regionEditor?.mode === "pose" || regionEditor?.mode === "rotate")) {event.preventDefault();event.currentTarget.setPointerCapture(event.pointerId);poseDrag.current=pointAt(event.clientX,event.clientY);return;}
           if (
             !storedRegion ||
             !regionEditor ||
@@ -274,7 +279,8 @@ export function Stage({
         onPointerLeave={() => {
           if (!stroke.current) setBrushCursor(null);
         }}
-        onPointerUp={() => {
+        onPointerUp={(event) => {
+          if(poseDrag.current){const p=pointAt(event.clientX,event.clientY);const j=scene.joints?.find(j=>j.id===regionEditor?.id);if(regionEditor?.mode === "rotate" && j){const a=Math.atan2(poseDrag.current.y-j.pivotY,poseDrag.current.x-j.pivotX);const b=Math.atan2(p.y-j.pivotY,p.x-j.pivotX);const delta=Math.atan2(Math.sin(b-a),Math.cos(b-a))*180/Math.PI;onPose?.(0,0,Math.max(-15,Math.min(15,delta)));}else onPose?.(p.x-poseDrag.current.x,p.y-poseDrag.current.y);poseDrag.current=null;return;}
           if (!stroke.current) return;
           try {
             const path = maskPath(stroke.current.canvas);
@@ -287,6 +293,7 @@ export function Stage({
           }
         }}
         onPointerCancel={() => {
+          poseDrag.current=null;
           stroke.current = null;
           setStrokePreview(null);
         }}
@@ -305,6 +312,7 @@ export function Stage({
             );
             return;
           }
+          if (regionEditor?.mode === "pose" || regionEditor?.mode === "rotate") return;
           if (regionEditor?.mode === "pivot") {
             const p = pointAt(event.clientX, event.clientY);
             onPivot?.(p.x, p.y);
@@ -726,6 +734,7 @@ export function Stage({
               {(e.motionZones || [])
                 .filter((w) => w.enabled)
                 .map((w) => {
+                  if (w.mode === "puddle") return <PuddleRipples key={w.id} zone={w} time={time} prefix={idPrefix} reduced={project.settings.reducedEffects || reducedMotion} />;
                   const offset = sampleMotion(
                     w,
                     time,
@@ -888,6 +897,7 @@ export function Stage({
           </g>
         )}
       </svg>
+      {regionEditor && ["pose","rotate"].includes(regionEditor.mode) && <div className="mask-hint" style={{pointerEvents:"none"}}>Drag on the scene to {regionEditor.mode === "rotate" ? "tilt the selected patch around its pivot" : "move the selected patch"}. Saves a pose for this dialogue.</div>}
       {onPlaceLight && <div className="mask-hint" style={{ pointerEvents: "none" }}>Click the scene to place the light centre.</div>}
       {wandError && (
         <div className="mask-hint" role="alert">

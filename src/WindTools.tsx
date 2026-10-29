@@ -25,7 +25,7 @@ export function WindTools({
     update((s) => fn(s.effects.motionZones![i]));
   return (
     <div data-effect-panel="Motion">
-      <h3>Wind & cloth motion</h3>
+      <h3>Wind, cloth & puddle motion</h3>
       <p className="small muted">
         Select a region of imported art for subtle pixel sway or rippling. This
         is a 2D distortion effect; it does not extract an object or generate
@@ -63,6 +63,7 @@ export function WindTools({
               onChange={(e) => patch(i, (w) => (w.name = e.target.value))}
             />
           </label>
+          <label>Motion type<select aria-label={w.name + " motion type"} value={w.mode || "sway"} onChange={e=>patch(i,w=>w.mode=e.target.value as "sway"|"puddle")}><option value="sway">Wind / cloth distortion</option><option value="puddle">Rain impact ripples (keeps pavement still)</option></select></label>
           <label className="consent">
             <input
               type="checkbox"
