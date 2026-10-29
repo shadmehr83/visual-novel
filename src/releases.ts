@@ -1,4 +1,4 @@
-export const ENGINE_VERSION = "2.18.0";
+export const ENGINE_VERSION = "2.18.1";
 export type ReleaseFeature = {
   name: string;
   description: string;
@@ -20,6 +20,10 @@ const f = (
   action?: string,
 ): ReleaseFeature => ({ name, description, steps: path.split(" → "), action });
 export const releases: Release[] = [
+ {version:"2.18.1",name:"Leaner saves and artwork previews",date:"2026-10-29",timestamp:"2026-10-29T12:38:23.981636+00:00",features:[
+ f("Lightweight progress saves", "Story advances save progress separately from unchanged artwork. Library thumbnails load on demand and hidden-tab scene animation pauses.", "Editor → Play story", "editor"),
+ f("Expand artwork", "Select an asset and open Expand image, or click an artwork picker preview. View the image larger and close with Escape or Close preview.", "Assets → Select an image → Expand image", "library:Assets")
+ ]},
  {version:"2.18.0",name:"Smoothness, stable workspaces and provider routing",date:"2026-10-29",timestamp:"2026-10-29T11:03:30.659208+00:00",features:[
  f("Stable workspace resets", "Reset clears stale preview geometry. Whole workspaces cannot dock inside their own child panels; resizing and floating remain available.", "Windows & docking → Restore all window positions", "windows"),
  f("Lighter editing and animation", "Edits share unchanged project data instead of copying embedded media. GIF rendering is capped near 30 frames per second.", "Editor → Scene controls", "editor"),

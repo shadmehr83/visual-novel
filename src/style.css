@@ -2054,3 +2054,11 @@ html:has(.app),body:has(.app),#root:has(.app){height:100%;overflow:hidden}.app{h
 .background-shot img {width:230px;height:154px;object-fit:contain;background:#18191b;border-radius:6px;}
 .background-link {padding:8px;color:var(--accent,#d4b395);}
 .background-sequence button {white-space:normal;text-align:left;display:block;margin:6px 0;}
+
+.artwork-expand { display: block; width: 100%; padding: 6px; text-align: center; }
+.artwork-expand span { display: block; margin: 4px; }
+.image-preview-dialog { width: min(1400px, 94vw); max-width: 94vw; max-height: 94dvh; padding: 16px; border: 1px solid #82796f; border-radius: 10px; background: #202426; color: #faf3eb; box-shadow: 0 16px 70px #0009; }
+.image-preview-dialog::backdrop { background: #000b; }
+.image-preview-dialog header { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 12px; }
+.image-preview-dialog small { display: block; margin-top: 5px; }
+.image-preview-dialog > img { display: block; width: 100%; height: auto; max-height: calc(94dvh - 110px); object-fit: contain; }

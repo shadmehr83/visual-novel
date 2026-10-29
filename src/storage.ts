@@ -1,23 +1,41 @@
 import { openDB } from "idb";
 import { validateProject, type Project, type Runtime } from "./model";
 import { portableFeedProject } from "./feedLibrary";
-const db = () =>
-  openDB("stillframe-studio", 1, {
+let connectionPromise: ReturnType<typeof openDB> | undefined;
+const db = () => connectionPromise ||= openDB("stillframe-studio", 1, {
     upgrade(db) {
       db.createObjectStore("projects");
     },
   });
+let savedProject: Project | undefined;
+let savedToken = "";
 export async function save(p: Project, r: Runtime | null) {
-  await (
-    await db()
-  ).put("projects", { project: validateProject(p), runtime: r }, "current");
+  // The editor uses immutable updates. Only a new project reference needs
+  // validation and a fresh structured clone of the embedded artwork.
+  const validated = p === savedProject ? undefined : validateProject(p);
+  const tx = (await db()).transaction("projects", "readwrite");
+  const token = await tx.store.get("current-project-token");
+  let nextToken = savedToken;
+  if (p !== savedProject || token !== savedToken) {
+    nextToken = crypto.randomUUID();
+    await tx.store.put({ project: validated || validateProject(p), runtime: r }, "current");
+    await tx.store.put(nextToken, "current-project-token");
+  }
+  await tx.store.put({ token: nextToken, runtime: r }, "current-runtime");
+  await tx.done;
+  savedProject = p;
+  savedToken = nextToken;
 }
 export async function load(): Promise<{
   project: Project;
   runtime: Runtime | null;
 } | null> {
-  const v = await (await db()).get("projects", "current");
-  return v ? { project: validateProject(v.project), runtime: v.runtime } : null;
+  const tx = (await db()).transaction("projects", "readonly");
+  const [v, progress, token] = await Promise.all([
+    tx.store.get("current"), tx.store.get("current-runtime"), tx.store.get("current-project-token"),
+  ]);
+  await tx.done;
+  return v ? { project: validateProject(v.project), runtime: progress && progress.token === token ? progress.runtime : v.runtime } : null;
 }
 export type Workspace = { project: Project; runtime: Runtime | null };
 export async function loadSnapshotRecovery(): Promise<Workspace | null> {
@@ -44,9 +62,12 @@ export async function openGithubSnapshot(
   try {
     const old = previous || (await tx.store.get("current"));
     if (old) {
+      const [progress, token] = previous ? [null, null] : await Promise.all([
+        tx.store.get("current-runtime"), tx.store.get("current-project-token"),
+      ]);
       const workspace = {
         project: validateProject(old.project),
-        runtime: old.runtime,
+        runtime: progress && progress.token === token ? progress.runtime : old.runtime,
       };
       if (JSON.stringify(workspace.project) !== JSON.stringify(snapshot))
         await tx.store.put(
@@ -55,6 +76,8 @@ export async function openGithubSnapshot(
         );
     }
     await tx.store.put({ project: snapshot, runtime: null }, "current");
+    await tx.store.delete("current-runtime");
+    await tx.store.delete("current-project-token");
     await tx.done;
   } catch (error) {
     try {
@@ -133,5 +156,7 @@ export async function saveProjectUpdate(
     tx = connection.transaction("projects", "readwrite");
   await tx.store.put(old, "before-studio-update");
   await tx.store.put({ project: next, runtime }, "current");
+  await tx.store.delete("current-runtime");
+  await tx.store.delete("current-project-token");
   await tx.done;
 }

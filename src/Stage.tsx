@@ -153,7 +153,7 @@ export function Stage({
     let frame = 0;
     let previous = 0;
     const tick = (t: number) => {
-      if (pausedRef.current) {
+      if (pausedRef.current || document.hidden) {
         origin += t - lastFrame;
         lastFrame = t;
         frame = requestAnimationFrame(tick);

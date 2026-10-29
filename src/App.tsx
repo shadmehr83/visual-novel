@@ -1,3 +1,4 @@
+import { ImagePreview } from "./ImagePreview";
 import { cloneData as structuredClone } from "./cloneData";
 import { RecentFeatures } from "./RecentFeatures";
 import { produce, setAutoFreeze } from "immer";
@@ -220,6 +221,7 @@ export default function App() {
     setPlacingLight(null);
   }, [playing, authorPlay, runtime?.scene, runtime?.node]);
   const [placingLight, setPlacingLight] = useState<{ preset?: string; light?: string } | null>(null);
+  const [previewAssetId, setPreviewAssetId] = useState<string | null>(null);
   const [tab, setTab] = useState("Scenes");
   const [effectPanel, setEffectPanel] = useState("All");
   const [placement, setPlacementState] = useState(() => {
@@ -536,6 +538,7 @@ export default function App() {
   function edit(fn: (p: Project) => void) {
     setProject((p) => {
       const next = produce(p, draft => { fn(draft as Project); pruneChapterExits(draft as Project); });
+      if (next === p) return p;
       setUndo((u) => [...u.slice(-39), p]);
       setRedo([]);
       return next;
@@ -1113,7 +1116,7 @@ export default function App() {
                         setInspector("Background");
                       }}
                     >
-                      <img src={a.data} />
+                      <img src={a.data} alt={a.name} loading="lazy" decoding="async" />
                       <b>{a.name}</b>
                       <small>
                         {a.width} × {a.height} ·{" "}
@@ -1127,6 +1130,7 @@ export default function App() {
                   ))}
                   {asset && (
                     <div className="asset-meta">
+                      <button data-help="Open this artwork in a large preview without changing its scene or selection. Close it or press Escape to return." onClick={() => setPreviewAssetId(asset.id)}>Expand image</button>
                       <label>
                         Name
                         <input
@@ -3283,6 +3287,7 @@ export default function App() {
           </div>
         )}
       </div>
+      {previewAssetId && <ImagePreview asset={project.assets.find(a => a.id === previewAssetId)} onClose={() => setPreviewAssetId(null)} />}
     </PlaySession>
   );
 }
