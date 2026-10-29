@@ -19,7 +19,7 @@ export default {
       });
     }
     if (path === "/api/project")
-      return request.method === "POST"
+      return ["GET", "POST"].includes(request.method)
         ? publishProject(request, env)
         : new Response("Method not allowed", { status: 405 });
     if (path === "/api/assistant") {

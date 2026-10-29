@@ -1,4 +1,4 @@
-export const ENGINE_VERSION = "2.18.2";
+export const ENGINE_VERSION = "2.19.0";
 export type ReleaseFeature = {
   name: string;
   description: string;
@@ -20,6 +20,11 @@ const f = (
   action?: string,
 ): ReleaseFeature => ({ name, description, steps: path.split(" → "), action });
 export const releases: Release[] = [
+ {version:"2.19.0",name:"Cross-device saves and scoped exports",date:"2026-10-29",timestamp:"2026-10-29T13:00:22.749680+00:00",features:[
+ f("Clear local and GitHub saving", "Choose a save destination and explicitly publish a complete project when connected. On opening, choose the latest GitHub save or retain local work with recovery protection.", "Save project file → Save destination", "save"),
+ f("Individual image expansion", "Every artwork card has its own expand icon, so large previews no longer require scrolling to the end of the library.", "Assets → Image expand icon", "library:Assets"),
+ f("Scoped playable exports", "Export the entire story, one chapter, a scene range or an inclusive dialogue range. Leaving the range finishes the exported demo.", "Library footer → Advanced playable export", "editor")
+ ]},
  {version:"2.18.2",name:"Phone weather and app-specific headers",date:"2026-10-29",timestamp:"2026-10-29T12:47:15.633714+00:00",features:[
  f("Rainy-week Weather app", "Open Weather from the phone home screen to see all seven rainy days. Toggle the clock’s weather widget in Advanced devices, standard phone appearance or the phone’s Settings app.", "Advanced devices → Appearance → Show weather widget", "devices"),
  f("Contact strip only in chat", "The contact portrait and conversation name appear only in Ember messages. Other apps use a simple navigation heading, without changing your artwork.", "Phone Home → Ember or Insta", "devices")

@@ -1,3 +1,4 @@
+import { AdvancedExport } from "./AdvancedExport";
 import { ImagePreview } from "./ImagePreview";
 import { cloneData as structuredClone } from "./cloneData";
 import { RecentFeatures } from "./RecentFeatures";
@@ -221,6 +222,7 @@ export default function App() {
     setPlacingLight(null);
   }, [playing, authorPlay, runtime?.scene, runtime?.node]);
   const [placingLight, setPlacingLight] = useState<{ preset?: string; light?: string } | null>(null);
+  const [sourcePromptOpen,setSourcePromptOpen]=useState(true);
   const [previewAssetId, setPreviewAssetId] = useState<string | null>(null);
   const [tab, setTab] = useState("Scenes");
   const [effectPanel, setEffectPanel] = useState("All");
@@ -328,7 +330,7 @@ export default function App() {
             location.pathname + (query ? "?" + query : "") + location.hash,
           );
           setSnapshotNotice(
-            "Your exported café is loaded. Any different local project has a recovery copy.",
+            "The latest GitHub project is loaded. Any different local project has a recovery copy.",
           );
         } else {
           workspace = await load();
@@ -450,11 +452,13 @@ export default function App() {
     setLoaded(false);
     try {
       await saveQueue.current.catch(() => {});
-      const snapshot = savedProject();
+      const response = await fetch("/api/project", { cache: "no-store" });
+      if (!response.ok) throw Error("Could not retrieve the latest GitHub save. Your local project is unchanged.");
+      const snapshot = validateProject(await response.json());
       await openGithubSnapshot(snapshot, { project, runtime });
       edit((p) => replaceProjectContents(p, snapshot));
-      setSceneId("cafe");
-      setNodeId("arrival");
+      setSceneId(snapshot.scenes[0].id);
+      setNodeId(snapshot.scenes[0].nodes[0].id);
       setRuntime(null);
       setMaskMode(false);
       setRegionEditor(null);
@@ -462,7 +466,7 @@ export default function App() {
       setHasRecovery(!!(await loadSnapshotRecovery()));
       setCanSave(true);
       setSnapshotNotice(
-        "Your exported café is loaded. Any different local project has a recovery copy.",
+        "The latest GitHub project is loaded. Any different local project has a recovery copy.",
       );
     } catch (e) {
       setError("Snapshot was not loaded: " + String(e));
@@ -1106,8 +1110,7 @@ export default function App() {
                     </div>
                   )}
                   {project.assets.filter(a => !artFolder || assetFolder(a) === artFolder).map((a) => (
-                    <button
-                      key={a.id}
+                    <div className="asset-row" key={a.id}><button
                       className={
                         "asset-card " + (assetId === a.id ? "selected" : "")
                       }
@@ -1126,11 +1129,11 @@ export default function App() {
                             ? "Approved"
                             : "Candidate"}
                       </small>
-                    </button>
+                    </button><button className="asset-expand-icon" aria-label={"Expand " + a.name} data-help="View this image at a larger size without scrolling or changing its scene." onClick={() => setPreviewAssetId(a.id)}>⛶</button></div>
                   ))}
                   {asset && (
                     <div className="asset-meta">
-                      <button data-help="Open this artwork in a large preview without changing its scene or selection. Close it or press Escape to return." onClick={() => setPreviewAssetId(asset.id)}>Expand image</button>
+
                       <label>
                         Name
                         <input
@@ -1332,6 +1335,7 @@ export default function App() {
                 >
                   <Download size={15} /> Export playable HTML
                 </button>
+                <AdvancedExport project={project} />
                 <button onClick={() => importInput.current?.click()}>
                   <FolderOpen size={15} /> Open project
                 </button>
@@ -1373,6 +1377,7 @@ export default function App() {
                   <span>{snapshotNotice}</span>
                   <button
                     className="primary"
+                    data-help="Download the latest complete project saved on GitHub, including its artwork, dialogue and effects. This replaces local work after preserving a recovery copy. This button does not save or upload."
                     onClick={() => void loadPublishedCafe()}
                     disabled={!loaded}
                   >
@@ -3007,6 +3012,7 @@ export default function App() {
             <button
               title="Save project file"
               aria-label="Save project file"
+              data-help="Open save choices: browser autosave is local, complete project file saves to disk, and Publish project to GitHub uploads for other computers when connected."
               onClick={() => setModal("save")}
             >
               <Save size={16} />
@@ -3202,9 +3208,9 @@ export default function App() {
                     back up your work or move between devices.
                   </p>
                   <p className="muted">
-                    Load GitHub snapshot restores the project included with this
+                    Load GitHub snapshot downloads the latest project from GitHub for this
                     release. Later edits save on this device; they do not update
-                    GitHub automatically. Undo can restore your local project
+                    GitHub automatically. Publish project to GitHub uploads your edits. Undo can restore your local project
                     after loading the snapshot.
                   </p>
                   <PanelLayoutSettings layouts={workspace.docks} onMove={moveWindow} onReset={()=>setWorkspace(w=>({...w,docks:{},previewCustom:false,previewLocked:true}))}/>
@@ -3287,9 +3293,14 @@ export default function App() {
           </div>
         )}
       </div>
+      <GithubLoadPrompt enabled={sourcePromptOpen && loaded && !playing} onClose={()=>setSourcePromptOpen(false)} onLoad={() => void loadPublishedCafe()} />
       {previewAssetId && <ImagePreview asset={project.assets.find(a => a.id === previewAssetId)} onClose={() => setPreviewAssetId(null)} />}
     </PlaySession>
   );
 }
 
 function projectHasNextChapter(project:Project,r:Runtime){const c=chapterForScene(project,r.scene);return !!c?.next&&!!c.exits.some(e=>e.scene===r.scene&&e.node===r.node);}
+
+function GithubLoadPrompt({onLoad,enabled,onClose}:{onLoad:()=>void;enabled:boolean;onClose:()=>void}) {
+ return enabled ? <div className="modal-backdrop"><section className="modal" role="dialog" aria-label="Choose project source"><h2>Continue your story</h2><p>Load the latest complete GitHub save to continue across computers, or keep this browser’s local work. Loading preserves a local recovery copy.</p><button data-help="Retrieve the latest project committed to GitHub. This does not upload your current work." onClick={()=>{onClose();onLoad();}}>Load latest GitHub save</button><button data-help="Continue with the project saved in this browser. No upload or download happens." onClick={onClose}>Keep local project</button></section></div> : null;
+}

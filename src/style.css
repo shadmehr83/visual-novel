@@ -2076,3 +2076,4 @@ html:has(.app),body:has(.app),#root:has(.app){height:100%;overflow:hidden}.app{h
 .phone-app-heading { display:flex; align-items:center; gap:8px; padding:8px; flex-shrink:0; }
 .phone-app-heading button { background:transparent; border:0; color:inherit; font-size:22px; padding:2px 8px; }
 .phone-app-heading small { display:block; font-size:10px; opacity:.7; }
+.asset-row { position:relative; }.asset-row .asset-card { width:100%; padding-right:28px; }.asset-expand-icon { position:absolute; right:5px; top:5px; background:#252a2de8; border:1px solid #ad9685; border-radius:5px; color:#fff; padding:5px; }.advanced-export { padding:8px; font-size:12px; }.advanced-export label { display:block; margin:8px 0; }.advanced-export select { max-width:100%; }

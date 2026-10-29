@@ -1,10 +1,13 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { validateProject, type Project } from "./model";
 import { exportProject } from "./storage";
 import { portableFeedProject } from "./feedLibrary";
 let fileHandle: any = null;
 let fileProjectId = "";
 export function ProjectSave({ project }: { project: Project }) {
+  const [destination,setDestination]=useState(()=>localStorage.getItem('stillframe-save-destination') || 'file');
+  const [connection,setConnection]=useState('Checking GitHub publishing connection…');
+  useEffect(()=>{fetch('/api/project?configuration=1').then(r=>r.ok?r.json():Promise.reject()).then(d=>setConnection(d.configured?'GitHub publishing connection is configured. Enter your studio publish password below.':'GitHub publishing is not connected yet. Configure GITHUB_PROJECT_TOKEN and STUDIO_ACCESS_TOKEN as Cloudflare server secrets; local file saving works now.')).catch(()=>setConnection('Could not check GitHub publishing. Local file saving is available.'));},[]);
   const [status, setStatus] = useState("");
   const [password, setPassword] = useState("");
   const [busy, setBusy] = useState(false);
@@ -54,7 +57,7 @@ export function ProjectSave({ project }: { project: Project }) {
           "Content-Type": "application/json",
           Authorization: "Bearer " + password,
         },
-        body: JSON.stringify(validateProject(project)),
+        body: JSON.stringify(await portableFeedProject(validateProject(project))),
       });
       const data = await result.json();
       if (!result.ok) throw Error(data.error || "Publish failed");
@@ -76,10 +79,12 @@ export function ProjectSave({ project }: { project: Project }) {
     <section className="property-section" data-effect-panel="Save">
       <h3>Save & move your project</h3>
       <p className="small muted">
-        Browser autosave stays on this device. A project file includes
+        Browser autosave stays on this device. Save complete project file downloads a local backup; it does NOT upload to GitHub. Load GitHub snapshot downloads saved work; it does NOT save your edits. Use Publish project to GitHub below to upload your complete current project. A project file includes
         backgrounds, audio, regions, lighting and dialogue. An image or player
         export is not an editable project backup.
       </p>
+      <label>Save destination<select aria-label="Save destination" value={destination} data-help="Choose whether Save now writes a file to this computer or uploads the entire project to GitHub. GitHub requires the server connection and studio publish password." onChange={e=>{setDestination(e.target.value);localStorage.setItem('stillframe-save-destination',e.target.value);}}><option value="file">Local project file</option><option value="github">GitHub · across computers</option></select></label>
+      <button disabled={busy || (destination==='github' && !password)} onClick={()=>void (destination==='github'?publish():file())} data-help="Save to the destination selected above. A successful GitHub save reports a commit; a local file save does not upload.">Save now to {destination==='github'?'GitHub':'local file'}</button>
       <button className="wide primary" onClick={file}>
         Save complete project file
       </button>
@@ -103,8 +108,8 @@ export function ProjectSave({ project }: { project: Project }) {
         </a>
         . Engine files stay separate. A deployment publishes that snapshot.
       </p>
-      <details>
-        <summary>Publish directly to GitHub</summary>
+      <details open>
+        <summary>Save complete project to GitHub · cross-device</summary><p>{connection}</p>
         <p className="small muted">
           Requires a server-side GITHUB_PROJECT_TOKEN with Contents write access
           to this repository, plus STUDIO_ACCESS_TOKEN. No GitHub token goes

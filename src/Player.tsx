@@ -1,3 +1,4 @@
+import { startScope, limitScope, type ExportScope } from "./exportScope";
 import { cloneData as structuredClone } from "./cloneData";
 import { ChapterBadge } from "./ChapterWorkspace";
 import { effectiveDevice, saveDeviceAppearance } from "./deviceShared";
@@ -14,7 +15,7 @@ import { SelfReply } from "./SelfReply";
 import { FullscreenButton } from "./FullscreenButton";
 import { useState } from "react";
 import { createRoot } from "react-dom/client";
-import { start, advance, respond, putAwayDevice, validateProject } from "./model";
+import { start, advance, respond, putAwayDevice, validateProject, type Runtime } from "./model";
 import { Stage } from "./Stage";
 import { Qte, SceneAudio } from "./EngineTools";
 function Player() {
@@ -24,11 +25,13 @@ function Player() {
     ),
   );
   const [reply, setReply] = useState("");
-  const [runtime, setRuntime] = useState(() => start(project));
+  const scope: ExportScope | undefined = JSON.parse(document.getElementById("story-range")?.textContent || "null") || undefined;
+  const [runtime, rawSetRuntime] = useState(() => startScope(project,scope));
+  const setRuntime = (next: Runtime | ((r:Runtime)=>Runtime)) => rawSetRuntime(before=>limitScope(before,typeof next === 'function' ? next(before):next,scope));
   const scene = project.scenes.find((s) => s.id === runtime.scene)!;
   const node = scene.nodes.find((n) => n.id === runtime.node)!;
   return (
-    <PlaySession playing project={project} runtime={runtime} onRestart={() => setRuntime(start(project))}>
+    <PlaySession playing project={project} runtime={runtime} onRestart={() => setRuntime(startScope(project,scope))}>
       <main
         className="standalone-experience"
         style={
@@ -116,7 +119,7 @@ function Player() {
                     return next;
                   })
                 }
-                onRestart={() => setRuntime(start(project))}
+                onRestart={() => setRuntime(startScope(project,scope))}
                 project={project}
                 scene={scene}
                 node={node}
@@ -150,7 +153,7 @@ function Player() {
                   )}
                 </p>
                 {runtime.ended ? (
-                  <button onClick={() => setRuntime(start(project))}>
+                  <button onClick={() => setRuntime(startScope(project,scope))}>
                     Restart story
                   </button>
                 ) : node.choices.length ? (

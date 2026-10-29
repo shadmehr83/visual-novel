@@ -1,6 +1,7 @@
+import type { ExportScope } from "./exportScope";
 import { validateProject, type Project } from "./model";
 import { portableFeedProject } from "./feedLibrary";
-export async function exportPlayer(project: Project) {
+export async function exportPlayer(project: Project, scope?: ExportScope) {
   validateProject(project);
   project = await portableFeedProject(project);
   // Coding requests belong to editable project backups, not the public game.
@@ -29,7 +30,7 @@ export async function exportPlayer(project: Project) {
       }
     })
     .join("\n");
-  const html = `<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Visual novel player</title><style>${style.replace(/<\/style/gi, "<\\/style")}</style></head><body><div id="root"></div><script id="story-data" type="application/json">${JSON.stringify(project).replace(/</g, "\\u003c")}</script><script>${code.replace(/<\/script/gi, "<\\/script")}</script></body></html>`;
+  const html = `<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Visual novel player</title><style>${style.replace(/<\/style/gi, "<\\/style")}</style></head><body><div id="root"></div><script id="story-range" type="application/json">${JSON.stringify(scope || null).replace(/</g, "\\u003c")}</script><script id="story-data" type="application/json">${JSON.stringify(project).replace(/</g, "\\u003c")}</script><script>${code.replace(/<\/script/gi, "<\\/script")}</script></body></html>`;
   const url = URL.createObjectURL(new Blob([html], { type: "text/html" }));
   const link = document.createElement("a");
   link.href = url;

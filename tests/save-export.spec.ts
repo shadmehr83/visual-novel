@@ -1,0 +1,25 @@
+import {readFile} from "node:fs/promises";
+import {test,expect} from '@playwright/test';
+import {demo} from '../src/demo';
+test('latest GitHub prompt loads current remote project and each asset has an expand icon',async({page})=>{
+ const p=demo();p.title='Latest GitHub test';p.scenes=p.scenes.slice(0,1);p.chapters=undefined;p.scenes[0].nodes=[{id:'a',speaker:'Narrator',text:'Range A',next:'b',choices:[]},{id:'b',speaker:'Narrator',text:'Range B',next:'c',choices:[]},{id:'c',speaker:'Narrator',text:'Range C',choices:[]}];
+ p.assets.push({id:'test-art',name:'Tiny artwork',width:1,height:1,mime:'image/png',data:'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+jRZkAAAAASUVORK5CYII=',tags:'',notes:'',approved:false,reference:false});
+ await page.route('**/api/project',r=>r.fulfill({json:p}));
+ await page.goto('/');await page.getByRole('button',{name:'Load latest GitHub save',exact:true}).click();
+ await expect(page.getByLabel('Project title')).toHaveValue(p.title);
+ await expect(page.getByRole('dialog',{name:'Choose project source'})).toHaveCount(0);
+ await page.getByRole('button',{name:'Assets',exact:true}).click();
+ await page.getByRole('button',{name:'Expand Tiny artwork',exact:true}).click();
+ await expect(page.getByRole('dialog',{name:'Artwork preview'})).toBeVisible();await page.keyboard.press('Escape');
+ await page.locator('.advanced-export summary').click();
+ await page.getByLabel('Export scope',{exact:true}).selectOption('dialogues');
+ await expect(page.getByLabel('Start dialogue',{exact:true})).toBeVisible();
+ await page.getByLabel('Start dialogue',{exact:true}).selectOption({index:1});
+ const code=await readFile('dist/player.js','utf8');
+ await page.route('**/player.js',r=>r.fulfill({contentType:'application/javascript',body:code}));
+ const download=page.waitForEvent('download');await page.getByRole('button',{name:'Export selected playable HTML',exact:true}).click();const file=await download;expect(file.suggestedFilename()).toBe('visual-novel-player.html');
+ const player=await page.context().newPage();await player.setContent(await readFile((await file.path())!,'utf8'));
+ await expect(player.locator('.dialogue-overlay')).toContainText('Range B');
+ await player.getByRole('button',{name:'Continue',exact:true}).click();await expect(player.locator('.dialogue-overlay')).toContainText('Range C');
+ await player.getByRole('button',{name:'Continue',exact:true}).click();await expect(player.getByRole('button',{name:'Restart story',exact:true})).toBeVisible();
+});

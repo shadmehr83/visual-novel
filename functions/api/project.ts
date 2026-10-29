@@ -3,6 +3,11 @@ export async function publishProject(
   request: Request,
   env: { GITHUB_PROJECT_TOKEN?: string; STUDIO_ACCESS_TOKEN?: string },
 ) {
+  if (request.method === "GET") {
+    if (new URL(request.url).searchParams.has("configuration")) return Response.json({ configured: !!(env.GITHUB_PROJECT_TOKEN && env.STUDIO_ACCESS_TOKEN) });
+    const upstream = await fetch("https://raw.githubusercontent.com/shadmehr83/visual-novel/main/projects/published.stillframe.json", { cache: "no-store" });
+    return new Response(upstream.body, { status: upstream.status, headers: { "Content-Type": "application/json", "Cache-Control": "no-store" } });
+  }
   const error = (message: string, status: number) =>
     Response.json({ error: message }, { status });
   if (!env.GITHUB_PROJECT_TOKEN || !env.STUDIO_ACCESS_TOKEN)
@@ -18,9 +23,9 @@ export async function publishProject(
     return error("Incorrect studio password", 401);
   try {
     const text = await request.text();
-    if (text.length > 20 * 1024 * 1024)
+    if (text.length > 50 * 1024 * 1024)
       return error(
-        "Direct publish is limited to 20 MB. Save the file instead.",
+        "Direct publish is limited to 50 MB. Save the file instead.",
         413,
       );
     const project = validateProject(JSON.parse(text));
