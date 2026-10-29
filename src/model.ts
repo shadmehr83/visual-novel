@@ -305,6 +305,7 @@ const scene = z.object({
     background: z.string().nullable(),
     transition: transitionSchema,
     effects: effectsSchema.optional(),
+    audio: z.array(z.object({ id: z.string(), volume: z.number().min(0).max(1), loop: z.boolean() })).optional(),
   })).max(40).optional(),
   effectBackup: z.record(z.number()).optional(),
   keyframesEnabled: z.boolean().optional(),
@@ -563,6 +564,9 @@ export function validateProject(input: unknown): Project {
     for (const sprite of s.sprites || [])
       if (!p.assets.some((a) => a.id === sprite.asset))
         throw Error("Missing sprite asset");
+    for (const view of s.subscenes || [])
+      for (const track of view.audio || [])
+        if (!p.audioAssets?.some(a => a.id === track.id)) throw Error("Missing sub-scene audio asset");
     for (const track of s.audio || [])
       if (!p.audioAssets?.some((a) => a.id === track.id))
         throw Error("Missing audio asset");

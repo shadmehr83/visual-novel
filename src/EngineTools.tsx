@@ -1,3 +1,4 @@
+import { sceneView } from "./SceneViews";
 import { usePaused, useAuthorEditing } from "./PlaySession";
 import { RangeInput } from "./RangeInput";
 import { useFootsteps } from "./Footsteps";
@@ -123,6 +124,7 @@ export function SceneAudio({
   choiceSource?: { scene: string; node: string };
   onAdvance?: () => void;
 }) {
+  scene = sceneView(scene, nodeId);
   const sessionPaused = usePaused();
   const authorEditing = useAuthorEditing();
   const { enabled, volume, play, onBlocked } = useSound();

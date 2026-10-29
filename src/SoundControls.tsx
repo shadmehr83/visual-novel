@@ -1,10 +1,10 @@
 import { useState } from "react";
 import { RangeInput } from "./RangeInput";
 import type { Project, Scene } from "./model";
-export function SoundControls({ project, scene, nodeId, edit }: { project: Project; scene: Scene; nodeId: string; edit: (fn: (p: Project) => void) => void }) {
+export function SoundControls({ project, scene, nodeId, edit, update }: { project: Project; scene: Scene; nodeId: string; edit: (fn: (p: Project) => void) => void; update?: (fn: (s: Scene) => void) => void }) {
   const [error, setError] = useState("");
   const node = scene.nodes.find(n => n.id === nodeId) || scene.nodes[0];
-  const change = (fn: (s: Scene) => void) => edit(p => fn(p.scenes.find(s => s.id === scene.id)!));
+  const change = (fn: (s: Scene) => void) => update ? update(fn) : edit(p => fn(p.scenes.find(s => s.id === scene.id)!));
   const assets = <><option value="">None</option>{project.audioAssets?.map(a => <option key={a.id} value={a.id}>{a.name}</option>)}</>;
   const cue = (label: string, value: { asset: string; volume: number } | undefined, set: (s: Scene, v: typeof value) => void) => <div className="sound-cue" key={label}>
     <label>{label}<select aria-label={label} value={value?.asset || ""} onChange={e => change(s => set(s, e.target.value ? { asset: e.target.value, volume: value?.volume ?? 0.5 } : undefined))}>{assets}</select></label>

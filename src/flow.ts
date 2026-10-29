@@ -94,7 +94,7 @@ export function flowGraph(
           });
           return {
             id: "scene:" + s.id,
-            title: `Scene ${i + 1} · ${s.title}`,
+            title: `Scene ${i + 1} · ${s.title}${s.subscenes?.length ? ` · ▣ ${s.subscenes.length} sub-scenes` : ""}`,
             text: `${s.nodes.length} dialogues · ${ports.length - 1} exits`,
             scene: s.id,
             kind: "scene",

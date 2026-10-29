@@ -48,3 +48,9 @@ On normal reload, compatible First Match projects receive these additions once. 
 The second bedroom dialogue, “Then my phone vibrates, and the day remembers me first,” has an original 0.95-second double motor buzz. **Sound → This dialogue sound** selects it; the adjacent volume control adjusts it. The sound travels inside JSON exports and the single-file editor. Compatible older saved projects receive only the missing cue, with a recovery copy; edited text and custom sound assignments are retained.
 
 In **Lighting**, each local light using **Soft radial light** now has **Move light with mouse** directly above its coordinates. Click the button, then click the scene once to move that light’s centre. X/Y update immediately; its colour, radius, intensity, cycle and dedicated mask remain unchanged. **Cancel light move** cancels before placement, and **Undo** reverses a completed move. Use X/Y afterwards for exact adjustment. **Light Library → Place lights on scene** continues to create new lights from the selected favourite instead.
+
+## Editing sub-scene effects
+
+Expand the sub-scene list beneath the story scene cards, or select a scene in Scenes advanced and expand its sub-scene list. Each view lists its lights, rain and sounds and offers switches. Click its trigger dialogue to open it. Dialogue lists mark assigned views with “Sub-scene”. The preview identifies the current view.
+
+With that dialogue selected, use the normal Lighting, Rain and Sound controls. These edit that view’s effects and ambience independently of the main background. Upload sounds through Sound, then choose Add background ambience or This dialogue sound. Main ambience continues beneath sub-scene ambience; mute the main track if it should not continue. Sub-scene sound switches mute/unmute all its tracks (unmuting starts at 30%; adjust individual volumes in Sound).

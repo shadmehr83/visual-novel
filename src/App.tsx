@@ -1,3 +1,5 @@
+import { SubsceneList } from "./SubsceneList";
+import { sceneView } from "./SceneViews";
 import { syncActiveDialogue } from "./authorPlay";
 import { pruneChapterExits } from "./chapters";
 import { ChapterWorkspace, ChapterBadge } from "./ChapterWorkspace";
@@ -515,12 +517,15 @@ export default function App() {
     window.addEventListener("beforeunload", warn);
     return () => window.removeEventListener("beforeunload", warn);
   }, [status]);
-  const selected =
+  const baseSelected =
     project.scenes.find((s) => s.id === (playing && authorPlay ? runtime?.scene : sceneId)) || project.scenes[0];
+  const activeViewId = baseSelected.nodes.find(n => n.id === (playing ? runtime?.node : nodeId))?.view;
+  const activeView = baseSelected.subscenes?.find(v => v.id === activeViewId);
+  const selected = activeView ? { ...baseSelected, effects: sceneView(baseSelected, playing ? runtime?.node : nodeId).effects, audio: activeView.audio || [] } : baseSelected;
   const scene =
     playing && runtime
       ? project.scenes.find((s) => s.id === runtime.scene) || selected
-      : selected;
+      : baseSelected;
   const node =
     scene.nodes.find((n) => n.id === (playing ? runtime?.node : nodeId)) ||
     scene.nodes[0];
@@ -535,7 +540,19 @@ export default function App() {
     });
   }
   function updateScene(fn: (s: Scene) => void) {
-    edit((p) => fn(p.scenes.find((s) => s.id === selected.id)!));
+    edit((p) => {
+      const s = p.scenes.find(s => s.id === selected.id)!;
+      const view = s.subscenes?.find(v => v.id === activeViewId);
+      if (!view) { fn(s); return; }
+      const mainEffects = s.effects, mainAudio = s.audio;
+      s.effects = structuredClone(selected.effects);
+      s.audio = structuredClone(view.audio || []);
+      fn(s);
+      view.effects = s.effects;
+      view.audio = s.audio;
+      s.effects = mainEffects;
+      s.audio = mainAudio;
+    });
   }
   function effect<K extends keyof Effects>(key: K, value: Effects[K]) {
     updateScene((s) => {
@@ -1042,12 +1059,13 @@ export default function App() {
                         </div>
                         <div className="scene-title">
                           {s.title}
-                          <span>{s.nodes.length} dialogue nodes</span>
+                          <span>{s.nodes.length} dialogue nodes · {s.subscenes?.length || 0} sub-scenes</span>
                         </div>
                         {scene.id === s.id && <i className="scene-dot" />}
                       </button>
                     ))}
                   </div>
+                  <SubsceneList scene={baseSelected} update={fn => edit(p => fn(p.scenes.find(s=>s.id===baseSelected.id)!))} onOpen={(id) => { setPlaying(false); setNodeId(id); setEffectPanel("All"); }} />
                   <div className="story-note">
                     <span className="section-label">{chapterForScene(project,scene.id)?.title||"OPENING CHAPTER"}</span>
                     <p>
@@ -1435,6 +1453,7 @@ export default function App() {
                   }}>Edit current dialogue</button>
                   <small>{authorTyping ? "Story timers held while typing" : "Edits save to your project · Undo available"}</small>
                 </div>}
+                {activeView && <p role="status">Editing sub-scene: <strong>{activeView.title}</strong> · Lighting, rain and ambience controls apply to this view.</p>}
                 <div className="stage-frame">
                   <SceneTransition
                     scene={scene}
@@ -1827,7 +1846,7 @@ export default function App() {
                           <span>{String(i + 1).padStart(2, "0")}</span>
                           <div>
                             {n.speaker}
-                            <small>{n.text.slice(0, 42)}…</small>
+                            <small>{n.view ? "▣ Sub-scene · " : ""}{n.text.slice(0, 42)}…</small>
                           </div>
                           {n.choices.length > 0 && (
                             <span className="node-count">
@@ -2381,7 +2400,7 @@ export default function App() {
                     restart={() => setCameraPreview((n) => n + 1)}
                   />
                   <ProjectSave project={project} />
-                  <SoundControls project={project} scene={selected} nodeId={node.id} edit={edit} />
+                  <SoundControls project={project} scene={selected} nodeId={node.id} edit={edit} update={updateScene} />
                   <SceneViewControls project={project} scene={selected} nodeId={node.id} edit={edit} />
                   <Zones
                     scene={selected}

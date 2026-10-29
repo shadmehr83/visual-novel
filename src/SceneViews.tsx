@@ -4,7 +4,7 @@ import { useState } from "react";
 import { AssetPicker } from "./AssetPicker";
 export function sceneView(scene: Scene, nodeId?: string): Scene {
   const view = scene.subscenes?.find(v => v.id === scene.nodes.find(n => n.id === nodeId)?.view);
-  return view ? { ...scene, background: view.background, x: 0, y: 0, scale: 1, fit: "cover", camera: undefined, effects: view.effects || { ...scene.effects, rain: false, glass: false, rainZones: [], lights: [], motionZones: [], light: 0, lightLoop: undefined }, transition: view.transition } : scene;
+  return view ? { ...scene, background: view.background, x: 0, y: 0, scale: 1, fit: "cover", camera: undefined, audio: [...(scene.audio || []), ...(view.audio || [])], effects: view.effects || { ...scene.effects, rain: false, glass: false, rainZones: [], lights: [], motionZones: [], light: 0, lightLoop: undefined }, transition: view.transition } : scene;
 }
 export function SceneViewControls({ project, scene, nodeId, edit }: { project: Project; scene: Scene; nodeId: string; edit: (fn: (p: Project) => void) => void }) {
   const [error, setError] = useState("");
@@ -12,7 +12,7 @@ export function SceneViewControls({ project, scene, nodeId, edit }: { project: P
   const change = (fn: (s: Scene) => void) => edit(p => fn(p.scenes.find(s => s.id === scene.id)!));
   return <section className="property-section" data-effect-panel="Sub-scenes">
     <h3>Sub-scenes · temporary views</h3>
-    <p>Show a different angle for this dialogue without adding a main scene. The next dialogue uses its own view; Original scene fades back to the main image. Effects stay with the main view so masks do not land on the wrong image.</p>
+    <p>Show a different angle for this dialogue without adding a main scene. The next dialogue uses its own view; Original scene fades back to the main image. Select a sub-scene dialogue to edit its own lighting, rain and sound using the normal controls. Main-view effects remain separate.</p>
     <label>This dialogue view<select aria-label="This dialogue view" value={node.view || ""} onChange={e => change(s => { s.nodes.find(n => n.id === node.id)!.view = e.target.value || undefined; })}><option value="">Original scene</option>{scene.subscenes?.map(v => <option key={v.id} value={v.id}>{v.title}</option>)}</select></label>
     <button onClick={() => change(s => { const id = crypto.randomUUID(); (s.subscenes ??= []).push({ id, title: "New close-up", background: s.background, transition: { style: "fade", seconds: 0.65 } }); s.nodes.find(n => n.id === node.id)!.view = id; })}>Add sub-scene for this dialogue</button>
     {scene.subscenes?.map(view => <details key={view.id} open={view.id === node.view}><summary>{view.title}</summary>
