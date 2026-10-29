@@ -1,5 +1,6 @@
 import { openDB } from "idb";
 import { validateProject, type Project, type Runtime } from "./model";
+import { portableFeedProject } from "./feedLibrary";
 const db = () =>
   openDB("stillframe-studio", 1, {
     upgrade(db) {
@@ -63,8 +64,8 @@ export async function openGithubSnapshot(
     throw error;
   }
 }
-export function exportProject(p: Project, filename?: string) {
-  const b = new Blob([JSON.stringify(validateProject(p), null, 2)], {
+export async function exportProject(p: Project, filename?: string) {
+  const b = new Blob([JSON.stringify(await portableFeedProject(validateProject(p)), null, 2)], {
     type: "application/json",
   });
   const url = URL.createObjectURL(b);

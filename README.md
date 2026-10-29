@@ -123,3 +123,11 @@ Compatible older First Match projects gain the missing **After the café** scene
 ### Stillframe 2.4
 
 The original outfit images remain visible after selection and can be reconsidered. **Sound** provides reusable ambience, dialogue/reply/item cues and uploads, with original rain, muffled rain, walking, notification and wardrobe sounds in the demo. The phone opens to the feed before its notification, with three image icons, separate app profile uploads and a keyboard toggle. **Sub-scenes** provides temporary views, including a monitor close-up. Dialogue map boxes have **+ Dialogue / + Reply** actions. Compatible saved projects receive the additions with a recovery copy. See [Sound and sub-scenes](docs/SOUND_AND_SUBSCENES.md).
+
+### Insta videos, likes and comments (2.10)
+
+The fictional Insta app now plays four original 24-second illustrated videos with
+ambient sound. Hearts toggle a saved local like; comment panels contain authored
+reactions and accept local player replies. **Advanced devices → Insta feed** has
+video uploads, order, captions, comments, autoplay and volume. Complete project and
+playable HTML exports embed clips. See [the Insta feed guide](docs/INSTA_VIDEO_FEED.md).

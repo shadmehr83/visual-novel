@@ -1,4 +1,4 @@
-export const ENGINE_VERSION = "2.9.0";
+export const ENGINE_VERSION = "2.10.0";
 export type ReleaseFeature = {
   name: string;
   description: string;
@@ -19,7 +19,12 @@ const f = (
   action?: string,
 ): ReleaseFeature => ({ name, description, steps: path.split(" → "), action });
 export const releases: Release[] = [
-  {version:"2.9.0", name:"Phone controls made clear", date:"2026-10-29", features:[
+  {version:"2.10.0", name:"Insta video feed and local reactions", date:"2026-10-29", features:[
+    f("Four original illustrated videos", "Watch four distinct 24-second clips with atmospheric rain, lamplight, gentle camera motion and original ambient sound, matching the game’s painterly style and the protagonist’s quiet, dryly funny interests. Home, Ember, notifications and dialogue schedules are preserved.", "Phone Home → Insta → Scroll videos", "devices"),
+    f("Working likes and fictional comments", "Toggle one heart per post, read varied authored reactions and leave a local reply. Player reactions stay saved in the browser without changing story choices. Videos pause while comments or the pause menu are open and when scrolled away.", "Insta → Heart or Comments → Post locally", "devices"),
+    f("Dedicated Insta authoring and portable clips", "Upload more videos, edit accounts, captions and authored comments, reorder posts and set autoplay, replay and feed volume in the new Insta feed tab. Complete project and playable HTML exports include media bytes for use on another device.", "Advanced devices → Insta feed → Upload more feed videos", "devices")
+  ]},
+  {version:"2.9.0", commit:"e3c2989", name:"Phone controls made clear", date:"2026-10-29", features:[
     f("Phone switches on every dialogue", "Show or hide the phone directly in the dialogue map, original editor or simple Phone panel. Keep story dialogue separate, or integrate it into Ember chat. Choose Home, Insta or Ember without opening Advanced devices. Overrides affect only the selected dialogue; reset returns to the existing schedule.", "Dialogue advanced → Select a box → Phone on this dialogue", "dialogues"),
     f("Shared contact portraits and app icons", "Phone appearance is shared by default: saved icons, wallpaper and contact portrait follow the device across scenes and survive project export. Disable sharing in Advanced devices for an independent scene. Existing scene artwork, outfits and effect settings remain intact.", "Advanced devices → Use shared phone appearance → Apps or Frame & placement", "devices"),
     f("Visible switches and independent settings bars", "On/off switches now have bounded tracks and explicit ON/OFF states. Effects and interactions form one labelled tool row, while scene and workspace settings form another. Selecting Phone highlights Phone without also highlighting Atmosphere.", "Editor → Effects & interactions → Phone", "effect:Phone"),

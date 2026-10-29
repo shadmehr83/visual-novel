@@ -1,6 +1,8 @@
 import { validateProject, type Project } from "./model";
+import { portableFeedProject } from "./feedLibrary";
 export async function exportPlayer(project: Project) {
   validateProject(project);
+  project = await portableFeedProject(project);
   const embedded = document.getElementById("bundled-player")?.textContent;
   let code: string;
   if (embedded) {

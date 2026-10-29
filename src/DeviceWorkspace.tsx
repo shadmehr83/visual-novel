@@ -14,6 +14,7 @@ import { InteractionControls } from "./InteractionControls";
 import { PhoneUI } from "./PhoneUI";
 import { Stage } from "./Stage";
 import { savedProject } from "./savedProject";
+import { InstaFeedControls } from "./InstaFeedControls";
 export function DeviceSummary({
   project,
   scene,
@@ -189,12 +190,13 @@ export function DeviceWorkspace({
           "Timing",
           "Appearance",
           "Apps",
+          "Insta feed",
           "Dialogue & replies",
         ].map((t) => (
           <button
             key={t}
             aria-pressed={section === t}
-            onClick={() => setSection(t)}
+            onClick={() => { setSection(t); if (t === "Insta feed") setScreen("feed"); }}
           >
             {t}
           </button>
@@ -319,6 +321,7 @@ export function DeviceWorkspace({
                 }
               />
             )}
+            {section === "Insta feed" && <InstaFeedControls project={project} edit={edit} />}
             {section === "Timing" && (
               <InteractionControls
                 section="timing"

@@ -1,0 +1,285 @@
+.insta-feed {
+  scroll-snap-type: y proximity;
+  background: #17151e;
+  color: #f4e4e9;
+  container-type: inline-size;
+}
+.insta-card {
+  position: relative;
+  height: 100%;
+  min-height: 220px;
+  scroll-snap-align: start;
+  isolation: isolate;
+  overflow: hidden;
+  background: #27202d;
+}
+.insta-card > video {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  z-index: -2;
+}
+.insta-shade {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    #0005,
+    transparent 24%,
+    transparent 38%,
+    #0c0813e6
+  );
+  z-index: -1;
+  pointer-events: none;
+}
+.insta-video-controls {
+  position: absolute;
+  left: 7px;
+  right: 7px;
+  top: 7px;
+  display: flex;
+  gap: 5px;
+  align-items: center;
+  font-size: 10px;
+}
+.insta-video-controls button:last-child {
+  margin-left: auto;
+}
+.insta-feed button {
+  border: 1px solid #c5a9bc55;
+  background: #251c2abf;
+  color: #f7e9ef;
+  border-radius: 8px;
+  padding: 6px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  min-width: 28px;
+  min-height: 28px;
+}
+.insta-feed button:focus-visible {
+  outline: 2px solid #ebc3ce;
+  outline-offset: 2px;
+}
+.insta-caption {
+  position: absolute;
+  left: 10px;
+  bottom: 12px;
+  right: 43px;
+  pointer-events: none;
+  text-shadow: 0 1px 3px #000;
+}
+.insta-caption > b {
+  font-size: 11px;
+  color: #e3bccd;
+}
+.insta-caption h3 {
+  font:
+    16px/1.15 Georgia,
+    serif;
+  margin: 5px 0;
+}
+.insta-caption p {
+  font:
+    11px/1.4 Arial,
+    sans-serif;
+  margin: 0;
+  color: #f6e9ee;
+}
+.insta-actions {
+  position: absolute;
+  right: 6px;
+  bottom: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+}
+.insta-actions button {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  background: #241b27b3;
+  border: 0;
+}
+.insta-actions button[aria-pressed="true"] {
+  color: #ed8dad;
+}
+.insta-actions small {
+  font: 9px Arial;
+}
+.insta-comments {
+  position: absolute;
+  inset: 16% 0 0;
+  z-index: 4;
+  background: #211c29fa;
+  border-top: 1px solid #ab839a;
+  border-radius: 13px 13px 0 0;
+  padding: 8px;
+  display: flex;
+  flex-direction: column;
+  color: #f4e4e9;
+}
+.insta-comments > header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+  font-size: 12px;
+}
+.insta-comments > header button {
+  font-size: 19px;
+  min-height: 26px;
+}
+.insta-fiction {
+  font-size: 9px;
+  opacity: 0.75;
+  margin: 5px 0;
+}
+.insta-comment-list {
+  overflow: auto;
+  min-height: 0;
+  flex: 1;
+  overscroll-behavior: contain;
+}
+.insta-comment {
+  border-bottom: 1px solid #b396aa33;
+  padding: 7px 0;
+}
+.insta-comment > b {
+  font-size: 10px;
+  color: #d6abc3;
+}
+.insta-comment p {
+  font:
+    11px/1.4 Arial,
+    sans-serif;
+  margin: 4px 0;
+  overflow-wrap: anywhere;
+}
+.insta-comments form {
+  margin: 5px 0 0;
+  flex-shrink: 0;
+}
+.insta-comments form label {
+  font-size: 10px;
+}
+.insta-comments textarea {
+  display: block;
+  box-sizing: border-box;
+  width: 100%;
+  height: 40px;
+  resize: vertical;
+  background: #352a3d;
+  color: #fff;
+  border: 1px solid #a98ba8;
+  border-radius: 5px;
+  font-size: 12px;
+}
+.insta-comments form button {
+  font-size: 10px;
+  margin-top: 4px;
+}
+.insta-feed-end {
+  padding: 18px 9px;
+  font-size: 12px;
+  text-align: center;
+  scroll-snap-align: start;
+}
+.insta-empty {
+  padding: 12px;
+  font-size: 12px;
+}
+.insta-media-error {
+  padding: 50px 9px;
+  font-size: 11px;
+}
+.insta-authoring fieldset {
+  border: 0;
+  padding: 0;
+  margin: 0;
+  min-width: 0;
+}
+.insta-authoring label {
+  display: block;
+  margin: 12px 0;
+}
+.insta-authoring input:not([type="checkbox"]),
+.insta-authoring textarea {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+.insta-authoring input[type="checkbox"] {
+  width: auto;
+  margin-right: 7px;
+}
+.insta-post-settings {
+  border: 1px solid var(--line, #675066);
+  border-radius: 7px;
+  padding: 10px;
+  margin: 12px 0;
+}
+.insta-post-settings summary {
+  cursor: pointer;
+  font-weight: bold;
+}
+.insta-post-order {
+  display: flex;
+  gap: 6px;
+}
+.insta-comment-editor {
+  border-left: 2px solid #96728c;
+  padding-left: 10px;
+  margin: 12px 0;
+}
+.insta-upload {
+  border: 1px dashed var(--line, #675066);
+  padding: 12px;
+}
+.insta-authoring .danger {
+  margin-top: 15px;
+}
+@container (max-width:180px) {
+  .insta-caption {
+    left: 6px;
+    bottom: 8px;
+    right: 36px;
+  }
+  .insta-caption h3 {
+    font-size: 12px;
+  }
+  .insta-caption p {
+    font-size: 9px;
+  }
+  .insta-caption > b {
+    font-size: 9px;
+  }
+  .insta-actions {
+    right: 2px;
+    gap: 5px;
+  }
+  .insta-actions button {
+    padding: 3px;
+  }
+  .insta-actions svg {
+    width: 18px;
+  }
+  .insta-video-controls {
+    top: 4px;
+    left: 4px;
+    right: 4px;
+  }
+  .insta-feed button {
+    padding: 3px;
+    min-height: 25px;
+  }
+  .insta-comments {
+    padding: 5px;
+  }
+  .insta-comment p {
+    font-size: 10px;
+  }
+}

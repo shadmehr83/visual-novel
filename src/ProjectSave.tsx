@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { validateProject, type Project } from "./model";
 import { exportProject } from "./storage";
+import { portableFeedProject } from "./feedLibrary";
 let fileHandle: any = null;
 let fileProjectId = "";
 export function ProjectSave({ project }: { project: Project }) {
@@ -24,13 +25,13 @@ export function ProjectSave({ project }: { project: Project }) {
         });
         fileProjectId = project.id;
         const stream = await fileHandle.createWritable();
-        await stream.write(JSON.stringify(project, null, 2));
+        await stream.write(JSON.stringify(await portableFeedProject(project), null, 2));
         await stream.close();
         setStatus(
-          "Project file saved, including original images, audio, zones and dialogue.",
+          "Project file saved, including original images, audio, feed videos, zones and dialogue.",
         );
       } else {
-        exportProject(project, "published.stillframe.json");
+        await exportProject(project, "published.stillframe.json");
         setStatus(
           "Project download requested. Keep the JSON file; it contains the artwork and effects.",
         );

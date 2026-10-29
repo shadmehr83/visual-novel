@@ -1,0 +1,33 @@
+import { chromium } from 'playwright';
+import { readFile } from 'node:fs/promises';
+import assert from 'node:assert/strict';
+const browser=await chromium.launch({executablePath:process.env.CHROMIUM_PATH||undefined,headless:true});
+try {
+ const html=await readFile('dist/stillframe-studio.html','utf8');
+ const context=await browser.newContext({serviceWorkers:'block',viewport:{width:1440,height:1000}});
+ const page=await context.newPage(), errors=[],mediaRequests=[];
+ page.on('pageerror',e=>errors.push(e.message));page.on('request',r=>{if(r.url().includes('/media/insta/'))mediaRequests.push(r.url());});
+ await page.route('https://insta-offline.test/',r=>r.fulfill({contentType:'text/html',body:html}));
+ await context.setOffline(true);await page.goto('https://insta-offline.test/');
+ await page.getByRole('button',{name:'Play story',exact:true}).waitFor();
+ const p=JSON.parse(await readFile('projects/published.stillframe.json','utf8'));p.id='insta-offline-test';p.title='Insta offline test';p.scenes=p.scenes.slice(0,1);
+ const s=p.scenes[0];s.nodes=[{id:'browse',speaker:'Narrator',text:'Keep scrolling.',deviceVisible:true,deviceScreen:'feed',choices:[]}];
+ delete s.joints;delete s.subscenes;delete s.camera;delete s.phone.schedule;delete s.phone.returnControl;delete s.phone.dialogueRange;
+ s.phone.defaultScreen='feed';s.phone.typingSeconds=0;s.phone.frameWidth=26;s.phone.frameHeight=96;s.phone.x=60;s.phone.y=2;s.phone.anchor='top-left';s.phone.entrance={style:'cut',seconds:.1};
+ await page.locator('input[accept=".json"]').setInputFiles({name:'offline-feed.json',mimeType:'application/json',buffer:Buffer.from(JSON.stringify(p))});
+ await page.waitForFunction(()=>document.querySelector('[aria-label="Project title"]')?.value==='Insta offline test');
+ await page.getByRole('button',{name:'Play story',exact:true}).click();
+ const video=page.locator('.scene-in .insta-card video').first();
+ await page.waitForFunction(()=>{const v=document.querySelector('.scene-in .insta-card video');return v?.duration>23.9&&v?.duration<24.1&&v?.currentTime>.1;});
+ assert((await video.getAttribute('src')).startsWith('data:video/mp4;base64,'));
+ await page.locator('.scene-in .insta-card').first().getByRole('button',{name:'Like Took the long way home',exact:true}).click();
+ await page.screenshot({path:'/tmp/stillframe-insta-feed.png'});
+ await page.getByRole('button',{name:'Back to editor',exact:true}).first().click();
+ const download=page.waitForEvent('download');await page.getByRole('button',{name:'Export playable HTML',exact:true}).click();
+ const player=await readFile(await(await download).path(),'utf8');
+ await page.route('https://insta-player.test/',r=>r.fulfill({contentType:'text/html',body:player}));await page.goto('https://insta-player.test/');
+ await page.waitForFunction(()=>{const v=document.querySelector('.scene-in .insta-card video');return v?.duration>23.9&&v?.duration<24.1&&v?.currentTime>.1;});
+ assert.equal(await page.locator('.insta-card').count(),4);
+ assert.deepEqual(mediaRequests,[]);assert.deepEqual(errors,[]);
+ console.log('PASS: single-file editor and its exported player play all-embedded feed media offline, with working likes and no network media requests or page errors.');
+}finally{await browser.close();}

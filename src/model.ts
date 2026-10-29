@@ -1,4 +1,5 @@
 import { deviceScreen, deviceDialogue, allowsReply } from "./interactions";
+import { instaFeedSchema } from "./feedSchema";
 import { canPutAway, returnDestination } from "./deviceReturn";
 import { z } from "zod";
 export const soundCueSchema = z.object({
@@ -380,6 +381,7 @@ const asset = z.object({
   reference: z.boolean(),
 });
 export const projectSchema = z.object({
+  instaFeed: instaFeedSchema.optional(),
   deviceDefaults: z.object({ appearance: deviceAppearanceSchema.optional(), avatar: z.string().nullable().optional() }).optional(),
   flowLayout: z
     .object({

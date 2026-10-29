@@ -1,4 +1,5 @@
 import type { Project, Scene } from "./model";
+import { InstaFeed } from "./InstaFeed";
 export function PhoneApps({
   screen,
   onOpen,
@@ -27,10 +28,10 @@ export function PhoneApps({
           <span>{icon("chat", "♡")}</span>Ember<small>Messages</small>
         </button>
         <button
-          data-help="Open the local Insta feed. Scroll for mock posts; browsing does not choose a dialogue reply."
+          data-help="Open Insta’s illustrated video feed. Scroll to watch, like posts and read fictional comments. Browsing leaves story choices untouched."
           onClick={() => onOpen("feed")}
         >
-          <span>{icon("feed", "▶")}</span>Insta<small>Offline feed</small>
+          <span>{icon("feed", "▶")}</span>Insta<small>Video feed</small>
         </button>
         <button onClick={() => onOpen("settings")}>
           <span>{icon("settings", "⚙")}</span>Settings
@@ -60,53 +61,6 @@ export function PhoneApps({
       </p>
     </div>
   ) : (
-    <div
-      className="loop-feed"
-      data-no-advance
-      aria-label="Insta scrolling feed"
-    >
-      {appearance?.profiles.feed && <header className="phone-feed-profile"><img className="device-profile-picture" src={project.assets.find(a => a.id === appearance.profiles.feed)?.data} alt="Your Insta profile" /><b>Your Insta feed</b></header>}
-      {[
-        {
-          name: "nightwalks",
-          title: "The city after rain",
-          body: "Little lights. Long walks.",
-          style: "rain",
-        },
-        {
-          name: "quietcorners",
-          title: "A small pause",
-          body: "Tea cooling on a windowsill.",
-          style: "tea",
-        },
-        {
-          name: "softstatic",
-          title: "One more before I go",
-          body: "Nothing urgent. Just another afternoon.",
-          style: "room",
-        },
-        {
-          name: "latehours",
-          title: "Somewhere warm",
-          body: "A window, a table, a little rain.",
-          style: "rain",
-        },
-      ].map((card, i) => (
-        <article className={"loop-card loop-" + card.style} key={i}>
-          <span className="loop-play" aria-hidden>
-            ▶
-          </span>
-          <div>
-            <b>@{card.name}</b>
-            <h3>{card.title}</h3>
-            <p>{card.body}</p>
-            <small>Fictional feed · scroll for more</small>
-          </div>
-          <aside aria-hidden>
-            ♡<br />◌<br />↗
-          </aside>
-        </article>
-      ))}
-    </div>
+    <InstaFeed project={project} profile={project.assets.find(a => a.id === appearance?.profiles.feed)?.data} />
   );
 }

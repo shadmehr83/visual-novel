@@ -16,6 +16,7 @@ const defs:[string,string,string,string?][]=[
  ['Dialogue editor','Open the dialogue panel, author text and next-line choices.','dialogue','bottom self reply response notes'],
  ['Outfits and item selection','Open the saved clothing picker and its inspect-then-confirm item cards.','wardrobe','dress clothes png choose item'],
  ['Items and outfits editor','Edit item cards, descriptions, images and confirmation routes for this scene.','items','overlay blur inventory'],
+ ['Insta feed videos and comments','Upload videos, reorder posts, edit captions and fictional comments, and set autoplay and feed audio volume.','devices','instagram insta social feed like heart video upload comments'],
  ['Advanced devices','Open phone and computer frames, apps, timing, return routes and appearance.','devices','phone laptop desktop ui screen home feed messages'],
  ['Rain settings','Adjust falling rain, density, speed, angle, glass streaks and affected regions.','effect:Rain','weather drops mask brush wand'],
  ['Lighting settings','Adjust brightness, tint, illumination and local light zones.','effect:Lighting','luminosity candle intensity color'],

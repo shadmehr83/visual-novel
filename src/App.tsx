@@ -800,7 +800,7 @@ export default function App() {
     }
     if (action === "export-project") {
       try {
-        exportProject(project);
+        void exportProject(project).catch((e) => setError(String(e)));
       } catch (e) {
         setError(String(e));
       }
@@ -1274,7 +1274,7 @@ export default function App() {
                 <button
                   onClick={() => {
                     try {
-                      exportProject(project);
+                      void exportProject(project).catch((e) => setError(String(e)));
                     } catch (e) {
                       setError(String(e));
                     }
@@ -3150,7 +3150,7 @@ export default function App() {
                   </p>
                   <button
                     className="wide"
-                    onClick={() => exportProject(project)}
+                    onClick={() => { void exportProject(project).catch((e) => setError(String(e))); }}
                   >
                     <Download size={15} /> Back up current project
                   </button>
