@@ -12,6 +12,8 @@ import type { FeedPost, InstaFeed as FeedConfig } from "./feedSchema";
 import { feedSource, getInstaFeed } from "./feedLibrary";
 import { usePaused } from "./PlaySession";
 import { useSound } from "./Sound";
+import { createPortal } from "react-dom";
+import { InstaComments } from "./InstaComments";
 type Reactions = Record<
   string,
   { liked: boolean; comments: { id: string; author: string; text: string }[] }
@@ -187,23 +189,36 @@ function FeedCard({
   useEffect(() => {
     const listener = () => setVisible(!document.hidden);
     document.addEventListener("visibilitychange", listener);
-    const observer = new IntersectionObserver(
-      (entries) => {
-        const entry = entries[0];
-        setActive(
-          entry.intersectionRect.height >=
-            Math.min(
-              entry.boundingClientRect.height,
-              entry.rootBounds?.height || entry.boundingClientRect.height,
-            ) *
-              0.55 && entry.isIntersecting,
-        );
-      },
-      { root: root.current, threshold: [0, 0.1, 0.25, 0.5, 0.55, 0.75, 1] },
-    );
+    // At very small phone sizes a card's visible fraction can sit below the
+    // observer's thresholds. Recheck actual geometry on scroll as well.
+    const update = () => {
+      const bounds = root.current?.getBoundingClientRect(),
+        rect = card.current?.getBoundingClientRect();
+      if (!bounds || !rect) return;
+      const visibleHeight = Math.max(
+        0,
+        Math.min(bounds.bottom, rect.bottom) - Math.max(bounds.top, rect.top),
+      );
+      setActive(
+        bounds.height > 0 &&
+          visibleHeight >= Math.min(rect.height, bounds.height) * 0.55 &&
+          visibleHeight > 0,
+      );
+    };
+    const observer = new IntersectionObserver(update, {
+      root: root.current,
+      threshold: [0, 0.001, 0.1, 0.25, 0.5, 0.55, 0.75, 1],
+    });
     if (card.current) observer.observe(card.current);
+    const container = root.current,
+      resize = new ResizeObserver(update);
+    container?.addEventListener("scroll", update, { passive: true });
+    if (container) resize.observe(container);
+    update();
     return () => {
       observer.disconnect();
+      resize.disconnect();
+      container?.removeEventListener("scroll", update);
       document.removeEventListener("visibilitychange", listener);
     };
   }, [root]);
@@ -246,6 +261,15 @@ function FeedCard({
   useEffect(() => {
     if (!config.comments) setComments(false);
   }, [config.comments]);
+  useEffect(() => {
+    if (!comments || !root.current) return;
+    const container = root.current,
+      old = container.style.overflowY;
+    container.style.overflowY = "hidden";
+    return () => {
+      container.style.overflowY = old;
+    };
+  }, [comments, root]);
   return (
     <article ref={card} className="insta-card" aria-label={post.title}>
       <video
@@ -318,55 +342,22 @@ function FeedCard({
           </button>
         )}
       </aside>
-      {comments && (
-        <section
-          className="insta-comments"
-          aria-label={"Comments on " + post.title}
-        >
-          <header>
-            <b>Comments</b>
-            <button
-              aria-label="Close comments"
-              onClick={() => setComments(false)}
-            >
-              ×
-            </button>
-          </header>
-          <p className="insta-fiction">
-            Fictional comments · your replies stay on this device.
-          </p>
-          <div className="insta-comment-list">
-            {[...post.comments, ...reaction.comments].map((c) => (
-              <div className="insta-comment" key={c.id}>
-                <b>@{c.author}</b>
-                <p>{c.text}</p>
-              </div>
-            ))}
-          </div>
-          <form
-            onSubmit={(e) => {
-              e.preventDefault();
-              if (draft.trim()) {
-                onComment(draft.trim());
-                setDraft("");
-              }
+      {comments &&
+        card.current?.closest(".device-shell") &&
+        createPortal(
+          <InstaComments
+            title={post.title}
+            rows={[...post.comments, ...reaction.comments]}
+            draft={draft}
+            onDraft={setDraft}
+            onPost={() => {
+              onComment(draft.trim());
+              setDraft("");
             }}
-          >
-            <label>
-              Your comment
-              <textarea
-                aria-label="Your Insta comment"
-                maxLength={400}
-                value={draft}
-                onChange={(e) => setDraft(e.target.value)}
-              />
-            </label>
-            <button type="submit" disabled={!draft.trim()}>
-              Post locally
-            </button>
-          </form>
-        </section>
-      )}
+            onClose={() => setComments(false)}
+          />,
+          card.current.closest(".device-shell")!,
+        )}
     </article>
   );
 }

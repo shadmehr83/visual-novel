@@ -119,7 +119,7 @@ declare global {
 export function feedSource(path?: string) {
   return path
     ? (typeof window !== "undefined" && window.__stillframeFeedMedia?.[path]) ||
-        path
+        (path.startsWith('/media/insta/') && path.endsWith('.mp4') ? path+'?v=2.12.0' : path)
     : undefined;
 }
 async function embed(path: string) {

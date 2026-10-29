@@ -283,3 +283,151 @@
     font-size: 10px;
   }
 }
+/* The comments sheet belongs to the whole phone, rather than a clipped post. */
+.device-shell > .insta-comments {
+  inset: auto 0 0;
+  box-sizing: border-box;
+  z-index: 25;
+  padding: 0 6px 5px;
+  min-height: 0;
+  max-height: 100%;
+  border-radius: 12px 12px 0 0;
+  transition: height 0.12s ease;
+  box-shadow: 0 -8px 24px #0006;
+  overflow: hidden;
+  font-family: Arial, sans-serif;
+  overscroll-behavior: contain;
+}
+.device-shell > .insta-comments.comments-dragging {
+  transition: none;
+}
+.insta-comments-handle {
+  position: relative;
+  flex: none;
+  height: 34px;
+  min-height: 34px;
+  box-sizing: border-box;
+  touch-action: none;
+  cursor: ns-resize;
+  user-select: none;
+  padding: 7px 30px 2px 5px;
+  border-bottom: 1px solid #ac86a033;
+}
+.insta-comments-handle > span {
+  position: absolute;
+  width: 28px;
+  height: 3px;
+  border-radius: 3px;
+  background: #cbb0c5;
+  left: calc(50% - 14px);
+  top: 4px;
+}
+.insta-comments-title {
+  padding-top: 5px;
+  font-size: 11px;
+  line-height: 14px;
+}
+.insta-comments-title small {
+  font-size: 9px;
+  opacity: 0.7;
+  margin-left: 5px;
+}
+.insta-comments .insta-comments-close {
+  position: absolute;
+  right: 5px;
+  top: 9px;
+  width: 22px;
+  height: 22px;
+  min-height: 22px;
+  min-width: 22px;
+  padding: 2px;
+  display: grid;
+  place-items: center;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  border-radius: 4px;
+  cursor: pointer;
+}
+.insta-comments .insta-fiction {
+  font:
+    8px/1.2 Arial,
+    sans-serif;
+  margin: 4px 2px;
+  flex: none;
+  opacity: 0.7;
+}
+.insta-comments .insta-comment-list {
+  padding: 0 3px;
+  cursor: grab;
+  user-select: none;
+  touch-action: pan-y;
+  scrollbar-width: thin;
+  overflow-x: hidden;
+}
+.insta-comment-list:active {
+  cursor: grabbing;
+}
+.insta-comments .insta-comment {
+  padding: 7px 0;
+}
+.insta-comments .insta-comment p {
+  margin: 3px 0;
+  font:
+    11px/1.4 Arial,
+    sans-serif;
+}
+.insta-comments .insta-comment > b {
+  font-size: 10px;
+}
+.insta-comments .insta-comment-composer {
+  display: flex;
+  gap: 4px;
+  align-items: flex-end;
+  padding-top: 4px;
+  margin: 0;
+  border-top: 1px solid #ac86a033;
+  flex: none;
+}
+.insta-comments .insta-comment-composer textarea {
+  margin: 0;
+  padding: 5px 6px;
+  height: 28px;
+  min-height: 28px;
+  max-height: 56px;
+  resize: none;
+  flex: 1;
+  min-width: 0;
+  box-sizing: border-box;
+  border: 1px solid #a98ba866;
+  background: #352a3d;
+  color: #fff;
+  border-radius: 7px;
+  font:
+    11px/16px Arial,
+    sans-serif;
+}
+.insta-comments .insta-comment-composer button {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  min-height: 28px;
+  min-width: 28px;
+  margin: 0;
+  padding: 4px;
+  border: 1px solid #b08aab55;
+  border-radius: 7px;
+  background: #57405c;
+  color: #f7e9ef;
+  cursor: pointer;
+}
+.insta-comments button:disabled {
+  opacity: 0.4;
+}
+.insta-comments :focus-visible {
+  outline: 1px solid #f0bbd3;
+  outline-offset: -1px;
+}
+/* Device headers must not inherit the main editor header's fixed 68px height. */
+.device-shell>.device-contact{height:auto;min-height:30px}

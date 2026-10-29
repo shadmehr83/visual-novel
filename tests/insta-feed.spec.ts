@@ -71,18 +71,18 @@ test("plays real clips, persists likes, opens fictional comments and retains pho
       exact: true,
     })
     .click();
-  await expect(first.locator(".insta-comments")).toContainText(
+  await expect(page.locator(".insta-comments")).toContainText(
     "pavement declined an interview",
   );
   await expect(video).toHaveJSProperty("paused", true);
-  await first.getByLabel("Your Insta comment").fill("The rain sounds lovely.");
-  await first
+  await page.getByLabel("Your Insta comment").fill("The rain sounds lovely.");
+  await page
     .getByRole("button", { name: "Post locally", exact: true })
     .click();
-  await expect(first.locator(".insta-comments")).toContainText(
+  await expect(page.locator(".insta-comments")).toContainText(
     "The rain sounds lovely.",
   );
-  await first.getByLabel("Close comments", { exact: true }).click();
+  await page.getByLabel("Close comments", { exact: true }).click();
   await page.getByLabel("Back to phone home", { exact: true }).click();
   await expect(page.locator(".phone-home-screen")).toBeVisible();
   await page
@@ -140,6 +140,9 @@ test("advanced Insta settings import videos and export a portable project withou
   await expect(settings.locator("summary").nth(3)).toContainText(
     "My rainy walk",
   );
+  await settings.getByRole("button", {name:"Use updated included animations",exact:true}).click();
+  await expect(settings.getByRole("status")).toContainText("Uploaded videos and your post settings were kept");
+  await expect(settings.locator("summary").nth(3)).toContainText("My rainy walk");
   // Existing apps still open from the device preview.
   await page
     .locator(".device-preview-apps")

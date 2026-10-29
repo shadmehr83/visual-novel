@@ -1,4 +1,4 @@
-export const ENGINE_VERSION = "2.11.0";
+export const ENGINE_VERSION = "2.12.0";
 export type ReleaseFeature = {
   name: string;
   description: string;
@@ -19,7 +19,12 @@ const f = (
   action?: string,
 ): ReleaseFeature => ({ name, description, steps: path.split(" → "), action });
 export const releases: Release[] = [
-  {version:"2.11.0",name:"Mouse resizing and branching chapters",date:"2026-10-29",features:[
+  {version:"2.12.0",name:"Draggable comments and animated feed scenes",date:"2026-10-29",features:[
+    f("Compact comments with finger-like mouse gestures", "Comments use a short header and a single-line reply composer. Drag the sheet header up to the phone’s top or down to shrink it; drag the comments themselves to scroll. Likes, saved replies and story choices stay intact.", "Insta → Comments → Drag header or comment list", "devices"),
+    f("Independent scene action and original sound", "The four 24-second feed clips add windblown leaves, puddle splashes, moving book pages, curling steam, an animated monitor and a passing city view. New original sound designs include a short piano composition for the reading clip.", "Phone Home → Insta → Play and unmute", "devices"),
+    f("Reusable media archive", "Original paintings, earlier clips and exact soundtracks remain saved alongside new animation assets, audio stems, effects and music. Older embedded backups can opt into the new included video sources without replacing uploads or post settings.", "Advanced devices → Insta feed → Use updated included animations or GitHub media archive", "devices")
+  ]},
+  {version:"2.11.0",commit:"98e674b",name:"Mouse resizing and branching chapters",date:"2026-10-29",features:[
     f("Resize edges and deliberate window dragging", "Resize dialogue vertically and effects horizontally by dragging their dividers. Floating panels resize at every edge. Only dragging the six-dot grip detaches a window; clicking the title or grip leaves it docked.", "Dialogue editor top edge → Drag up/down; Effects inner edge → Drag left/right", "windows"),
     f("Chapters with conditional starting scenes", "Group scenes into chapters, author ordered all/any state rules, preview the selected starting scene and choose chapter ending dialogues. The next chapter retains prior choices and resolves its opening once on entry.", "Chapters advanced → Select chapter → Conditional starting scenarios", "chapters"),
     f("Six editable chapter-two openings", "The Space Between Messages has short draft starts for warm, cautious, goodbye, deferred, declined and quiet routes. These extend the source bible’s continuity rules and stop at explicit draft endpoints. Existing artwork, phone apps and café effects are preserved.", "Story library → Story chapter → The Space Between Messages", "chapters")

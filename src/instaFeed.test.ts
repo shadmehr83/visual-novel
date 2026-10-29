@@ -48,7 +48,7 @@ it("embeds video and poster bytes in complete backups while retaining the origin
       ok: true,
       blob: async () =>
         new Blob(["original clip bytes"], {
-          type: path.endsWith(".mp4") ? "video/mp4" : "image/jpeg",
+          type: path.includes(".mp4") ? "video/mp4" : "image/jpeg",
         }),
     })),
   );
@@ -83,4 +83,8 @@ it("handles corrupt browser reactions without failing the phone", () => {
   expect(loadFeedReactions("feed")).toEqual({
     one: { liked: true, comments: [{ id: "a", author: "You", text: "nice" }] },
   });
+});
+it('bounds mouse-driven comment sheet height at a small peek and the full phone',async()=>{
+ const {commentSheetHeight}=await import('./InstaComments');
+ expect(commentSheetHeight(70,-200,400)).toBe(100);expect(commentSheetHeight(70,300,400)).toBe(38);expect(commentSheetHeight(70,-40,400)).toBe(80);
 });

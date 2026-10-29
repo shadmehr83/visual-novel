@@ -69,3 +69,8 @@ HTML editor below Cloudflare's 25 MiB asset limit, its embedded copies use the s
 24 seconds at 216×384, 15 fps. The web editor uses the larger copies. A media
 manifest records durations, sizes and SHA-256 hashes in `public/media/insta/`.
 The service worker precaches the four web clips and posters for offline reloads.
+
+Version 2.12 adds stronger independent animation, original soundtracks and a draggable
+comments sheet. See [the updated guide](INSTA_ANIMATION_AND_COMMENTS.md) and the
+[complete reusable-media archive](../references/media/README.md). The earlier renderer
+now rebuilds only into its v1 archive; the active pipeline is documented in that archive.

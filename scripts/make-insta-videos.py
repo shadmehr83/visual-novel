@@ -7,7 +7,7 @@ import concurrent.futures, hashlib, json, math, random, struct, subprocess, temp
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-DEST = ROOT / 'public/media/insta'
+DEST = ROOT / 'references/media/insta/v1/rebuilt'
 NAMES = ['rain-walk', 'tea-and-pages', 'midnight-monitor', 'last-tram']
 SECONDS, FPS, RATE = 24, 20, 22050
 
@@ -61,15 +61,16 @@ def render(item):
         filters += f";nullsrc=s=360x640:r={FPS}:d={SECONDS},format=rgba,geq=r=211:g=204:b=197:a='{steam}'[steam];[lit][steam]overlay=shortest=1[out]"
     else:
         filters += ';[lit]null[out]'
-    with tempfile.TemporaryDirectory() as tmp:
-        audio = Path(tmp) / 'ambience.wav'
-        sound(audio, theme)
-        subprocess.run(['ffmpeg', '-y', '-loglevel', 'error', '-threads', '2', '-i', str(source), '-i', str(audio),
-                        '-filter_complex_threads', '1', '-filter_complex', filters, '-map', '[out]', '-map', '1:a',
-                        '-t', str(SECONDS), '-c:v', 'libx264', '-preset', 'slow', '-crf', '32', '-pix_fmt', 'yuv420p',
-                        '-c:a', 'aac', '-b:a', '32k', '-movflags', '+faststart', str(DEST / (name + '.mp4'))], check=True)
-        subprocess.run(['ffmpeg', '-y', '-loglevel', 'error', '-i', str(source), '-vf', 'scale=360:640',
-                        '-frames:v', '1', '-q:v', '5', str(DEST / (name + '.jpg'))], check=True)
+    audio_folder=ROOT / 'references/audio/insta/v1/source'
+    audio_folder.mkdir(parents=True,exist_ok=True)
+    audio = audio_folder / (name + '.wav')
+    sound(audio, theme)
+    subprocess.run(['ffmpeg', '-y', '-loglevel', 'error', '-threads', '2', '-i', str(source), '-i', str(audio),
+                    '-filter_complex_threads', '1', '-filter_complex', filters, '-map', '[out]', '-map', '1:a',
+                    '-t', str(SECONDS), '-c:v', 'libx264', '-preset', 'slow', '-crf', '32', '-pix_fmt', 'yuv420p',
+                    '-c:a', 'aac', '-b:a', '32k', '-movflags', '+faststart', str(DEST / (name + '.mp4'))], check=True)
+    subprocess.run(['ffmpeg', '-y', '-loglevel', 'error', '-i', str(source), '-vf', 'scale=360:640',
+                    '-frames:v', '1', '-q:v', '5', str(DEST / (name + '.jpg'))], check=True)
     path = DEST / (name + '.mp4')
     compact = DEST / 'compact'
     compact.mkdir(exist_ok=True)
@@ -81,7 +82,8 @@ def render(item):
                 sourceSha256=hashlib.sha256(source.read_bytes()).hexdigest(),
                 sha256=hashlib.sha256(path.read_bytes()).hexdigest(), bytes=path.stat().st_size)
 
-DEST.mkdir(parents=True, exist_ok=True)
-with concurrent.futures.ThreadPoolExecutor(max_workers=2) as pool:
-    result = list(pool.map(render, enumerate(NAMES)))
-(DEST / 'manifest.json').write_text(json.dumps(result, indent=2) + '\n')
+if __name__ == '__main__':
+    DEST.mkdir(parents=True, exist_ok=True)
+    with concurrent.futures.ThreadPoolExecutor(max_workers=2) as pool:
+        result = list(pool.map(render, enumerate(NAMES)))
+    (DEST / 'manifest.json').write_text(json.dumps(result, indent=2) + '\n')

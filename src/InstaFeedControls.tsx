@@ -304,6 +304,36 @@ export function InstaFeedControls({
           </details>
         ))}
         <button
+          data-help="Replace only the four included posts’ video sources with the latest animated versions. Your uploaded posts, captions, comments, order and likes are kept. Original clips and soundtracks remain in the GitHub media archive."
+          onClick={() => {
+            set((f) => {
+              for (const original of defaultInstaFeed.posts) {
+                const post = f.posts.find((p) => p.id === original.id);
+                if (post) {
+                  post.video = original.video;
+                  post.poster = original.poster;
+                  post.seconds = original.seconds;
+                }
+              }
+            });
+            setStatus("The included posts now use the updated animations. Uploaded videos and your post settings were kept.");
+          }}
+        >
+          Use updated included animations
+        </button>
+        <p className="small">
+          Reusable originals, earlier clips, music and sound effects are saved
+          in the{" "}
+          <a
+            href="https://github.com/shadmehr83/visual-novel/tree/main/references/media"
+            target="_blank"
+            rel="noreferrer"
+          >
+            GitHub media archive
+          </a>
+          .
+        </p>
+        <button
           data-help="Add any of the four original clips missing from this feed. Existing posts, uploads and edited captions are preserved."
           onClick={() =>
             set((f) => {

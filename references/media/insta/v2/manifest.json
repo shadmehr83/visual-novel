@@ -1,0 +1,54 @@
+[
+  {
+    "id": "rain-walk",
+    "revision": 2,
+    "seconds": 24,
+    "width": 360,
+    "height": 640,
+    "fps": 24,
+    "bytes": 1107314,
+    "sha256": "7b0e5063e0a4e6c1f6fd38ed51858a08563aa9cab9062816d2bc06512d73e02e",
+    "sourceSha256": "bc8318464c9022f5f553ba9f9068dbcefa8df3f4a2c50a3101757bace01c21ad",
+    "audioSource": "references/audio/insta/v2/rain-walk-soundtrack.wav",
+    "audioSampleRate": "48000"
+  },
+  {
+    "id": "tea-and-pages",
+    "revision": 2,
+    "seconds": 24,
+    "width": 360,
+    "height": 640,
+    "fps": 24,
+    "bytes": 654283,
+    "sha256": "bb2c5844c31cb398aaa2572500f9428d7c5f8218423f7d6f4358ce97ab235ae0",
+    "sourceSha256": "aac76e4ff556d785dca3cbc75426f76b1e8a1d4bf0af9a6e3051bd6c0f4ba761",
+    "audioSource": "references/audio/insta/v2/tea-and-pages-soundtrack.wav",
+    "audioSampleRate": "48000"
+  },
+  {
+    "id": "midnight-monitor",
+    "revision": 2,
+    "seconds": 24,
+    "width": 360,
+    "height": 640,
+    "fps": 24,
+    "bytes": 453264,
+    "sha256": "52b2f8c071467f3bd49d8a4dbae4789e576605b3a24066f68df96d7bf4afc785",
+    "sourceSha256": "213457572b53b6e962723bc18ee9b0a504f4bcc4cfb22a557fb980f93b6ebd65",
+    "audioSource": "references/audio/insta/v2/midnight-monitor-soundtrack.wav",
+    "audioSampleRate": "48000"
+  },
+  {
+    "id": "last-tram",
+    "revision": 2,
+    "seconds": 24,
+    "width": 360,
+    "height": 640,
+    "fps": 24,
+    "bytes": 657778,
+    "sha256": "4e81dc87402dad2c9bbf722248018e05cbc2845948c34c3bd31fd0b010461096",
+    "sourceSha256": "0eb7c9e98a13b64e60929822c2f461827146d4e577cb821e286be45c12a08225",
+    "audioSource": "references/audio/insta/v2/last-tram-soundtrack.wav",
+    "audioSampleRate": "48000"
+  }
+]

@@ -3,7 +3,7 @@ const assets = (await readdir("dist/assets"))
   .filter((f) => !f.endsWith(".map"))
   .map((f) => "/assets/" + f);
 const version = "stillframe-" + Date.now();
-const media = (await readdir('dist/media/insta')).filter(f => /\.(mp4|jpg)$/.test(f)).map(f => '/media/insta/' + f);
+const media = (await readdir('dist/media/insta')).filter(f => /\.(mp4|jpg)$/.test(f)).map(f => '/media/insta/' + f + (f.endsWith('.mp4')?'?v=2.12.0':''));
 await writeFile(
   "dist/sw.js",
   `const CACHE=${JSON.stringify(version)};const FILES=${JSON.stringify(["/", "/player.js", "/stillframe-studio.html", ...assets, ...media])};

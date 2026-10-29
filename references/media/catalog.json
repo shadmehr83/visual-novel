@@ -1,0 +1,520 @@
+[
+  {
+    "path": "artwork/insta-originals/last-tram.png",
+    "kind": "image",
+    "bytes": 2309367,
+    "sha256": "0eb7c9e98a13b64e60929822c2f461827146d4e577cb821e286be45c12a08225"
+  },
+  {
+    "path": "artwork/insta-originals/midnight-monitor.png",
+    "kind": "image",
+    "bytes": 2137187,
+    "sha256": "213457572b53b6e962723bc18ee9b0a504f4bcc4cfb22a557fb980f93b6ebd65"
+  },
+  {
+    "path": "artwork/insta-originals/rain-walk.png",
+    "kind": "image",
+    "bytes": 2544616,
+    "sha256": "bc8318464c9022f5f553ba9f9068dbcefa8df3f4a2c50a3101757bace01c21ad"
+  },
+  {
+    "path": "artwork/insta-originals/tea-and-pages.png",
+    "kind": "image",
+    "bytes": 2309973,
+    "sha256": "aac76e4ff556d785dca3cbc75426f76b1e8a1d4bf0af9a6e3051bd6c0f4ba761"
+  },
+  {
+    "path": "artwork/insta-animation/loose-page.png",
+    "kind": "image",
+    "bytes": 3183708,
+    "sha256": "d11af361147829473cefadbc314bcd1a016d1dc4669ff83708177a0fa66180c0"
+  },
+  {
+    "path": "artwork/insta-animation/passing-city.png",
+    "kind": "image",
+    "bytes": 2638199,
+    "sha256": "cbff7080d3584a96060d58be7db15d478a32c4e72feb0f61fd19c1a368c215be"
+  },
+  {
+    "path": "artwork/insta-animation/tram-window-mask.svg",
+    "kind": "mask",
+    "bytes": 379,
+    "sha256": "445fa558ad79840909613b236c399922628cf93d7673a313221c337a6ea8e68b"
+  },
+  {
+    "path": "artwork/insta-animation/wind-leaf.png",
+    "kind": "image",
+    "bytes": 1376988,
+    "sha256": "041bfb68ea93c169447322d05a6411cbf8789e78252566ade1aec0ec99593b56"
+  },
+  {
+    "path": "references/audio/insta/v1/last-tram.m4a",
+    "kind": "audio",
+    "bytes": 99475,
+    "sha256": "4ee9e3d3106fbad6e664bd5f0186804c21feeb617a5902bc4a0332a53be36af1",
+    "seconds": 24.0,
+    "sampleRate": "22050",
+    "channels": 1
+  },
+  {
+    "path": "references/audio/insta/v1/midnight-monitor.m4a",
+    "kind": "audio",
+    "bytes": 99508,
+    "sha256": "237b3dcf8d2dfb2d11259273e68f847fd622841240a56ed0eba838f37d5b82d2",
+    "seconds": 24.0,
+    "sampleRate": "22050",
+    "channels": 1
+  },
+  {
+    "path": "references/audio/insta/v1/rain-walk.m4a",
+    "kind": "audio",
+    "bytes": 99480,
+    "sha256": "48128774b800dce2ed9535fab2515706d7c55e8164891a14a9e8c1371a926460",
+    "seconds": 24.0,
+    "sampleRate": "22050",
+    "channels": 1
+  },
+  {
+    "path": "references/audio/insta/v1/source/last-tram.wav",
+    "kind": "audio",
+    "bytes": 1058444,
+    "sha256": "21a7e5f8c63fe20f1e0343c9cdc441502e8b18c9bc1275915f5f78575e23572b",
+    "seconds": 24.0,
+    "sampleRate": "22050",
+    "channels": 1
+  },
+  {
+    "path": "references/audio/insta/v1/source/midnight-monitor.wav",
+    "kind": "audio",
+    "bytes": 1058444,
+    "sha256": "797ffc76a87aeea79e03d692f021757d565d2cd8885d2b57ff85fe8a3aad7ef9",
+    "seconds": 24.0,
+    "sampleRate": "22050",
+    "channels": 1
+  },
+  {
+    "path": "references/audio/insta/v1/source/rain-walk.wav",
+    "kind": "audio",
+    "bytes": 1058444,
+    "sha256": "4aab8f7925d52a7742977e4c8a2652ec44c73d164a4848331d8927d4ff9c44d5",
+    "seconds": 24.0,
+    "sampleRate": "22050",
+    "channels": 1
+  },
+  {
+    "path": "references/audio/insta/v1/source/tea-and-pages.wav",
+    "kind": "audio",
+    "bytes": 1058444,
+    "sha256": "83f9f4bd5db7eaa059ddc3ba13823aa6a89e4aee182ac3f1a30823376ee7b6ec",
+    "seconds": 24.0,
+    "sampleRate": "22050",
+    "channels": 1
+  },
+  {
+    "path": "references/audio/insta/v1/tea-and-pages.m4a",
+    "kind": "audio",
+    "bytes": 99466,
+    "sha256": "99717ab0d5ed1b6f9f2c7d1ee46d8dc9b8e60a3113d9c0c993130bc9199d9eb5",
+    "seconds": 24.0,
+    "sampleRate": "22050",
+    "channels": 1
+  },
+  {
+    "path": "references/audio/insta/v2/ceramic-cup-clink.wav",
+    "kind": "audio",
+    "bytes": 115244,
+    "sha256": "7e20d265b88280338225692f180a308b0bf94e907cf2f39a2423b9dc4c65f192",
+    "seconds": 1.2,
+    "sampleRate": "24000",
+    "channels": 2
+  },
+  {
+    "path": "references/audio/insta/v2/keyboard-key.wav",
+    "kind": "audio",
+    "bytes": 8684,
+    "sha256": "ae27858c4546fb38eae2a323405634062d7a0f140ced6a847e8142567b74deab",
+    "seconds": 0.09,
+    "sampleRate": "24000",
+    "channels": 2
+  },
+  {
+    "path": "references/audio/insta/v2/last-tram-ambience-stem.wav",
+    "kind": "audio",
+    "bytes": 2304044,
+    "sha256": "6c9039494d7747da35416a30efe78038a0ef982aa3960b1fc65635bfa1d185e0",
+    "seconds": 24.0,
+    "sampleRate": "24000",
+    "channels": 2
+  },
+  {
+    "path": "references/audio/insta/v2/last-tram-soundtrack.wav",
+    "kind": "audio",
+    "bytes": 2304044,
+    "sha256": "3ca70f2bfe2fbc44055f512c16468b7f5eccbad99f2c3ea7bcd659e76010752d",
+    "seconds": 24.0,
+    "sampleRate": "24000",
+    "channels": 2
+  },
+  {
+    "path": "references/audio/insta/v2/midnight-monitor-ambience-stem.wav",
+    "kind": "audio",
+    "bytes": 2304044,
+    "sha256": "cfad1d24c457f45c6f723f8147d2ea9ba9f55553093070d156bdb47f2b612434",
+    "seconds": 24.0,
+    "sampleRate": "24000",
+    "channels": 2
+  },
+  {
+    "path": "references/audio/insta/v2/midnight-monitor-soundtrack.wav",
+    "kind": "audio",
+    "bytes": 2304044,
+    "sha256": "ef1a472cffe91262fbd3b21b6e6c51310720adf05f679f41fb41329fb3373715",
+    "seconds": 24.0,
+    "sampleRate": "24000",
+    "channels": 2
+  },
+  {
+    "path": "references/audio/insta/v2/paper-page-turn.wav",
+    "kind": "audio",
+    "bytes": 110440,
+    "sha256": "872418c960b2ea24f1af33660dd01eb6d0c237503bd804a2386b6af983bdaea2",
+    "seconds": 1.149958,
+    "sampleRate": "24000",
+    "channels": 2
+  },
+  {
+    "path": "references/audio/insta/v2/rail-joint.wav",
+    "kind": "audio",
+    "bytes": 21164,
+    "sha256": "49717925f25836a6dd80ac4d2dc3b8101c429a63e24cb2ef5304c50d78a600e3",
+    "seconds": 0.22,
+    "sampleRate": "24000",
+    "channels": 2
+  },
+  {
+    "path": "references/audio/insta/v2/rain-walk-ambience-stem.wav",
+    "kind": "audio",
+    "bytes": 2304044,
+    "sha256": "c5623fc97ece97aaa338d9a99f4c02684edfa443b21ba96b79588a737963de91",
+    "seconds": 24.0,
+    "sampleRate": "24000",
+    "channels": 2
+  },
+  {
+    "path": "references/audio/insta/v2/rain-walk-soundtrack.wav",
+    "kind": "audio",
+    "bytes": 2304044,
+    "sha256": "00ed000cbbe8c65b880730cf69ec3eda19f435151ab25a6ea1ef36c6cf1586fe",
+    "seconds": 24.0,
+    "sampleRate": "24000",
+    "channels": 2
+  },
+  {
+    "path": "references/audio/insta/v2/tea-and-pages-ambience-stem.wav",
+    "kind": "audio",
+    "bytes": 2304044,
+    "sha256": "2b64a9ec080a7be5a998cf6180506c3b00e7ab92bab45fbc4283fce94b8b068b",
+    "seconds": 24.0,
+    "sampleRate": "24000",
+    "channels": 2
+  },
+  {
+    "path": "references/audio/insta/v2/tea-and-pages-soundtrack.wav",
+    "kind": "audio",
+    "bytes": 2304044,
+    "sha256": "b6aa52a634917dde05be484c6e350580b625d544477bdd6033faeb2a64d6f9f9",
+    "seconds": 24.0,
+    "sampleRate": "24000",
+    "channels": 2
+  },
+  {
+    "path": "references/audio/insta/v2/tea-window-original-piano.wav",
+    "kind": "audio",
+    "bytes": 2304044,
+    "sha256": "a82770cf5794c79eff2bae0e5373080378891754b31f0244ccf9290e7b75c8fb",
+    "seconds": 24.0,
+    "sampleRate": "24000",
+    "channels": 2
+  },
+  {
+    "path": "references/audio/insta/v2/tram-warning-bell.wav",
+    "kind": "audio",
+    "bytes": 201644,
+    "sha256": "83f542511844c3478119f09e8d589cc41247c211c426156102c8297c867a564e",
+    "seconds": 2.1,
+    "sampleRate": "24000",
+    "channels": 2
+  },
+  {
+    "path": "references/audio/insta/v2/wet-footstep.wav",
+    "kind": "audio",
+    "bytes": 36524,
+    "sha256": "24f9227a9628de201da2dc24ba4dd101141666b879f759281bf86694fc81c20c",
+    "seconds": 0.38,
+    "sampleRate": "24000",
+    "channels": 2
+  },
+  {
+    "path": "references/media/insta/experiments/fold-check/compact/tea-and-pages.mp4",
+    "kind": "video",
+    "bytes": 73624,
+    "sha256": "9ff5cbfd4119eb64722b8424253f997c556828dac5cb3d943f3843fc881724e0",
+    "seconds": 9.003,
+    "width": 216,
+    "height": 384,
+    "sampleRate": "96000",
+    "channels": 2
+  },
+  {
+    "path": "references/media/insta/experiments/fold-check/page-lift.jpg",
+    "kind": "image",
+    "bytes": 21608,
+    "sha256": "bd2b438749f1e4006a4e9e5d9471a590bd8781beec2d269458be2b525726c9b2"
+  },
+  {
+    "path": "references/media/insta/experiments/fold-check/tea-and-pages.mp4",
+    "kind": "video",
+    "bytes": 367087,
+    "sha256": "0a93719e794ab50c2852576d3a4edea0a224cff44f488f05038b45750ebb8861",
+    "seconds": 9.0,
+    "width": 360,
+    "height": 640,
+    "sampleRate": "96000",
+    "channels": 2
+  },
+  {
+    "path": "references/media/insta/experiments/perspective-mask-convex.jpg",
+    "kind": "image",
+    "bytes": 3715,
+    "sha256": "d3435d5797540666d9ffc89ee3a954d052badb0f2142f80b69da4ba240d1696c"
+  },
+  {
+    "path": "references/media/insta/experiments/perspective-mask.jpg",
+    "kind": "image",
+    "bytes": 7297,
+    "sha256": "ee4ace3bcecc67b6d8f3481655989093792c6afacacf7e8a63f056727dde950b"
+  },
+  {
+    "path": "references/media/insta/experiments/tea-old-perspective-preview.jpg",
+    "kind": "image",
+    "bytes": 21608,
+    "sha256": "bd2b438749f1e4006a4e9e5d9471a590bd8781beec2d269458be2b525726c9b2"
+  },
+  {
+    "path": "references/media/insta/experiments/tea-unclipped-perspective.jpg",
+    "kind": "image",
+    "bytes": 19158,
+    "sha256": "bd7f7b043fc3d48ceb4d15b4cd5ec9d54a14f550208e26798f55700d6f5b75d8"
+  },
+  {
+    "path": "references/media/insta/experiments/tea-unclipped-perspective.mp4",
+    "kind": "video",
+    "bytes": 1058111,
+    "sha256": "03dc2a856a0c671c3cad5c63941f77a8606006db70c6d4f383871ce90118ce2e",
+    "seconds": 24.0,
+    "width": 360,
+    "height": 640,
+    "sampleRate": "96000",
+    "channels": 2
+  },
+  {
+    "path": "references/media/insta/v1/compact/last-tram.mp4",
+    "kind": "video",
+    "bytes": 101177,
+    "sha256": "53071ce4e12c22bca222dda2bc6661e2fbcf732b56ef16e4fd85eece66806ee3",
+    "seconds": 24.00898,
+    "width": 216,
+    "height": 384,
+    "sampleRate": "22050",
+    "channels": 1
+  },
+  {
+    "path": "references/media/insta/v1/compact/midnight-monitor.mp4",
+    "kind": "video",
+    "bytes": 96548,
+    "sha256": "369b40d8682fad06e0931e24bcc6225ecd0f6a0743e0b5d6f0b1a0d4000e728e",
+    "seconds": 24.00898,
+    "width": 216,
+    "height": 384,
+    "sampleRate": "22050",
+    "channels": 1
+  },
+  {
+    "path": "references/media/insta/v1/compact/rain-walk.mp4",
+    "kind": "video",
+    "bytes": 113389,
+    "sha256": "12afa1916dfd86faadb4a28168b8e345327b3991309d45b7655c1cfec4923dc8",
+    "seconds": 24.00898,
+    "width": 216,
+    "height": 384,
+    "sampleRate": "22050",
+    "channels": 1
+  },
+  {
+    "path": "references/media/insta/v1/compact/tea-and-pages.mp4",
+    "kind": "video",
+    "bytes": 109236,
+    "sha256": "623ff93c45a5de21db20ea97889f7d4b78f242e3893b907a9986763b9cb91bc9",
+    "seconds": 24.00898,
+    "width": 216,
+    "height": 384,
+    "sampleRate": "22050",
+    "channels": 1
+  },
+  {
+    "path": "references/media/insta/v1/last-tram.mp4",
+    "kind": "video",
+    "bytes": 300543,
+    "sha256": "946e737595445ab128257225ba7e7daeeadda37e2e8cc4c202fa5d795db70c6d",
+    "seconds": 24.0,
+    "width": 360,
+    "height": 640,
+    "sampleRate": "22050",
+    "channels": 1
+  },
+  {
+    "path": "references/media/insta/v1/midnight-monitor.mp4",
+    "kind": "video",
+    "bytes": 269574,
+    "sha256": "ba2ab1a9ef805b27fcab9fa87e428dc93c68dc84ead01dacb82b3e3a50f37352",
+    "seconds": 24.0,
+    "width": 360,
+    "height": 640,
+    "sampleRate": "22050",
+    "channels": 1
+  },
+  {
+    "path": "references/media/insta/v1/rain-walk.mp4",
+    "kind": "video",
+    "bytes": 389295,
+    "sha256": "c8bfa0c4eb69425d0a88853145abd421b132808a777ffcf5ca7e9811feeac1b7",
+    "seconds": 24.0,
+    "width": 360,
+    "height": 640,
+    "sampleRate": "22050",
+    "channels": 1
+  },
+  {
+    "path": "references/media/insta/v1/tea-and-pages.mp4",
+    "kind": "video",
+    "bytes": 330087,
+    "sha256": "8c447584c7940cfa7a6e4560eed8772e4bf63ded30d88e61092587c833b7a4c6",
+    "seconds": 24.0,
+    "width": 360,
+    "height": 640,
+    "sampleRate": "22050",
+    "channels": 1
+  },
+  {
+    "path": "references/media/insta/v2/compact/last-tram.mp4",
+    "kind": "video",
+    "bytes": 113123,
+    "sha256": "ede49d9d17cf49ea249bf41bd9a0f2b51051b6dc1167a9d9129bf21c269a5825",
+    "seconds": 24.0,
+    "width": 216,
+    "height": 384,
+    "sampleRate": "24000",
+    "channels": 2
+  },
+  {
+    "path": "references/media/insta/v2/compact/midnight-monitor.mp4",
+    "kind": "video",
+    "bytes": 87966,
+    "sha256": "296e08e8aec8ec5f7e3c824f3625557447112a0463003d7d4b997597df17cf26",
+    "seconds": 24.0,
+    "width": 216,
+    "height": 384,
+    "sampleRate": "24000",
+    "channels": 2
+  },
+  {
+    "path": "references/media/insta/v2/compact/rain-walk.mp4",
+    "kind": "video",
+    "bytes": 116936,
+    "sha256": "66819d8a168f998dd3269d5e2cd6cbcd49892a6288fa83b9c6bfb1e2623f0e65",
+    "seconds": 24.0,
+    "width": 216,
+    "height": 384,
+    "sampleRate": "24000",
+    "channels": 2
+  },
+  {
+    "path": "references/media/insta/v2/compact/tea-and-pages.mp4",
+    "kind": "video",
+    "bytes": 102255,
+    "sha256": "0fe77154fe58aaebdb3025af30083e497ec77852ee3ed79bde256e3d2a12ecfd",
+    "seconds": 24.0,
+    "width": 216,
+    "height": 384,
+    "sampleRate": "24000",
+    "channels": 2
+  },
+  {
+    "path": "references/media/insta/v2/last-tram.mp4",
+    "kind": "video",
+    "bytes": 657778,
+    "sha256": "4e81dc87402dad2c9bbf722248018e05cbc2845948c34c3bd31fd0b010461096",
+    "seconds": 24.0,
+    "width": 360,
+    "height": 640,
+    "sampleRate": "48000",
+    "channels": 2
+  },
+  {
+    "path": "references/media/insta/v2/midnight-monitor.mp4",
+    "kind": "video",
+    "bytes": 453264,
+    "sha256": "52b2f8c071467f3bd49d8a4dbae4789e576605b3a24066f68df96d7bf4afc785",
+    "seconds": 24.0,
+    "width": 360,
+    "height": 640,
+    "sampleRate": "48000",
+    "channels": 2
+  },
+  {
+    "path": "references/media/insta/v2/previews/last-tram-action.jpg",
+    "kind": "image",
+    "bytes": 31983,
+    "sha256": "4ed6013349068a65411d0dec40cc89a8716e342fba81917d2dabf205265008ab"
+  },
+  {
+    "path": "references/media/insta/v2/previews/midnight-monitor-action.jpg",
+    "kind": "image",
+    "bytes": 32918,
+    "sha256": "4b82528a9c868b3afcb2b489d7ef3787cb0f16f856f49174d2a7ceeb8f5cafa7"
+  },
+  {
+    "path": "references/media/insta/v2/previews/rain-walk-action.jpg",
+    "kind": "image",
+    "bytes": 44585,
+    "sha256": "eae80d28cce9c8d9f41e213e97cb4bf1891a6c1c721a947cc767a854a513bf44"
+  },
+  {
+    "path": "references/media/insta/v2/previews/tea-and-pages-action.jpg",
+    "kind": "image",
+    "bytes": 41607,
+    "sha256": "6b763a4b5009541fd6750ab4dc000f9c9c86f230f5162d74fff6399da4dfab81"
+  },
+  {
+    "path": "references/media/insta/v2/rain-walk.mp4",
+    "kind": "video",
+    "bytes": 1107314,
+    "sha256": "7b0e5063e0a4e6c1f6fd38ed51858a08563aa9cab9062816d2bc06512d73e02e",
+    "seconds": 24.0,
+    "width": 360,
+    "height": 640,
+    "sampleRate": "48000",
+    "channels": 2
+  },
+  {
+    "path": "references/media/insta/v2/tea-and-pages.mp4",
+    "kind": "video",
+    "bytes": 654283,
+    "sha256": "bb2c5844c31cb398aaa2572500f9428d7c5f8218423f7d6f4358ce97ab235ae0",
+    "seconds": 24.0,
+    "width": 360,
+    "height": 640,
+    "sampleRate": "48000",
+    "channels": 2
+  }
+]

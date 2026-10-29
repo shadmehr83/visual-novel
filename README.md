@@ -139,3 +139,11 @@ edge to change width. Only the six-dot grip moves a window; floating windows hav
 resize edges. **Chapters advanced** groups scenes, selects starting scenarios from
 previous story state, marks chapter endings and previews rule outcomes. Chapter two
 includes six short editable opening drafts. See [the guide](docs/CHAPTERS_AND_WINDOW_RESIZING.md).
+
+### Animated feed and draggable comments (2.12)
+
+Comments now have a compact header and reply composer. Drag their header up/down
+to expand or shrink the sheet, and drag the list to scroll like a finger. Feed
+clips now have independent animated elements and new sound designs; the reading
+clip includes an original piano piece. All earlier and new media are retained in
+the [reusable media archive](references/media/README.md). See the [usage guide](docs/INSTA_ANIMATION_AND_COMMENTS.md).
