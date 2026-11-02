@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { applyProposal, aiContext, proposalSchema, type Proposal } from "./ai";
 import type { Project } from "./model";
 import { ClaudeMark } from "./ClaudeMark";
-import { aiLog, characterReplyMode, claudeLocalStatus, setCharacterReplyMode, studioSession, type CharacterReplyMode, type ClaudeLocalStatus } from "./characterReply";
+import { aiLog, characterReplyMode, claudeApiStatus, claudeLocalStatus, setCharacterReplyMode, studioSession, type CharacterReplyMode, type ClaudeLocalStatus } from "./characterReply";
 // "claude-local" uses this computer's Claude Code sign-in (local studio only, no API key).
 type TaskProvider = Provider | "claude-local";
 export function Assistant({
@@ -30,6 +30,8 @@ export function Assistant({
   useEffect(()=>{const t=setInterval(()=>setLogCount(aiLog.read().length),3000);return()=>clearInterval(t);},[]);
   useEffect(()=>{let live=true;claudeLocalStatus().then(s=>{if(live)setLocal(s);});return()=>{live=false;};},[]);
   const localLabel=local?.connected?"· connected":local?"· not connected":"· checking…";
+  const [api,setApi]=useState<{ready:boolean;reason?:string}|null>(null);
+  useEffect(()=>{let live=true;claudeApiStatus().then(s=>{if(live)setApi(s);});return()=>{live=false;};},[]);
   const useLocal=routes[task]==="claude-local";
   const [prompt, setPrompt] = useState(
     "Add gentle rain and dim this scene slightly.",
@@ -169,7 +171,7 @@ export function Assistant({
         <h3>Character replies <ClaudeMark help="Added by Claude. When a player uses Self-reply, the speaking character answers them in their own voice, then the authored story continues unchanged." /></h3>
         <label>Who answers self-replies<select aria-label="Character replies" data-help="Choose who answers when a player types their own reply during Play story. Claude on this computer uses your signed-in Claude subscription in the local studio; no API key or password. Off keeps the authored story only." value={replyMode} onChange={e=>{const m=e.target.value as CharacterReplyMode;setCharacterReplyMode(m);setReplyMode(m);}}>
           <option value="claude-local">Claude (this computer) {localLabel}</option>
-          <option value="anthropic">Claude API (server key) {available.anthropic?"· ready":"· not configured"}</option>
+          <option value="anthropic">Claude API · texts only {api?.ready?"· connected":api?"· not connected":"· checking…"}</option>
           <option value="off">Off · authored story only</option>
         </select></label>
         {replyMode==="claude-local" && <p className={"small claude-status"+(local?.connected?" ok":"")} role="status">{local?.connected ? "✓ Claude Pro connected through Claude Code on this computer. Characters answer automatically." : local?.reason || "Checking Claude on this computer…"}</p>}
@@ -178,7 +180,8 @@ export function Assistant({
           <button disabled={!logCount} aria-label="Download AI playthrough log" onClick={() => aiLog.download()}>Download log</button>
           <button disabled={!logCount} aria-label="Clear AI playthrough log" onClick={() => { if (confirm("Clear the AI playthrough log saved in this browser? Files in playtest-logs/ are kept.")) { aiLog.clear(); setLogCount(0); } }}>Clear</button>
         </div>
-        {replyMode==="anthropic" && <label>Studio access password<input type="password" autoComplete="off" aria-label="Character reply studio password" data-help="Needed only for the server API key mode. Kept in memory for this tab, never saved." defaultValue={studioSession.password} onChange={e=>{studioSession.password=e.target.value;}} /></label>}
+        {replyMode==="anthropic" && <p className={"small claude-status"+(api?.ready?" ok":"")} role="status">{api?.ready ? "✓ Claude API connected · used for character texts only (self-replies). Other Assistant tasks keep their own provider." : api?.reason || "Checking the Claude API…"}</p>}
+        {replyMode==="anthropic" && api && !api.ready && <label>Studio access password<input type="password" autoComplete="off" aria-label="Character reply studio password" data-help="Needed only for the server API key mode. Kept in memory for this tab, never saved." defaultValue={studioSession.password} onChange={e=>{studioSession.password=e.target.value;}} /></label>}
       </section>
       <div
         className="assistant-modes"

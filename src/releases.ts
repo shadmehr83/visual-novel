@@ -1,4 +1,4 @@
-export const ENGINE_VERSION = "2.25.0-claude";
+export const ENGINE_VERSION = "2.25.1-claude";
 export type ReleaseFeature = {
   name: string;
   description: string;
@@ -22,6 +22,9 @@ const f = (
   action?: string,
 ): ReleaseFeature => ({ name, description, steps: path.split(" → "), action });
 export const releases: Release[] = [
+ {version:"2.25.1-claude",name:"Hosted studio texts with the Claude API",by:"Claude",date:"2026-11-02",timestamp:"2026-11-02T16:00:00Z",features:[
+ f("Claude API for character texts", "On the hosted studio, character replies use the Claude API automatically when opened from a link with ?code=<playtest code>; no password. Assistant → Character replies shows Claude API · texts only and whether it is connected. Other Assistant tasks keep their own provider.", "Assistant → Character replies", "assistant")
+ ]},
  {version:"2.25.0-claude",name:"Free texting that finds its way back, playthrough logs and a play link",by:"Claude",date:"2026-11-02",timestamp:"2026-11-02T14:30:00Z",features:[
  f("Keep texting the character", "After a self-reply you can keep texting. The character answers each message, steers off-topic chats back to the story and, after about four free texts (or sooner when you engage with the story), the authored route continues on your chosen path.", "Play story → Phone chat → Self-reply → Reply to the character", "author-play"),
  f("No repeated authored line", "When the character's answer already moves the story on, it carries the next authored line's plans and details in its own words and that line is skipped, so nothing is said twice.", "Play story → Self-reply → Continue", "author-play"),

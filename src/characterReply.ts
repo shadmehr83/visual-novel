@@ -150,12 +150,36 @@ export const pendingReply = {
   subscribe(l: () => void) { listeners.add(l); return () => { listeners.delete(l); }; },
 };
 const modeKey = "stillframe-character-replies";
+// Without a saved choice, the local studio uses this computer's Claude sign-in and the
+// hosted studio uses the Claude API on its server.
+const hostedStudio = () => !/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname);
 export function characterReplyMode(): CharacterReplyMode {
   try {
     const v = localStorage.getItem(modeKey);
-    return v === "anthropic" || v === "off" ? v : "claude-local";
+    return v === "anthropic" || v === "off" || v === "claude-local" ? v : hostedStudio() ? "anthropic" : "claude-local";
   } catch {
-    return "claude-local";
+    return hostedStudio() ? "anthropic" : "claude-local";
+  }
+}
+// The playtest code from a studio link (?code=…) lets the hosted studio use the Claude API without a password.
+const codeKey = "stillframe-play-code";
+export function playCode(): string {
+  const fromLink = new URL(location.href).searchParams.get("code");
+  try {
+    if (fromLink) localStorage.setItem(codeKey, fromLink);
+    return fromLink || localStorage.getItem(codeKey) || "";
+  } catch {
+    return fromLink || "";
+  }
+}
+export async function claudeApiStatus(): Promise<{ ready: boolean; reason?: string }> {
+  try {
+    const s = await (await fetch("/api/reply")).json();
+    if (s.playtest && playCode()) return { ready: true };
+    if (s.configured) return { ready: !!studioSession.password, reason: "Enter the studio password, or open the studio from a link ending in ?code=<playtest code>." };
+    return { ready: false, reason: s.playtest ? "Open the studio from a link ending in ?code=<playtest code>." : "Add ANTHROPIC_API_KEY and PLAYTEST_TOKEN to this site's Cloudflare secrets." };
+  } catch {
+    return { ready: false, reason: "The Claude API runs on the hosted site; this preview has no server." };
   }
 }
 export function setCharacterReplyMode(mode: CharacterReplyMode) {
@@ -183,7 +207,7 @@ export async function askCharacter(body: CharacterReplyRequest, mode: CharacterR
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      ...(local ? {} : online ? { "X-Playtest-Token": online.token } : { Authorization: "Bearer " + studioSession.password }),
+      ...(local ? {} : online ? { "X-Playtest-Token": online.token } : studioSession.password ? { Authorization: "Bearer " + studioSession.password } : { "X-Playtest-Token": playCode() }),
     },
     body: JSON.stringify(body),
     signal,
