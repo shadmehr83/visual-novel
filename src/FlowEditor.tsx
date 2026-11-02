@@ -7,7 +7,7 @@ import { pruneChapterExits } from "./chapters";
 import { chapterForScene } from "./chapterRuntime";
 import { DialogueDeviceControls } from "./DialogueDeviceControls";
 import { useState } from "react";
-import { validateProject, type Project, type Scene } from "./model";
+import { validateProject, type Project, type Runtime, type Scene } from "./model";
 import { removeDialogue } from "./authoring";
 import { FlowCanvas } from "./FlowCanvas";
 import { DialogueArtwork } from "./DialogueArtwork";
@@ -31,7 +31,10 @@ export function FlowEditor({
   onSelect,
   onDrill,
   onOriginal,
+  runtime,
 }: {
+  // The playthrough in progress, so AI-adapted lines can be highlighted on the map.
+  runtime?: Runtime | null;
   project: Project;
   mode: "scenes" | "dialogues";
   sceneId: string;
@@ -54,7 +57,7 @@ export function FlowEditor({
   const [incoming, setIncoming] = useState(""),
     [linkKind, setLinkKind] = useState<"continue" | "reply">("continue"),
     [outgoing, setOutgoing] = useState("");
-  const graph = flowGraph(project, mode, scene.id),
+  const graph = flowGraph(project, mode, scene.id, runtime?.rewrites),
     selected = mode === "scenes" ? "scene:" + scene.id : "node:" + node.id;
   const source = selectedLink
       ? project.scenes.find((s) => s.id === selectedLink.scene)
@@ -242,6 +245,16 @@ export function FlowEditor({
       >
         <FlowCanvas
           graph={graph}
+          onToggleNode={mode === "dialogues" ? (id) => commit((p) => {
+            const n = p.scenes.find((s) => s.id === scene.id)?.nodes.find((n) => n.id === id);
+            if (!n) return;
+            if (n.disabled) delete n.disabled; else n.disabled = true;
+          }) : undefined}
+          onToggleChoice={mode === "dialogues" ? (ref) => commit((p) => {
+            const c = p.scenes.find((s) => s.id === ref.scene)?.nodes.find((n) => n.id === ref.node)?.choices.find((c) => c.id === ref.choice);
+            if (!c) return;
+            if (c.enabled === false) delete c.enabled; else c.enabled = false;
+          }) : undefined}
           onAdd={
             mode === "dialogues"
               ? (from, kind) => quickAdd(from, kind)

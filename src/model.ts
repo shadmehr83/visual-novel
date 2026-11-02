@@ -82,6 +82,8 @@ const node = z.object({
   allowCustomResponse: z.boolean().optional(),
   // Per-dialogue master switch (by Claude): false hides Self-reply on this line only, in every view.
   allowSelfReply: z.boolean().optional(),
+  // Switched off (by Claude): kept in the project but skipped during play, like a disabled reply.
+  disabled: z.boolean().optional(),
   allowPhoneCustomResponse: z.boolean().optional(),
   portrait: z.string().nullable().optional(),
   id: z.string(),
@@ -702,7 +704,7 @@ export function enter(p: Project, r: Runtime, id: string): Runtime {
 export function start(p: Project): Runtime {
   return recordPhone(
     p,
-    enter(
+    skipDisabled(p, enter(
       p,
       {
         scene: "",
@@ -714,7 +716,7 @@ export function start(p: Project): Runtime {
         ended: false,
       },
       p.chapters?.length ? resolveChapterStart(p.chapters[0],p.variables).scene : p.scenes[0].id,
-    ),
+    )),
   );
 }
 /** Leave an interaction without committing a dialogue response or replaying state actions. */
@@ -728,6 +730,20 @@ export function putAwayDevice(p: Project, r: Runtime): Runtime {
   return recordPhone(p, { ...r, node: target, ended: false,
     deviceBookmark: { scene: scene.id, node: node.id, entry: path[0] || node.id, path },
     history: [...r.history, "Put device away"].slice(-200) });
+}
+// Passes over switched-off dialogues: on to their Continue link, else their first available reply's
+// destination (without that reply's actions), else the story ends there.
+function skipDisabled(p: Project, r: Runtime): Runtime {
+  for (let guard = 0; guard < 200 && !r.ended; guard++) {
+    const s = p.scenes.find((s) => s.id === r.scene);
+    const n = s?.nodes.find((n) => n.id === r.node);
+    if (!s || !n?.disabled) return r;
+    const reply = n.choices.find((c) => c.enabled !== false && (!c.condition || r.values[c.condition.key] === c.condition.equals));
+    const target = n.next || reply?.target;
+    if (!target) return { ...r, ended: true, history: [...r.history, "Story complete"].slice(-200) };
+    r = p.scenes.some((x) => x.id === target) && !s.nodes.some((x) => x.id === target) ? enter(p, r, target) : { ...r, node: target };
+  }
+  return r;
 }
 function advanceCore(p: Project, r: Runtime, choiceId?: string): Runtime {
   if (r.ended) return r;
@@ -812,7 +828,7 @@ export function shownChoice(r: Runtime | null | undefined, scene: string, n: Nod
   return r?.rewrites?.find((w) => w.scene === scene && w.node === n.id)?.choices?.find((x) => x.id === c.id)?.text || c.text;
 }
 export function advance(p: Project, r: Runtime, choiceId?: string): Runtime {
-  let next = advanceCore(p, r, choiceId);
+  let next = skipDisabled(p, advanceCore(p, r, choiceId));
   if (next === r) return r;
   const s = p.scenes.find((s) => s.id === r.scene)!;
   const c = s.nodes

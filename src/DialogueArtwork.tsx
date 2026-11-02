@@ -31,6 +31,7 @@ export function DialogueArtwork({
         initialFolder="Background scenes"
         value={view?.background}
         empty="Use main scene background"
+        fallback={scene.background}
         onChange={(id) => update((s) => setDialogueArtwork(s, node.id, id))}
       />
       <label>

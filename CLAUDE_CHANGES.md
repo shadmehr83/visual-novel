@@ -4,6 +4,16 @@ Every change in this list was written by Claude (Anthropic) at the request of th
 
 > **Where this lives:** branch `claude` on GitHub. Versions end in `-claude`. `main` is the original line and is untouched.
 
+## Iteration 9 — Bug-fix pass, AI search, on/off dialogues, image expand (2026-11-03, engine 2.29.0-claude)
+
+- **On/Off switches:** a node can now be switched off (`disabled`), and replies already had `enabled: false`. Both have On/Off pills on the Dialogue advanced map (`src/FlowCanvas.tsx`, `src/FlowEditor.tsx`, `src/flow.ts`) and a switch in the normal editor. `skipDisabled` in `src/model.ts` passes switched-off lines during play and start. Switched-off items are greyed and struck through.
+- **AI parallels on the map:** `flowGraph(…, rewrites)` marks adapted dialogues and replies, which get an orange outline and the parallel text during a playthrough.
+- **Search by AI** (`src/aiSearch.ts`, `/api/claude-local/search`, `src/FeatureSearch.tsx`): Claude Code ranks the search catalogue for misspelled or described queries; toggle in the AI panel. Local studio only, never the API.
+- **Image expand:** ⤢ and double-click on scene thumbnails and Scenes advanced backgrounds; `AssetPicker` `fallback` shows and expands the scene background a dialogue uses.
+- **Settings:** an Open playtest admin link.
+- **Hover help:** `src/familyHelp.ts` gives specific text to about 500 controls that had generic help (519 → 0 found in an audit of six workspaces). The outdated Self-reply help was fixed.
+- **Checks and fixes:** `src/storyCheck.test.ts` plays every branch of the published story (all 186 lines reached, 6 endings, no errors or dead ends). The Scenes advanced map had duplicate React keys when two lines share a reply id (Getting ready, `journey-18`); ports are now keyed by line and reply. New tests are in `src/switches.test.ts`.
+
 ## Iteration 8 — Playtest admin website, Claude exports, AI panel fix (2026-11-03, engine 2.28.0-claude)
 
 - **Admin website** `/admin` (`admin.html`, `src/admin.tsx`): password `ADMIN_PASSWORD`. It lists testers (automatic name or chosen name, device, country, first and last seen, visits, steps, AI replies, progress, access) and shows each run's timeline (lines, choices, typed messages, AI answers, errors). It can block, allow or delete a tester's records, and refreshes every 30 s.

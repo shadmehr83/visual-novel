@@ -1,4 +1,5 @@
 import { specificHelp } from "./controlHelp";
+import { familyHelp } from "./familyHelp";
 import { useEffect, useState } from "react";
 export function describeControl(el: HTMLElement) {
   const name =
@@ -12,7 +13,8 @@ export function describeControl(el: HTMLElement) {
   const help =
     el.dataset.help ||
     el.closest("label")?.dataset.help ||
-    specificHelp(label, el);
+    specificHelp(label, el) ||
+    familyHelp(label);
   if (help) return { label, text: (el.dataset.recent ? "New in v"+el.dataset.recent+". " : "") + help };
   const rules: [RegExp, string][] = [
     [
@@ -33,7 +35,7 @@ export function describeControl(el: HTMLElement) {
     ],
     [
       /self-reply/i,
-      "Expand a small input to record your own response. It follows the authored next line; it does not generate a live AI reply.",
+      "Type your own reply instead of a written one. With character replies on (Assistant), the character answers in their own voice, then the story follows your chosen path.",
     ],
     [
       /hide dialogue|show dialogue/i,
@@ -81,7 +83,7 @@ export function describeControl(el: HTMLElement) {
     ],
     [
       /dialogue|response|speaker|choice/i,
-      "Author dialogue and branching choices. Custom responses are recorded in the playthrough and follow the authored next transition.",
+      "Author dialogue and branching choices. Custom responses are recorded in the playthrough, can be answered by a character when character replies are on, and then follow the authored route.",
     ],
     [
       /theme|colour|color|appearance|background/i,

@@ -55,7 +55,7 @@ import { SceneTransition } from "./SceneTransition";
 import { DeviceOverlay as PhoneUI } from "./DeviceOverlay";
 import { SelfReply } from "./SelfReply";
 import { LastLine } from "./LastLine";
-import { claudeExport, pendingReply } from "./characterReply";
+import { CLAUDE_SITE, claudeExport, pendingReply } from "./characterReply";
 import { SelectionToolbar } from "./SelectionToolbar";
 import { useWorkspace, contrast } from "./workspace";
 import { WorkspaceControls } from "./WorkspaceSettings";
@@ -752,7 +752,7 @@ export default function App() {
           if (["chapters","scenes","dialogues","devices","editor"].includes(action)) chooseSecondWorkspace(action as StudioView);
           else navigate(action);
         }} />
-        : <FlowEditor key={side + ":" + selected.id} project={project} mode={side} sceneId={selected.id} nodeId={nodeId} edit={edit}
+        : <FlowEditor key={side + ":" + selected.id} runtime={playing ? runtime : null} project={project} mode={side} sceneId={selected.id} nodeId={nodeId} edit={edit}
           onSelect={chooseSharedDialogue} onDrill={sid => {selectScene(sid);chooseSecondWorkspace("dialogues");}} onOriginal={openEditor} />}
     </div>;
   };
@@ -1054,13 +1054,41 @@ export default function App() {
                       >
                         <div className={"scene-thumb " + s.art}>
                           {s.background ? (
+                            <>
                             <img
                               src={
                                 project.assets.find(
                                   (a) => a.id === s.background,
                                 )?.data
                               }
+                              alt={s.title}
+                              title="Double-click to enlarge"
+                              onDoubleClick={(e) => {
+                                e.stopPropagation();
+                                setPreviewAssetId(s.background!);
+                              }}
                             />
+                            {/* Enlarge the scene's background (by Claude); also on double-click. */}
+                            <span
+                              className="scene-thumb-expand"
+                              role="button"
+                              tabIndex={0}
+                              aria-label={"Enlarge background of " + s.title}
+                              data-help="Open a larger view of this scene's background image. Escape or Close preview returns."
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setPreviewAssetId(s.background!);
+                              }}
+                              onKeyDown={(e) => {
+                                if (e.key !== "Enter" && e.key !== " ") return;
+                                e.preventDefault();
+                                e.stopPropagation();
+                                setPreviewAssetId(s.background!);
+                              }}
+                            >
+                              ⤢
+                            </span>
+                            </>
                           ) : (
                             <span>
                               {s.art === "cafe"
@@ -1911,7 +1939,8 @@ export default function App() {
                         <button
                           disabled={playing}
                           key={n.id}
-                          className={node.id === n.id ? "active" : ""}
+                          className={(node.id === n.id ? "active" : "") + (n.disabled ? " switched-off" : "")}
+                          title={n.disabled ? "Switched off: skipped during play" : undefined}
                           onClick={() => setNodeId(n.id)}
                         >
                           <span>{String(i + 1).padStart(2, "0")}</span>
@@ -2011,6 +2040,22 @@ export default function App() {
                           }
                         />
                         Self-reply on this dialogue (this line only)
+                      </label>
+                      <label className="consent" data-help="Switch this dialogue off to skip it during Play story and Author's playthrough without deleting it. The story continues to its Continue link (or first reply). Also available on the Dialogue advanced map.">
+                        <input
+                          type="checkbox"
+                          disabled={editingLocked}
+                          aria-label="Dialogue switched on"
+                          checked={!node.disabled}
+                          onChange={(ev) =>
+                            updateScene((s) => {
+                              const n = s.nodes.find((n) => n.id === node.id)!;
+                              if (ev.target.checked) delete n.disabled;
+                              else n.disabled = true;
+                            })
+                          }
+                        />
+                        Dialogue switched on (off = skipped in play, kept in the project)
                       </label>
                       <label className="consent">
                         <input
@@ -3199,6 +3244,7 @@ export default function App() {
           <div id={"studio-" + view} className="secondary-workspace">
             <FlowEditor
               key={view === "scenes" ? "scenes" : "dialogues:" + selected.id}
+              runtime={playing ? runtime : null}
               project={project}
               mode={view === "scenes" ? "scenes" : "dialogues"}
               sceneId={selected.id}
@@ -3293,6 +3339,12 @@ export default function App() {
                 <ProjectSave project={project} />
               ) : modal === "settings" ? (
                 <>
+                  {/* Playtest admin (by Claude): the hosted page that follows testers of the shared Claude version. */}
+                  <section className="property-section playtest-admin-link">
+                    <h3>Playtest admin</h3>
+                    <p className="small">See who opens your shared game, follow their runs and choices, and block access. Opens the hosted admin page in a new tab; sign in with your ADMIN_PASSWORD.</p>
+                    <a className="button-link" href={CLAUDE_SITE + "/admin"} target="_blank" rel="noreferrer" data-help="Open the playtest admin page for the shared Claude version in a new browser tab.">Open playtest admin ↗</a>
+                  </section>
                   <p>
                     This is a local-first studio. Projects and original images
                     are saved in this browser’s IndexedDB. Export regularly to

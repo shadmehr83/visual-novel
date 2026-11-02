@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { applyProposal, aiContext, proposalSchema, type Proposal } from "./ai";
 import type { Project } from "./model";
 import { ClaudeMark } from "./ClaudeMark";
+import { aiSearchAvailable, aiSearchEnabled, setAiSearchEnabled } from "./aiSearch";
 import { aiLog, characterReplyMode, claudeApiStatus, claudeLocalStatus, setCharacterReplyMode, studioSession, type CharacterReplyMode, type ClaudeLocalStatus } from "./characterReply";
 // "claude-local" uses this computer's Claude Code sign-in (local studio only, no API key).
 type TaskProvider = Provider | "claude-local";
@@ -27,6 +28,7 @@ export function Assistant({
   const [local,setLocal]=useState<ClaudeLocalStatus|null>(null);
   const [replyMode,setReplyMode]=useState<CharacterReplyMode>(characterReplyMode);
   const [logCount,setLogCount]=useState(()=>aiLog.read().length);
+  const [aiSearch,setAiSearch]=useState(aiSearchEnabled);
   useEffect(()=>{const t=setInterval(()=>setLogCount(aiLog.read().length),3000);return()=>clearInterval(t);},[]);
   useEffect(()=>{let live=true;claudeLocalStatus().then(s=>{if(live)setLocal(s);});return()=>{live=false;};},[]);
   const localLabel=local?.connected?"· connected":local?"· not connected":"· checking…";
@@ -240,6 +242,13 @@ export function Assistant({
               <p className={"small claude-status"+((routes[t]==="claude-local"&&local?.connected)||(routes[t]==="openai"&&available.openai)?" ok":"")}>{providerStatus(routes[t], false)}</p>
             </section>
           ))}
+          <section className="ai-job">
+            <label className="consent" data-help="When on, studio search (Ctrl+K) asks Claude Code on this computer to find what you mean if nothing matches, or when you press Ask Claude. Typos and descriptions work. Local studio only; it never uses the Claude API.">
+              <input type="checkbox" aria-label="Search by AI" checked={aiSearch} onChange={(e) => { setAiSearchEnabled(e.target.checked); setAiSearch(e.target.checked); }} />
+              Search by AI (Claude Code · this computer)
+            </label>
+            <p className={"small claude-status" + (aiSearch && aiSearchAvailable() && local?.connected ? " ok" : "")}>{!aiSearchAvailable() ? "Available in the local studio (npm run dev); on this site search stays exact." : !aiSearch ? "Off · search matches names and words exactly." : local?.connected ? "✓ On · misspelled or described searches are answered by Claude Code." : local?.reason || "Checking Claude Code on this computer…"}</p>
+          </section>
           <h3>Ask for an edit</h3>
           <label>Job<select aria-label="Assistant task" data-help="Which job this request belongs to; it uses the AI chosen for that job above." value={task} onChange={e=>setTask(e.target.value as AssistantTask)}>{(Object.keys(taskHelp) as AssistantTask[]).map((id)=><option key={id} value={id}>{{ dialogue: "Dialogue rewrites", "system-ui": "Phone & item UI", effects: "Lighting & effects" }[id]} · {editLabel[routes[id]]}</option>)}</select></label>
           <p className="small muted">

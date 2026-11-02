@@ -20,7 +20,12 @@ export function FlowCanvas({
   onRoute,
   onArrange,
   onAdd,
+  onToggleNode,
+  onToggleChoice,
 }: {
+  // Switch a dialogue or reply off/on without deleting it (by Claude).
+  onToggleNode?: (node: string) => void;
+  onToggleChoice?: (ref: LinkRef) => void;
   graph: FlowGraph;
   saved: Record<string, Point>;
   selected: string;
@@ -338,7 +343,7 @@ export function FlowCanvas({
               key={c.id}
               data-flow-card={c.id}
               className={
-                "flow-card " + c.kind + (selected === c.id ? " selected" : "")
+                "flow-card " + c.kind + (selected === c.id ? " selected" : "") + (c.disabled ? " switched-off" : "") + (c.parallel ? " ai-parallel" : "")
               }
               style={{
                 left: positions[c.id].x,
@@ -432,6 +437,18 @@ export function FlowCanvas({
               <p className="flow-card-text" title={c.text}>
                 {c.text}
               </p>
+              {c.parallel && <p className="flow-card-parallel" title={"AI parallel in this playthrough: " + c.parallel}>AI parallel: {c.parallel}</p>}
+              {c.kind === "dialogue" && onToggleNode && (
+                <button
+                  className={"flow-switch" + (c.disabled ? " off" : "")}
+                  aria-pressed={!c.disabled}
+                  aria-label={(c.disabled ? "Switch on " : "Switch off ") + c.title}
+                  data-help="Switch this dialogue off to skip it in Play story and Author's playthrough without deleting it. The story continues to its Continue link (or first reply). Switch it back on any time."
+                  onClick={(e) => { e.stopPropagation(); onToggleNode(c.node!); }}
+                >
+                  {c.disabled ? "Off" : "On"}
+                </button>
+              )}
               {c.kind === "dialogue" && onAdd && <div className="flow-quick-add">
                 <button aria-label={"Add connected dialogue after " + c.title} onClick={e => { e.stopPropagation(); onAdd(c.node!, "continue"); }}>+ Dialogue</button>
                 <button aria-label={"Add reply route from " + c.title} onClick={e => { e.stopPropagation(); onAdd(c.node!, "reply"); }}>+ Reply</button>
@@ -439,9 +456,20 @@ export function FlowCanvas({
               {c.ports.map((port, i) => (
                 <div
                   key={port.id}
-                  className="flow-port-row"
+                  className={"flow-port-row" + (port.disabled ? " switched-off" : "") + (port.parallel ? " ai-parallel" : "")}
                   style={{ top: portY(i) - 15 }}
                 >
+                  {port.ref.kind === "choice" && onToggleChoice && (
+                    <button
+                      className={"flow-switch small" + (port.disabled ? " off" : "")}
+                      aria-pressed={!port.disabled}
+                      aria-label={(port.disabled ? "Switch on reply " : "Switch off reply ") + port.label}
+                      data-help={"Switch this reply off to hide it during play without deleting it, or back on." + (port.parallel ? " AI parallel in this playthrough: " + port.parallel : "")}
+                      onClick={(e) => { e.stopPropagation(); onToggleChoice(port.ref); }}
+                    >
+                      {port.disabled ? "Off" : "On"}
+                    </button>
+                  )}
                   <button
                     className="flow-route-label"
                     title={port.detail || port.label}

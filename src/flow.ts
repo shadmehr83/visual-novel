@@ -13,6 +13,9 @@ export type FlowPort = {
   ref: LinkRef;
   target?: string;
   detail?: string;
+  // Switched-off reply, and its AI-adapted text in the current playthrough (by Claude).
+  disabled?: boolean;
+  parallel?: string;
 };
 export type FlowCard = {
   id: string;
@@ -23,6 +26,8 @@ export type FlowCard = {
   kind: "scene" | "dialogue" | "destination";
   ports: FlowPort[];
   entry?: boolean;
+  disabled?: boolean;
+  parallel?: string;
 };
 export type FlowGraph = {
   cards: FlowCard[];
@@ -39,7 +44,7 @@ export type FlowGraph = {
 export const CARD_WIDTH = 270;
 export const portY = (index: number) => 112 + index * 34;
 export const cardHeight = (card: FlowCard) =>
-  Math.max(146, 112 + card.ports.length * 34 + (card.kind === "dialogue" ? 44 : 12));
+  Math.max(146, 112 + card.ports.length * 34 + (card.kind === "dialogue" ? 44 : 12)) + (card.parallel ? 34 : 0);
 export function addConnectedDialogue(p: Project, sceneId: string, from: string | undefined, kind: "continue" | "reply", outgoing?: string) {
   const s = p.scenes.find(s => s.id === sceneId)!;
   const source = s.nodes.find(n => n.id === from);
@@ -61,8 +66,11 @@ export function flowGraph(
   p: Project,
   mode: "scenes" | "dialogues",
   sceneId: string,
+  // During a playthrough, AI-adapted lines and replies are shown on their cards.
+  rewrites?: { scene: string; node: string; text: string; choices?: { id: string; text: string }[] }[],
 ): FlowGraph {
   const current = p.scenes.find((s) => s.id === sceneId) || p.scenes[0];
+  const adapted = (node: string) => rewrites?.find((w) => w.scene === current.id && w.node === node);
   const cards: FlowCard[] =
     mode === "scenes"
       ? p.scenes.map((s, i) => {
@@ -70,7 +78,8 @@ export function flowGraph(
             n.choices
               .filter((c) => p.scenes.some((s) => s.id === c.target))
               .map((c) => ({
-                id: c.id,
+                // Two lines can carry replies with the same id (e.g. copied replies), so the line id keeps ports unique.
+                id: n.id + ":" + c.id,
                 label: label(c),
                 detail: `${n.speaker}: ${n.text}\nReply: ${c.text}${c.condition ? " · Conditional" : ""}`,
                 ref: {
@@ -119,8 +128,10 @@ export function flowGraph(
               ? n.choices.map((c) => ({
                   id: c.id,
                   label: label(c),
-                  detail: `Reply: ${c.text}${c.condition ? " · Conditional" : ""}`,
+                  detail: `Reply: ${c.text}${c.condition ? " · Conditional" : ""}${c.enabled === false ? " · Switched off" : ""}`,
                   ref: { ...ref, kind: "choice" as const, choice: c.id },
+                  ...(c.enabled === false ? { disabled: true } : {}),
+                  ...(adapted(n.id)?.choices?.some((x) => x.id === c.id && x.text !== c.text) ? { parallel: adapted(n.id)!.choices!.find((x) => x.id === c.id)!.text } : {}),
                   target:
                     (p.scenes.some((s) => s.id === c.target)
                       ? "scene:"
@@ -143,6 +154,8 @@ export function flowGraph(
             kind: "dialogue",
             ports,
             entry: i === 0,
+            ...(n.disabled ? { disabled: true } : {}),
+            ...(adapted(n.id) ? { parallel: adapted(n.id)!.text } : {}),
           };
         });
   if (mode === "dialogues")

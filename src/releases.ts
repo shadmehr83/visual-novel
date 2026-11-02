@@ -1,4 +1,4 @@
-export const ENGINE_VERSION = "2.28.0-claude";
+export const ENGINE_VERSION = "2.29.0-claude";
 export type ReleaseFeature = {
   name: string;
   description: string;
@@ -22,6 +22,15 @@ const f = (
   action?: string,
 ): ReleaseFeature => ({ name, description, steps: path.split(" → "), action });
 export const releases: Release[] = [
+ {version:"2.29.0-claude",name:"Bug-fix pass, AI search and on/off dialogues",by:"Claude",date:"2026-11-03",timestamp:"2026-11-03T09:00:00Z",features:[
+ f("Switch dialogues and replies off", "Each dialogue box and reply on the Dialogue advanced map has an On/Off switch. Switched-off items fade and are skipped in Play story and Author's playthrough, but stay in your project to bring back with one click. The normal editor has the same switch for dialogues.", "Dialogue advanced → On / Off on a box or reply", "dialogues"),
+ f("AI parallels on the map", "During a playthrough, dialogues and replies that Claude adapted are outlined in warm orange on the Dialogue advanced map, with the parallel text shown on the box.", "Author’s playthrough → Dialogue advanced", "dialogues"),
+ f("Search by AI", "In the local studio, search (Ctrl+K) asks Claude Code on this computer when nothing matches, or when you press Ask Claude, so misspelled or described searches find the right feature. Switch it in Assistant → AI assistant.", "Search features → Ask Claude", "assistant"),
+ f("Enlarge images again", "Scene thumbnails and Scenes advanced backgrounds open full size with ⤢ or a double-click, and the Dialogue advanced image picker now shows and expands the scene background a dialogue uses.", "Story library → ⤢ on a scene", "scenes"),
+ f("Playtest admin in settings", "Layout & project settings has an Open playtest admin link to the hosted admin page.", "Layout & project settings → Open playtest admin", "workspace"),
+ f("Clearer hover help", "Over 500 controls that only had generic hover text now explain what they do, and Self-reply's help mentions character replies.", "Hover any control", "workspace"),
+ f("Story and map fixes", "Every branch of the story is now checked automatically (186 lines, 6 endings, no dead ends). The Scenes advanced map keeps two replies with the same id apart, so routes no longer mix up.", "Scenes advanced", "scenes")
+ ]},
  {version:"2.28.0-claude",name:"Playtest admin page and Claude exports",by:"Claude",date:"2026-11-03",timestamp:"2026-11-03T06:00:00Z",features:[
  f("Playtest admin website", "/admin on the hosted site lists everyone who opens a Claude version: automatic tester name or the name they typed, device, country, visits, story steps, AI replies and how far they got. Open a tester to see their run (lines, choices, typed messages and the character's answers), and block, allow again or delete their records. Needs a PLAYTEST_DB database and an ADMIN_PASSWORD secret on Cloudflare.", "Your site → /admin", "export-player"),
  f("Testers without accounts", "Each tester gets a random ID kept in their browser and an automatic name; they can add their own name on the title screen, which also explains what the playtest records. Blocked testers see a short notice and get no AI replies.", "Play link → title screen", "export-player"),

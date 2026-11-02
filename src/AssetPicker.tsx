@@ -14,12 +14,15 @@ export function artworkFolders(assets: Asset[]) {
   const populated = new Set(assets.map(assetFolder));
   return [...ART_FOLDERS.filter(f => populated.has(f)), ...[...populated].filter(f => !ART_FOLDERS.includes(f)).sort()];
 }
-export function AssetPicker({ project, value, onChange, label, empty = "No image", initialFolder = "" }: {
+export function AssetPicker({ project, value, onChange, label, empty = "No image", initialFolder = "", fallback }: {
   project: Project; value?: string | null; onChange: (id: string | null) => void; label: string; empty?: string; initialFolder?: string;
+  // The image used when nothing is chosen (e.g. the main scene background), so it can still be seen and expanded.
+  fallback?: string | null;
 }) {
   const [preview, setPreview] = useState(false);
   const [folder, setFolder] = useState(initialFolder);
-  const selected = project.assets.find(a => a.id === value);
+  const chosen = project.assets.find(a => a.id === value);
+  const selected = chosen || project.assets.find(a => a.id === fallback);
   // A current selection is always available, even if its folder differs from the filter.
   const assets = project.assets.filter(a => !folder || assetFolder(a) === folder || a.id === value);
   return <div className="artwork-picker">
@@ -31,6 +34,6 @@ export function AssetPicker({ project, value, onChange, label, empty = "No image
     <label>{label}<select aria-label={label} value={value || ""} onChange={e => onChange(e.target.value || null)}>
       <option value="">{empty}</option>{artworkFolders(assets).map(f => <optgroup label={f} key={f}>{assets.filter(a => assetFolder(a) === f).map(a => <option value={a.id} key={a.id}>{a.name}</option>)}</optgroup>)}
     </select></label>
-    {selected && <><button type="button" className="artwork-expand" aria-label={"Expand " + selected.name} data-help="Open a larger view of the selected artwork. Press Escape or Close preview to return." onClick={() => setPreview(true)}><img className="artwork-selection" src={selected.data} alt={selected.name} loading="lazy" decoding="async" /><span>Expand image</span></button>{preview && <ImagePreview asset={selected} onClose={() => setPreview(false)} />}</>}
+    {selected && <><button type="button" className="artwork-expand" aria-label={"Expand " + selected.name} data-help="Open a larger view of the selected artwork. Press Escape or Close preview to return." onClick={() => setPreview(true)}><img className="artwork-selection" src={selected.data} alt={selected.name} loading="lazy" decoding="async" /><span>{chosen ? "Expand image" : "Expand · " + empty.toLowerCase() + ": " + selected.name}</span></button>{preview && <ImagePreview asset={selected} onClose={() => setPreview(false)} />}</>}
   </div>;
 }

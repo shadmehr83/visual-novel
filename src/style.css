@@ -2152,3 +2152,14 @@ body:has(.exported-game),body:has(.player-title){margin:0;overflow:hidden;backgr
 
 /* Playtest name and notice on Claude version title screens (by Claude). */
 .playtest-name{display:grid;gap:4px;margin:6px 0 12px;font-size:12px;opacity:.85;text-align:left}.playtest-name input{padding:7px 10px;border-radius:6px;border:1px solid #b5987566;background:#1b1f22;color:inherit}.playtest-notice{max-width:440px;margin-top:14px;font-size:11px;line-height:1.45;opacity:.6}
+
+/* Switched-off dialogues/replies and AI parallels on the Dialogue advanced map (by Claude). */
+.flow-card.switched-off{opacity:.5;filter:grayscale(.8);border-style:dashed!important}.flow-card.switched-off .flow-card-text{text-decoration:line-through;text-decoration-color:#ffffff55}.flow-port-row.switched-off .flow-route-label{opacity:.45;text-decoration:line-through}.flow-card.ai-parallel{box-shadow:0 0 0 2px #d97757aa,0 6px 18px #0006}.flow-card-parallel{position:absolute;left:10px;right:10px;bottom:46px;margin:0;padding:3px 6px;border-radius:5px;background:#d977572a;border:1px solid #d9775766;color:#f3d2c1;font-size:10px;line-height:1.3;max-height:30px;overflow:hidden}.flow-port-row.ai-parallel .flow-route-label{color:#f0b89d}.flow-switch{position:absolute;top:6px;right:30px;z-index:3;font-size:9px!important;padding:1px 7px!important;border-radius:999px!important;border:1px solid #8fd3a688!important;color:#8fd3a6!important;background:#14181aee!important;line-height:1.5}.flow-switch.off{border-color:#e58b7a88!important;color:#e58b7a!important}.flow-switch.small{position:static;margin-right:4px}
+.node-list button.switched-off{opacity:.45;text-decoration:line-through}
+
+.scene-thumb{position:relative}.scene-thumb-expand{position:absolute;top:2px;right:2px;width:18px;height:18px;display:grid;place-items:center;border-radius:4px;background:#000a;color:#fff;font-size:11px;opacity:0;cursor:zoom-in}.scene-card:hover .scene-thumb-expand,.scene-thumb-expand:focus{opacity:1}.scene-thumb img{cursor:zoom-in}
+.background-shot{position:relative}.background-shot:hover .storyboard-expand,.storyboard-expand:focus{opacity:1}.background-shot img{cursor:zoom-in}
+
+/* Claude's picks in studio search (by Claude). */
+.ask-claude-search{margin-left:8px;font-size:11px;padding:2px 8px;border-radius:999px;border:1px solid #d9775788;color:#f0b89d;background:transparent}.claude-search-picks{display:grid;gap:4px;margin:6px 0;padding:8px;border:1px solid #d9775755;border-radius:8px;background:#d977570f}.claude-search-picks button{text-align:left;display:grid;gap:2px}.claude-search-picks p{margin:0}
+.playtest-admin-link .button-link{display:inline-block;margin-top:4px;padding:6px 12px;border-radius:6px;border:1px solid #d9775788;color:#f0b89d;text-decoration:none}.playtest-admin-link .button-link:hover{background:#d977571a}

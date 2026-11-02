@@ -57,7 +57,7 @@ async function ask(system: string, body: unknown, model: "haiku" | "sonnet") {
 }
 const read = (req: IncomingMessage) => new Promise<string>((resolve, reject) => {
   let text = "";
-  req.on("data", (d) => { text += d; if (text.length > 100000) reject(Error("Request is too large.")); });
+  req.on("data", (d) => { text += d; if (text.length > 300000) reject(Error("Request is too large.")); });
   req.on("end", () => resolve(text));
 });
 const send = (res: ServerResponse, status: number, body: unknown) => {
@@ -88,6 +88,10 @@ export function claudeLocalPlugin(): Plugin {
           if (req.url === "/rewrite") {
             const { rewriteRequestSchema, rewriteSchema, rewritePrompt, rewriteSystem } = (await server.ssrLoadModule("/src/characterReply.ts")) as Reply;
             return send(res, 200, rewriteSchema.parse(await ask(rewriteSystem, rewritePrompt(rewriteRequestSchema.parse(body)), "haiku")));
+          }
+          if (req.url === "/search") {
+            const { aiSearchRequestSchema, aiSearchResultSchema, aiSearchPrompt, aiSearchSystem } = (await server.ssrLoadModule("/src/aiSearch.ts")) as typeof import("../src/aiSearch");
+            return send(res, 200, aiSearchResultSchema.parse(await ask(aiSearchSystem, aiSearchPrompt(aiSearchRequestSchema.parse(body)), "haiku")));
           }
           if (req.url === "/log") {
             // One JSON line per AI exchange, in playtest-logs/ (kept out of Git).

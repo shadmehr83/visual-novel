@@ -4,6 +4,7 @@ import { readImage } from "./storage";
 import { GifCanvas } from "./GifCanvas";
 import { GifTimeline } from "./GifTimeline";
 import { TransitionFields } from "./TimelineControls";
+import { ImagePreview } from "./ImagePreview";
 export function BackgroundStoryboard({
   project,
   scene,
@@ -20,6 +21,7 @@ export function BackgroundStoryboard({
   const [trigger, setTrigger] = useState(scene.nodes[0].id),
     [error, setError] = useState("");
   const [active, setActive] = useState("main");
+  const [preview, setPreview] = useState<string | null>(null);
   const update = (fn: (s: Scene) => void) =>
     edit((p) => fn(p.scenes.find((s) => s.id === scene.id)!));
   const activeView = scene.subscenes?.find((v) => v.id === active);
@@ -39,10 +41,24 @@ export function BackgroundStoryboard({
               />
             </div>
           ) : (
-            <img src={a.data} alt={title} />
+            <img src={a.data} alt={title} onDoubleClick={(e) => { e.stopPropagation(); setPreview(a.id); }} />
           )
         ) : (
           <div>Included illustration</div>
+        )}
+        {a && (
+          // Enlarge this view's image (by Claude); also on double-click.
+          <span
+            className="scene-thumb-expand storyboard-expand"
+            role="button"
+            tabIndex={0}
+            aria-label={"Enlarge " + title}
+            data-help="Open a larger view of this background. Escape or Close preview returns."
+            onClick={(e) => { e.stopPropagation(); setPreview(a.id); }}
+            onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); e.stopPropagation(); setPreview(a.id); } }}
+          >
+            ⤢
+          </span>
         )}
         <strong>{title}</strong>
         <small>
@@ -238,6 +254,7 @@ export function BackgroundStoryboard({
         />
       </label>
       {error && <p role="alert">{error}</p>}
+      {preview && <ImagePreview asset={project.assets.find((a) => a.id === preview)} onClose={() => setPreview(null)} />}
     </details>
   );
 }
