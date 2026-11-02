@@ -2,6 +2,7 @@ import { sydneyTimestamp } from "./time";
 import { useState } from "react";
 import { ENGINE_VERSION, releases } from "./releases";
 import { ClaudeMark } from "./ClaudeMark";
+import { V3 } from "./v3/ui";
 export function ReleaseHistory({
   onNavigate,
 }: {
@@ -24,7 +25,7 @@ export function ReleaseHistory({
   return (
     <main className="release-workspace">
       <div className="release-heading">
-        <span className="eyebrow">STILLFRAME STUDIO</span>
+        <span className="eyebrow">{V3 ? "STILLFRAME 3" : "STILLFRAME STUDIO"}</span>
         <h1>Update history</h1>
         <p>
           Current engine: <b>v{ENGINE_VERSION}</b>. Your novel is a separate

@@ -1,5 +1,13 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, type ReactNode } from "react";
+import { BookOpen, Columns2, History, LayoutDashboard, MessagesSquare, Palette, PanelLeftClose, PanelLeftOpen, PenLine, Smartphone, Sparkles, Workflow, type LucideIcon } from "lucide-react";
 import { ENGINE_VERSION } from "./releases";
+import { V3 } from "./v3/ui";
+// Stillframe 3 shows short tab names with icons; the full name stays as the accessible name.
+const tabIcons = { editor: PenLine, chapters: BookOpen, scenes: Workflow, dialogues: MessagesSquare, devices: Smartphone, updates: History };
+const shortNames = { editor: "Editor", chapters: "Chapters", scenes: "Scenes", dialogues: "Dialogue", devices: "Devices", updates: "Updates" };
+// Quick tools get an icon in Stillframe 3; their words hide on narrower windows.
+const quick = (Icon: LucideIcon, text: string) =>
+  V3 ? <><Icon size={14} aria-hidden="true" /><span className="v3-quick-label">{text}</span></> : text;
 export type StudioView =
   | "editor"
   | "chapters"
@@ -20,6 +28,7 @@ export function StudioMenu({
   placement,
   split = false,
   onSplit,
+  extra,
 }: {
   view: StudioView;
   onView: (v: StudioView) => void;
@@ -33,6 +42,7 @@ export function StudioMenu({
   placement: string;
   split?: boolean;
   onSplit?: () => void;
+  extra?: ReactNode;
 }) {
   const root = useRef<HTMLDivElement>(null);
   useEffect(() => {
@@ -150,15 +160,15 @@ export function StudioMenu({
             }
             onClick={() => onAction("toggle-library")}
           >
-            {collapsed ? "Show story" : "Hide story"}
+            {quick(collapsed ? PanelLeftOpen : PanelLeftClose, collapsed ? "Show story" : "Hide story")}
           </button>
-          <button onClick={() => onAction("layout")}>Layout</button>
-          <button onClick={() => onAction("appearance")}>Appearance</button>
+          <button aria-label={V3 ? "Layout" : undefined} onClick={() => onAction("layout")}>{quick(LayoutDashboard, "Layout")}</button>
+          <button aria-label={V3 ? "Appearance" : undefined} onClick={() => onAction("appearance")}>{quick(Palette, "Appearance")}</button>
           <button
             aria-label="Enabled effects"
             onClick={() => onAction("active")}
           >
-            {effects} effects
+            {V3 ? <><Sparkles size={14} aria-hidden="true" />{effects}<span className="v3-quick-label">effects</span></> : <>{effects} effects</>}
           </button>
           <button
             className="engine-version"
@@ -167,6 +177,7 @@ export function StudioMenu({
           >
             v{ENGINE_VERSION}
           </button>
+          {extra}
         </div>
       </nav>
       <nav
@@ -183,19 +194,24 @@ export function StudioMenu({
             ["devices", "Advanced devices"],
             ["updates", "Update history"],
           ] as const
-        ).map(([id, label]) => (
-          <button
-            role="tab"
-            key={id}
-            aria-selected={view === id}
-            aria-controls={"studio-" + id}
-            onClick={() => onView(id)}
-          >
-            {label}
-          </button>
-        ))}
+        ).map(([id, label]) => {
+          const Icon = tabIcons[id];
+          return (
+            <button
+              role="tab"
+              key={id}
+              aria-selected={view === id}
+              aria-controls={"studio-" + id}
+              aria-label={V3 ? label : undefined}
+              title={V3 ? label : undefined}
+              onClick={() => onView(id)}
+            >
+              {V3 ? <><Icon size={15} aria-hidden="true" /><span className="v3-tab-label">{shortNames[id]}</span></> : label}
+            </button>
+          );
+        })}
       </nav>
-      {onSplit && <button className="split-workspace-button" aria-pressed={split} onClick={onSplit} data-help="Open two workspaces in one window. They share your story, selected dialogue, artwork and Undo history. Choose side-by-side or stacked and drag the divider.">{split ? "Single workspace" : "Split view"}</button>}
+      {onSplit && <button className="split-workspace-button" aria-pressed={split} aria-label={V3 ? (split ? "Single workspace" : "Split view") : undefined} onClick={onSplit} data-help="Open two workspaces in one window. They share your story, selected dialogue, artwork and Undo history. Choose side-by-side or stacked and drag the divider.">{quick(Columns2, split ? "Single workspace" : "Split view")}</button>}
     </div>
   );
 }

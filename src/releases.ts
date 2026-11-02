@@ -1,4 +1,4 @@
-export const ENGINE_VERSION = "2.29.0-claude";
+export const ENGINE_VERSION = "3.0.0-claude";
 export type ReleaseFeature = {
   name: string;
   description: string;
@@ -22,6 +22,13 @@ const f = (
   action?: string,
 ): ReleaseFeature => ({ name, description, steps: path.split(" → "), action });
 export const releases: Release[] = [
+ {version:"3.0.0-claude",name:"Stillframe 3: a lighter, faster studio",by:"Claude",date:"2026-11-03",timestamp:"2026-11-03T12:00:00Z",features:[
+ f("Stillframe 3 light studio", "A calm light design with one top bar and one row for menus, workspace tabs and quick tools. Every feature of the classic studio is still here; Stillframe 3 runs separately at localhost:5174 with its own saved project.", "Stillframe 3 → Top bar", "editor"),
+ f("Windows menu", "Tools and controls placement, Windows & docking, Restore artwork and Layout & project settings now sit in one Windows menu instead of their own row.", "Top bar → Windows", "windows"),
+ f("New badges", "Controls added in the latest releases carry a green New pill; hover it to see the version that added it.", "Any workspace → Hover a New pill", "updates"),
+ f("Faster and lighter", "Stillframe 3 runs from an optimised build (about five times faster per edit, half the memory), and autosave stores artwork once instead of copying every image on each change.", "Stillframe 3 → Edit any line", "editor"),
+ f("Smooth GIF and still backgrounds", "Moving from a still background to an animated GIF, or back, is now a clean cross-fade: a GIF starts on its poster or a ready frame, each frame is prepared once and reused, and the old picture waits for the new one, so nothing flashes dark or blinks.", "Play story → Café → A table by the window", "background")
+ ]},
  {version:"2.29.0-claude",name:"Bug-fix pass, AI search and on/off dialogues",by:"Claude",date:"2026-11-03",timestamp:"2026-11-03T09:00:00Z",features:[
  f("Switch dialogues and replies off", "Each dialogue box and reply on the Dialogue advanced map has an On/Off switch. Switched-off items fade and are skipped in Play story and Author's playthrough, but stay in your project to bring back with one click. The normal editor has the same switch for dialogues.", "Dialogue advanced → On / Off on a box or reply", "dialogues"),
  f("AI parallels on the map", "During a playthrough, dialogues and replies that Claude adapted are outlined in warm orange on the Dialogue advanced map, with the parallel text shown on the box.", "Author’s playthrough → Dialogue advanced", "dialogues"),

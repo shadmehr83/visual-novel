@@ -31,7 +31,7 @@ export function GifCanvas({
   cueKey?: string;
   frozen?: boolean;
   reduced?: boolean;
-  onFrame?: (canvas: HTMLCanvasElement) => void;
+  onFrame?: (canvas: HTMLCanvasElement, index: number) => void;
   onPosition?: (time: number) => void;
   onTime?: (time: number, running: boolean) => void;
   onMovie?: (movie: GifMovie) => void;
@@ -123,7 +123,7 @@ export function GifCanvas({
         if (index !== previousIndex) {
           draw(index);
           previousIndex = index;
-          latest.current.onFrame?.(canvas.current!);
+          latest.current.onFrame?.(canvas.current!, index);
         }
       } catch (e) {
         const message = "Could not draw GIF: " + String(e);

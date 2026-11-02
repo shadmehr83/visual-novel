@@ -3,6 +3,7 @@ import { viewKey, viewTransition } from "./viewTransitions";
 import { SceneAudio, Qte } from "./EngineTools";
 import {
   useEffect,
+  useLayoutEffect,
   useRef,
   useState,
   Children,
@@ -29,7 +30,8 @@ export function SceneTransition({
     (scene.nodes.find((n) => n.id === nodeId)?.viewTransition
       ? ":cue:" + nodeId
       : "");
-  const incoming = useRef<HTMLDivElement>(null);
+  const incoming = useRef<HTMLDivElement>(null),
+    root = useRef<HTMLDivElement>(null);
   const position = useRef<number | undefined>(undefined);
   const content = isValidElement<{ onGifPosition?: (time: number) => void }>(
     children,
@@ -58,7 +60,8 @@ export function SceneTransition({
       lastNode.current,
     );
   const transition = playing ? selectedTransition.current : scene.transition;
-  useEffect(() => {
+  // Before paint, so the first frame of the new view is already covered by the old one.
+  useLayoutEffect(() => {
     setOutgoing(null);
     if (
       previous.current !== key &&
@@ -98,10 +101,17 @@ export function SceneTransition({
           : old,
       );
       let elapsed = 0,
+        held = 0,
         lastTime = performance.now();
       const tick = (now: number) => {
-        if (!pausedRef.current) elapsed += now - lastTime;
+        const step = now - lastTime;
         lastTime = now;
+        // Wait (up to 1.5 s) for an incoming GIF's first frame, so the old picture
+        // never fades into an empty one (by Claude).
+        const waiting = held < 1500 && !!incoming.current?.querySelector("[data-gif-pending]");
+        if (waiting) held += step;
+        else if (!pausedRef.current) elapsed += step;
+        root.current?.toggleAttribute("data-waiting", waiting);
         if (elapsed >= transition.seconds * 1000) setOutgoing(null);
         else timer.current = requestAnimationFrame(tick);
       };
@@ -109,7 +119,10 @@ export function SceneTransition({
     }
     previous.current = key;
     lastScene.current = scene;
-    return () => cancelAnimationFrame(timer.current);
+    return () => {
+      cancelAnimationFrame(timer.current);
+      root.current?.removeAttribute("data-waiting");
+    };
   }, [key, playing, reduced]);
   useEffect(() => {
     last.current = content;
@@ -119,6 +132,7 @@ export function SceneTransition({
   const active = playing && !reduced && transition;
   return (
     <div
+      ref={root}
       className="scene-transition"
       data-transition-seconds={transition?.seconds || 0}
       data-transition-style={transition?.style || "cut"}

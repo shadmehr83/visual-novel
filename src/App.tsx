@@ -93,7 +93,9 @@ import {
   Sparkles,
   X,
   FolderOpen,
+  PanelsTopLeft,
 } from "lucide-react";
+import { V3 } from "./v3/ui";
 import { downloadLocalEditor } from "./localEditor";
 import { exportPlayer } from "./playerExport";
 import { demo } from "./demo";
@@ -3074,6 +3076,15 @@ export default function App() {
         <p>Opening your studio…</p>
       </div>
     );
+  const layoutControls = (
+        <div className="visible-layout-controls">
+          <label>Tools <select aria-label="Tools placement" value={workspace.toolsPlacement} onChange={e => setWorkspace(w => ({...w, toolsPlacement:e.target.value as "left" | "top"}))}><option value="left">Left</option><option value="top">Top</option></select></label>
+          <label>Controls <select aria-label="Quick controls placement" value={!playing && panelLayout(workspace.docks,"controls").mode === "float" ? "float" : placement} onChange={e => setPlacement(e.target.value)}><option value="right">Right</option><option value="left">Left</option><option value="top">Top</option><option value="float">Floating</option></select></label>
+          <button onClick={() => setModal("windows")} data-help="Choose dock positions for every panel, recover floating windows, or restore the original window layout.">Windows & docking</button>
+          <button onClick={() => void restoreArtwork()}>Restore artwork</button>
+          <button onClick={() => setModal("settings")}>Layout & project settings</button>
+        </div>
+  );
   return (
     <PlaySession
       playing={playing}
@@ -3084,7 +3095,7 @@ export default function App() {
       onRestart={() => play(true)}
     >
       <div
-        data-theme={workspace.theme}
+        data-theme={V3 && workspace.theme === "dark" ? "light" : workspace.theme}
         onFocusCapture={(event) => {
           const target = event.target;
           setAuthorTyping(target instanceof HTMLTextAreaElement || (target instanceof HTMLInputElement && ["text", "number", "search"].includes(target.type)));
@@ -3105,7 +3116,7 @@ export default function App() {
             "--top-dock-size": (!playing && panelLayout(workspace.docks,"controls").mode !== "home" ? 0 : workspace.topDockHeight) + "px",
             "--bottom-size": workspace.bottomHeight + "px",
             "--preview-scale": workspace.previewScale,
-            "--ui-font": workspace.font,
+            "--ui-font": V3 && workspace.font === "Arial" ? '"Segoe UI Variable Text", "Segoe UI", system-ui, -apple-system, sans-serif' : workspace.font,
             "--ui-font-size": workspace.fontSize + "px",
             "--story-font": project.settings.dialogueFont || "Georgia",
             "--story-size": (project.settings.dialogueSize || 17) + "px",
@@ -3124,7 +3135,7 @@ export default function App() {
             <span className="brand-icon">
               <Layers size={21} />
             </span>
-            stillframe<span className="brand-sub">STUDIO</span>
+            stillframe{V3 ? <span className="brand-sub v3-mark" aria-label="version 3">3</span> : <span className="brand-sub">STUDIO</span>}
           </a>
           <div className="project-name">
             <span className="separator">/</span>
@@ -3204,14 +3215,12 @@ export default function App() {
           placement={placement}
           split={workspace.splitWorkspace && !playing}
           onSplit={toggleSplit}
+          extra={V3 && <details className="v3-layout-menu">
+            <summary data-help="Tools and controls placement, windows and docking, artwork restore and layout settings."><PanelsTopLeft size={14} aria-hidden="true" />Windows</summary>
+            {layoutControls}
+          </details>}
         />
-        <div className="visible-layout-controls">
-          <label>Tools <select aria-label="Tools placement" value={workspace.toolsPlacement} onChange={e => setWorkspace(w => ({...w, toolsPlacement:e.target.value as "left" | "top"}))}><option value="left">Left</option><option value="top">Top</option></select></label>
-          <label>Controls <select aria-label="Quick controls placement" value={!playing && panelLayout(workspace.docks,"controls").mode === "float" ? "float" : placement} onChange={e => setPlacement(e.target.value)}><option value="right">Right</option><option value="left">Left</option><option value="top">Top</option><option value="float">Floating</option></select></label>
-          <button onClick={() => setModal("windows")} data-help="Choose dock positions for every panel, recover floating windows, or restore the original window layout.">Windows & docking</button>
-          <button onClick={() => void restoreArtwork()}>Restore artwork</button>
-          <button onClick={() => setModal("settings")}>Layout & project settings</button>
-        </div>
+        {!V3 && layoutControls}
         {workspace.splitWorkspace && !playing && <div className="workspace-split-controls">
           <label>Main workspace<select aria-label="Main workspace" value={view} onChange={e => chooseMainWorkspace(e.target.value as StudioView)}>{WORKSPACES.map(([id,label]) => <option key={id} value={id}>{label}</option>)}</select></label>
           <label>Second workspace<select aria-label="Second workspace" value={workspace.secondWorkspace} onChange={e => chooseSecondWorkspace(e.target.value as StudioView)}>{WORKSPACES.filter(([id]) => id !== view).map(([id,label]) => <option key={id} value={id}>{label}</option>)}</select></label>

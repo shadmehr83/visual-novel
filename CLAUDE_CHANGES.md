@@ -4,6 +4,21 @@ Every change in this list was written by Claude (Anthropic) at the request of th
 
 > **Where this lives:** branch `claude` on GitHub. Versions end in `-claude`. `main` is the original line and is untouched.
 
+## Stillframe 3 — experimental light studio (2026-11-03, engine 3.0.0-claude)
+
+> **Separate line:** branch `claude-v3`, worked on in the `stillframe-3` folder next to `visual-novel`, kept local. It runs at http://localhost:5174 (double-click `Start Stillframe 3.cmd`, or `npm run stillframe3`) with its own browser storage, so it never touches the classic studio at 5173. The classic studio stays the main line: new features land on `claude` first and are merged into `claude-v3` afterwards.
+
+- **Runs from an optimised build** (`scripts/stillframe3.mjs`): `vite build --watch` plus `vite preview`. Per keystroke about 20–30 ms instead of 110–155 ms on the dev server, and about 120–130 MB of memory instead of 220 MB. Local Claude works there too (`configurePreviewServer` in `scripts/claude-local-plugin.ts` loads the story modules through a watcher-free Vite instance).
+- **Autosave without copying artwork** (`src/storage.ts`, IndexedDB version 2): images and sounds live in a `media` store, keyed by asset, and are written only when they change. The saved project holds the story text. Older saves load as before. Memory stayed flat over 40 edits and 5 saves; before, it grew by about 4 MB per edit.
+- **Light design** (`src/v3/stillframe3.css`, all scoped to `html[data-ui="v3"]`): one 52 px top bar plus one row for the menus, workspace tabs with icons, and icon quick tools. The classic layout row is in a new **Windows** menu. There are light panels, inputs, ON/OFF switches, menus, dialogs, search, hover help and floating windows, and no backdrop blur. The story stage, device screens and the game keep their own look. Theme choices are Light and Warm paper.
+- **New pills** (`src/RecentFeatures.tsx`): controls from the five latest releases get a green "New" pill that shows the version on hover. Names can match by their start, and DOM changes inside the playing scene no longer re-run the scan.
+- **GIF ↔ still backgrounds** (`src/BackgroundImage.tsx`, `src/SceneTransition.tsx`):
+  - Each GIF frame is encoded once (WebP) and shared by every copy, up to 64 MB.
+  - A GIF starts on its poster or a ready frame, and a frame is swapped only once it is decoded.
+  - A transition waits up to 1.5 s for a new GIF's first frame.
+  - "Smooth" is a true cross-dissolve: the new view stays opaque beneath the fading old one, so there is no dip to the dark stage.
+- Tests: `src/recentFeatures.test.tsx`; all 209 tests pass.
+
 ## Iteration 9 — Bug-fix pass, AI search, on/off dialogues, image expand (2026-11-03, engine 2.29.0-claude)
 
 - **On/Off switches:** a node can now be switched off (`disabled`), and replies already had `enabled: false`. Both have On/Off pills on the Dialogue advanced map (`src/FlowCanvas.tsx`, `src/FlowEditor.tsx`, `src/flow.ts`) and a switch in the normal editor. `skipDisabled` in `src/model.ts` passes switched-off lines during play and start. Switched-off items are greyed and struck through.

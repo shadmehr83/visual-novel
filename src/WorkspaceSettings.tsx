@@ -1,6 +1,7 @@
 import { RangeInput } from "./RangeInput";
 import type { Dispatch, SetStateAction } from "react";
 import { defaults, type WorkspaceSettings } from "./workspace";
+import { V3 } from "./v3/ui";
 export function WorkspaceControls({
   value,
   onChange,
@@ -34,7 +35,7 @@ export function WorkspaceControls({
             >
               {["Arial", "Verdana", "Trebuchet MS", "Georgia", "monospace"].map(
                 (f) => (
-                  <option key={f}>{f}</option>
+                  <option key={f} value={f}>{V3 && f === "Arial" ? "Stillframe 3 default (Segoe UI)" : f}</option>
                 ),
               )}
             </select>
@@ -53,12 +54,13 @@ export function WorkspaceControls({
           <label>
             Interface theme
             <select
-              value={value.theme}
+              value={V3 && value.theme === "dark" ? "light" : value.theme}
               onChange={(e) =>
                 set("theme", e.target.value as WorkspaceSettings["theme"])
               }
             >
-              <option value="dark">Dark</option>
+              {/* Stillframe 3 is designed light; the dark theme stays in the classic studio. */}
+              {!V3 && <option value="dark">Dark</option>}
               <option value="light">Light</option>
               <option value="warm">Warm paper</option>
             </select>
@@ -75,11 +77,13 @@ export function WorkspaceControls({
                 type="color"
                 value={
                   value.panels[key] ||
-                  (value.theme === "dark"
-                    ? "#1c2022"
-                    : value.theme === "warm"
-                      ? "#f1e7d4"
-                      : "#f4f7fa")
+                  (value.theme === "warm"
+                    ? "#f1e7d4"
+                    : V3
+                      ? "#ffffff"
+                      : value.theme === "dark"
+                        ? "#1c2022"
+                        : "#f4f7fa")
                 }
                 onChange={(e) =>
                   set("panels", { ...value.panels, [key]: e.target.value })

@@ -429,7 +429,8 @@ export function Stage({
           {asset && <g id={idPrefix + "background-source"}>
             <BackgroundImage asset={asset} fit={scene.fit} gif={scene.gif}
               cue={gifFrozenTime!==undefined?{action:"pause",time:gifFrozenTime}:scene.nodes.find(n=>n.id===nodeId)?.gifCue} cueKey={scene.id+":"+nodeId+":"+(visits.length || 0)}
-              onPosition={onGifPosition} frozen={!!idPrefix} reduced={project.settings.reducedEffects || reducedMotion}/>
+              onPosition={onGifPosition} frozen={!!idPrefix} reduced={project.settings.reducedEffects || reducedMotion}
+              poster={asset.mime === "image/gif" && asset.poster ? project.assets.find(a => a.id === asset.poster)?.data : undefined}/>
           </g>}
           {!!scene.joints?.length && <g id={idPrefix + "joint-source"}>
             {asset ? <use href={"#"+idPrefix+"background-source"}/> : <Artwork idPrefix={idPrefix+"joint-art-"} kind={scene.art}/>}

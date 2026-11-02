@@ -65,11 +65,28 @@ const send = (res: ServerResponse, status: number, body: unknown) => {
   res.setHeader("Content-Type", "application/json");
   res.end(JSON.stringify(body));
 };
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type Load = (id: string) => Promise<any>;
 export function claudeLocalPlugin(): Plugin {
   return {
     name: "claude-local",
     configureServer(server) {
-      server.middlewares.use("/api/claude-local", async (req, res) => {
+      server.middlewares.use("/api/claude-local", handler((id) => server.ssrLoadModule(id)));
+    },
+    // Stillframe 3 runs from an optimised build (vite preview); a watcher-free Vite instance
+    // loads the same story modules on demand, so local Claude works there too.
+    configurePreviewServer(server) {
+      let loader: Promise<import("vite").ViteDevServer> | undefined;
+      const load: Load = async (id) => (await (loader ||= import("vite").then(({ createServer }) => createServer({
+        root: server.config.root, configFile: false, logLevel: "error", appType: "custom",
+        server: { middlewareMode: true, hmr: false, watch: null },
+      })))).ssrLoadModule(id);
+      server.middlewares.use("/api/claude-local", handler(load));
+    },
+  };
+}
+function handler(load: Load) {
+  return async (req: IncomingMessage, res: ServerResponse) => {
         // Same-machine studio requests only.
         const host = (req.headers.origin || "http://localhost").replace(/^https?:\/\//, "");
         if (!/^(localhost|127\.0\.0\.1|\[::1\])(:\d+)?$/.test(host)) return send(res, 403, { error: "Local studio requests only." });
@@ -77,7 +94,7 @@ export function claudeLocalPlugin(): Plugin {
           if (req.method === "GET") return send(res, 200, await status());
           if (req.method !== "POST") return send(res, 405, { error: "Method not allowed" });
           const body = JSON.parse(await read(req));
-          const { characterReplyPrompt, echoesPlayer, finishReply, characterReplyRequestSchema, characterReplySchema, characterReplySystem } = (await server.ssrLoadModule("/src/characterReply.ts")) as Reply;
+          const { characterReplyPrompt, echoesPlayer, finishReply, characterReplyRequestSchema, characterReplySchema, characterReplySystem } = (await load("/src/characterReply.ts")) as Reply;
           if (req.url === "/reply") {
             const request = characterReplyRequestSchema.parse(body);
             let answer = characterReplySchema.parse(await ask(characterReplySystem, characterReplyPrompt(request), "haiku"));
@@ -86,11 +103,11 @@ export function claudeLocalPlugin(): Plugin {
             return send(res, 200, finishReply(request, answer));
           }
           if (req.url === "/rewrite") {
-            const { rewriteRequestSchema, rewriteSchema, rewritePrompt, rewriteSystem } = (await server.ssrLoadModule("/src/characterReply.ts")) as Reply;
+            const { rewriteRequestSchema, rewriteSchema, rewritePrompt, rewriteSystem } = (await load("/src/characterReply.ts")) as Reply;
             return send(res, 200, rewriteSchema.parse(await ask(rewriteSystem, rewritePrompt(rewriteRequestSchema.parse(body)), "haiku")));
           }
           if (req.url === "/search") {
-            const { aiSearchRequestSchema, aiSearchResultSchema, aiSearchPrompt, aiSearchSystem } = (await server.ssrLoadModule("/src/aiSearch.ts")) as typeof import("../src/aiSearch");
+            const { aiSearchRequestSchema, aiSearchResultSchema, aiSearchPrompt, aiSearchSystem } = (await load("/src/aiSearch.ts")) as typeof import("../src/aiSearch");
             return send(res, 200, aiSearchResultSchema.parse(await ask(aiSearchSystem, aiSearchPrompt(aiSearchRequestSchema.parse(body)), "haiku")));
           }
           if (req.url === "/log") {
@@ -100,15 +117,13 @@ export function claudeLocalPlugin(): Plugin {
             return send(res, 200, { saved: true });
           }
           if (req.url === "/assistant") {
-            const { proposalSchema } = (await server.ssrLoadModule("/src/ai.ts")) as typeof import("../src/ai");
-            const { assistantSystem } = (await server.ssrLoadModule("/functions/api/assistant.ts")) as typeof import("../functions/api/assistant");
+            const { proposalSchema } = (await load("/src/ai.ts")) as typeof import("../src/ai");
+            const { assistantSystem } = (await load("/functions/api/assistant.ts")) as typeof import("../functions/api/assistant");
             return send(res, 200, proposalSchema.parse(await ask(assistantSystem, { prompt: String(body.prompt).slice(0, 4000), context: body.context }, "sonnet")));
           }
           return send(res, 404, { error: "Unknown Claude action." });
         } catch (e) {
           send(res, 502, { error: (e as Error).message || "Claude could not answer. The story continues unchanged." });
         }
-      });
-    },
   };
 }

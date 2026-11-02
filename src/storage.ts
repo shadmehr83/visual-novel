@@ -2,27 +2,54 @@ import { openDB } from "idb";
 import { validateProject, type Project, type Runtime } from "./model";
 import { portableFeedProject } from "./feedLibrary";
 let connectionPromise: ReturnType<typeof openDB> | undefined;
-const db = () => connectionPromise ||= openDB("stillframe-studio", 1, {
-    upgrade(db) {
-      db.createObjectStore("projects");
+const db = () => connectionPromise ||= openDB("stillframe-studio", 2, {
+    upgrade(db, oldVersion) {
+      if (oldVersion < 1) db.createObjectStore("projects");
+      // Stillframe 3 (by Claude): artwork and sound live apart from the story, keyed by asset.
+      if (oldVersion < 2) db.createObjectStore("media");
     },
   });
 let savedProject: Project | undefined;
 let savedToken = "";
+// Media already in the "media" store. Edits keep unchanged artwork strings identical,
+// so an autosave only writes the story text plus artwork that actually changed.
+const storedMedia = new Map<string, string>();
+const mediaKeys = (p: Project) => [
+  ...p.assets.map((a) => ["image:" + a.id, a.data] as const),
+  ...(p.audioAssets || []).map((a) => ["audio:" + a.id, a.data] as const),
+];
+const withoutMedia = (p: Project) => ({
+  ...p,
+  assets: p.assets.map((a) => ({ ...a, data: "" })),
+  ...(p.audioAssets ? { audioAssets: p.audioAssets.map((a) => ({ ...a, data: "" })) } : {}),
+});
 export async function save(p: Project, r: Runtime | null) {
-  // The editor uses immutable updates. Only a new project reference needs
-  // validation and a fresh structured clone of the embedded artwork.
-  const validated = p === savedProject ? undefined : validateProject(p);
-  const tx = (await db()).transaction("projects", "readwrite");
-  const token = await tx.store.get("current-project-token");
+  // The editor uses immutable updates. Only a new project reference needs validation.
+  if (p !== savedProject) validateProject(p);
+  const tx = (await db()).transaction(["projects", "media"], "readwrite");
+  const store = tx.objectStore("projects"), media = tx.objectStore("media");
+  const token = await store.get("current-project-token");
   let nextToken = savedToken;
+  const writes: Promise<unknown>[] = [];
   if (p !== savedProject || token !== savedToken) {
     nextToken = crypto.randomUUID();
-    await tx.store.put({ project: validated || validateProject(p), runtime: r }, "current");
-    await tx.store.put(nextToken, "current-project-token");
+    const keep = new Set<string>();
+    for (const [key, data] of mediaKeys(p)) {
+      keep.add(key);
+      if (storedMedia.get(key) !== data) { writes.push(media.put(data, key)); storedMedia.set(key, data); }
+    }
+    for (const key of [...storedMedia.keys()]) if (!keep.has(key)) { writes.push(media.delete(key)); storedMedia.delete(key); }
+    writes.push(store.put({ project: withoutMedia(p), runtime: r, media: true }, "current"), store.put(nextToken, "current-project-token"));
   }
-  await tx.store.put({ token: nextToken, runtime: r }, "current-runtime");
-  await tx.done;
+  writes.push(store.put({ token: nextToken, runtime: r }, "current-runtime"));
+  try {
+    await Promise.all(writes);
+    await tx.done;
+  } catch (e) {
+    // Nothing was written; the next save rewrites every media item it needs.
+    storedMedia.clear();
+    throw e;
+  }
   savedProject = p;
   savedToken = nextToken;
 }
@@ -30,10 +57,22 @@ export async function load(): Promise<{
   project: Project;
   runtime: Runtime | null;
 } | null> {
-  const tx = (await db()).transaction("projects", "readonly");
+  const tx = (await db()).transaction(["projects", "media"], "readonly");
+  const store = tx.objectStore("projects"), media = tx.objectStore("media");
   const [v, progress, token] = await Promise.all([
-    tx.store.get("current"), tx.store.get("current-runtime"), tx.store.get("current-project-token"),
+    store.get("current"), store.get("current-runtime"), store.get("current-project-token"),
   ]);
+  storedMedia.clear();
+  if (v?.media) {
+    const fill = async (a: { id: string; data: string }, kind: string) => {
+      a.data = (await media.get(kind + a.id)) || "";
+      if (a.data) storedMedia.set(kind + a.id, a.data);
+    };
+    await Promise.all([
+      ...v.project.assets.map((a: Project["assets"][number]) => fill(a, "image:")),
+      ...(v.project.audioAssets || []).map((a: { id: string; data: string }) => fill(a, "audio:")),
+    ]);
+  }
   await tx.done;
   return v ? { project: validateProject(v.project), runtime: progress && progress.token === token ? progress.runtime : v.runtime } : null;
 }
@@ -57,17 +96,15 @@ export async function openGithubSnapshot(
   previous?: Workspace,
 ) {
   const snapshot = validateProject(project);
+  // load() puts the separately stored artwork back into the previous project.
+  const old = previous || (await load());
   const connection = await db();
   const tx = connection.transaction("projects", "readwrite");
   try {
-    const old = previous || (await tx.store.get("current"));
     if (old) {
-      const [progress, token] = previous ? [null, null] : await Promise.all([
-        tx.store.get("current-runtime"), tx.store.get("current-project-token"),
-      ]);
       const workspace = {
         project: validateProject(old.project),
-        runtime: progress && progress.token === token ? progress.runtime : old.runtime,
+        runtime: old.runtime,
       };
       if (JSON.stringify(workspace.project) !== JSON.stringify(snapshot))
         await tx.store.put(

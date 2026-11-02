@@ -1,10 +1,11 @@
 {
   "name": "visual-novel-studio",
-  "version": "2.29.0-claude",
+  "version": "3.0.0-claude",
   "private": true,
   "type": "module",
   "scripts": {
     "dev": "vite --host 0.0.0.0",
+    "stillframe3": "node scripts/stillframe3.mjs",
     "build": "tsc -b && tsc -p tsconfig.worker.json && vite build && node scripts/worker.mjs && node scripts/standalone.mjs && node scripts/offline.mjs",
     "test": "vitest run",
     "preview": "vite preview --host 0.0.0.0",

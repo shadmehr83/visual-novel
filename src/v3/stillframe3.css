@@ -1,0 +1,668 @@
+/* Stillframe 3 (by Claude): a light, calm studio. Every rule is scoped to html[data-ui="v3"],
+   so the classic studio is untouched. Story artwork, the game and device screens keep their own look. */
+html[data-ui="v3"] {
+  --v3-bg: #f4f3ef;
+  --v3-surface: #ffffff;
+  --v3-surface-2: #faf9f6;
+  --v3-sunken: #f1efea;
+  --v3-hover: #ecebe6;
+  --v3-line: #e4e1da;
+  --v3-line-strong: #d3cfc6;
+  --v3-text: #1d2125;
+  --v3-text-2: #474d55;
+  --v3-muted: #767b83;
+  --v3-accent: #b0562a;
+  --v3-accent-hover: #974621;
+  --v3-accent-soft: #f8ebe2;
+  --v3-accent-line: #ecc9b3;
+  --v3-new: #0b8457;
+  --v3-new-soft: #e3f4ec;
+  --v3-radius: 8px;
+  --v3-radius-sm: 6px;
+  --v3-shadow: 0 1px 2px rgb(24 26 30 / 6%);
+  --v3-shadow-pop: 0 14px 36px rgb(24 26 30 / 14%), 0 2px 6px rgb(24 26 30 / 6%);
+  background: var(--v3-bg);
+  color-scheme: light;
+}
+html[data-ui="v3"] body {
+  background: var(--v3-bg);
+}
+html[data-ui="v3"] .app[data-theme="warm"] {
+  --v3-bg: #efe7d8;
+  --v3-surface: #fbf6ec;
+  --v3-surface-2: #f6efe1;
+  --v3-sunken: #efe6d5;
+  --v3-hover: #e9dfcc;
+  --v3-line: #ddd0b9;
+  --v3-line-strong: #cdbd9f;
+  --v3-text: #352f26;
+  --v3-text-2: #574e41;
+  --v3-muted: #7f7462;
+}
+/* The studio's own colour names follow the Stillframe 3 palette (dialogs render beside .app). */
+html[data-ui="v3"],
+html[data-ui="v3"] .app {
+  --ui-bg: var(--v3-bg);
+  --panel: var(--v3-surface);
+  --ui-text: var(--v3-text);
+  --text: var(--v3-text);
+  --line: var(--v3-line);
+  --muted: var(--v3-muted);
+  --accent: var(--v3-accent);
+  --hover: var(--v3-hover);
+  -webkit-font-smoothing: antialiased;
+}
+html[data-ui="v3"] .app {
+  background: var(--v3-bg);
+  color: var(--v3-text);
+}
+
+/* ---------- Controls (studio only: the stage, device screens and game keep their look) ---------- */
+html[data-ui="v3"] :is(.app, .modal-backdrop) button:not(:is(.stage-frame, .device-shell, .standalone-experience, .dialogue-overlay) *) {
+  border-radius: var(--v3-radius-sm);
+  transition: background 0.12s, border-color 0.12s, color 0.12s;
+}
+html[data-ui="v3"] :is(.app, .modal-backdrop) button:not(.primary):not(:disabled):hover:not(:is(.stage-frame, .device-shell, .standalone-experience, .dialogue-overlay) *) {
+  background: var(--v3-hover);
+}
+html[data-ui="v3"] :is(.app, .modal-backdrop) button.primary:not(:is(.stage-frame, .device-shell, .standalone-experience, .dialogue-overlay) *) {
+  background: var(--v3-accent);
+  border-color: var(--v3-accent);
+  color: #fff;
+  font-weight: 600;
+  box-shadow: var(--v3-shadow);
+}
+html[data-ui="v3"] :is(.app, .modal-backdrop) button.primary:not(:disabled):hover:not(:is(.stage-frame, .device-shell, .standalone-experience, .dialogue-overlay) *) {
+  background: var(--v3-accent-hover);
+  border-color: var(--v3-accent-hover);
+}
+html[data-ui="v3"] :is(.app, .modal-backdrop) :is(input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="color"]), textarea, select):not(:is(.stage-frame, .device-shell, .standalone-experience, .dialogue-overlay) *) {
+  background: var(--v3-surface);
+  color: var(--v3-text);
+  border: 1px solid var(--v3-line-strong);
+  border-radius: var(--v3-radius-sm);
+}
+html[data-ui="v3"] :is(.app, .modal-backdrop) :is(input, textarea, select):focus:not(:is(.stage-frame, .device-shell, .standalone-experience, .dialogue-overlay) *) {
+  border-color: var(--v3-accent);
+  box-shadow: 0 0 0 3px rgb(176 86 42 / 14%);
+}
+html[data-ui="v3"] :is(.app, .modal-backdrop) :is(input, textarea, select):disabled:not(:is(.stage-frame, .device-shell, .standalone-experience, .dialogue-overlay) *) {
+  background: var(--v3-sunken);
+}
+/* Readable on/off switches, lighter and slimmer. */
+html[data-ui="v3"] :is(.app, .modal-backdrop) input[type="checkbox"]:not(:is(.stage-frame, .device-shell, .standalone-experience) *) {
+  width: 42px !important;
+  min-width: 42px !important;
+  max-width: 42px !important;
+  flex: 0 0 42px !important;
+  height: 22px !important;
+  border: 0 !important;
+  border-radius: 999px !important;
+  background: #d8d5ce !important;
+  transition: background 0.15s;
+}
+html[data-ui="v3"] :is(.app, .modal-backdrop) input[type="checkbox"]:not(:is(.stage-frame, .device-shell, .standalone-experience) *)::before {
+  left: 3px;
+  top: 3px;
+  width: 16px;
+  height: 16px;
+  background: #fff;
+  box-shadow: 0 1px 2px rgb(0 0 0 / 25%);
+}
+html[data-ui="v3"] :is(.app, .modal-backdrop) input[type="checkbox"]:not(:is(.stage-frame, .device-shell, .standalone-experience) *)::after {
+  top: 5px;
+  right: 6px;
+  font: 700 7.5px/12px system-ui, sans-serif;
+  color: #6f737a;
+}
+html[data-ui="v3"] :is(.app, .modal-backdrop) input[type="checkbox"]:checked:not(:is(.stage-frame, .device-shell, .standalone-experience) *) {
+  background: #23845a !important;
+}
+html[data-ui="v3"] :is(.app, .modal-backdrop) input[type="checkbox"]:checked:not(:is(.stage-frame, .device-shell, .standalone-experience) *)::before {
+  transform: translateX(20px);
+}
+html[data-ui="v3"] :is(.app, .modal-backdrop) input[type="checkbox"]:checked:not(:is(.stage-frame, .device-shell, .standalone-experience) *)::after {
+  left: 6px;
+  color: #fff;
+}
+html[data-ui="v3"] :is(.app, .modal-backdrop) input[type="checkbox"]:focus-visible {
+  outline: 2px solid var(--v3-accent) !important;
+}
+html[data-ui="v3"] :is(.app, .modal-backdrop) input[type="range"] {
+  accent-color: var(--v3-accent);
+}
+html[data-ui="v3"] :is(.app, .modal-backdrop) :is(label, .section-label, h3, h4):not(:is(.stage-frame, .device-shell, .standalone-experience, .dialogue-overlay) *) {
+  color: var(--v3-text-2);
+}
+html[data-ui="v3"] :is(.app, .modal-backdrop) :is(.muted, .help, .small, small):not(:is(.stage-frame, .device-shell, .standalone-experience, .dialogue-overlay) *) {
+  color: var(--v3-muted);
+}
+html[data-ui="v3"] :is(.app, .modal-backdrop) :is(button, a, summary):focus-visible {
+  outline: 2px solid var(--v3-accent);
+  outline-offset: 2px;
+}
+html[data-ui="v3"] .app ::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+html[data-ui="v3"] .app ::-webkit-scrollbar-thumb {
+  background: #d3cfc7;
+  border: 3px solid transparent;
+  background-clip: padding-box;
+  border-radius: 10px;
+}
+html[data-ui="v3"] .app ::-webkit-scrollbar-thumb:hover {
+  background-color: #b8b3a9;
+}
+html[data-ui="v3"] .app ::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+/* ---------- Top bar ---------- */
+html[data-ui="v3"] .app > header {
+  height: 52px;
+  gap: 18px;
+  padding: 0 16px;
+  background: var(--v3-surface);
+  border-bottom: 1px solid var(--v3-line);
+}
+html[data-ui="v3"] .app .brand {
+  font-size: 19px;
+  font-weight: 650;
+  letter-spacing: -0.6px;
+  color: var(--v3-text);
+  gap: 8px;
+}
+html[data-ui="v3"] .app .brand-icon {
+  display: inline-grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  background: var(--v3-text);
+  color: #fff;
+}
+html[data-ui="v3"] .app .brand-icon svg {
+  width: 16px;
+  height: 16px;
+}
+html[data-ui="v3"] .app .brand-sub.v3-mark {
+  display: inline-grid;
+  place-items: center;
+  min-width: 20px;
+  height: 20px;
+  margin-left: 4px;
+  padding: 0 5px;
+  border-radius: 6px;
+  background: var(--v3-accent);
+  color: #fff;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0;
+}
+html[data-ui="v3"] .app .project-name {
+  gap: 8px;
+}
+html[data-ui="v3"] .app .project-name .separator {
+  color: var(--v3-line-strong);
+}
+html[data-ui="v3"] .app .project-name input {
+  border: 1px solid transparent !important;
+  background: transparent !important;
+  font-weight: 600;
+  font-size: 13px;
+  padding: 5px 8px;
+  box-shadow: none !important;
+}
+html[data-ui="v3"] .app .project-name input:hover {
+  border-color: var(--v3-line) !important;
+}
+html[data-ui="v3"] .app .project-name input:focus {
+  border-color: var(--v3-accent) !important;
+  background: var(--v3-surface) !important;
+}
+html[data-ui="v3"] .app .project-name .version {
+  background: var(--v3-sunken);
+  color: var(--v3-muted);
+  border: 0;
+  border-radius: 20px;
+  font-size: 10px;
+  letter-spacing: 0.3px;
+  padding: 3px 8px;
+}
+html[data-ui="v3"] .app .feature-search-trigger {
+  min-width: 260px;
+  justify-content: flex-start;
+  background: var(--v3-sunken);
+  border: 1px solid var(--v3-line);
+  color: var(--v3-muted);
+  border-radius: 999px;
+  padding: 6px 14px;
+}
+html[data-ui="v3"] .app .feature-search-trigger:hover {
+  background: var(--v3-hover) !important;
+  border-color: var(--v3-line-strong);
+}
+html[data-ui="v3"] .app .header-actions {
+  gap: 4px;
+}
+html[data-ui="v3"] .app .header-actions .divider {
+  background: var(--v3-line);
+}
+html[data-ui="v3"] .app .save-status {
+  color: var(--v3-muted);
+  font-size: 11px;
+  margin-right: 6px;
+}
+html[data-ui="v3"] .app .save-status i.saved {
+  background: var(--v3-new);
+}
+html[data-ui="v3"] .app .header-actions > button:not(.primary) {
+  color: var(--v3-text-2);
+  border: 1px solid transparent;
+}
+html[data-ui="v3"] .app .header-actions > button[aria-pressed] {
+  border-color: var(--v3-line-strong);
+  padding: 7px 12px;
+}
+html[data-ui="v3"] .app .header-actions > button[aria-pressed="true"] {
+  background: var(--v3-accent-soft);
+  border-color: var(--v3-accent-line);
+  color: var(--v3-accent-hover);
+}
+html[data-ui="v3"] .app .header-actions > button.primary {
+  padding: 8px 14px;
+  border-radius: 999px;
+}
+
+/* ---------- Menus + workspace tabs in one row ---------- */
+html[data-ui="v3"] .app .studio-navigation {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 42px;
+  padding: 0 12px;
+  background: var(--v3-surface);
+  border-bottom: 1px solid var(--v3-line);
+}
+html[data-ui="v3"] .app .studio-menu {
+  display: contents;
+}
+html[data-ui="v3"] .app .studio-menu > details {
+  order: 1;
+}
+html[data-ui="v3"] .app .studio-menu summary {
+  padding: 6px 10px;
+  color: var(--v3-text-2);
+  font-size: 12.5px;
+  border-radius: var(--v3-radius-sm);
+}
+html[data-ui="v3"] .app .studio-menu details[open] > summary,
+html[data-ui="v3"] .app .studio-menu summary:hover {
+  background: var(--v3-hover);
+  color: var(--v3-text);
+}
+html[data-ui="v3"] .app .studio-menu-popover,
+html[data-ui="v3"] .app .v3-layout-menu > .visible-layout-controls {
+  top: calc(100% + 6px);
+  background: var(--v3-surface);
+  border: 1px solid var(--v3-line);
+  border-radius: 10px;
+  box-shadow: var(--v3-shadow-pop);
+  padding: 6px;
+  color: var(--v3-text);
+}
+html[data-ui="v3"] .app .studio-menu-popover button {
+  padding: 8px 10px;
+  border-radius: var(--v3-radius-sm);
+  font-size: 12.5px;
+}
+html[data-ui="v3"] .app .studio-menu-popover button:hover {
+  background: var(--v3-hover);
+}
+html[data-ui="v3"] .app .studio-workspace-tabs {
+  order: 2;
+  display: flex;
+  gap: 2px;
+  padding: 3px;
+  margin-left: 10px;
+  background: var(--v3-sunken);
+  border-radius: 9px;
+  border: 0;
+}
+html[data-ui="v3"] .app .studio-workspace-tabs button {
+  gap: 6px;
+  padding: 5px 11px;
+  border: 0;
+  border-radius: 7px;
+  color: var(--v3-muted);
+  font-size: 12.5px;
+  font-weight: 500;
+}
+html[data-ui="v3"] .app .studio-workspace-tabs button:hover {
+  color: var(--v3-text);
+  background: rgb(255 255 255 / 60%);
+}
+html[data-ui="v3"] .app .studio-workspace-tabs button[aria-selected="true"] {
+  background: var(--v3-surface);
+  color: var(--v3-text);
+  box-shadow: 0 1px 2px rgb(24 26 30 / 10%), 0 0 0 1px rgb(24 26 30 / 4%);
+}
+html[data-ui="v3"] .app .studio-workspace-tabs button[aria-selected="true"] svg {
+  color: var(--v3-accent);
+}
+html[data-ui="v3"] .app .studio-quick-tools {
+  order: 3;
+  margin-left: auto;
+  gap: 2px;
+  flex-wrap: nowrap;
+}
+html[data-ui="v3"] .app .studio-quick-tools > button,
+html[data-ui="v3"] .app .v3-layout-menu > summary {
+  font-size: 12px;
+  padding: 6px 9px;
+  color: var(--v3-text-2);
+  border: 0;
+  white-space: nowrap;
+}
+html[data-ui="v3"] .app .studio-quick-tools .engine-version {
+  color: var(--v3-muted);
+  font-variant-numeric: tabular-nums;
+  font-size: 11px;
+  border: 1px solid var(--v3-line);
+  border-radius: 999px;
+  padding: 3px 9px;
+  margin-left: 4px;
+}
+html[data-ui="v3"] .app .split-workspace-button {
+  order: 4;
+  position: static;
+  flex-shrink: 0;
+  background: var(--v3-surface);
+  color: var(--v3-text-2);
+  border: 1px solid var(--v3-line-strong);
+  padding: 5px 11px;
+  font-size: 12px;
+  margin-left: 6px;
+}
+html[data-ui="v3"] .app .split-workspace-button[aria-pressed="true"] {
+  background: var(--v3-accent-soft);
+  border-color: var(--v3-accent-line);
+  color: var(--v3-accent-hover);
+}
+html[data-ui="v3"] .app :is(.studio-quick-tools > button, .split-workspace-button) {
+  gap: 6px;
+}
+/* Narrower windows keep one row: quick tools, then unselected tabs, show only their icon (the name is on hover). */
+@media (max-width: 1640px) {
+  html[data-ui="v3"] .app .v3-quick-label {
+    display: none;
+  }
+  html[data-ui="v3"] .app .studio-quick-tools > button {
+    padding-inline: 8px;
+  }
+}
+@media (max-width: 1340px) {
+  html[data-ui="v3"] .app .studio-workspace-tabs button:not([aria-selected="true"]) .v3-tab-label {
+    display: none;
+  }
+  html[data-ui="v3"] .app .feature-search-trigger {
+    min-width: 180px;
+  }
+}
+@media (max-width: 1100px) {
+  html[data-ui="v3"] .app .studio-navigation {
+    flex-wrap: wrap;
+    padding-block: 4px;
+  }
+  html[data-ui="v3"] .app .studio-quick-tools {
+    flex-wrap: wrap;
+  }
+}
+/* The layout row of the classic studio lives in the Windows popover. */
+html[data-ui="v3"] .app .v3-layout-menu {
+  position: relative;
+}
+html[data-ui="v3"] .app .v3-layout-menu > summary {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  list-style: none;
+  cursor: pointer;
+  border-radius: var(--v3-radius-sm);
+}
+html[data-ui="v3"] .app .v3-layout-menu > summary::-webkit-details-marker {
+  display: none;
+}
+html[data-ui="v3"] .app .v3-layout-menu[open] > summary,
+html[data-ui="v3"] .app .v3-layout-menu > summary:hover {
+  background: var(--v3-hover);
+  color: var(--v3-text);
+}
+html[data-ui="v3"] .app .v3-layout-menu > .visible-layout-controls {
+  position: absolute;
+  right: 0;
+  z-index: 95;
+  display: grid;
+  gap: 4px;
+  width: 260px;
+  padding: 10px;
+  border-bottom: 0;
+}
+html[data-ui="v3"] .app .v3-layout-menu > .visible-layout-controls > label {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  font-size: 12px;
+  color: var(--v3-text-2);
+  padding: 2px 2px 6px;
+}
+html[data-ui="v3"] .app .v3-layout-menu > .visible-layout-controls select {
+  width: 130px;
+  margin: 0;
+  padding: 5px 8px;
+}
+html[data-ui="v3"] .app .v3-layout-menu > .visible-layout-controls > button {
+  justify-content: flex-start;
+  width: 100%;
+  padding: 8px 10px;
+  font-size: 12.5px;
+  border-top: 0;
+}
+html[data-ui="v3"] .app .v3-layout-menu > .visible-layout-controls > button:first-of-type {
+  border-top: 1px solid var(--v3-line);
+  border-radius: 0 0 var(--v3-radius-sm) var(--v3-radius-sm);
+  margin-top: 2px;
+  padding-top: 10px;
+}
+html[data-ui="v3"] .app .workspace-split-controls {
+  background: var(--v3-surface-2);
+  border-bottom: 1px solid var(--v3-line);
+}
+
+/* ---------- Panels ---------- */
+html[data-ui="v3"] .app :is(.panel-chrome, .dock-panel-header, .panel-heading) {
+  background: var(--v3-surface);
+  color: var(--v3-muted);
+  border-color: var(--v3-line);
+}
+html[data-ui="v3"] .app :is(header, .library, .inspector, .bottom-panel, .rail, .workspace-toolbar, .snapshot-toolbar, .effect-tabs, .panel-layout, .inspector-tabs, .app-footer) {
+  background: var(--v3-surface);
+  border-color: var(--v3-line);
+}
+html[data-ui="v3"] .app :is(main, .preview-area) {
+  background: var(--v3-bg);
+}
+html[data-ui="v3"] .app .rail {
+  background: var(--v3-surface-2);
+  border-right: 1px solid var(--v3-line);
+}
+html[data-ui="v3"] .app .rail button {
+  color: var(--v3-muted);
+  border-radius: 9px;
+}
+html[data-ui="v3"] .app .rail button.active {
+  background: var(--v3-accent-soft);
+  color: var(--v3-accent-hover);
+}
+html[data-ui="v3"] .app .rail .avatar {
+  background: var(--v3-sunken);
+  color: var(--v3-text-2);
+}
+html[data-ui="v3"] .app .app-footer {
+  color: var(--v3-muted);
+  border-top: 1px solid var(--v3-line);
+}
+html[data-ui="v3"] .app :is(.effect-tabs, .inspector-tabs, .bottom-tabs, .tool-tabs) button {
+  color: var(--v3-text-2);
+  border-radius: var(--v3-radius-sm);
+}
+html[data-ui="v3"] .app :is(.effect-tabs, .inspector-tabs, .bottom-tabs, .tool-tabs) button:is(.active, [aria-selected="true"]) {
+  background: var(--v3-accent-soft);
+  color: var(--v3-accent-hover);
+  border-color: var(--v3-accent-line);
+}
+/* Dialogue editor tabs stay on one line and scroll sideways when the centre is narrow. */
+html[data-ui="v3"] .app .bottom-tabs {
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  scrollbar-width: thin;
+}
+html[data-ui="v3"] .app .bottom-tabs > * {
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+html[data-ui="v3"] .app :is(.clue, .state-grid > div, .choice-editor, .region-box, .property-section) {
+  border-color: var(--v3-line);
+}
+html[data-ui="v3"] .app :is(.scene-card.selected, .node-list button.active) {
+  background: var(--v3-accent-soft);
+  border-color: var(--v3-accent-line);
+  color: var(--v3-text);
+}
+html[data-ui="v3"] .app .slider output {
+  background: var(--v3-sunken);
+  color: var(--v3-text-2);
+}
+
+/* ---------- New features: a small pill that shows the release version on hover ---------- */
+html[data-ui="v3"] [data-recent] {
+  outline: none;
+  box-shadow: none;
+}
+html[data-ui="v3"] :is(button, summary, a)[data-recent]::after {
+  content: none;
+}
+html[data-ui="v3"] :is(button, summary, a, label)[data-new]::after {
+  content: "New";
+  display: inline-block;
+  flex: 0 0 auto;
+  min-width: 44px;
+  margin-left: 7px;
+  padding: 1px 6px;
+  border-radius: 999px;
+  background: var(--v3-new-soft);
+  color: var(--v3-new);
+  box-shadow: inset 0 0 0 1px rgb(11 132 87 / 22%);
+  font: 700 9px/14px system-ui, sans-serif;
+  letter-spacing: 0.2px;
+  text-align: center;
+  vertical-align: 1px;
+  white-space: nowrap;
+}
+html[data-ui="v3"] :is(button, summary, a, label)[data-new]:hover::after {
+  content: attr(data-new);
+}
+
+html[data-ui="v3"] .app .claude-mark {
+  color: #a4471c;
+  background: #fbeee6;
+  border-color: #efc7b1;
+}
+html[data-ui="v3"] .app .new-mark {
+  color: var(--v3-new);
+  background: var(--v3-new-soft);
+  border-color: rgb(11 132 87 / 25%);
+}
+html[data-ui="v3"] .app .flow-switch {
+  background: #fff !important;
+  color: #1f7a50 !important;
+  border-color: #9fd2b8 !important;
+  box-shadow: var(--v3-shadow);
+}
+html[data-ui="v3"] .app .flow-switch.off {
+  color: #b2442f !important;
+  border-color: #eab3a6 !important;
+}
+html[data-ui="v3"] .app .asset-expand-icon {
+  background: rgb(255 255 255 / 88%);
+  color: var(--v3-text);
+  box-shadow: var(--v3-shadow);
+}
+
+/* ---------- Dialogs ---------- */
+/* No backdrop blur: it repaints the whole studio on every frame behind a dialog. */
+html[data-ui="v3"] .modal-backdrop {
+  background: rgb(29 33 37 / 30%);
+  backdrop-filter: none;
+}
+html[data-ui="v3"] .feature-search-backdrop {
+  background: rgb(29 33 37 / 30%);
+  backdrop-filter: none;
+}
+html[data-ui="v3"] .feature-search-dialog {
+  background: var(--v3-surface);
+  color: var(--v3-text);
+  border: 1px solid var(--v3-line);
+  border-radius: 14px;
+  box-shadow: var(--v3-shadow-pop);
+}
+html[data-ui="v3"] .feature-search-dialog > input {
+  border-radius: 10px;
+  border: 1px solid var(--v3-line-strong);
+}
+html[data-ui="v3"] .feature-search-results > :is(.search-selected, button:hover) {
+  background: var(--v3-accent-soft);
+  border-color: var(--v3-accent-line);
+}
+html[data-ui="v3"] .feature-search-results > button {
+  align-items: flex-start;
+  text-align: left;
+  border-radius: 10px;
+}
+html[data-ui="v3"] .feature-search-results > button span {
+  color: var(--v3-muted);
+}
+html[data-ui="v3"] .hover-help {
+  background: var(--v3-text);
+  color: #f4f3ef;
+  border: 0;
+  border-radius: 10px;
+  box-shadow: var(--v3-shadow-pop);
+}
+html[data-ui="v3"] .floating-dock {
+  border: 1px solid var(--v3-line-strong);
+  border-radius: 10px;
+  box-shadow: var(--v3-shadow-pop);
+}
+html[data-ui="v3"] .floating-dock:focus-within {
+  border-color: var(--v3-accent-line);
+}
+html[data-ui="v3"] .panel-placement-menu > div {
+  background: var(--v3-surface);
+  border: 1px solid var(--v3-line);
+  border-radius: 10px;
+  box-shadow: var(--v3-shadow-pop);
+}
+html[data-ui="v3"] .app .panel-chrome :is(button, summary):hover {
+  background: var(--v3-hover);
+  border-color: transparent;
+}
+html[data-ui="v3"] .modal {
+  background: var(--v3-surface);
+  color: var(--v3-text);
+  border: 1px solid var(--v3-line);
+  border-radius: 14px;
+  box-shadow: var(--v3-shadow-pop);
+}
