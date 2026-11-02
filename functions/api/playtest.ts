@@ -97,7 +97,9 @@ export async function onAdmin(request: Request, env: PlaytestEnv) {
   const url = new URL(request.url);
   const plain = { "Cache-Control": "no-store" };
   if (url.pathname === "/api/admin/status") return json({ database: !!env.PLAYTEST_DB, password: !!env.ADMIN_PASSWORD, code: !!env.PLAYTEST_TOKEN }, 200, plain);
-  if (!env.ADMIN_PASSWORD || request.headers.get("authorization") !== `Bearer ${env.ADMIN_PASSWORD}`)
+  // Stray spaces from typing or pasting the password are ignored on both sides.
+  const given = (request.headers.get("authorization") || "").replace(/^Bearer\s+/, "").trim();
+  if (!env.ADMIN_PASSWORD || given !== env.ADMIN_PASSWORD.trim())
     return json({ error: env.ADMIN_PASSWORD ? "Wrong admin password." : "Add an ADMIN_PASSWORD secret in Cloudflare first." }, 401, plain);
   if (request.headers.get("origin") && request.headers.get("origin") !== url.origin) return json({ error: "Same-origin only." }, 403, plain);
   if (!env.PLAYTEST_DB) return json({ error: "Add the PLAYTEST_DB database binding in Cloudflare first." }, 503, plain);

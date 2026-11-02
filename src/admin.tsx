@@ -20,7 +20,7 @@ function Admin() {
   const [selected, setSelected] = useState<PlayerRow | null>(null);
   const [events, setEvents] = useState<Ev[]>([]);
   const api = async (path: string, init?: RequestInit) => {
-    const r = await fetch(path, { ...init, headers: { ...(init?.headers || {}), Authorization: "Bearer " + password, "Content-Type": "application/json" } });
+    const r = await fetch(path, { ...init, headers: { ...(init?.headers || {}), Authorization: "Bearer " + password.trim(), "Content-Type": "application/json" } });
     const body = await r.json().catch(() => ({}));
     if (!r.ok) throw Error(body.error || "Request failed");
     return body;

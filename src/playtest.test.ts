@@ -54,3 +54,8 @@ it("keeps the admin API behind the admin password", async () => {
   expect((await onAdmin(req("/api/admin/players", "secret"), { ADMIN_PASSWORD: "secret" })).status).toBe(503);
   expect((await onAdmin(req("/api/admin/players", "secret"), { ADMIN_PASSWORD: "secret", PLAYTEST_DB: fakeDb(0).db })).status).toBe(200);
 });
+
+it("ignores stray spaces around the admin password", async () => {
+  const req = new Request("https://site.test/api/admin/players", { headers: { authorization: "Bearer  sh " } });
+  expect((await onAdmin(req, { ADMIN_PASSWORD: "sh\n", PLAYTEST_DB: fakeDb(0).db })).status).toBe(200);
+});
