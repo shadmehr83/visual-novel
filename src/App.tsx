@@ -55,7 +55,7 @@ import { SceneTransition } from "./SceneTransition";
 import { DeviceOverlay as PhoneUI } from "./DeviceOverlay";
 import { SelfReply } from "./SelfReply";
 import { LastLine } from "./LastLine";
-import { pendingReply } from "./characterReply";
+import { claudeExport, pendingReply } from "./characterReply";
 import { SelectionToolbar } from "./SelectionToolbar";
 import { useWorkspace, contrast } from "./workspace";
 import { WorkspaceControls } from "./WorkspaceSettings";
@@ -1337,13 +1337,17 @@ export default function App() {
                 )}
 
                 <button
+                  data-help="Download a playable HTML file of the written story. Works offline; characters do not answer self-replies."
                   onClick={() =>
                     exportPlayer(project).catch((e) => setError(String(e)))
                   }
                 >
-                  <Download size={15} /> Export playable HTML
+                  <Download size={15} /> Export playable HTML · without Claude
                 </button>
-                <button data-help="Download a phone-optimized playable HTML file: full game viewport, larger phone, compact text and tap-to-continue. Sound, fullscreen and save/quit live in Pause menu. Your editable project stays unchanged." onClick={() => exportPlayer(project, undefined, "phone").catch(e => setError(String(e)))}><Download size={15} /> Export phone game</button>
+                <button data-help="Download a phone-optimized playable HTML file: full game viewport, larger phone, compact text and tap-to-continue. Works offline; characters do not answer self-replies. Sound, fullscreen and save/quit live in Pause menu. Your editable project stays unchanged." onClick={() => exportPlayer(project, undefined, "phone").catch(e => setError(String(e)))}><Download size={15} /> Export phone game · without Claude</button>
+                {/* Claude versions (by Claude): characters answer testers' self-replies through the hosted game server. */}
+                <button data-help="Download a playable HTML file where characters answer testers' own replies live through your Claude API, and their playthroughs appear on the admin page. Needs an internet connection." onClick={() => { const claude = claudeExport(); if (claude) exportPlayer(project, undefined, "desktop", claude).catch(e => setError(String(e))); }}><Download size={15} /> Export playable HTML · with Claude</button>
+                <button data-help="Download the phone-optimized game where characters answer testers' own replies live through your Claude API, and their playthroughs appear on the admin page. Needs an internet connection." onClick={() => { const claude = claudeExport(); if (claude) exportPlayer(project, undefined, "phone", claude).catch(e => setError(String(e))); }}><Download size={15} /> Export phone game · with Claude</button>
                 <AdvancedExport project={project} />
                 <button onClick={() => importInput.current?.click()}>
                   <FolderOpen size={15} /> Open project

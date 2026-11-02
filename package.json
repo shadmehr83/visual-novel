@@ -1,6 +1,6 @@
 {
   "name": "visual-novel-studio",
-  "version": "2.27.2-claude",
+  "version": "2.28.0-claude",
   "private": true,
   "type": "module",
   "scripts": {

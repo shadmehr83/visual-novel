@@ -2,10 +2,11 @@ import { demandConfiguration, publishDemand } from "./api/demands";
 import { publishProject } from "./api/project";
 import { onRequestGet, onRequestPost } from "./api/assistant";
 import { onReplyGet, onReplyOptions, onReplyPost } from "./api/reply";
+import { onAdmin, onPlaytest, type PlaytestEnv } from "./api/playtest";
 export default {
   async fetch(
     request: Request,
-    env: Parameters<typeof onRequestPost>[0]["env"] & {
+    env: Parameters<typeof onRequestPost>[0]["env"] & PlaytestEnv & {
       GITHUB_PROJECT_TOKEN?: string;
       ASSETS: { fetch: (r: Request) => Promise<Response> };
     },
@@ -31,6 +32,8 @@ export default {
         headers: { Allow: "GET, POST" },
       });
     }
+    if (path === "/api/playtest") return onPlaytest(request, env);
+    if (path.startsWith("/api/admin/")) return onAdmin(request, env);
     if (path === "/api/reply") {
       if (request.method === "GET") return onReplyGet({ env });
       if (request.method === "POST") return onReplyPost({ request, env });

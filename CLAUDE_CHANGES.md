@@ -4,6 +4,14 @@ Every change in this list was written by Claude (Anthropic) at the request of th
 
 > **Where this lives:** branch `claude` on GitHub. Versions end in `-claude`. `main` is the original line and is untouched.
 
+## Iteration 8 — Playtest admin website, Claude exports, AI panel fix (2026-11-03, engine 2.28.0-claude)
+
+- **Admin website** `/admin` (`admin.html`, `src/admin.tsx`): password `ADMIN_PASSWORD`. It lists testers (automatic name or chosen name, device, country, first and last seen, visits, steps, AI replies, progress, access) and shows each run's timeline (lines, choices, typed messages, AI answers, errors). It can block, allow or delete a tester's records, and refreshes every 30 s.
+- **Server** (`functions/api/playtest.ts`, routed in `functions/worker.ts`): `/api/playtest` for events and the access check, using the playtest code, simple requests and batching; `/api/admin/*` for the admin page. Storage is a Cloudflare D1 database bound as `PLAYTEST_DB`, which creates its own tables. `/api/reply` refuses blocked testers (`X-Player-Id`).
+- **Game** (`src/playtest.ts`, `src/Player.tsx`): Claude versions only (the play link with `?code=` and Claude exports). A random tester ID in localStorage, an optional name on the title screen, a plain notice of what is recorded, batched step, choice, AI and ending events, and a blocked screen. No IP, email or account is stored.
+- **Exports:** the library's two quick exports now come "without Claude" and "with Claude"; Advanced export defaults to the Claude site and the saved playtest code.
+- **AI panel:** tabs no longer float over the text.
+
 ## Iteration 7 — Author-only AI status, Normal/Advanced editor, per-line Self-reply (2026-11-03, engine 2.27.2-claude)
 
 - **No AI tags inside the game.** Author's playthrough shows "AI · parallel to Scene · Dialogue" or "AI · extra responses after Scene · Dialogue · n messages", and the dialogue editor lists the parallel or the extra messages.

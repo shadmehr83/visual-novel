@@ -3,11 +3,12 @@ import type { Project } from './model';
 import { dialogueKey, exportScope } from './exportScope';
 import { exportPlayer } from './playerExport';
 import { ClaudeMark } from './ClaudeMark';
+import { playCode } from './characterReply';
 export function AdvancedExport({project:p}:{project:Project}) {
  const [target,setTarget]=useState<'desktop'|'phone'>('desktop');
  // Claude edition (by Claude): the export calls the hosted game server so characters answer self-replies.
  const [edition,setEdition]=useState<'offline'|'claude'>('offline');
- const [server,setServer]=useState(()=>location.protocol==='https:'?location.origin:'https://visual-novel-8b9.pages.dev'),[code,setCode]=useState('');
+ const [server,setServer]=useState(()=>location.protocol==='https:'?location.origin:'https://claude.visual-novel-8b9.pages.dev'),[code,setCode]=useState(()=>playCode());
  const claude=()=>edition==='claude'?{endpoint:server.replace(/\/+$/,'')+'/api/reply',token:code.trim()}:undefined;
  const [mode,setMode]=useState('all'),[chapter,setChapter]=useState(''),[first,setFirst]=useState(''),[last,setLast]=useState(''),[status,setStatus]=useState('');
  const entries=p.scenes.flatMap((s,i)=>s.nodes.map((n,j)=>({scene:s,key:dialogueKey(s.id,n.id),label:`${p.chapters?.find(c=>c.scenes.includes(s.id))?.title || "Story"} · Scene ${i+1} · ${s.title} · Dialogue ${j+1}: ${n.text.slice(0,45)}`})));

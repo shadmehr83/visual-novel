@@ -2146,3 +2146,9 @@ body:has(.exported-game),body:has(.player-title){margin:0;overflow:hidden;backgr
 
 /* Normal / Advanced switch in the bottom Dialogue tab (by Claude). */
 .dialogue-view-switch{display:inline-flex;margin-left:8px;border:1px solid #b5987555;border-radius:6px;overflow:hidden}.dialogue-view-switch button{font-size:11px;padding:4px 10px;border:0;border-radius:0;background:transparent}.dialogue-view-switch button.active{background:#b598753a;color:#f3dcc4}.bottom-dialogue-advanced{display:flex;flex:none;height:min(640px,75vh);overflow:auto;overscroll-behavior:contain}.bottom-dialogue-advanced>*{flex:1;min-width:0}.author-ai-note div{opacity:.85;margin-top:2px}
+
+/* AI panel tabs sit at the top instead of floating over the text when scrolled (by Claude). */
+.library-body.assistant .assistant-modes{position:static;margin-bottom:8px}
+
+/* Playtest name and notice on Claude version title screens (by Claude). */
+.playtest-name{display:grid;gap:4px;margin:6px 0 12px;font-size:12px;opacity:.85;text-align:left}.playtest-name input{padding:7px 10px;border-radius:6px;border:1px solid #b5987566;background:#1b1f22;color:inherit}.playtest-notice{max-width:440px;margin-top:14px;font-size:11px;line-height:1.45;opacity:.6}

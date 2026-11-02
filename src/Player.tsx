@@ -13,12 +13,13 @@ import { SceneTransition } from "./SceneTransition";
 import { DeviceOverlay as PhoneUI } from "./DeviceOverlay";
 import { openNotification } from "./notifications";
 import { SelfReply } from "./SelfReply";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { createRoot } from "react-dom/client";
 import { start, advance, respond, putAwayDevice, shownText, validateProject, type Runtime } from "./model";
 import { Stage } from "./Stage";
 import { Qte, SceneAudio } from "./EngineTools";
-import { onlinePlay } from "./characterReply";
+import { aiLog, onlinePlay, type AiLogEntry } from "./characterReply";
+import { nickname, playtest, setNickname } from "./playtest";
 import { LastLine } from "./LastLine";
 function Player() {
   const [project, setProject] = useState(() =>
@@ -41,6 +42,37 @@ function Player() {
   const setRuntime = (next: Runtime | ((r:Runtime)=>Runtime)) => rawSetRuntime(before=>limitScope(before,typeof next === 'function' ? next(before):next,scope));
   const scene = project.scenes.find((s) => s.id === runtime.scene)!;
   const node = scene.nodes.find((n) => n.id === runtime.node)!;
+  // Playtest tracking for Claude versions (by Claude): access check, story steps, choices and AI chats.
+  const online = onlinePlay();
+  const [access, setAccess] = useState<"checking" | "ok" | "blocked">(online ? "checking" : "ok");
+  const [name, setName] = useState(nickname);
+  useEffect(() => {
+    if (!online) return;
+    playtest.start(online.endpoint, online.token);
+    void playtest.allowed(online.endpoint, online.token).then((ok) => setAccess(ok ? "ok" : "blocked"));
+    const onAi = (e: AiLogEntry) => playtest.record("ai", project.scenes.find((s) => s.id === e.scene)?.title, { turn: e.turn, player: e.player, answer: e.answer, advance: e.advance, chosenPath: e.chosenPath, error: e.error, ms: e.ms });
+    aiLog.listeners.push(onAi);
+    return () => { aiLog.listeners.splice(aiLog.listeners.indexOf(onAi), 1); };
+  }, []);
+  const seen = useRef<Runtime | null>(null);
+  useEffect(() => {
+    if (!online || atTitle) return;
+    const before = seen.current;
+    seen.current = runtime;
+    if (before && before.scene === runtime.scene && before.node === runtime.node) return;
+    const fromScene = before && project.scenes.find((s) => s.id === before.scene);
+    const fromNode = fromScene?.nodes.find((n) => n.id === before!.node);
+    const picked = before && runtime.choices.length > before.choices.length ? fromNode?.choices.find((c) => c.id === runtime.choices.at(-1)) : undefined;
+    const typed = before && (runtime.responses?.length || 0) > (before.responses?.length || 0) ? runtime.responses!.at(-1)!.text : undefined;
+    const index = scene.nodes.findIndex((n) => n.id === node.id) + 1;
+    playtest.record("step", scene.title, {
+      at: `Scene ${project.scenes.indexOf(scene) + 1} · Dialogue ${index}`,
+      line: `${node.speaker}: ${shownText(runtime, scene.id, node).slice(0, 240)}`,
+      ...(picked ? { choice: picked.text } : {}),
+      ...(typed ? { typed } : {}),
+    });
+    if (runtime.ended) playtest.record("end", scene.title, { at: `Scene ${project.scenes.indexOf(scene) + 1}` });
+  }, [runtime, atTitle]);
   const exitFullscreen = () => {
     document.querySelector(".presentation")?.classList.remove("presentation");
     if(document.fullscreenElement) void document.exitFullscreen().catch(()=>{});
@@ -50,12 +82,17 @@ function Player() {
     try { savePlayerProgress(localStorage,saveKey,runtime); setSaved(runtime); quit(); }
     catch { setSaveError("Progress could not be saved in this browser. Free storage or allow local storage, then try again. The story is still open."); }
   };
-  const restart = () => { setRuntime(startScope(project,scope)); setAtTitle(false); };
+  const restart = () => { setRuntime(startScope(project,scope)); setAtTitle(false); seen.current = null; playtest.record("open", project.scenes[0]?.title, { start: "new game", layout: mobile ? "phone" : "desktop" }); };
+  if (access === "blocked") return <main className="player-title claude-edition"><h1>{project.title}</h1>
+    <p className="claude-edition-badge">This playtest is no longer available on this device. If you think this is a mistake, contact the author.</p>
+  </main>;
   if(atTitle) return <main className={"player-title" + (claudeEdition ? " claude-edition" : "")}><h1>{project.title}</h1>
     {claudeEdition && <p className="claude-edition-badge">Claude edition · characters answer your own replies live · needs an internet connection</p>}
-    {saved && <button data-help="Resume your last saved dialogue, choices and chat transcript in this browser." onClick={()=>{setRuntime(saved);setAtTitle(false);}}>Continue saved game</button>}
+    {claudeEdition && <label className="playtest-name">Your name for the author (optional)<input value={name} maxLength={40} placeholder="e.g. Alex" onChange={e=>{setName(e.target.value);setNickname(e.target.value);}} /></label>}
+    {saved && <button data-help="Resume your last saved dialogue, choices and chat transcript in this browser." onClick={()=>{setRuntime(saved);setAtTitle(false);seen.current=null;playtest.record("open", project.scenes.find(s=>s.id===saved.scene)?.title, { start: "continue saved game", layout: mobile ? "phone" : "desktop" });}}>Continue saved game</button>}
     <button data-help="Begin this exported story from its opening. The previous saved checkpoint is kept until you choose Save and quit again." onClick={restart}>Start new game</button>
     <p>Progress stays in this browser on this device. Reopen the same exported game to continue.</p>
+    {claudeEdition && <p className="playtest-notice">This is a playtest. To help the author fix problems, it records your choices, the messages you type, the characters' answers, your approximate country and your browser type, linked to a random ID kept in this browser. No account, email or IP address is stored.</p>}
   </main>;
   return (
     <PlaySession key="game" playing project={project} runtime={runtime} onRestart={restart}

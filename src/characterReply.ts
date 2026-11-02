@@ -1,5 +1,6 @@
 import { z } from "zod";
 import type { Project, Runtime } from "./model";
+import { playerId } from "./playtest";
 
 // Claude answers a player's self-reply in the speaking character's voice, and may keep a short
 // free conversation going. It never changes state or choices; the authored route always resumes.
@@ -263,6 +264,15 @@ export function playCode(): string {
     return fromLink || "";
   }
 }
+// The Claude version of an export calls the hosted Claude site with the playtest code.
+export const CLAUDE_SITE = "https://claude.visual-novel-8b9.pages.dev";
+export function claudeExport(): OnlinePlay | null {
+  const site = location.protocol === "https:" ? location.origin : CLAUDE_SITE;
+  const code = playCode() || prompt("Playtest code for the Claude version (the PLAYTEST_TOKEN on your Cloudflare site):")?.trim() || "";
+  if (!code) return null;
+  try { localStorage.setItem("stillframe-play-code", code); } catch { /* used for this export only */ }
+  return { endpoint: site + "/api/reply", token: code };
+}
 export async function claudeApiStatus(): Promise<{ ready: boolean; reason?: string }> {
   try {
     const s = await (await fetch("/api/reply")).json();
@@ -298,7 +308,7 @@ export async function askCharacter(body: CharacterReplyRequest, mode: CharacterR
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      ...(local ? {} : online ? { "X-Playtest-Token": online.token } : studioSession.password ? { Authorization: "Bearer " + studioSession.password } : { "X-Playtest-Token": playCode() }),
+      ...(local ? {} : online ? { "X-Playtest-Token": online.token, "X-Player-Id": playerId() } : studioSession.password ? { Authorization: "Bearer " + studioSession.password } : { "X-Playtest-Token": playCode() }),
     },
     body: JSON.stringify(body),
     signal,
@@ -336,7 +346,9 @@ export const aiLog = {
   read(): AiLogEntry[] {
     try { return JSON.parse(localStorage.getItem(logKey) || "[]"); } catch { return []; }
   },
+  listeners: [] as ((entry: AiLogEntry) => void)[],
   add(entry: AiLogEntry) {
+    aiLog.listeners.forEach((l) => l(entry));
     try { localStorage.setItem(logKey, JSON.stringify([...aiLog.read(), entry].slice(-1000))); } catch { /* the file log below still records it */ }
     // The local studio also appends it to playtest-logs/ in the project folder.
     if (entry.mode === "claude-local")

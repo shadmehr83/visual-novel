@@ -1,4 +1,5 @@
 import { providerCompletion } from "../../src/aiProviders";
+import { isBlocked, type D1 } from "./playtest";
 import { characterReplyPrompt, echoesPlayer, finishReply, rewritePrompt, rewriteRequestSchema, rewriteSchema, rewriteSystem, characterReplyRequestSchema, characterReplySchema, characterReplySystem } from "../../src/characterReply";
 type Env = {
   ANTHROPIC_API_KEY?: string;
@@ -6,9 +7,10 @@ type Env = {
   STUDIO_ACCESS_TOKEN?: string;
   // Shared code embedded in Claude-integrated playable exports for testers.
   PLAYTEST_TOKEN?: string;
+  PLAYTEST_DB?: D1;
 };
 // Exported games run from a file or another site, so playtest requests are cross-origin.
-const cors = { "Access-Control-Allow-Origin": "*", "Access-Control-Allow-Headers": "Content-Type, X-Playtest-Token", "Access-Control-Allow-Methods": "POST, OPTIONS" };
+const cors = { "Access-Control-Allow-Origin": "*", "Access-Control-Allow-Headers": "Content-Type, X-Playtest-Token, X-Player-Id", "Access-Control-Allow-Methods": "POST, OPTIONS" };
 export function onReplyOptions() {
   return new Response(null, { status: 204, headers: cors });
 }
@@ -21,6 +23,8 @@ export async function onReplyPost({ request, env }: { request: Request; env: Env
   if (playtest) {
     if (!env.ANTHROPIC_API_KEY || !env.PLAYTEST_TOKEN) return reply("Claude replies are not set up on the game server yet.", 503);
     if (request.headers.get("x-playtest-token") !== env.PLAYTEST_TOKEN) return reply("This playtest link has expired. Ask the author for a new export.", 401);
+    // Testers blocked on the admin page get no more replies.
+    if (await isBlocked(env, request.headers.get("x-player-id"))) return reply("This playtest is no longer available to you.", 403);
   } else {
     if (!env.ANTHROPIC_API_KEY || !env.STUDIO_ACCESS_TOKEN)
       return reply("Claude replies are not configured. Add ANTHROPIC_API_KEY and STUDIO_ACCESS_TOKEN in Cloudflare Pages secrets.", 503);

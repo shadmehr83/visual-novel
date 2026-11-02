@@ -1,4 +1,4 @@
-export const ENGINE_VERSION = "2.27.2-claude";
+export const ENGINE_VERSION = "2.28.0-claude";
 export type ReleaseFeature = {
   name: string;
   description: string;
@@ -22,6 +22,12 @@ const f = (
   action?: string,
 ): ReleaseFeature => ({ name, description, steps: path.split(" → "), action });
 export const releases: Release[] = [
+ {version:"2.28.0-claude",name:"Playtest admin page and Claude exports",by:"Claude",date:"2026-11-03",timestamp:"2026-11-03T06:00:00Z",features:[
+ f("Playtest admin website", "/admin on the hosted site lists everyone who opens a Claude version: automatic tester name or the name they typed, device, country, visits, story steps, AI replies and how far they got. Open a tester to see their run (lines, choices, typed messages and the character's answers), and block, allow again or delete their records. Needs a PLAYTEST_DB database and an ADMIN_PASSWORD secret on Cloudflare.", "Your site → /admin", "export-player"),
+ f("Testers without accounts", "Each tester gets a random ID kept in their browser and an automatic name; they can add their own name on the title screen, which also explains what the playtest records. Blocked testers see a short notice and get no AI replies.", "Play link → title screen", "export-player"),
+ f("Export with or without Claude", "The library has Export playable HTML and Export phone game in two versions each: without Claude (offline) and with Claude (live character replies, tracked on the admin page).", "Library → Export … · with Claude", "export-player"),
+ f("AI panel tabs fixed", "The AI assistant and AI Demand Export tabs no longer float over the panel's text when it scrolls.", "Assistant → AI assistant", "assistant")
+ ]},
  {version:"2.27.2-claude",name:"Self-reply on or off per dialogue",by:"Claude",date:"2026-11-03",timestamp:"2026-11-03T04:15:00Z",features:[
  f("Self-reply on this dialogue", "A new switch in the dialogue editor turns Self-reply off for the selected line only, in the dialogue box and on the phone. Other lines and the normal/device custom-response options are not changed.", "Dialogue editor → Self-reply on this dialogue", "editor")
  ]},

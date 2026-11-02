@@ -1,0 +1,21 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" /><meta name="viewport" content="width=device-width,initial-scale=1" /><meta name="robots" content="noindex" /><meta name="theme-color" content="#171a1c" />
+<title>Playtest admin · Stillframe</title>
+<style>
+:root{color-scheme:dark;--bg:#14181a;--panel:#1c2124;--line:#2c3438;--text:#e6e1da;--muted:#9a958f;--accent:#d9a37a;--ok:#8fd3a6;--bad:#e58b7a}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font:14px/1.45 system-ui,sans-serif}
+main{max-width:1200px;margin:0 auto;padding:20px 16px 60px}h1{font:600 22px Georgia,serif;margin:0 0 4px}h2{font:600 16px Georgia,serif;margin:22px 0 8px}
+.muted{color:var(--muted)}.small{font-size:12px}button,input{font:inherit;color:inherit}button{background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:6px 12px;cursor:pointer}button:hover{border-color:var(--accent)}
+button.danger{border-color:#e58b7a66;color:var(--bad)}button.good{border-color:#8fd3a666;color:var(--ok)}input{background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:7px 10px}
+.bar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:12px 0}.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin:14px 0}.card{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:10px 12px}.card b{display:block;font-size:20px}
+.table{overflow-x:auto;border:1px solid var(--line);border-radius:8px}table{width:100%;border-collapse:collapse;min-width:820px}th,td{padding:8px 10px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}th{font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);background:var(--panel)}tr.row{cursor:pointer}tr.row:hover td{background:#20272a}tr.sel td{background:#262e31}
+.tag{display:inline-block;padding:1px 8px;border-radius:999px;font-size:11px;border:1px solid var(--line)}.tag.ok{color:var(--ok);border-color:#8fd3a655}.tag.bad{color:var(--bad);border-color:#e58b7a55}
+.timeline{display:grid;gap:6px;margin-top:8px}.ev{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:8px 10px}.ev .k{font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--accent)}.ev.ai{border-left:3px solid var(--accent)}.ev.step .choice{color:var(--ok)}
+.notice{background:var(--panel);border:1px solid var(--line);border-left:3px solid var(--accent);border-radius:8px;padding:10px 12px;margin:12px 0}
+@media (max-width:640px){main{padding:14px 16px 40px}}
+</style>
+</head>
+<body><div id="root"></div><script type="module" src="/src/admin.tsx"></script></body>
+</html>
