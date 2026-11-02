@@ -19,7 +19,7 @@ it("builds an in-character request from the current line, speaker notes and next
   const body = characterReplyRequest(p, r, "  Are you okay?  ")!;
   const node = p.scenes.find((s) => s.id === r.scene)!.nodes.find((n) => n.id === r.node)!;
   expect(body.reply).toBe("Are you okay?");
-  expect(body.line).toBe(node.text);
+  expect(body.line).toContain(node.text);
   expect(body.storyTitle).toBe(p.title);
   const character = p.characters.find((c) => c.id === node.speaker || c.name === node.speaker);
   if (character) expect(body.characterNotes).toBe(character.notes);

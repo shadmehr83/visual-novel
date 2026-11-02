@@ -15,10 +15,11 @@ import { openNotification } from "./notifications";
 import { SelfReply } from "./SelfReply";
 import { useState } from "react";
 import { createRoot } from "react-dom/client";
-import { start, advance, respond, putAwayDevice, validateProject, type Runtime } from "./model";
+import { start, advance, respond, putAwayDevice, shownText, validateProject, type Runtime } from "./model";
 import { Stage } from "./Stage";
 import { Qte, SceneAudio } from "./EngineTools";
 import { onlinePlay } from "./characterReply";
+import { LastLine } from "./LastLine";
 function Player() {
   const [project, setProject] = useState(() =>
     validateProject(
@@ -148,6 +149,7 @@ function Player() {
               />
             ) : (
               <div className="dialogue-overlay">
+                {node.choices.length > 0 && <LastLine project={project} runtime={runtime} />}
                 <b
                   style={{
                     color: project.characters.find(
@@ -158,7 +160,7 @@ function Player() {
                   {node.speaker}
                 </b>
                 <p>
-                  {node.text.replace(/\{(\w+)\}/g, (_, key) =>
+                  {shownText(runtime, scene.id, node).replace(/\{(\w+)\}/g, (_, key) =>
                     String(runtime.values[key] ?? ""),
                   )}
                 </p>

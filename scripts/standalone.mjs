@@ -23,7 +23,7 @@ const player = await readFile("dist/player.js", "utf8");
 // The single-file editor embeds smaller copies of the same 24-second clips.
 // The web editor serves the full 360×640 versions as separate cacheable assets.
 const media = {};
-for (const name of ['rain-walk', 'tea-and-pages', 'midnight-monitor', 'last-tram']) {
+for (const name of ['rain-walk', 'tea-and-pages', 'midnight-monitor', 'last-tram', 'harbour-lights']) {
   media[`/media/insta/${name}.mp4`] = 'data:video/mp4;base64,' + (await readFile(`public/media/insta/compact/${name}.mp4`)).toString('base64');
   media[`/media/insta/${name}.jpg`] = 'data:image/jpeg;base64,' + (await readFile(`public/media/insta/${name}.jpg`)).toString('base64');
 }

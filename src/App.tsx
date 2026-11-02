@@ -54,6 +54,7 @@ import { CinematicControls } from "./CinematicControls";
 import { SceneTransition } from "./SceneTransition";
 import { DeviceOverlay as PhoneUI } from "./DeviceOverlay";
 import { SelfReply } from "./SelfReply";
+import { LastLine } from "./LastLine";
 import { SelectionToolbar } from "./SelectionToolbar";
 import { useWorkspace, contrast } from "./workspace";
 import { WorkspaceControls } from "./WorkspaceSettings";
@@ -107,6 +108,7 @@ import {
   type Scene,
   type Runtime,
   type Effects,
+  shownText,
 } from "./model";
 import {
   exportProject,
@@ -1408,6 +1410,8 @@ export default function App() {
                   (workspace.previewLocked ? "preview-locked" : "")
                 }
               >
+                {/* Pinned to the top while the window is unlocked, so Lock is always reachable. */}
+                {!playing && !workspace.previewLocked && <div className="preview-window-bar">{previewWindow.tools}</div>}
                 <div className="preview-header">
                   <div>
                     <span className="eyebrow">{scene.subtitle}</span>
@@ -1467,6 +1471,11 @@ export default function App() {
                     requestAnimationFrame(() => document.querySelector<HTMLTextAreaElement>('[aria-label="Dialogue text"]')?.focus());
                   }}>Edit current dialogue</button>
                   <small>{authorTyping ? "Story timers held while typing" : "Edits save to your project · Undo available"}</small>
+                  {runtime?.rewrites?.some((w) => w.scene === scene.id && w.node === node.id) && (
+                    <p className="author-ai-note" data-help="This line is shown in an AI-adapted form after a free conversation. The written line is unchanged in your project.">
+                      AI parallel of {dialogueLabel(project, scene, node.id)} · written line: “{node.text.slice(0, 90)}”
+                    </p>
+                  )}
                 </div>}
                 {activeView && <p role="status">Editing sub-scene: <strong>{activeView.title}</strong> · Lighting, rain and ambience controls apply to this view.</p>}
                       {playing && (
@@ -1648,6 +1657,7 @@ export default function App() {
                                 }
                               />
                             )}
+                            {playing && node.choices.length > 0 && <LastLine project={project} runtime={runtime} />}
                             <span
                               className="dialogue-speaker"
                               style={{
@@ -1659,9 +1669,10 @@ export default function App() {
                               {node.speaker === project.characters[0]?.name
                                 ? project.characters[0]?.name
                                 : node.speaker}
+                              {playing && runtime?.rewrites?.some((w) => w.scene === scene.id && w.node === node.id) && <span className="ai-parallel-tag" data-help={"AI parallel of this dialogue. Written line: " + node.text}>AI parallel</span>}
                             </span>
                             <p>
-                              {node.text.replace(/\{(\w+)\}/g, (_, key) =>
+                              {(playing ? shownText(runtime, scene.id, node) : node.text).replace(/\{(\w+)\}/g, (_, key) =>
                                 String(
                                   (playing
                                     ? runtime?.values
@@ -1734,7 +1745,7 @@ export default function App() {
                   </SceneTransition>
                 </div>
                 <div className="stage-footer">
-                  {!playing && previewWindow.tools}
+                  {!playing && workspace.previewLocked && previewWindow.tools}
                   <div>
                     <span className="live-dot" />{" "}
                     {playing
@@ -1976,6 +1987,11 @@ export default function App() {
                         />
                         Allow custom response in device dialogue
                       </label>
+                      {playing && runtime?.rewrites?.find((w) => w.scene === scene.id && w.node === node.id) && (
+                        <p className="author-ai-note" role="note">
+                          In this playthrough this line is an AI parallel: “{runtime.rewrites.find((w) => w.scene === scene.id && w.node === node.id)!.text}”. The written line below is what the story keeps.
+                        </p>
+                      )}
                       <textarea
                         disabled={editingLocked}
                         aria-label="Dialogue text"

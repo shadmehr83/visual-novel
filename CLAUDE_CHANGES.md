@@ -4,6 +4,16 @@ Every change in this list was written by Claude (Anthropic) at the request of th
 
 > **Where this lives:** branch `claude` on GitHub. Versions end in `-claude`. `main` is the original line and is untouched.
 
+## Iteration 6 — One AI panel, narrated-scene replies, AI labels, preview window, fifth Insta clip (2026-11-03, engine 2.27.0-claude)
+
+- **AI panel** (`src/Assistant.tsx`): one **AI assistant** tab where each job picks its AI: Claude Code on this computer (shows which Claude model and plan), OpenAI API, or Claude API. The Claude API asks for confirmation for anything but character texts. **AI Demand Export** stays as its own tab, and the old "Cilia AI assistant" and "OFFLINE MODE" labels are gone.
+- **Narrated scenes:** self-replies on Narrator or You lines are answered by the character present, the last one who spoke in the scene. Narration is labelled as narration for Claude. Outside the phone, a story-advancing answer stays visible until **Continue story**, and the chosen path is still followed (`src/characterReply.ts`, `src/SelfReply.tsx`).
+- **Last line reminder** (`src/LastLine.tsx`) on lines with choices, in the studio and in exported or shared games.
+- **AI labels** (studio only): "AI reply" and "AI parallel" tags in the phone and dialogue box, an author toolbar note naming the dialogue a parallel replaces, and a note in the dialogue editor.
+- **Preview window** (`src/PreviewWindow.tsx`, `src/App.tsx`, `src/style.css`): Lock, Fill and Reset are pinned at the top when unlocked; the window scrolls inside and resizes from every edge and corner; the preview and dialogue editor scroll together when they don't fit.
+- **Story bible voice rules** and phrase-repetition limits in Claude's instructions.
+- **Fifth Insta clip, "harbour-lights":** rendered in the browser from `artwork/cafe-animation/street-source.png` (`scripts/insta/render.html`, `render-harbour-lights.ts`, `receive.mjs`; dev dependency `mp4-muxer`). It is registered in the feed, the manifest, the offline editor and the media pattern.
+
 ## Iteration 5 — Hosted studio on the Claude API, the script follows your conversation (2026-11-03, engine 2.26.0-claude)
 
 - **Hosted studio (2.25.1-claude):** opened with `?code=<playtest code>`, character replies use the Claude API with no password. **Assistant → Character replies** shows "Claude API · texts only · connected".

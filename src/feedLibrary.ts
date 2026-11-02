@@ -107,6 +107,20 @@ export const defaultInstaFeed: InstaFeed = {
         ["last_service", "A tram with surprisingly good lighting, to be fair."],
       ],
     ),
+    // Fifth clip (by Claude): rendered from the wet harbour-street painting.
+    post(
+      "harbour-lights",
+      "low_tide_lamps",
+      "The wheel kept turning anyway",
+      "Rain cancelled everyone's plans except the Ferris wheel's.",
+      451,
+      [
+        ["puddle_cartographer", "Every streetlamp got its own reflection. Very fair system."],
+        ["cold_hands_club", "Somewhere down that street is a café with the heating on. I can feel it."],
+        ["weather_realist", "Lovely until you remember your socks are part of this."],
+        ["low_tide_lamps", "The socks were a necessary sacrifice."],
+      ],
+    ),
   ],
 };
 export const getInstaFeed = (p: Project): InstaFeed =>

@@ -3,7 +3,7 @@ export const feedMedia = z
   .string()
   .max(14 * 1024 * 1024)
   .regex(
-    /^(?:data:video\/(?:mp4|webm|ogg);base64,|\/media\/insta\/(?:rain-walk|tea-and-pages|midnight-monitor|last-tram)\.mp4$)/,
+    /^(?:data:video\/(?:mp4|webm|ogg);base64,|\/media\/insta\/(?:rain-walk|tea-and-pages|midnight-monitor|last-tram|harbour-lights)\.mp4$)/,
   );
 export const feedCommentSchema = z.object({
   id: z.string(),

@@ -20,7 +20,7 @@ export function Assistant({
   edit: (fn: (p: Project) => void) => void;
   apply: (p: Project) => void;
 }) {
-  const [mode, setMode] = useState<"demand" | "provider">("demand");
+  const [mode, setMode] = useState<"demand" | "provider">("provider");
   const [task,setTask]=useState<AssistantTask>("dialogue");
   const [routes,setRoutes]=useState<Record<AssistantTask,TaskProvider>>(()=>{try{return {dialogue:"claude-local","system-ui":"openai",effects:"openai",...JSON.parse(localStorage.getItem("stillframe-ai-routes")||"{}")};}catch{return {dialogue:"claude-local","system-ui":"openai",effects:"openai"};}});
   const [available,setAvailable]=useState<Record<string,boolean>>({});
@@ -165,24 +165,24 @@ export function Assistant({
       setBusy(false);
     }
   }
+  // One place to choose the AI for each job (by Claude). Character texts are the in-game replies.
+  const textsLabel = { "claude-local": "Claude Code · this computer", anthropic: "Claude API · site key", off: "Off · written story only", online: "Claude API · site key" } as const;
+  const editLabel = { "claude-local": "Claude Code · this computer", openai: "OpenAI API (ChatGPT)", anthropic: "Claude API · reserved for texts" } as const;
+  const chooseEdit = (t: AssistantTask, p: TaskProvider) => {
+    if (p === "anthropic" && !confirm("The Claude API is reserved for character texts (self-replies) for now. Using it here spends your Anthropic credit on editing tasks.\n\nUse the Claude API for this task anyway?")) return;
+    const next = { ...routes, [t]: p };
+    setRoutes(next);
+    try { localStorage.setItem("stillframe-ai-routes", JSON.stringify(next)); } catch { /* lasts for this page only */ }
+  };
+  const providerStatus = (p: string, forTexts: boolean) =>
+    p === "claude-local"
+      ? local?.connected ? `✓ Connected. This is Claude (Anthropic) running through Claude Code on this computer with your Claude Pro plan: ${forTexts ? "Claude Haiku 5.5 for fast character texts" : "Claude Sonnet 5.5 for edit proposals"}. Local studio only.` : local?.reason || "Checking Claude Code on this computer…"
+      : p === "anthropic" || p === "online"
+        ? forTexts ? (api?.ready ? "✓ Claude API connected through this site's key (Claude Haiku 5.5). Used for character texts only." : api?.reason || "Checking the Claude API…") : "⚠ Reserved for character texts. Proposals here spend your Anthropic credit."
+        : p === "openai" ? (available.openai ? "✓ OpenAI API connected through this site's key." : "OpenAI API not configured on this site (needs AI_API_KEY).")
+        : "Characters keep to the written story; self-replies are only recorded.";
   return (
     <div className="library-body assistant">
-      <section className="character-replies">
-        <h3>Character replies <ClaudeMark help="Added by Claude. When a player uses Self-reply, the speaking character answers them in their own voice, then the authored story continues unchanged." /></h3>
-        <label>Who answers self-replies<select aria-label="Character replies" data-help="Choose who answers when a player types their own reply during Play story. Claude on this computer uses your signed-in Claude subscription in the local studio; no API key or password. Off keeps the authored story only." value={replyMode} onChange={e=>{const m=e.target.value as CharacterReplyMode;setCharacterReplyMode(m);setReplyMode(m);}}>
-          <option value="claude-local">Claude (this computer) {localLabel}</option>
-          <option value="anthropic">Claude API · texts only {api?.ready?"· connected":api?"· not connected":"· checking…"}</option>
-          <option value="off">Off · authored story only</option>
-        </select></label>
-        {replyMode==="claude-local" && <p className={"small claude-status"+(local?.connected?" ok":"")} role="status">{local?.connected ? "✓ Claude Pro connected through Claude Code on this computer. Characters answer automatically." : local?.reason || "Checking Claude on this computer…"}</p>}
-        <div className="ai-log-row" data-help="Every AI conversation is logged with its scene, line, chosen path, your text, the answer, whether the story moved on and how long it took. Use it to keep favourite answers, tune replies or spot conversations that ran too long.">
-          <span className="small">Playthrough log · {logCount} AI {logCount === 1 ? "reply" : "replies"}{local?.logFolder ? " · also saved to playtest-logs/" : ""}</span>
-          <button disabled={!logCount} aria-label="Download AI playthrough log" onClick={() => aiLog.download()}>Download log</button>
-          <button disabled={!logCount} aria-label="Clear AI playthrough log" onClick={() => { if (confirm("Clear the AI playthrough log saved in this browser? Files in playtest-logs/ are kept.")) { aiLog.clear(); setLogCount(0); } }}>Clear</button>
-        </div>
-        {replyMode==="anthropic" && <p className={"small claude-status"+(api?.ready?" ok":"")} role="status">{api?.ready ? "✓ Claude API connected · used for character texts only (self-replies). Other Assistant tasks keep their own provider." : api?.reason || "Checking the Claude API…"}</p>}
-        {replyMode==="anthropic" && api && !api.ready && <label>Studio access password<input type="password" autoComplete="off" aria-label="Character reply studio password" data-help="Needed only for the server API key mode. Kept in memory for this tab, never saved." defaultValue={studioSession.password} onChange={e=>{studioSession.password=e.target.value;}} /></label>}
-      </section>
       <div
         className="assistant-modes"
         role="tablist"
@@ -190,19 +190,19 @@ export function Assistant({
       >
         <button
           role="tab"
-          aria-selected={mode === "demand"}
-          data-help="Dictate and log change requests for your coding chat. Copy or export the handoff and save it to GitHub without using OpenAI API credits."
-          onClick={() => setMode("demand")}
+          aria-selected={mode === "provider"}
+          data-help="Choose which AI handles each job (character texts, dialogue rewrites, phone and item UI, effects) and ask for edit proposals."
+          onClick={() => setMode("provider")}
         >
-          AI Demand Export
+          AI assistant
         </button>
         <button
           role="tab"
-          aria-selected={mode === "provider"}
-          data-help="The existing optional API assistant proposes scene and dialogue edits after its server connection is configured."
-          onClick={() => setMode("provider")}
+          aria-selected={mode === "demand"}
+          data-help="Dictate and log change requests for your coding chat. Copy or export the handoff and save it to GitHub without using API credits."
+          onClick={() => setMode("demand")}
         >
-          API assistant
+          AI Demand Export
         </button>
       </div>
       {mode === "demand" ? (
@@ -215,14 +215,33 @@ export function Assistant({
         />
       ) : (
         <>
-          <span className="badge">
-            {configured ? "SERVER AI" : "OFFLINE MODE"}
-          </span>
-          <h3>Cilia AI assistant</h3>
-          <label>Assistant task<select aria-label="Assistant task" data-help="Choose the task whose provider assignment you want to use. Each task remembers its own provider in this browser." value={task} onChange={e=>setTask(e.target.value as AssistantTask)}>{Object.entries(taskHelp).map(([id,text])=><option key={id} value={id}>{id}</option>)}</select></label>
-          <p className="small">{taskHelp[task]}</p>
-          <label>Provider for this task<select aria-label="AI task provider" data-help="Assign OpenAI or Claude to this task. Server keys are required for the chosen provider; assignments do not send requests automatically." value={routes[task]} onChange={e=>{const next={...routes,[task]:e.target.value as Provider};setRoutes(next);localStorage.setItem("stillframe-ai-routes",JSON.stringify(next));}}><option value="openai">OpenAI / ChatGPT {available.openai?"· ready":"· not configured"}</option><option value="anthropic">Anthropic / Claude API {available.anthropic?"· ready":"· not configured"}</option><option value="claude-local">Claude (this computer) {localLabel}</option></select></label>
-          {useLocal && <p className={"small claude-status"+(local?.connected?" ok":"")}>{local?.connected ? "✓ Claude Pro connected. No API key or password needed." : local?.reason || "Checking Claude on this computer…"} <ClaudeMark help="Added by Claude: proposals for this task come from Claude through your Claude Code sign-in on this computer." /></p>}
+          <h3>AI assistant <ClaudeMark help="Redesigned by Claude: every job picks its own AI here. Claude Code is Claude on this computer; the Claude API is the site's Anthropic key." /></h3>
+          <section className="ai-job">
+            <label>Character texts (self-replies)<select aria-label="Character replies" data-help="Who answers when a player types their own reply during play. Claude Code uses your Claude Pro plan on this computer (local studio); the Claude API uses this site's Anthropic key and also powers the share link." value={replyMode} onChange={e=>{const m=e.target.value as CharacterReplyMode;setCharacterReplyMode(m);setReplyMode(m);}}>
+              <option value="claude-local">{textsLabel["claude-local"]} {localLabel}</option>
+              <option value="anthropic">{textsLabel.anthropic} {api?.ready?"· connected":api?"· not connected":"· checking…"}</option>
+              <option value="off">{textsLabel.off}</option>
+            </select></label>
+            <p className={"small claude-status"+((replyMode==="claude-local"?local?.connected:replyMode==="anthropic"?api?.ready:false)?" ok":"")} role="status">{providerStatus(replyMode, true)}</p>
+            {replyMode==="anthropic" && api && !api.ready && <label>Studio access password<input type="password" autoComplete="off" aria-label="Character reply studio password" data-help="Needed only when this studio was not opened from a link with ?code=. Kept in memory for this tab, never saved." defaultValue={studioSession.password} onChange={e=>{studioSession.password=e.target.value;}} /></label>}
+            <div className="ai-log-row" data-help="Every AI conversation is logged with its scene, line, chosen path, your text, the answer, whether the story moved on and how long it took. Use it to keep favourite answers, tune replies or spot conversations that ran too long.">
+              <span className="small">Playthrough log · {logCount} AI {logCount === 1 ? "reply" : "replies"}{local?.logFolder ? " · also saved to playtest-logs/" : ""}</span>
+              <button disabled={!logCount} aria-label="Download AI playthrough log" onClick={() => aiLog.download()}>Download log</button>
+              <button disabled={!logCount} aria-label="Clear AI playthrough log" onClick={() => { if (confirm("Clear the AI playthrough log saved in this browser? Files in playtest-logs/ are kept.")) { aiLog.clear(); setLogCount(0); } }}>Clear</button>
+            </div>
+          </section>
+          {(Object.keys(taskHelp) as AssistantTask[]).map((t) => (
+            <section className="ai-job" key={t}>
+              <label>{{ dialogue: "Dialogue rewrites", "system-ui": "Phone & item UI", effects: "Lighting & effects" }[t]}<select aria-label={"AI for " + t} data-help={taskHelp[t] + " Proposals always wait for your approval."} value={routes[t]} onChange={e=>chooseEdit(t, e.target.value as TaskProvider)}>
+                <option value="claude-local">{editLabel["claude-local"]} {localLabel}</option>
+                <option value="openai">{editLabel.openai} {available.openai?"· ready":"· not configured"}</option>
+                <option value="anthropic">{editLabel.anthropic}</option>
+              </select></label>
+              <p className={"small claude-status"+((routes[t]==="claude-local"&&local?.connected)||(routes[t]==="openai"&&available.openai)?" ok":"")}>{providerStatus(routes[t], false)}</p>
+            </section>
+          ))}
+          <h3>Ask for an edit</h3>
+          <label>Job<select aria-label="Assistant task" data-help="Which job this request belongs to; it uses the AI chosen for that job above." value={task} onChange={e=>setTask(e.target.value as AssistantTask)}>{(Object.keys(taskHelp) as AssistantTask[]).map((id)=><option key={id} value={id}>{{ dialogue: "Dialogue rewrites", "system-ui": "Phone & item UI", effects: "Lighting & effects" }[id]} · {editLabel[routes[id]]}</option>)}</select></label>
           <p className="small muted">
             Ask for mood changes, dialogue rewrites or scene titles. The
             assistant proposes edits; you stay in control.

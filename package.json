@@ -1,6 +1,6 @@
 {
   "name": "visual-novel-studio",
-  "version": "2.26.0-claude",
+  "version": "2.27.0-claude",
   "private": true,
   "type": "module",
   "scripts": {
@@ -30,6 +30,7 @@
     "@vitejs/plugin-react": "^4.3.4",
     "esbuild": "^0.25.0",
     "jsdom": "^26.0.0",
+    "mp4-muxer": "^5.2.2",
     "typescript": "~5.7.2",
     "vite": "^6.0.0",
     "vitest": "^3.0.0"

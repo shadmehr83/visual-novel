@@ -51,6 +51,15 @@ export function usePreviewWindow(
     observer.observe(main);
     return () => observer.disconnect();
   }, [active, value.dialogueMode, locationKey]);
+  // Resize handles live inside the scrolling preview; this keeps them on its visible edges.
+  useEffect(() => {
+    const el = previewRef.current;
+    if (!el || value.previewLocked) return;
+    const sync = () => el.style.setProperty("--preview-scroll", el.scrollTop + "px");
+    sync();
+    el.addEventListener("scroll", sync, { passive: true });
+    return () => el.removeEventListener("scroll", sync);
+  }, [value.previewLocked, active]);
   const toggle = () => {
     if (value.previewLocked) {
       const box = previewRef.current?.getBoundingClientRect();
@@ -91,11 +100,34 @@ export function usePreviewWindow(
         Math.min(1800, bounds.height, Math.round(height)),
       ),
     }));
+  // Every edge and corner resizes (by Claude). The window is centred, so a side edge changes the
+  // width twice as fast to stay under the pointer; the top edge grows the window as it is dragged up.
+  const edges = { n: [0, -1], s: [0, 1], e: [2, 0], w: [-2, 0], ne: [2, -1], nw: [-2, -1], se: [2, 1], sw: [-2, 1] } as const;
+  const edge = (dir: Exclude<keyof typeof edges, "se">) => (
+    <span
+      key={dir}
+      className={"preview-window-edge edge-" + dir}
+      aria-hidden
+      onPointerDown={(e) => {
+        e.currentTarget.setPointerCapture(e.pointerId);
+        const r = previewRef.current!.getBoundingClientRect();
+        drag.current = { x: e.clientX, y: e.clientY, width: r.width, height: r.height };
+      }}
+      onPointerMove={(e) => {
+        const d = drag.current;
+        if (d) resize(d.width + (e.clientX - d.x) * edges[dir][0], d.height + (e.clientY - d.y) * edges[dir][1]);
+      }}
+      onPointerUp={() => { drag.current = null; }}
+      onPointerCancel={() => { drag.current = null; }}
+    />
+  );
   const handle = !value.previewLocked ? (
+    <>
+    {(["n", "s", "e", "w", "ne", "nw", "sw"] as const).map(edge)}
     <button
       className="preview-window-resize"
       aria-label="Resize game preview window"
-      data-help="Drag this corner to resize the entire preview window. Arrow keys adjust width or height. Extra height gives the artwork more room and the dialogue editor uses the remaining space. Lock preview size when finished."
+      data-help="Drag this corner, or any edge, to resize the preview window. Arrow keys adjust width or height. Extra height gives the artwork more room and the dialogue editor uses the remaining space. Lock preview size when finished."
       onPointerDown={(e) => {
         e.currentTarget.setPointerCapture(e.pointerId);
         const r = previewRef.current!.getBoundingClientRect();
@@ -108,7 +140,7 @@ export function usePreviewWindow(
       }}
       onPointerMove={(e) => {
         const d = drag.current;
-        if (d) resize(d.width + e.clientX - d.x, d.height + e.clientY - d.y);
+        if (d) resize(d.width + (e.clientX - d.x) * 2, d.height + e.clientY - d.y);
       }}
       onPointerUp={() => {
         drag.current = null;
@@ -133,6 +165,7 @@ export function usePreviewWindow(
     >
       ◢
     </button>
+    </>
   ) : null;
   const tools = (
     <div className="preview-window-actions">

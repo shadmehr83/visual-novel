@@ -12,7 +12,8 @@ function replyMode(studio: boolean): CharacterReplyMode {
   if (onlinePlay()) return "online";
   return studio && location.protocol !== "file:" ? characterReplyMode() : "off";
 }
-type Conversation = { first: string; choice?: string; speaker: string; messages: ReplyThread; turn: number; typing: boolean; error?: string };
+// `done`: the character moved the story on; outside a chat the answer stays visible until Continue story.
+type Conversation = { first: string; choice?: string; speaker: string; messages: ReplyThread; turn: number; typing: boolean; error?: string; done?: boolean };
 type Base = { request: CharacterReplyRequest; mode: CharacterReplyMode };
 export function SelfReply({
   nodeId,
@@ -111,6 +112,7 @@ export function SelfReply({
       // When the character moves the story on, their answer stands in for the next authored line.
       const next = { ...c, typing: false, messages: [...c.messages, { sender: c.speaker, text: answer.text, ...(answer.advance ? { bridge: true } : {}) }] };
       if (!answer.advance) return show(next);
+      if (!inChat) return show({ ...next, done: true });
       if (mounted.current) return void finish(next);
       // Left the chat meanwhile: finish when it is shown again.
       chatStore.set({ key, convo: next, base: start, finished: true });
@@ -131,7 +133,7 @@ export function SelfReply({
       <div className={"self-reply" + (inChat ? " chat-followup" : " claude-reply")} data-no-advance aria-live="polite">
         {!inChat && convo.messages.map((m, i) => <p key={i} className={m.sender === "You" ? "claude-reply-you" : "claude-reply-answer"}><b>{m.sender}:</b> {m.text}</p>)}
         {convo.error && <p role="alert" className="small">{convo.error}</p>}
-        {!convo.error && (
+        {!convo.error && !convo.done && (
           <form
             className="custom-response"
             onSubmit={(e) => {

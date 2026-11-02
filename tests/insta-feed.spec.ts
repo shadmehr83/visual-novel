@@ -125,7 +125,7 @@ test("advanced Insta settings import videos and export a portable project withou
     .click();
   await page.getByRole("button", { name: "Insta feed", exact: true }).click();
   const settings = page.getByRole("region", { name: "Insta feed settings" });
-  await expect(settings).toContainText("4 posts");
+  await expect(settings).toContainText("5 posts");
   await settings
     .getByLabel("Upload more feed videos", { exact: true })
     .setInputFiles("public/media/insta/rain-walk.mp4");

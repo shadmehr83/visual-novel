@@ -1,4 +1,4 @@
-export const ENGINE_VERSION = "2.26.0-claude";
+export const ENGINE_VERSION = "2.27.0-claude";
 export type ReleaseFeature = {
   name: string;
   description: string;
@@ -22,6 +22,15 @@ const f = (
   action?: string,
 ): ReleaseFeature => ({ name, description, steps: path.split(" → "), action });
 export const releases: Release[] = [
+ {version:"2.27.0-claude",name:"One AI panel, clearer AI lines and a fifth Insta clip",by:"Claude",date:"2026-11-03",timestamp:"2026-11-03T02:00:00Z",features:[
+ f("One AI assistant panel", "Assistant → AI assistant lists every job (character texts, dialogue rewrites, phone and item UI, lighting and effects) with its own AI: Claude Code on this computer, OpenAI or the Claude API. The Claude API is reserved for character texts and asks before being used elsewhere. AI Demand Export stays in its own tab.", "Assistant → AI assistant", "assistant"),
+ f("Replies in narrated scenes", "Self-replies on narration (like arriving at the café) are answered by the character you are with, never by the narrator, and a chosen path is still followed. Outside the phone, the answer stays on screen until Continue story.", "Play story → Café → Self-reply", "author-play"),
+ f("Last line reminder", "On lines with choices, a faint ↶ Last line button shows what was said just before, so you know what you are answering.", "Play story → a line with choices → ↶ Last line", "author-play"),
+ f("AI lines are labelled", "In the studio, AI replies and AI parallel lines carry a small tag. Author's playthrough names the dialogue a parallel stands in for, and the dialogue editor shows the parallel next to the written line.", "Author’s playthrough → toolbar and Dialogue editor", "author-play"),
+ f("Preview window: scroll, lock and resize", "Unlocked, the preview keeps Lock, Fill and Reset pinned at the top, scrolls inside, and resizes from every edge and corner. The preview and dialogue editor also scroll together when they do not both fit.", "Scene preview → Unlock window", "windows"),
+ f("Fifth Insta clip", "Harbour lights: rain on a lamp-lit harbour street with the Ferris wheel turning, 24 seconds with rain sound.", "Phone → Insta", "devices"),
+ f("Less repetitive characters", "Character replies follow the story bible's voice notes and avoid repeating stock phrases such as 'that's an honest answer'.", "Play story → Self-reply", "author-play")
+ ]},
  {version:"2.26.0-claude",name:"The script follows your conversation",by:"Claude",date:"2026-11-03",timestamp:"2026-11-02T18:30:00Z",features:[
  f("Adapted script after free texting", "When a free conversation ends, the next few written lines and reply options are rephrased to follow on from what was said, like a parallel take on the same scene. Meaning, information and branches stay the same, and the story rejoins the original after the next choice.", "Play story → Phone chat → Self-reply → keep texting", "author-play"),
  f("Conversations survive leaving the chat", "A free conversation in progress, including an answer still being typed, is kept when you open the pause menu or another workspace and is restored when you come back.", "Play story → Self-reply → Pause menu → Resume", "author-play")

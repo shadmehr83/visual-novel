@@ -11,12 +11,12 @@ import { loadFeedReactions } from "./InstaFeed";
 afterEach(() => {
   vi.unstubAllGlobals();
 });
-it("gives older projects four different 24-second video posts without changing their device or scene settings", () => {
+it("gives older projects five different 24-second video posts without changing their device or scene settings", () => {
   const p = demo(),
     before = JSON.stringify(p);
   const feed = getInstaFeed(p);
-  expect(feed.posts).toHaveLength(4);
-  expect(new Set(feed.posts.map((p) => p.video)).size).toBe(4);
+  expect(feed.posts).toHaveLength(5);
+  expect(new Set(feed.posts.map((p) => p.video)).size).toBe(5);
   expect(
     feed.posts.every(
       (p) => p.seconds >= 20 && p.seconds <= 30 && p.comments.length >= 3,
