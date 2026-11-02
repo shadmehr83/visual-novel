@@ -7,7 +7,7 @@ import {
   DeviceAppearanceControls,
   type DeviceAppearance,
 } from "./DeviceAppearance";
-import { usePaused, useStory } from "./PlaySession";
+import { usePaused } from "./PlaySession";
 import { deviceScreen, deviceDialogue, allowsReply } from "./interactions";
 import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { shownChoice, shownText, type Project, type Scene, type Runtime, type Node } from "./model";
@@ -78,15 +78,7 @@ export function PhoneUI({
   }, [effective, scene.id]);
   const [typing, setTyping] = useState(false);
   const waiting = useSyncExternalStore(pendingReply.subscribe, pendingReply.get);
-  // In the studio, AI-written messages are tagged so they are never mistaken for the written script.
-  const studio = !!useStory()?.studio;
-  const aiTag = (m: { scene: string; node: string; sender: string; text: string }) => {
-    if (!studio || !runtime || m.sender === "You") return null;
-    const written = project.scenes.find((s) => s.id === m.scene)?.nodes.find((n) => n.id === m.node)?.text;
-    if (written === undefined || written === m.text) return null;
-    const parallel = runtime.rewrites?.some((w) => w.scene === m.scene && w.node === m.node && w.text === m.text);
-    return <span className="ai-parallel-tag" title={parallel ? "AI parallel of the written line: " + written : "Written live by AI"}>{parallel ? "AI parallel" : "AI reply"}</span>;
-  };
+
   const replying = !!waiting && waiting.scene === scene.id && waiting.node === node.id;
   const [keyboardVisible, setKeyboardVisible] = useState(config.keyboard);
   useEffect(
@@ -334,14 +326,14 @@ export function PhoneUI({
                     }
                   >
                     <span>{m.text}</span>
-                    <small>{m.sender === "You" ? "You" : config.contact}{aiTag(m)}</small>
+                    <small>{m.sender === "You" ? "You" : config.contact}</small>
                   </div>
                 ),
               )}
               {replying && waiting.messages.map((m, i) => (
                 <div key={"free" + i} className={"message-bubble " + (m.sender === "You" ? "message-you" : "message-contact")}>
                   <span>{m.text}</span>
-                  <small>{m.sender === "You" ? "You" : config.contact}{m.sender !== "You" && studio && <span className="ai-parallel-tag">AI reply</span>}</small>
+                  <small>{m.sender === "You" ? "You" : config.contact}</small>
                 </div>
               ))}
               {(typing || (replying && waiting.typing)) && (

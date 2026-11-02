@@ -2143,3 +2143,6 @@ body:has(.exported-game),body:has(.player-title){margin:0;overflow:hidden;backgr
 
 /* The scene preview and dialogue editor scroll together when they don't both fit (by Claude). */
 .workspace>main.ui-pane{overflow-y:auto;overscroll-behavior:contain}.workspace>main.ui-pane>.preview-area{flex-shrink:0}.workspace>main.ui-pane>.bottom-panel:not(.collapsed){flex-shrink:0!important;min-height:min(340px,60vh)!important}
+
+/* Normal / Advanced switch in the bottom Dialogue tab (by Claude). */
+.dialogue-view-switch{display:inline-flex;margin-left:8px;border:1px solid #b5987555;border-radius:6px;overflow:hidden}.dialogue-view-switch button{font-size:11px;padding:4px 10px;border:0;border-radius:0;background:transparent}.dialogue-view-switch button.active{background:#b598753a;color:#f3dcc4}.bottom-dialogue-advanced{display:flex;flex:none;height:min(640px,75vh);overflow:auto;overscroll-behavior:contain}.bottom-dialogue-advanced>*{flex:1;min-width:0}.author-ai-note div{opacity:.85;margin-top:2px}

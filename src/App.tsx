@@ -55,6 +55,7 @@ import { SceneTransition } from "./SceneTransition";
 import { DeviceOverlay as PhoneUI } from "./DeviceOverlay";
 import { SelfReply } from "./SelfReply";
 import { LastLine } from "./LastLine";
+import { pendingReply } from "./characterReply";
 import { SelectionToolbar } from "./SelectionToolbar";
 import { useWorkspace, contrast } from "./workspace";
 import { WorkspaceControls } from "./WorkspaceSettings";
@@ -62,7 +63,7 @@ import { ResizeHandle } from "./ResizeHandle";
 import { CameraControls } from "./CameraControls";
 import { HoverHelp } from "./HoverHelp";
 import { EffectSummary, effectSummary, type EffectDestination } from "./EffectSummary";
-import { useEffect, useRef, useState, useCallback } from "react";
+import { useEffect, useRef, useState, useCallback, useSyncExternalStore } from "react";
 import {
   Layers,
   Film,
@@ -206,6 +207,11 @@ export default function App() {
   const [sceneId, setSceneId] = useState("cafe");
   const [nodeId, setNodeId] = useState("arrival");
   const [runtime, setRuntime] = useState<Runtime | null>(null);
+  // A free AI conversation in progress, shown as status in Author's playthrough and the editor (by Claude).
+  const freeChat = useSyncExternalStore(pendingReply.subscribe, pendingReply.get);
+  // The bottom Dialogue tab can show the normal editor or the Dialogue advanced map.
+  const [dialogueView, setDialogueView] = useState<"normal" | "advanced">(() => { try { return localStorage.getItem("stillframe-dialogue-view") === "advanced" ? "advanced" : "normal"; } catch { return "normal"; } });
+  const chooseDialogueView = (v: "normal" | "advanced") => { setDialogueView(v); try { localStorage.setItem("stillframe-dialogue-view", v); } catch { /* this page only */ } };
   const [playing, setPlaying] = useState(false);
   const [authorPlay, setAuthorPlay] = useState(false);
   const [authorTyping, setAuthorTyping] = useState(false);
@@ -1473,7 +1479,12 @@ export default function App() {
                   <small>{authorTyping ? "Story timers held while typing" : "Edits save to your project · Undo available"}</small>
                   {runtime?.rewrites?.some((w) => w.scene === scene.id && w.node === node.id) && (
                     <p className="author-ai-note" data-help="This line is shown in an AI-adapted form after a free conversation. The written line is unchanged in your project.">
-                      AI parallel of {dialogueLabel(project, scene, node.id)} · written line: “{node.text.slice(0, 90)}”
+                      AI · parallel to {dialogueLabel(project, scene, node.id)} · written line: “{node.text.slice(0, 90)}”
+                    </p>
+                  )}
+                  {freeChat && freeChat.scene === scene.id && freeChat.node === node.id && (
+                    <p className="author-ai-note" data-help="AI-written extra responses between written lines. They are not part of your project; the story resumes at the next written line on your chosen path.">
+                      AI · extra responses after {dialogueLabel(project, scene, node.id)} · {freeChat.messages.length} message{freeChat.messages.length === 1 ? "" : "s"}{freeChat.typing ? " · typing…" : ""}
                     </p>
                   )}
                 </div>}
@@ -1669,7 +1680,7 @@ export default function App() {
                               {node.speaker === project.characters[0]?.name
                                 ? project.characters[0]?.name
                                 : node.speaker}
-                              {playing && runtime?.rewrites?.some((w) => w.scene === scene.id && w.node === node.id) && <span className="ai-parallel-tag" data-help={"AI parallel of this dialogue. Written line: " + node.text}>AI parallel</span>}
+                              
                             </span>
                             <p>
                               {(playing ? shownText(runtime, scene.id, node) : node.text).replace(/\{(\w+)\}/g, (_, key) =>
@@ -1823,6 +1834,12 @@ export default function App() {
                       {t}
                     </button>
                   ))}
+                  {bottom === "Dialogue" && (
+                    <div className="dialogue-view-switch" role="group" aria-label="Dialogue editor mode">
+                      <button className={dialogueView === "normal" ? "active" : ""} aria-pressed={dialogueView === "normal"} data-help="The line-by-line dialogue editor for the selected scene." onClick={() => chooseDialogueView("normal")}>Normal</button>
+                      <button className={dialogueView === "advanced" ? "active" : ""} aria-pressed={dialogueView === "advanced"} data-help="Dialogue advanced: the map of dialogue nodes and routes for this scene, here under the preview." onClick={() => chooseDialogueView("advanced")}>Advanced</button>
+                    </div>
+                  )}
                   <span />
                   {!playing && (
                     <button
@@ -1861,7 +1878,29 @@ export default function App() {
                     />
                   </fieldset>
                 )}
-                {bottom === "Dialogue" && (
+                {bottom === "Dialogue" && dialogueView === "advanced" && (
+                  <div className="bottom-dialogue-advanced">
+                    <FlowEditor
+                      key={"bottom-dialogues:" + selected.id}
+                      project={project}
+                      mode="dialogues"
+                      sceneId={selected.id}
+                      nodeId={nodeId}
+                      edit={edit}
+                      onSelect={(sid, nid) => {
+                        selectScene(sid);
+                        if (nid) setNodeId(nid);
+                      }}
+                      onDrill={(sid) => selectScene(sid)}
+                      onOriginal={(sid, nid) => {
+                        selectScene(sid);
+                        if (nid) setNodeId(nid);
+                        chooseDialogueView("normal");
+                      }}
+                    />
+                  </div>
+                )}
+                {bottom === "Dialogue" && dialogueView !== "advanced" && (
                   <div className="dialogue-editor">
                     <div className="node-list">
                       {scene.nodes.map((n, i) => (
@@ -1989,8 +2028,14 @@ export default function App() {
                       </label>
                       {playing && runtime?.rewrites?.find((w) => w.scene === scene.id && w.node === node.id) && (
                         <p className="author-ai-note" role="note">
-                          In this playthrough this line is an AI parallel: “{runtime.rewrites.find((w) => w.scene === scene.id && w.node === node.id)!.text}”. The written line below is what the story keeps.
+                          AI · parallel shown in this playthrough: “{runtime.rewrites.find((w) => w.scene === scene.id && w.node === node.id)!.text}”. The written line below is what the story keeps.
                         </p>
+                      )}
+                      {playing && freeChat && freeChat.scene === scene.id && freeChat.node === node.id && (
+                        <div className="author-ai-note" role="note">
+                          AI · extra responses after this line (not saved to the project):
+                          {freeChat.messages.map((m, i) => <div key={i}>{m.sender}: {m.text}</div>)}
+                        </div>
                       )}
                       <textarea
                         disabled={editingLocked}

@@ -1,4 +1,4 @@
-export const ENGINE_VERSION = "2.27.0-claude";
+export const ENGINE_VERSION = "2.27.1-claude";
 export type ReleaseFeature = {
   name: string;
   description: string;
@@ -22,6 +22,10 @@ const f = (
   action?: string,
 ): ReleaseFeature => ({ name, description, steps: path.split(" → "), action });
 export const releases: Release[] = [
+ {version:"2.27.1-claude",name:"AI status only for the author, and an advanced dialogue switch",by:"Claude",date:"2026-11-03",timestamp:"2026-11-03T03:30:00Z",features:[
+ f("No AI labels inside the game", "The game itself shows no AI tags. Author's playthrough shows the status instead: 'AI · parallel to Scene · Dialogue' for adapted lines, or 'AI · extra responses after Scene · Dialogue' during a free conversation. The dialogue editor below lists the parallel or the extra messages.", "Author’s playthrough → toolbar and Dialogue editor", "author-play"),
+ f("Normal / Advanced dialogue editor", "The Dialogue tab under the preview switches between the normal line editor and the Dialogue advanced map, now that the preview and editor scroll together.", "Dialogue tab → Normal / Advanced", "dialogues")
+ ]},
  {version:"2.27.0-claude",name:"One AI panel, clearer AI lines and a fifth Insta clip",by:"Claude",date:"2026-11-03",timestamp:"2026-11-03T02:00:00Z",features:[
  f("One AI assistant panel", "Assistant → AI assistant lists every job (character texts, dialogue rewrites, phone and item UI, lighting and effects) with its own AI: Claude Code on this computer, OpenAI or the Claude API. The Claude API is reserved for character texts and asks before being used elsewhere. AI Demand Export stays in its own tab.", "Assistant → AI assistant", "assistant"),
  f("Replies in narrated scenes", "Self-replies on narration (like arriving at the café) are answered by the character you are with, never by the narrator, and a chosen path is still followed. Outside the phone, the answer stays on screen until Continue story.", "Play story → Café → Self-reply", "author-play"),
