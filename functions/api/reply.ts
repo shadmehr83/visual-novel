@@ -30,7 +30,8 @@ export async function onReplyPost({ request, env }: { request: Request; env: Env
   }
   if (Number(request.headers.get("content-length") || 0) > 40000) return reply("Request is too large.", 413);
   const model = { ...env, ANTHROPIC_MODEL: env.ANTHROPIC_REPLY_MODEL || "claude-haiku-5-5" };
-  const json = (content: string) => JSON.parse(content.trim().replace(/^```(?:json)?\s*|\s*```$/g, ""));
+  // Tolerates a sentence or code fence around the JSON object.
+  const json = (content: string) => JSON.parse(content.slice(content.indexOf("{"), content.lastIndexOf("}") + 1));
   let body;
   let raw: unknown;
   try {

@@ -77,7 +77,8 @@ export function SelfReply({
             { speaker: c.speaker, text: start.request.line },
             ...c.messages.map((m) => ({ speaker: m.sender === "You" ? "Player" : c.speaker, text: m.text })),
           ].slice(-40);
-          const result = await askRewrite({ storyTitle: start.request.storyTitle, sceneTitle: start.request.sceneTitle, speaker: c.speaker, characterNotes: start.request.characterNotes, conversation, upcoming }, start.mode);
+          const request = { storyTitle: start.request.storyTitle, sceneTitle: start.request.sceneTitle, speaker: c.speaker, characterNotes: start.request.characterNotes, conversation, upcoming };
+          const result = await askRewrite(request, start.mode).catch(() => askRewrite(request, start.mode));
           rewrites = keepRewrites(after.scene, upcoming, result);
           aiLog.add({ time: new Date().toISOString(), playthrough: playthroughId, mode: start.mode, story: story.project.title, scene: after.scene, node: after.node, line: upcoming.map((u) => u.text).join(" / "), turn: c.turn, player: "(script adapted)", answer: rewrites.map((w) => w.text + (w.choices ? " [" + w.choices.map((x) => x.text).join(" | ") + "]" : "")).join(" / ") || "(unchanged)", ms: 0, choicesSoFar: story.runtime.choices.slice(-20) });
         }
