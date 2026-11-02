@@ -10,9 +10,9 @@ import {
 import { usePaused } from "./PlaySession";
 import { deviceScreen, deviceDialogue, allowsReply } from "./interactions";
 import { useEffect, useRef, useState, useSyncExternalStore } from "react";
-import type { Project, Scene, Runtime, Node } from "./model";
+import { shownChoice, shownText, type Project, type Scene, type Runtime, type Node } from "./model";
 import { SelfReply } from "./SelfReply";
-import { pendingReply, type ReplyThread } from "./characterReply";
+import { pendingReply, type ReplyThread, type Rewrite } from "./characterReply";
 export function PhoneUI({
   project,
   scene,
@@ -33,7 +33,7 @@ export function PhoneUI({
   node: Node;
   runtime: Runtime | null;
   onStep: (id?: string) => void;
-  onReply: (text: string, choiceId?: string, thread?: ReplyThread) => void;
+  onReply: (text: string, choiceId?: string, thread?: ReplyThread, rewrites?: Rewrite[]) => void;
   onRestart?: () => void;
   onAppearance?: (a: DeviceAppearance) => void;
   onUpload?: (a: Project["assets"][number], target: string) => void;
@@ -124,7 +124,7 @@ export function PhoneUI({
     if (!s || !n || n.deviceDialogue === false) return false;
     if (
       m.sender === "You" &&
-      n.choices.some((c) => c.text === m.text) &&
+      n.choices.some((c) => c.text === m.text || shownChoice(runtime, s.id, n, c) === m.text) &&
       !deviceDialogue(s, n)
     )
       return false;
@@ -145,7 +145,7 @@ export function PhoneUI({
   );
   const avatar = project.assets.find((a) => a.id === config.avatar);
   const currentIsMessage = messages.some(
-    (m) => m.scene === scene.id && m.node === node.id && m.text === node.text,
+    (m) => m.scene === scene.id && m.node === node.id && m.text === shownText(runtime, scene.id, node),
   );
   const storyNotice =
     node.phoneNotice || (node.speaker === "Phone" ? node.text : undefined);
@@ -346,7 +346,7 @@ export function PhoneUI({
                 </div>
               )}
               {texting && !currentIsMessage && (
-                <p className="device-narration">{node.text}</p>
+                <p className="device-narration">{shownText(runtime, scene.id, node)}</p>
               )}
             </div>
           )}
@@ -369,7 +369,7 @@ export function PhoneUI({
                     <div className="device-replies">
                       {choices.map((c) => (
                         <button key={c.id} onClick={() => onStep(c.id)}>
-                          {c.text}
+                          {shownChoice(runtime, scene.id, node, c)}
                         </button>
                       ))}
                     </div>
@@ -430,13 +430,13 @@ export function PhoneUI({
           className="device-story-progress"
           aria-label="Story controls outside device"
         >
-          <p>{node.text}</p>
+          <p>{shownText(runtime, scene.id, node)}</p>
           {runtime?.ended ? (
             <button onClick={onRestart}>Restart story</button>
           ) : choices.length ? (
             choices.map((c) => (
               <button key={c.id} onClick={() => onStep(c.id)}>
-                {c.text}
+                {shownChoice(runtime, scene.id, node, c)}
               </button>
             ))
           ) : node.choices.length ? <p role="status">No replies are currently available.</p> : (

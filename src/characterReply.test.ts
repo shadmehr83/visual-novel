@@ -1,7 +1,7 @@
-﻿import { afterEach, expect, it, vi } from "vitest";
+import { afterEach, expect, it, vi } from "vitest";
 import { demo } from "./demo";
-import { respond, start } from "./model";
-import { askCharacter, characterReplyMode, characterReplyPrompt, characterReplyRequest, finishReply, MAX_FREE_TURNS, setCharacterReplyMode } from "./characterReply";
+import { respond, shownChoice, shownText, start } from "./model";
+import { askCharacter, characterReplyMode, characterReplyPrompt, characterReplyRequest, finishReply, keepRewrites, MAX_FREE_TURNS, setCharacterReplyMode } from "./characterReply";
 import { onReplyGet, onReplyPost } from "../functions/api/reply";
 
 const env = { ANTHROPIC_API_KEY: "test-key", STUDIO_ACCESS_TOKEN: "studio" };
@@ -115,4 +115,49 @@ it("lets Claude edition exports use the playtest code from any origin", async ()
   expect(ok.status).toBe(200);
   expect(ok.headers.get("access-control-allow-origin")).toBe("*");
   expect((await onReplyPost({ request: play("share-me"), env: { ANTHROPIC_API_KEY: "k" } })).status).toBe(503);
+});
+
+it("shows adapted lines and choice texts after a free conversation without changing the route", () => {
+  const p = demo();
+  const scene = p.scenes[0];
+  const line = { ...scene.nodes[0], choices: [], qte: undefined, speaker: "Maria" };
+  scene.nodes.push(
+    { ...line, id: "w-ask", text: "Coffee sometime?", next: "w-delete" },
+    { ...line, id: "w-delete", text: "I was going to delete this app tonight.", next: undefined, choices: [{ ...(scene.nodes.find((n) => n.choices.length)?.choices[0] || {}), id: "w-why", text: "Why didn't you?", target: "w-ask" } as never] },
+  );
+  const r = { ...start(p), scene: scene.id, node: "w-ask" };
+  const rewrites = [{ scene: scene.id, node: "w-delete", text: "Anyway, confession: I almost deleted this app tonight.", choices: [{ id: "w-why", text: "Sounds like a date then. What stopped you?" }] }];
+  const after = respond(p, r, "maybe!", undefined, [{ sender: "Maria", text: "Ha, noted." }], rewrites);
+  expect(after.node).toBe("w-delete");
+  const node = scene.nodes.find((n) => n.id === "w-delete")!;
+  expect(shownText(after, scene.id, node)).toBe(rewrites[0].text);
+  expect(shownChoice(after, scene.id, node, node.choices[0])).toBe(rewrites[0].choices[0].text);
+  expect(node.choices[0].target).toBe("w-ask");
+});
+
+it("keeps only rewrites for the real upcoming lines and choices", () => {
+  const upcoming = [{ id: "a", speaker: "Maria", text: "Hi.", choices: [{ id: "c1", text: "Hello" }] }];
+  const kept = keepRewrites("s", upcoming, { lines: [{ id: "a", text: "Anyway, hi.", choices: [{ id: "c1", text: "Hey you" }, { id: "evil", text: "new branch" }] }, { id: "zzz", text: "invented", choices: [] }] });
+  expect(kept).toEqual([{ scene: "s", node: "a", text: "Anyway, hi.", choices: [{ id: "c1", text: "Hey you" }] }]);
+  expect(keepRewrites("s", upcoming, { lines: [{ id: "a", text: "Hi.", choices: [{ id: "c1", text: "Hello" }] }] })).toEqual([]);
+});
+
+it("adapts the script through the playtest server with quick Haiku", async () => {
+  const f = vi.fn().mockResolvedValue(Response.json({ content: [{ type: "text", text: '{"lines":[{"id":"a","text":"Anyway, hi.","choices":[]}]}' }] }));
+  vi.stubGlobal("fetch", f);
+  const res = await onReplyPost({
+    request: new Request("https://studio.test/api/reply?rewrite=1", { method: "POST", headers: { "x-playtest-token": "t" }, body: JSON.stringify({ storyTitle: "S", sceneTitle: "C", speaker: "Maria", characterNotes: "", conversation: [{ speaker: "Player", text: "soup?" }], upcoming: [{ id: "a", speaker: "Maria", text: "Hi.", choices: [] }] }) }),
+    env: { ANTHROPIC_API_KEY: "k", PLAYTEST_TOKEN: "t" },
+  });
+  expect(res.status).toBe(200);
+  expect((await res.json()).lines[0].text).toBe("Anyway, hi.");
+  const sent = JSON.parse(f.mock.calls[0][1].body);
+  expect(sent.model).toBe("claude-haiku-5-5");
+  expect(sent.thinking).toEqual({ type: "disabled" });
+});
+
+it("strips speaker labels the model adds to adapted lines", () => {
+  const upcoming = [{ id: "p", speaker: "Player", text: "Why didn't you?", choices: [] }, { id: "m", speaker: "Maria", text: "I had a speech.", choices: [] }];
+  expect(keepRewrites("s", upcoming, { lines: [{ id: "p", text: "Player: Why didn't you?", choices: [] }, { id: "m", text: "Maria: Okay, I had a speech.", choices: [] }] }))
+    .toEqual([{ scene: "s", node: "m", text: "Okay, I had a speech." }]);
 });

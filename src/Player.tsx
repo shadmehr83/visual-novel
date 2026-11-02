@@ -94,7 +94,7 @@ function Player() {
 
             {hasItemUI(scene, node) ? (
               <ItemOverlay
-                onReply={(text, branch, answer) => setRuntime(r => respond(project, r, text, branch, answer))}
+                onReply={(text, branch, answer, rewrites) => setRuntime(r => respond(project, r, text, branch, answer, rewrites))}
                 project={project}
                 scene={scene}
                 node={node}
@@ -135,8 +135,8 @@ function Player() {
                 node={node}
                 runtime={runtime}
                 onStep={(id) => setRuntime((r) => advance(project, r, id))}
-                onReply={(text, branch, answer) =>
-                  setRuntime((r) => respond(project, r, text, branch, answer))
+                onReply={(text, branch, answer, rewrites) =>
+                  setRuntime((r) => respond(project, r, text, branch, answer, rewrites))
                 }
               />
             ) : node.qte ? (
@@ -199,8 +199,8 @@ function Player() {
                         choiceAvailable(c, runtime.values),
                     )}
                     nodeId={node.id}
-                    onSend={(text, branch, answer) =>
-                      setRuntime((r) => respond(project, r, text, branch, answer))
+                    onSend={(text, branch, answer, rewrites) =>
+                      setRuntime((r) => respond(project, r, text, branch, answer, rewrites))
                     }
                   />
                 )}

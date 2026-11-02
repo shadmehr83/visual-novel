@@ -1,4 +1,4 @@
-export const ENGINE_VERSION = "2.25.1-claude";
+export const ENGINE_VERSION = "2.26.0-claude";
 export type ReleaseFeature = {
   name: string;
   description: string;
@@ -22,6 +22,10 @@ const f = (
   action?: string,
 ): ReleaseFeature => ({ name, description, steps: path.split(" → "), action });
 export const releases: Release[] = [
+ {version:"2.26.0-claude",name:"The script follows your conversation",by:"Claude",date:"2026-11-03",timestamp:"2026-11-02T18:30:00Z",features:[
+ f("Adapted script after free texting", "When a free conversation ends, the next few written lines and reply options are rephrased to follow on from what was said, like a parallel take on the same scene. Meaning, information and branches stay the same, and the story rejoins the original after the next choice.", "Play story → Phone chat → Self-reply → keep texting", "author-play"),
+ f("Conversations survive leaving the chat", "A free conversation in progress, including an answer still being typed, is kept when you open the pause menu or another workspace and is restored when you come back.", "Play story → Self-reply → Pause menu → Resume", "author-play")
+ ]},
  {version:"2.25.1-claude",name:"Hosted studio texts with the Claude API",by:"Claude",date:"2026-11-02",timestamp:"2026-11-02T16:00:00Z",features:[
  f("Claude API for character texts", "On the hosted studio, character replies use the Claude API automatically when opened from a link with ?code=<playtest code>; no password. Assistant → Character replies shows Claude API · texts only and whether it is connected. Other Assistant tasks keep their own provider.", "Assistant → Character replies", "assistant")
  ]},

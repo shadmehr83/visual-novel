@@ -1,5 +1,5 @@
 import { providerCompletion } from "../../src/aiProviders";
-import { characterReplyPrompt, echoesPlayer, finishReply, characterReplyRequestSchema, characterReplySchema, characterReplySystem } from "../../src/characterReply";
+import { characterReplyPrompt, echoesPlayer, finishReply, rewritePrompt, rewriteRequestSchema, rewriteSchema, rewriteSystem, characterReplyRequestSchema, characterReplySchema, characterReplySystem } from "../../src/characterReply";
 type Env = {
   ANTHROPIC_API_KEY?: string;
   ANTHROPIC_REPLY_MODEL?: string;
@@ -29,17 +29,36 @@ export async function onReplyPost({ request, env }: { request: Request; env: Env
       return reply("Enter the studio access password configured by the site owner.", 401);
   }
   if (Number(request.headers.get("content-length") || 0) > 40000) return reply("Request is too large.", 413);
+  const model = { ...env, ANTHROPIC_MODEL: env.ANTHROPIC_REPLY_MODEL || "claude-haiku-5-5" };
+  const json = (content: string) => JSON.parse(content.trim().replace(/^```(?:json)?\s*|\s*```$/g, ""));
   let body;
+  let raw: unknown;
   try {
     const text = await request.text();
     if (text.length > 40000) return reply("Request is too large.", 413);
-    body = characterReplyRequestSchema.parse(JSON.parse(text));
+    raw = JSON.parse(text);
+  } catch {
+    return reply("Send a JSON request.", 400);
+  }
+  // ?rewrite=1 adapts the next authored lines after a free conversation (same beats and branches).
+  if (new URL(request.url).searchParams.has("rewrite")) {
+    const parsed = rewriteRequestSchema.safeParse(raw);
+    if (!parsed.success) return reply("Provide the conversation and 1–4 upcoming lines.", 400);
+    try {
+      const result = rewriteSchema.parse(json(await providerCompletion("anthropic", model, rewriteSystem, rewritePrompt(parsed.data), 1200, true)));
+      return Response.json(result, { headers: playtest ? cors : {} });
+    } catch (e) {
+      return Response.json({ error: "The script could not be adapted.", detail: String((e as Error).message).slice(0, 300) }, { status: 502, headers: playtest ? cors : {} });
+    }
+  }
+  try {
+    body = characterReplyRequestSchema.parse(raw);
   } catch {
     return reply("Provide a reply of 1–1000 characters.", 400);
   }
   try {
     // The fastest, lightest model keeps in-game replies quick.
-    const ask = async () => characterReplySchema.parse(JSON.parse((await providerCompletion("anthropic", { ...env, ANTHROPIC_MODEL: env.ANTHROPIC_REPLY_MODEL || "claude-haiku-5-5" }, characterReplySystem, characterReplyPrompt(body), 1000, true)).replace(/^```(?:json)?\s*|\s*```$/g, "")));
+    const ask = async () => characterReplySchema.parse(json(await providerCompletion("anthropic", model, characterReplySystem, characterReplyPrompt(body), 1000, true)));
     let result = await ask();
     if (echoesPlayer(body, result.text)) result = await ask();
     result = finishReply(body, result);

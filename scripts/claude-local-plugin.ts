@@ -83,6 +83,10 @@ export function claudeLocalPlugin(): Plugin {
               answer = characterReplySchema.parse(await ask(characterReplySystem, characterReplyPrompt(request), "haiku"));
             return send(res, 200, finishReply(request, answer));
           }
+          if (req.url === "/rewrite") {
+            const { rewriteRequestSchema, rewriteSchema, rewritePrompt, rewriteSystem } = (await server.ssrLoadModule("/src/characterReply.ts")) as Reply;
+            return send(res, 200, rewriteSchema.parse(await ask(rewriteSystem, rewritePrompt(rewriteRequestSchema.parse(body)), "haiku")));
+          }
           if (req.url === "/log") {
             // One JSON line per AI exchange, in playtest-logs/ (kept out of Git).
             await mkdir(logFolder, { recursive: true });

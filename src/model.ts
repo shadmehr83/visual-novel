@@ -522,6 +522,8 @@ export type Runtime = {
     text: string;
   }[];
   responses?: { scene: string; node: string; text: string; thread?: { sender: string; text: string }[] }[];
+  // Authored lines and choice texts rephrased (by Claude) to follow a free conversation; same route.
+  rewrites?: { scene: string; node: string; text: string; choices?: { id: string; text: string }[] }[];
   memories?: {
     scene: string;
     node: string;
@@ -789,15 +791,23 @@ function recordPhone(p: Project, r: Runtime): Runtime {
     return r;
   const rows = r.phoneMessages || [];
   const last = rows[rows.length - 1];
-  if (last?.scene === s.id && last.node === n.id && last.text === n.text)
+  const text = shownText(r, s.id, n);
+  if (last?.scene === s.id && last.node === n.id && last.text === text)
     return r;
   return {
     ...r,
     phoneMessages: [
       ...rows,
-      { scene: s.id, node: n.id, sender: n.speaker, text: n.text },
+      { scene: s.id, node: n.id, sender: n.speaker, text },
     ].slice(-100),
   };
+}
+// The text a line or choice shows in this playthrough: its rephrased version after a free conversation, else the authored one.
+export function shownText(r: Runtime | null | undefined, scene: string, n: Node) {
+  return r?.rewrites?.find((w) => w.scene === scene && w.node === n.id)?.text || n.text;
+}
+export function shownChoice(r: Runtime | null | undefined, scene: string, n: Node, c: Choice) {
+  return r?.rewrites?.find((w) => w.scene === scene && w.node === n.id)?.choices?.find((x) => x.id === c.id)?.text || c.text;
 }
 export function advance(p: Project, r: Runtime, choiceId?: string): Runtime {
   let next = advanceCore(p, r, choiceId);
@@ -812,7 +822,7 @@ export function advance(p: Project, r: Runtime, choiceId?: string): Runtime {
       ...next,
       phoneMessages: [
         ...(r.phoneMessages || []),
-        { scene: s.id, node: r.node, sender: "You", text: c.text },
+        { scene: s.id, node: r.node, sender: "You", text: shownChoice(r, s.id, sourceNode, c) },
       ].slice(-100),
     };
   return recordPhone(p, next);
@@ -848,6 +858,8 @@ export function respond(
   // The live in-character conversation (by Claude) after the player's reply: the character's
   // answers and any further player texts ("You"), shown before the authored route resumes.
   thread?: { sender: string; text: string; bridge?: boolean }[],
+  // Rephrased upcoming lines (by Claude) so the script follows on from that conversation.
+  rewrites?: NonNullable<Runtime["rewrites"]>,
 ): Runtime {
   const node = p.scenes
     .find((s) => s.id === r.scene)
@@ -871,6 +883,8 @@ export function respond(
   const reply = text.trim();
   if (!reply || reply.length > 1000)
     throw Error("Enter a reply of 1–1000 characters");
+  if (rewrites?.length)
+    r = { ...r, rewrites: [...(r.rewrites || []).filter((w) => !rewrites.some((x) => x.scene === w.scene && x.node === w.node)), ...rewrites].slice(-40) };
   let next = advance(p, r, choiceId);
   // A bridging answer stands in for the character's next authored line, so that plain line is
   // passed (its entry actions still apply) instead of the character saying the same thing twice.

@@ -9,6 +9,7 @@ const runtimeSchema = z.object({
   nodeVisits: z.array(z.object(position)).optional(),
   phoneMessages: z.array(z.object({...position, sender:z.string(), text:z.string()})).optional(),
   responses: z.array(z.object({...position, text:z.string(), thread:z.array(z.object({sender:z.string(), text:z.string()})).optional()})).optional(),
+  rewrites: z.array(z.object({...position, text:z.string(), choices:z.array(z.object({id:z.string(), text:z.string()})).optional()})).optional(),
   memories: z.array(z.object({...position, choice:z.string(), knowledge:z.record(value)})).optional(),
   deviceBookmark: z.object({...position, entry:z.string(), path:z.array(z.string())}).optional(),
 });

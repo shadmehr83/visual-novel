@@ -1552,7 +1552,7 @@ export default function App() {
                       )}
                       {hasItemUI(scene, node) && placingLight === null && (
                         <ItemOverlay
-                          onReply={playing ? (text, branch, answer) => { if (runtime) setRuntime(respond(project, runtime, text, branch, answer)); } : undefined}
+                          onReply={playing ? (text, branch, answer, rewrites) => { if (runtime) setRuntime(respond(project, runtime, text, branch, answer, rewrites)); } : undefined}
                           project={project}
                           scene={scene}
                           node={node}
@@ -1597,11 +1597,11 @@ export default function App() {
                             node={node}
                             runtime={playing ? runtime : null}
                             onStep={(id) => playing && step(id)}
-                            onReply={(text, branch, answer) => {
+                            onReply={(text, branch, answer, rewrites) => {
                               try {
                                 if (runtime)
                                   setRuntime(
-                                    respond(project, runtime, text, branch, answer),
+                                    respond(project, runtime, text, branch, answer, rewrites),
                                   );
                               } catch (e) {
                                 setError(String(e));
@@ -1705,10 +1705,10 @@ export default function App() {
                                     <SelfReply
                                       choices={availableChoices}
                                       nodeId={node.id}
-                                      onSend={(text, branch, answer) => {
+                                      onSend={(text, branch, answer, rewrites) => {
                                         try {
                                           setRuntime((r) =>
-                                            respond(project, r!, text, branch, answer),
+                                            respond(project, r!, text, branch, answer, rewrites),
                                           );
                                         } catch (e) {
                                           setError(String(e));
