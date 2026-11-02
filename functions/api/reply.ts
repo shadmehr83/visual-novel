@@ -44,7 +44,8 @@ export async function onReplyPost({ request, env }: { request: Request; env: Env
     if (echoesPlayer(body, result.text)) result = await ask();
     result = finishReply(body, result);
     return Response.json(result, { headers: playtest ? cors : {} });
-  } catch {
-    return reply("The character could not answer. The authored story continues unchanged.", 502);
+  } catch (e) {
+    // The provider's status and message help diagnose setup; they never include the key.
+    return Response.json({ error: "The character could not answer. The authored story continues unchanged.", detail: String((e as Error).message).slice(0, 300) }, { status: 502, headers: playtest ? cors : {} });
   }
 }
