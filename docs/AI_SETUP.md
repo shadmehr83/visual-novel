@@ -28,7 +28,9 @@ The production build includes `dist/_worker.js` (Cloudflare Pages advanced mode)
 
 ## In-character Claude replies (by Claude)
 
-During **Play story** or **Author's playthrough**, open **Self-reply**, tick **Let Claude answer in character**, and enter the studio password. After you send a reply, the speaking character answers it in their own voice, then **Continue story** carries on with the authored next line. Claude receives your reply, the current and next authored lines, the speaker's character notes and up to twelve recent lines from the scene. It cannot change variables, clues, choices or the route, and its answer is not saved to the project.
+Choose who answers in **Assistant → Character replies**: **Claude (this computer)**, **Claude API (server key)** or **Off**. During **Play story** or **Author's playthrough**, send a **Self-reply** and the speaking character answers it in their own voice. **Continue story** then carries on with the authored next line.
+
+**Claude (this computer)** needs no API key or password. Start the local studio with `npm run dev`, install Claude Code (`npm install -g @anthropic-ai/claude-code`) and run `claude auth login` once with your Claude Pro or Max account. The panel then shows *Claude Pro connected*. This only works in the local studio, because a public website cannot use a personal subscription. It is also available as a provider for Assistant tasks. Claude receives your reply, the current and next authored lines, the speaker's character notes and up to twelve recent lines from the scene. It cannot change variables, clues, choices or the route, and its answer is not saved to the project.
 
 Server secrets: `ANTHROPIC_API_KEY` (an Anthropic API key with API billing; a Claude subscription does not include API credit) and the same `STUDIO_ACCESS_TOKEN`. Optional plain variable `ANTHROPIC_MODEL` defaults to `claude-sonnet-5-5`. The endpoint is `/api/reply`. Exported playable HTML games keep the original offline self-reply behaviour.
 

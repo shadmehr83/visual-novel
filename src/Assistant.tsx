@@ -3,6 +3,10 @@ import { DemandExport } from "./DemandExport";
 import { useEffect, useRef, useState } from "react";
 import { applyProposal, aiContext, proposalSchema, type Proposal } from "./ai";
 import type { Project } from "./model";
+import { ClaudeMark } from "./ClaudeMark";
+import { characterReplyMode, claudeLocalStatus, setCharacterReplyMode, studioSession, type CharacterReplyMode, type ClaudeLocalStatus } from "./characterReply";
+// "claude-local" uses this computer's Claude Code sign-in (local studio only, no API key).
+type TaskProvider = Provider | "claude-local";
 export function Assistant({
   project,
   sceneId,
@@ -18,8 +22,13 @@ export function Assistant({
 }) {
   const [mode, setMode] = useState<"demand" | "provider">("demand");
   const [task,setTask]=useState<AssistantTask>("dialogue");
-  const [routes,setRoutes]=useState<Record<AssistantTask,Provider>>(()=>{try{return {dialogue:"openai","system-ui":"openai",effects:"openai",...JSON.parse(localStorage.getItem("stillframe-ai-routes")||"{}")};}catch{return {dialogue:"openai","system-ui":"openai",effects:"openai"};}});
+  const [routes,setRoutes]=useState<Record<AssistantTask,TaskProvider>>(()=>{try{return {dialogue:"claude-local","system-ui":"openai",effects:"openai",...JSON.parse(localStorage.getItem("stillframe-ai-routes")||"{}")};}catch{return {dialogue:"claude-local","system-ui":"openai",effects:"openai"};}});
   const [available,setAvailable]=useState<Record<string,boolean>>({});
+  const [local,setLocal]=useState<ClaudeLocalStatus|null>(null);
+  const [replyMode,setReplyMode]=useState<CharacterReplyMode>(characterReplyMode);
+  useEffect(()=>{let live=true;claudeLocalStatus().then(s=>{if(live)setLocal(s);});return()=>{live=false;};},[]);
+  const localLabel=local?.connected?"· connected":local?"· not connected":"· checking…";
+  const useLocal=routes[task]==="claude-local";
   const [prompt, setPrompt] = useState(
     "Add gentle rain and dim this scene slightly.",
   );
@@ -126,16 +135,16 @@ export function Assistant({
           throw Error(
             "Choose whether to share text context before requesting AI help.",
           );
-        const r = await fetch("/api/assistant", {
+        const r = await fetch(useLocal ? "/api/claude-local/assistant" : "/api/assistant", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
-            Authorization: "Bearer " + password,
+            ...(useLocal ? {} : { Authorization: "Bearer " + password }),
           },
           body: JSON.stringify({
             prompt: prompt + " Selected scene: " + sceneId,
             context: aiContext(project),
-            provider:routes[task], task,
+            ...(useLocal ? {} : { provider: routes[task] }), task,
           }),
         });
         result = await r.json();
@@ -154,6 +163,16 @@ export function Assistant({
   }
   return (
     <div className="library-body assistant">
+      <section className="character-replies">
+        <h3>Character replies <ClaudeMark help="Added by Claude. When a player uses Self-reply, the speaking character answers them in their own voice, then the authored story continues unchanged." /></h3>
+        <label>Who answers self-replies<select aria-label="Character replies" data-help="Choose who answers when a player types their own reply during Play story. Claude on this computer uses your signed-in Claude subscription in the local studio; no API key or password. Off keeps the authored story only." value={replyMode} onChange={e=>{const m=e.target.value as CharacterReplyMode;setCharacterReplyMode(m);setReplyMode(m);}}>
+          <option value="claude-local">Claude (this computer) {localLabel}</option>
+          <option value="anthropic">Claude API (server key) {available.anthropic?"· ready":"· not configured"}</option>
+          <option value="off">Off · authored story only</option>
+        </select></label>
+        {replyMode==="claude-local" && <p className={"small claude-status"+(local?.connected?" ok":"")} role="status">{local?.connected ? "✓ Claude Pro connected through Claude Code on this computer. Characters answer automatically." : local?.reason || "Checking Claude on this computer…"}</p>}
+        {replyMode==="anthropic" && <label>Studio access password<input type="password" autoComplete="off" aria-label="Character reply studio password" data-help="Needed only for the server API key mode. Kept in memory for this tab, never saved." defaultValue={studioSession.password} onChange={e=>{studioSession.password=e.target.value;}} /></label>}
+      </section>
       <div
         className="assistant-modes"
         role="tablist"
@@ -192,7 +211,8 @@ export function Assistant({
           <h3>Cilia AI assistant</h3>
           <label>Assistant task<select aria-label="Assistant task" data-help="Choose the task whose provider assignment you want to use. Each task remembers its own provider in this browser." value={task} onChange={e=>setTask(e.target.value as AssistantTask)}>{Object.entries(taskHelp).map(([id,text])=><option key={id} value={id}>{id}</option>)}</select></label>
           <p className="small">{taskHelp[task]}</p>
-          <label>Provider for this task<select aria-label="AI task provider" data-help="Assign OpenAI or Claude to this task. Server keys are required for the chosen provider; assignments do not send requests automatically." value={routes[task]} onChange={e=>{const next={...routes,[task]:e.target.value as Provider};setRoutes(next);localStorage.setItem("stillframe-ai-routes",JSON.stringify(next));}}><option value="openai">OpenAI / ChatGPT {available.openai?"· ready":"· not configured"}</option><option value="anthropic">Anthropic / Claude {available.anthropic?"· ready":"· not configured"}</option></select></label>
+          <label>Provider for this task<select aria-label="AI task provider" data-help="Assign OpenAI or Claude to this task. Server keys are required for the chosen provider; assignments do not send requests automatically." value={routes[task]} onChange={e=>{const next={...routes,[task]:e.target.value as Provider};setRoutes(next);localStorage.setItem("stillframe-ai-routes",JSON.stringify(next));}}><option value="openai">OpenAI / ChatGPT {available.openai?"· ready":"· not configured"}</option><option value="anthropic">Anthropic / Claude API {available.anthropic?"· ready":"· not configured"}</option><option value="claude-local">Claude (this computer) {localLabel}</option></select></label>
+          {useLocal && <p className={"small claude-status"+(local?.connected?" ok":"")}>{local?.connected ? "✓ Claude Pro connected. No API key or password needed." : local?.reason || "Checking Claude on this computer…"} <ClaudeMark help="Added by Claude: proposals for this task come from Claude through your Claude Code sign-in on this computer." /></p>}
           <p className="small muted">
             Ask for mood changes, dialogue rewrites or scene titles. The
             assistant proposes edits; you stay in control.
@@ -210,9 +230,9 @@ export function Assistant({
           <button className="wide" onClick={voice}>
             {listening ? "Stop dictation" : "🎙 Speak your request"}
           </button>
-          {configured && (
+          {(configured || (useLocal && local?.connected)) && (
             <>
-              <label>
+              {!useLocal && <label>
                 Studio access password
                 <input
                   type="password"
@@ -220,7 +240,7 @@ export function Assistant({
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                 />
-              </label>
+              </label>}
               <label className="consent">
                 <input
                   type="checkbox"
@@ -232,7 +252,7 @@ export function Assistant({
               </label>
               <button
                 className="wide primary"
-                disabled={busy || !consent || !password}
+                disabled={busy || !consent || (!useLocal && !password)}
                 onClick={() => propose()}
               >
                 Ask AI

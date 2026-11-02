@@ -54,10 +54,42 @@ export function characterReplyRequest(project: Project, runtime: Runtime, reply:
   };
 }
 
-export async function askCharacter(body: CharacterReplyRequest, password: string, signal?: AbortSignal) {
-  const r = await fetch("/api/reply", {
+// Who answers self-replies: Claude through this computer's Claude Code sign-in,
+// Claude through the server API key, or nobody (authored story only).
+export type CharacterReplyMode = "claude-local" | "anthropic" | "off";
+const modeKey = "stillframe-character-replies";
+export function characterReplyMode(): CharacterReplyMode {
+  try {
+    const v = localStorage.getItem(modeKey);
+    return v === "anthropic" || v === "off" ? v : "claude-local";
+  } catch {
+    return "claude-local";
+  }
+}
+export function setCharacterReplyMode(mode: CharacterReplyMode) {
+  try { localStorage.setItem(modeKey, mode); } catch { /* the choice lasts for this page only */ }
+  window.dispatchEvent(new Event(modeKey));
+}
+export const characterReplyModeEvent = modeKey;
+// The server API mode still needs the studio password; held in memory only.
+export const studioSession = { password: "" };
+export type ClaudeLocalStatus = { connected: boolean; installed?: boolean; account?: string; reason?: string };
+export async function claudeLocalStatus(): Promise<ClaudeLocalStatus> {
+  if (location.protocol === "file:") return { connected: false, reason: "Claude on this computer runs from the local studio (npm run dev)." };
+  try {
+    const r = await fetch("/api/claude-local");
+    if (!r.ok || !r.headers.get("content-type")?.includes("json")) throw Error();
+    return await r.json();
+  } catch {
+    return { connected: false, reason: "Only available in the local studio started with npm run dev." };
+  }
+}
+
+export async function askCharacter(body: CharacterReplyRequest, mode: CharacterReplyMode, signal?: AbortSignal) {
+  const local = mode === "claude-local";
+  const r = await fetch(local ? "/api/claude-local/reply" : "/api/reply", {
     method: "POST",
-    headers: { "Content-Type": "application/json", Authorization: "Bearer " + password },
+    headers: { "Content-Type": "application/json", ...(local ? {} : { Authorization: "Bearer " + studioSession.password }) },
     body: JSON.stringify(body),
     signal,
   });

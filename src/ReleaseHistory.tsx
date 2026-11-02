@@ -1,6 +1,7 @@
 import { sydneyTimestamp } from "./time";
 import { useState } from "react";
 import { ENGINE_VERSION, releases } from "./releases";
+import { ClaudeMark } from "./ClaudeMark";
 export function ReleaseHistory({
   onNavigate,
 }: {
@@ -71,6 +72,7 @@ export function ReleaseHistory({
                   · {r.features.length} updates
                 </small>
               </span>
+              {r.by === "Claude" && <ClaudeMark help={"Made by Claude: " + r.features.map((f) => f.name).join(", ") + "."} />}
               {r.version === ENGINE_VERSION && (
                 <span className="badge">CURRENT</span>
               )}
@@ -91,7 +93,7 @@ export function ReleaseHistory({
               )}
               {r.features.map((feature) => (
                 <article className="release-feature" key={feature.name}>
-                  <h3>{feature.action ? <button onClick={()=>onNavigate(feature.action!)} data-help={feature.description}>{feature.name}</button> : feature.name}</h3>
+                  <h3>{feature.action ? <button onClick={()=>onNavigate(feature.action!)} data-help={feature.description}>{feature.name}</button> : feature.name}{r.version === ENGINE_VERSION && <span className="new-mark" tabIndex={0} data-help={feature.description} title={feature.description}>✓ New</span>}</h3>
                   <p>{feature.description}</p>
                   <ol aria-label={"How to find " + feature.name}>
                     {feature.steps.map((step, i) => (

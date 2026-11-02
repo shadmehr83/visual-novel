@@ -1,8 +1,9 @@
 import { publishedDataPlugin } from "./scripts/published-data-plugin";
+import { claudeLocalPlugin } from "./scripts/claude-local-plugin";
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 export default defineConfig({
-  plugins: [publishedDataPlugin(), react()],
+  plugins: [publishedDataPlugin(), claudeLocalPlugin(), react()],
   build: {
     rollupOptions: {
       output: {

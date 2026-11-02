@@ -1,4 +1,4 @@
-export const ENGINE_VERSION = "2.22.0";
+export const ENGINE_VERSION = "2.23.0";
 export type ReleaseFeature = {
   name: string;
   description: string;
@@ -11,6 +11,8 @@ export type Release = {
   date: string;
   timestamp?: string;
   commit?: string;
+  // Who made the release when it was not the usual coding chat, e.g. "Claude".
+  by?: string;
   features: ReleaseFeature[];
 };
 const f = (
@@ -20,8 +22,14 @@ const f = (
   action?: string,
 ): ReleaseFeature => ({ name, description, steps: path.split(" → "), action });
 export const releases: Release[] = [
- {version:"2.22.0",name:"Characters answer self-replies with Claude (by Claude)",date:"2026-11-02",timestamp:"2026-11-02T08:40:00Z",features:[
- f("In-character Claude replies (by Claude)", "Tick Let Claude answer in character in Self-reply and enter the studio password. The speaker answers your words in their own voice using their character notes and recent scene dialogue, then the authored story continues unchanged. Requires ANTHROPIC_API_KEY and STUDIO_ACCESS_TOKEN server secrets; exported games keep the offline behaviour.", "Play story → Self-reply → Let Claude answer in character", "author-play")
+ {version:"2.23.0",name:"Claude on this computer and automatic character replies",by:"Claude",date:"2026-11-02",timestamp:"2026-11-02T10:30:00Z",features:[
+ f("Claude (this computer)", "Use Claude with your own Claude Pro sign-in instead of an API key. Run `claude auth login` once; the local studio then shows Claude Pro connected. No studio password is needed.", "Assistant → Character replies → Claude (this computer)", "assistant"),
+ f("Automatic character replies", "Self-reply no longer needs a tick box or password. After you send your own words, the speaker types back in their voice, then Continue story resumes the authored line. Choose Claude on this computer, the Claude API or Off in the Assistant.", "Play story → Self-reply → Send response", "author-play"),
+ f("Claude for dialogue proposals", "Claude (this computer) is now a provider choice for Assistant tasks. Dialogue rewrites and other proposals still need your approval before anything changes.", "Assistant → API assistant → Provider for this task", "assistant"),
+ f("New and Claude markers", "Controls added in the latest updates show a ✓ marker; hover them for what they do. Work made by Claude carries a small Claude tag here and in the studio.", "Update history → Latest release", "assistant")
+ ]},
+ {version:"2.22.0",name:"Characters answer self-replies with Claude",by:"Claude",date:"2026-11-02",timestamp:"2026-11-02T08:40:00Z",features:[
+ f("In-character Claude replies", "The speaker answers a self-reply in their own voice using their character notes and recent scene dialogue, then the authored story continues unchanged. The live site uses ANTHROPIC_API_KEY and STUDIO_ACCESS_TOKEN server secrets; exported games keep the offline behaviour.", "Play story → Self-reply → Let Claude answer in character", "author-play")
  ]},
  {version:"2.21.1",name:"Independent scene inspector scrolling",date:"2026-10-30",timestamp:"2026-10-30T01:16:00Z",features:[
  f("Scroll scene details without moving the map", "The right-hand scene and dialogue inspector stays within its workspace and scrolls independently. Scrolling past its edges no longer passes scrolling to the surrounding workspace.", "Scenes advanced → Select a scene → Scroll the right-hand panel", "scenes")

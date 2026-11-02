@@ -1,7 +1,7 @@
 import { afterEach, expect, it, vi } from "vitest";
 import { demo } from "./demo";
 import { start } from "./model";
-import { characterReplyRequest } from "./characterReply";
+import { askCharacter, characterReplyMode, characterReplyRequest, setCharacterReplyMode } from "./characterReply";
 import { onReplyGet, onReplyPost } from "../functions/api/reply";
 
 const env = { ANTHROPIC_API_KEY: "test-key", STUDIO_ACCESS_TOKEN: "studio" };
@@ -50,4 +50,18 @@ it("guards the Claude reply endpoint", async () => {
   expect((await onReplyPost({ request: post({ ...body, reply: " " }), env })).status).toBe(400);
   vi.stubGlobal("fetch", vi.fn().mockResolvedValue(Response.json({ content: [{ type: "text", text: "not json" }] })));
   expect((await onReplyPost({ request: post(body), env })).status).toBe(502);
+});
+
+it("defaults to Claude on this computer and sends local replies without a password", async () => {
+  localStorage.clear();
+  expect(characterReplyMode()).toBe("claude-local");
+  setCharacterReplyMode("off");
+  expect(characterReplyMode()).toBe("off");
+  setCharacterReplyMode("claude-local");
+  const f = vi.fn().mockResolvedValue(Response.json({ text: "Hi." }));
+  vi.stubGlobal("fetch", f);
+  const p = demo();
+  expect(await askCharacter(characterReplyRequest(p, start(p), "Hello")!, "claude-local")).toBe("Hi.");
+  expect(f.mock.calls[0][0]).toBe("/api/claude-local/reply");
+  expect(f.mock.calls[0][1].headers.Authorization).toBeUndefined();
 });

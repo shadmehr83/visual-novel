@@ -1,8 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useStory } from "./PlaySession";
-import { askCharacter, characterReplyRequest } from "./characterReply";
-// Held in memory only for this browser tab; never saved or exported.
-const claude = { enabled: false, password: "" };
+import { askCharacter, characterReplyMode, characterReplyRequest } from "./characterReply";
+import { ClaudeMark } from "./ClaudeMark";
 export function SelfReply({
   nodeId,
   onSend,
@@ -13,12 +12,11 @@ export function SelfReply({
   choices?: { id: string; text: string }[];
 }) {
   const story = useStory();
+  // Characters answer automatically in the studio; Assistant → Character replies chooses who answers.
   const canAsk = !!story?.studio && location.protocol !== "file:";
   const [open, setOpen] = useState(false),
     [text, setText] = useState("");
   const [branch, setBranch] = useState("");
-  const [useClaude, setUseClaude] = useState(claude.enabled);
-  const [password, setPassword] = useState(claude.password);
   const [pending, setPending] = useState<{ text: string; choice?: string; speaker: string; answer?: string; error?: string } | null>(null);
   const abort = useRef<AbortController | null>(null);
   useEffect(() => {
@@ -42,17 +40,19 @@ export function SelfReply({
         ) : pending.error ? (
           <p role="alert">{pending.error}</p>
         ) : (
-          <p className="claude-reply-thinking">{pending.speaker} is thinking…</p>
+          <p className="claude-reply-thinking">{pending.speaker} is typing…</p>
         )}
-        <button
-          type="button"
-          autoFocus={!!(pending.answer || pending.error)}
-          data-help="Record your reply and continue with the next authored line. Claude's answer never changes the story route."
-          onClick={() => { abort.current?.abort(); finish(); }}
-        >
-          {pending.answer || pending.error ? "Continue story" : "Skip and continue"}
-        </button>
-        <small>Claude replies are AI-written flavour (by Claude) and are not saved to the project.</small>
+        <div className="claude-reply-actions">
+          <button
+            type="button"
+            autoFocus={!!(pending.answer || pending.error)}
+            data-help="Record your reply and continue with the next authored line. The character's AI answer never changes the story route."
+            onClick={() => { abort.current?.abort(); finish(); }}
+          >
+            {pending.answer || pending.error ? "Continue story" : "Skip and continue"}
+          </button>
+          <ClaudeMark help="This answer was written live by Claude in the speaker's voice. It is not saved to the project and never changes the story route." />
+        </div>
       </div>
     );
   return (
@@ -68,14 +68,15 @@ export function SelfReply({
             const reply = text.trim();
             if (!reply) return;
             const choice = choices.length ? branch || choices[0].id : undefined;
-            const request = canAsk && useClaude && story ? characterReplyRequest(story.project, story.runtime, reply) : null;
+            const mode = characterReplyMode();
+            const request = canAsk && mode !== "off" && story ? characterReplyRequest(story.project, story.runtime, reply) : null;
             setText("");
             setOpen(false);
             if (!request) return onSend(reply, choice);
             setPending({ text: reply, choice, speaker: request.speaker });
             abort.current = new AbortController();
             try {
-              const answer = await askCharacter(request, password, abort.current.signal);
+              const answer = await askCharacter(request, mode, abort.current.signal);
               setPending((p) => p && { ...p, answer });
             } catch (err) {
               if (abort.current.signal.aborted) return;
@@ -107,30 +108,10 @@ export function SelfReply({
             onChange={(e) => setText(e.target.value)}
             placeholder="Write your own response…"
           />
-          {canAsk && (
-            <label className="claude-reply-toggle" data-help="Send your reply, the speaker's character notes and recent scene dialogue to Claude so the character answers in their own voice before the authored story continues.">
-              <input
-                type="checkbox"
-                checked={useClaude}
-                onChange={(e) => { claude.enabled = e.target.checked; setUseClaude(e.target.checked); }}
-              />
-              Let Claude answer in character (shares this text with Anthropic)
-            </label>
-          )}
-          {canAsk && useClaude && (
-            <input
-              type="password"
-              aria-label="Studio access password"
-              data-help="The studio password set as STUDIO_ACCESS_TOKEN on the server. Kept in memory for this tab only."
-              value={password}
-              onChange={(e) => { claude.password = e.target.value; setPassword(e.target.value); }}
-              placeholder="Studio access password"
-            />
-          )}
-          <button disabled={!text.trim() || (canAsk && useClaude && !password)}>Send response</button>
+          <button disabled={!text.trim()}>Send response</button>
           <small>
-            {canAsk && useClaude
-              ? "The character answers with Claude, then the authored story continues unchanged."
+            {canAsk && characterReplyMode() !== "off"
+              ? "The character answers you, then the authored story continues."
               : "Saved in this playthrough. Continues the authored story; no automatic AI response."}
           </small>
         </form>
