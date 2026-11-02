@@ -4,6 +4,14 @@ Every change in this list was written by Claude (Anthropic) at the request of th
 
 > **Where this lives:** branch `claude` on GitHub. Versions end in `-claude`. `main` is the original line and is untouched.
 
+## Iteration 5 — Hosted studio on the Claude API, the script follows your conversation (2026-11-03, engine 2.26.0-claude)
+
+- **Hosted studio (2.25.1-claude):** opened with `?code=<playtest code>`, character replies use the Claude API with no password. **Assistant → Character replies** shows "Claude API · texts only · connected".
+- **Live fixes:** Haiku 5.5 thinks by default and used up the reply budget, so quick replies now turn thinking off. JSON is read even when the model wraps it in text, and a failed reply or adaptation is retried once.
+- **Adapted script:** when a free conversation ends, the next authored lines (up to the next choice, 4 at most) and their choice texts are rephrased to follow on from it. The first line reacts briefly to the last message. Meaning, information and branches stay the same (`rewrite*` and `upcomingLines` in `src/characterReply.ts`; `shownText`/`shownChoice` and `runtime.rewrites` in `src/model.ts`; `/api/reply?rewrite=1`; `/api/claude-local/rewrite`).
+- **Bridging answers** no longer end with a question the player can't answer.
+- **Bug fix:** a free conversation, including an answer still arriving, survives the pause menu and other workspaces (`chatStore` in `src/characterReply.ts`, `src/SelfReply.tsx`).
+
 ## Iteration 4 — Free texting that returns to the story, playthrough logs, play link (2026-11-02, engine 2.25.0-claude)
 
 - **Keep texting:** after a self-reply you can keep texting the character. Each answer has an `advance` decision: when your message engages with the story (or after 4 free texts, `MAX_FREE_TURNS`), the authored route resumes on your chosen path. Off-topic chats get steered back, more firmly each turn (`src/characterReply.ts`, `src/SelfReply.tsx`, `src/PhoneUI.tsx`).
