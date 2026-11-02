@@ -2,6 +2,18 @@
 
 Every change in this list was written by Claude (Anthropic) at the request of the repository owner. Matching commits start with `[Claude]` and carry a `Co-authored-by: Claude <noreply@anthropic.com>` trailer.
 
+> **Where this lives:** branch `claude` on GitHub. Versions end in `-claude`. `main` is the original line and is untouched.
+
+## Iteration 4 — Free texting that returns to the story, playthrough logs, play link (2026-11-02, engine 2.25.0-claude)
+
+- **Keep texting:** after a self-reply you can keep texting the character. Each answer has an `advance` decision: when your message engages with the story (or after 4 free texts, `MAX_FREE_TURNS`), the authored route resumes on your chosen path. Off-topic chats get steered back, more firmly each turn (`src/characterReply.ts`, `src/SelfReply.tsx`, `src/PhoneUI.tsx`).
+- **No duplicate line:** when the character's answer moves the story on, it carries the next authored line's content, and `respond()` skips that plain line of theirs (`src/model.ts`).
+- **Natural side answers:** characters may answer harmless questions (where, when…) using names from the story: current and upcoming scene titles, plus lines from other branches of the scene. No secrets or invented clues.
+- **AI playthrough log:** every exchange is logged with time, playthrough id, scene, line, chosen path, turn, your text, the answer, the advance decision, response time and recent choices. Use **Assistant → Character replies → Download log / Clear**. The local studio also appends to `playtest-logs/claude-YYYY-MM-DD.jsonl`, which Git ignores. Players can download theirs from the Pause menu.
+- **Share link:** `/play` is a game-only page with no editor. Add `?layout=phone` for the phone layout and `?code=<PLAYTEST_TOKEN>` for live character replies (`play.html`, `src/play.tsx`, `vite.config.ts`).
+- One quiet automatic retry when an answer fails. The local bridge loads story code on demand, so editing it no longer restarts the dev server.
+- Versions renamed to `2.22.0-claude` … `2.25.0-claude`; `AGENTS.md` notes the branch convention.
+
 ## Iteration 3 — Phone chat replies, chosen-path intent, Claude edition export, bigger stage (2026-11-02, engine 2.24.0)
 
 - **Phone chat:** your self-reply appears as your chat bubble, the contact shows typing dots, and their answer arrives as their own message before the authored conversation continues (`src/PhoneUI.tsx`, `src/SelfReply.tsx`, `src/model.ts` `respond(…, answer)`, `src/playerSave.ts`).

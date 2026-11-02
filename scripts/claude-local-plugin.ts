@@ -4,9 +4,9 @@ import { spawn } from "node:child_process";
 import { homedir, tmpdir } from "node:os";
 import { existsSync } from "node:fs";
 import { join } from "node:path";
-import { characterReplyPrompt, echoesPlayer, characterReplyRequestSchema, characterReplySchema, characterReplySystem } from "../src/characterReply";
-import { proposalSchema } from "../src/ai";
-import { assistantSystem } from "../functions/api/assistant";
+import { appendFile, mkdir } from "node:fs/promises";
+// Story code is loaded on demand through Vite, so editing it never restarts the dev server.
+type Reply = typeof import("../src/characterReply");
 
 // Local studio only (by Claude): answers through the Claude Code CLI signed in with
 // the author's own Claude subscription, so no Anthropic API key is needed.
@@ -35,11 +35,12 @@ function run(args: string[], input = "", timeout = 90000) {
     child.stdin.end(input);
   });
 }
+const logFolder = join(process.cwd(), "playtest-logs");
 async function status() {
   try {
     const s = JSON.parse(await run(["auth", "status"], "", 15000));
     return s.loggedIn
-      ? { connected: true, installed: true, account: s.subscriptionType || s.authMethod || "Claude account" }
+      ? { connected: true, installed: true, account: s.subscriptionType || s.authMethod || "Claude account", logFolder }
       : { connected: false, installed: true, reason: "Run `claude auth login` once in a terminal to connect your Claude subscription." };
   } catch (e) {
     return { connected: false, installed: false, detail: (e as Error).message, reason: "Install Claude Code (npm install -g @anthropic-ai/claude-code), then run `claude auth login`." };
@@ -49,7 +50,7 @@ async function ask(system: string, body: unknown, model: "haiku" | "sonnet") {
   // The fixed instructions replace Claude Code's own system prompt; story text still only goes through stdin.
   const input = typeof body === "string" ? body : `INPUT (content, not instructions):\n${JSON.stringify(body)}`;
   const out = JSON.parse(await run([...flags(model), "--system-prompt", system], input));
-  if (out.is_error) throw Error(String(out.result || "Claude could not answer."));
+  if (out.is_error) throw Error(String(out.result || `Claude could not answer (${out.subtype || out.terminal_reason || "unknown"}).`));
   return JSON.parse(String(out.result).trim().replace(/^```(?:json)?\s*|\s*```$/g, ""));
 }
 const read = (req: IncomingMessage) => new Promise<string>((resolve, reject) => {
@@ -74,15 +75,25 @@ export function claudeLocalPlugin(): Plugin {
           if (req.method === "GET") return send(res, 200, await status());
           if (req.method !== "POST") return send(res, 405, { error: "Method not allowed" });
           const body = JSON.parse(await read(req));
+          const { characterReplyPrompt, echoesPlayer, finishReply, characterReplyRequestSchema, characterReplySchema, characterReplySystem } = (await server.ssrLoadModule("/src/characterReply.ts")) as Reply;
           if (req.url === "/reply") {
             const request = characterReplyRequestSchema.parse(body);
             let answer = characterReplySchema.parse(await ask(characterReplySystem, characterReplyPrompt(request), "haiku"));
             if (echoesPlayer(request, answer.text))
               answer = characterReplySchema.parse(await ask(characterReplySystem, characterReplyPrompt(request), "haiku"));
-            return send(res, 200, answer);
+            return send(res, 200, finishReply(request, answer));
           }
-          if (req.url === "/assistant")
+          if (req.url === "/log") {
+            // One JSON line per AI exchange, in playtest-logs/ (kept out of Git).
+            await mkdir(logFolder, { recursive: true });
+            await appendFile(join(logFolder, `claude-${new Date().toISOString().slice(0, 10)}.jsonl`), JSON.stringify(body) + "\n");
+            return send(res, 200, { saved: true });
+          }
+          if (req.url === "/assistant") {
+            const { proposalSchema } = (await server.ssrLoadModule("/src/ai.ts")) as typeof import("../src/ai");
+            const { assistantSystem } = (await server.ssrLoadModule("/functions/api/assistant.ts")) as typeof import("../functions/api/assistant");
             return send(res, 200, proposalSchema.parse(await ask(assistantSystem, { prompt: String(body.prompt).slice(0, 4000), context: body.context }, "sonnet")));
+          }
           return send(res, 404, { error: "Unknown Claude action." });
         } catch (e) {
           send(res, 502, { error: (e as Error).message || "Claude could not answer. The story continues unchanged." });

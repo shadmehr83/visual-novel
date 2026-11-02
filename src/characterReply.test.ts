@@ -1,7 +1,7 @@
 import { afterEach, expect, it, vi } from "vitest";
 import { demo } from "./demo";
 import { respond, start } from "./model";
-import { askCharacter, characterReplyMode, characterReplyRequest, setCharacterReplyMode } from "./characterReply";
+import { askCharacter, characterReplyMode, characterReplyPrompt, characterReplyRequest, finishReply, MAX_FREE_TURNS, setCharacterReplyMode } from "./characterReply";
 import { onReplyGet, onReplyPost } from "../functions/api/reply";
 
 const env = { ANTHROPIC_API_KEY: "test-key", STUDIO_ACCESS_TOKEN: "studio" };
@@ -32,7 +32,7 @@ it("routes in-character replies to Claude and returns only the character's text"
   const p = demo();
   const res = await onReplyPost({ request: post(characterReplyRequest(p, start(p), "Are you okay?")), env });
   expect(res.status).toBe(200);
-  expect(await res.json()).toEqual({ text: "I am, thank you." });
+  expect(await res.json()).toEqual({ text: "I am, thank you.", advance: false });
   expect(f.mock.calls[0][0]).toBe("https://api.anthropic.com/v1/messages");
   const sent = JSON.parse(f.mock.calls[0][1].body);
   expect(sent.model).toBe("claude-haiku-5-5");
@@ -61,7 +61,7 @@ it("defaults to Claude on this computer and sends local replies without a passwo
   const f = vi.fn().mockResolvedValue(Response.json({ text: "Hi." }));
   vi.stubGlobal("fetch", f);
   const p = demo();
-  expect(await askCharacter(characterReplyRequest(p, start(p), "Hello")!, "claude-local")).toBe("Hi.");
+  expect(await askCharacter(characterReplyRequest(p, start(p), "Hello")!, "claude-local")).toEqual({ text: "Hi.", advance: false });
   expect(f.mock.calls[0][0]).toBe("/api/claude-local/reply");
   expect(f.mock.calls[0][1].headers.Authorization).toBeUndefined();
 });
@@ -74,9 +74,33 @@ it("reads a self-reply through the chosen authored path and records the answer a
   const choice = node.choices[0];
   const body = characterReplyRequest(p, r, "Depends why you're asking.", choice.id)!;
   expect(body.chosenPath).toBe(choice.text);
-  const result = respond(p, r, "Depends why you're asking.", choice.id, "Fair. Suspicious answer.");
-  expect(result.responses!.at(-1)).toMatchObject({ text: "Depends why you're asking.", answer: "Fair. Suspicious answer." });
+  const thread = [{ sender: node.speaker, text: "Fair. Suspicious answer." }, { sender: "You", text: "Where though?" }, { sender: node.speaker, text: "The Lantern Room." }];
+  const result = respond(p, r, "Depends why you're asking.", choice.id, thread);
+  expect(result.responses!.at(-1)).toMatchObject({ text: "Depends why you're asking.", thread });
   expect(result.history).toContain(`${node.speaker}: Fair. Suspicious answer.`);
+  expect(result.history).toContain("Custom reply: Where though?");
+});
+
+it("skips the character's next plain authored line when Claude's answer bridges into it", () => {
+  const p = demo();
+  const scene = p.scenes[0];
+  const line = { ...scene.nodes[0], choices: [], qte: undefined, speaker: "Maria" };
+  const node = { ...line, id: "t-ask", text: "So, when?", next: "t-plan" };
+  const authored = { ...line, id: "t-plan", text: "How about four?", next: "t-bye" };
+  scene.nodes.push(node, authored, { ...line, id: "t-bye", text: "See you.", next: undefined });
+  const r = { ...start(p), scene: scene.id, node: node.id };
+  const plain = respond(p, r, "Hi", undefined, [{ sender: node.speaker, text: "Hello." }]);
+  expect(plain.node).toBe(authored.id);
+  const bridged = respond(p, r, "Hi", undefined, [{ sender: node.speaker, text: "Hello, and here's the plan.", bridge: true }]);
+  expect(bridged.node).toBe(authored.next);
+});
+
+it("caps the free conversation and always returns to the story on the last turn", async () => {
+  const p = demo();
+  const body = { ...characterReplyRequest(p, start(p), "Anyway, do you like soup?")!, turn: MAX_FREE_TURNS };
+  expect(finishReply(body, { text: "Soup is fine. Anyway…", advance: false }).advance).toBe(true);
+  expect(characterReplyPrompt(body)).toContain("last free turn");
+  expect(characterReplyPrompt({ ...body, turn: 1 })).not.toContain("last free turn");
 });
 
 it("lets Claude edition exports use the playtest code from any origin", async () => {

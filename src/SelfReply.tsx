@@ -1,12 +1,16 @@
 import { useEffect, useRef, useState } from "react";
 import { useStory } from "./PlaySession";
-import { askCharacter, characterReplyMode, characterReplyRequest, onlinePlay, pendingReply, type CharacterReplyMode } from "./characterReply";
-// Who answers here: the Claude-integrated export calls its server; the studio follows
+import {
+  aiLog, askCharacter, characterReplyMode, characterReplyRequest, onlinePlay, pendingReply, playthroughId,
+  type CharacterReplyMode, type CharacterReplyRequest, type ReplyThread,
+} from "./characterReply";
+// Who answers here: the Claude edition and play link call their server; the studio follows
 // Assistant → Character replies; ordinary exports keep the authored story only.
 function replyMode(studio: boolean): CharacterReplyMode {
   if (onlinePlay()) return "online";
   return studio && location.protocol !== "file:" ? characterReplyMode() : "off";
 }
+type Conversation = { first: string; choice?: string; speaker: string; messages: ReplyThread; turn: number; typing: boolean; error?: string };
 export function SelfReply({
   nodeId,
   onSend,
@@ -14,9 +18,10 @@ export function SelfReply({
   inChat = false,
 }: {
   nodeId: string;
-  onSend: (text: string, choiceId?: string, answer?: string) => void;
+  // `thread` holds the character's answers and any further texts after the first reply.
+  onSend: (text: string, choiceId?: string, thread?: ReplyThread) => void;
   choices?: { id: string; text: string }[];
-  // Phone chats show the reply and the character's answer as messages with typing dots.
+  // Phone chats show the conversation as messages with typing dots.
   inChat?: boolean;
 }) {
   const story = useStory();
@@ -24,45 +29,106 @@ export function SelfReply({
   const [open, setOpen] = useState(false),
     [text, setText] = useState("");
   const [branch, setBranch] = useState("");
-  const [pending, setPending] = useState<{ text: string; choice?: string; speaker: string; answer?: string; error?: string } | null>(null);
+  const [convo, setConvo] = useState<Conversation | null>(null);
+  const base = useRef<{ request: CharacterReplyRequest; mode: CharacterReplyMode } | null>(null);
   const abort = useRef<AbortController | null>(null);
   useEffect(() => {
     setOpen(false);
     setText("");
     setBranch("");
-    setPending(null);
+    setConvo(null);
     return () => {
       abort.current?.abort();
       pendingReply.set(null);
     };
   }, [nodeId]);
-  const finish = () => {
-    if (!pending) return;
-    onSend(pending.text, pending.choice, pending.answer);
-    setPending(null);
+  const show = (c: Conversation | null) => {
+    setConvo(c);
+    if (inChat && story) pendingReply.set(c && { scene: story.runtime.scene, node: story.runtime.node, messages: c.messages, typing: c.typing });
   };
-  if (pending && !inChat)
-    return (
+  const finish = (c: Conversation) => {
+    abort.current?.abort();
+    pendingReply.set(null);
+    setConvo(null);
+    onSend(c.first, c.choice, c.messages.slice(1));
+  };
+  // One free turn: the character answers, then either the story resumes or the player may text again.
+  async function turn(c: Conversation) {
+    const start = base.current;
+    if (!start || !story) return;
+    show({ ...c, typing: true, error: undefined });
+    const request: CharacterReplyRequest = {
+      ...start.request,
+      thread: c.messages.slice(1).map((m) => ({ speaker: m.sender === "You" ? "Player" : c.speaker, text: m.text })),
+      turn: c.turn,
+    };
+    const player = c.messages.at(-1)!.text;
+    abort.current = new AbortController();
+    const began = performance.now();
+    const log = { time: new Date().toISOString(), playthrough: playthroughId, mode: start.mode, story: story.project.title, scene: story.runtime.scene, node: story.runtime.node, line: start.request.line, chosenPath: start.request.chosenPath, turn: c.turn, player, choicesSoFar: story.runtime.choices.slice(-20) };
+    try {
+      // One quiet retry covers an occasional failed answer before the player sees an error.
+      const answer = await askCharacter(request, start.mode, abort.current.signal).catch((e) => {
+        if (abort.current?.signal.aborted) throw e;
+        return askCharacter(request, start.mode, abort.current!.signal);
+      });
+      aiLog.add({ ...log, answer: answer.text, advance: answer.advance, ms: Math.round(performance.now() - began) });
+      // When the character moves the story on, their answer stands in for the next authored line.
+      const next = { ...c, typing: false, messages: [...c.messages, { sender: c.speaker, text: answer.text, ...(answer.advance ? { bridge: true } : {}) }] };
+      if (answer.advance) finish(next);
+      else show(next);
+    } catch (err) {
+      if (abort.current.signal.aborted) return;
+      const error = (err as Error).message || "The character could not answer right now.";
+      aiLog.add({ ...log, error, ms: Math.round(performance.now() - began) });
+      show({ ...c, typing: false, error });
+    }
+  }
+  if (convo) {
+    if (convo.typing) return inChat ? null : (
       <div className="self-reply claude-reply" data-no-advance aria-live="polite">
-        <p className="claude-reply-you"><b>You:</b> {pending.text}</p>
-        {pending.answer ? (
-          <p className="claude-reply-answer"><b>{pending.speaker}:</b> {pending.answer}</p>
-        ) : pending.error ? (
-          <p role="alert">{pending.error}</p>
-        ) : (
-          <p className="claude-reply-thinking">{pending.speaker} is typing…</p>
+        {convo.messages.map((m, i) => <p key={i} className={m.sender === "You" ? "claude-reply-you" : "claude-reply-answer"}><b>{m.sender}:</b> {m.text}</p>)}
+        <p className="claude-reply-thinking">{convo.speaker} is typing…</p>
+        <button type="button" onClick={() => finish(convo)}>Skip and continue</button>
+      </div>
+    );
+    return (
+      <div className={"self-reply" + (inChat ? " chat-followup" : " claude-reply")} data-no-advance aria-live="polite">
+        {!inChat && convo.messages.map((m, i) => <p key={i} className={m.sender === "You" ? "claude-reply-you" : "claude-reply-answer"}><b>{m.sender}:</b> {m.text}</p>)}
+        {convo.error && <p role="alert" className="small">{convo.error}</p>}
+        {!convo.error && (
+          <form
+            className="custom-response"
+            onSubmit={(e) => {
+              e.preventDefault();
+              const reply = text.trim();
+              if (!reply) return;
+              setText("");
+              void turn({ ...convo, turn: convo.turn + 1, messages: [...convo.messages, { sender: "You", text: reply }] });
+            }}
+          >
+            <input
+              autoFocus
+              aria-label="Keep texting"
+              value={text}
+              maxLength={1000}
+              onChange={(e) => setText(e.target.value)}
+              placeholder={`Reply to ${convo.speaker}…`}
+            />
+            <button disabled={!text.trim()}>Send</button>
+          </form>
         )}
         <button
           type="button"
-          autoFocus={!!(pending.answer || pending.error)}
-          data-help="Record your reply and continue with the next authored line. The character's answer never changes the story route."
-          onClick={() => { abort.current?.abort(); finish(); }}
+          autoFocus={!!convo.error}
+          data-help="Leave the free conversation and continue with the next authored line on your chosen path."
+          onClick={() => finish(convo)}
         >
-          {pending.answer || pending.error ? "Continue story" : "Skip and continue"}
+          Continue story
         </button>
       </div>
     );
-  if (pending) return null;
+  }
   return (
     <div className="self-reply">
       <button type="button" aria-expanded={open} onClick={() => setOpen(!open)}>
@@ -71,7 +137,7 @@ export function SelfReply({
       {open && (
         <form
           className="custom-response"
-          onSubmit={async (e) => {
+          onSubmit={(e) => {
             e.preventDefault();
             const reply = text.trim();
             if (!reply) return;
@@ -80,24 +146,10 @@ export function SelfReply({
             const request = mode !== "off" && story ? characterReplyRequest(story.project, story.runtime, reply, choice) : null;
             setText("");
             setOpen(false);
-            if (!request || !story) return onSend(reply, choice);
+            if (!request) return onSend(reply, choice);
             request.chat = inChat;
-            setPending({ text: reply, choice, speaker: request.speaker });
-            if (inChat) pendingReply.set({ scene: story.runtime.scene, node: story.runtime.node, text: reply, speaker: request.speaker });
-            abort.current = new AbortController();
-            let answer: string | undefined, error: string | undefined;
-            try {
-              answer = await askCharacter(request, mode, abort.current.signal);
-            } catch (err) {
-              if (abort.current.signal.aborted) return;
-              error = (err as Error).message || "The character could not answer right now.";
-            }
-            if (inChat) {
-              // In a chat the conversation simply flows on: the answer arrives as a message.
-              pendingReply.set(null);
-              setPending(null);
-              onSend(reply, choice, answer);
-            } else setPending((p) => p && { ...p, answer, error });
+            base.current = { request, mode };
+            void turn({ first: reply, choice, speaker: request.speaker, messages: [{ sender: "You", text: reply }], turn: 1, typing: true });
           }}
         >
           {choices.length > 0 && (
@@ -128,7 +180,7 @@ export function SelfReply({
           <button disabled={!text.trim()}>Send response</button>
           <small>
             {answers
-              ? "The character answers you, then the story follows the chosen path."
+              ? "The character answers you. Keep texting a little, then the story returns to the chosen path."
               : "Saved in this playthrough. Continues the authored story; no automatic AI response."}
           </small>
         </form>

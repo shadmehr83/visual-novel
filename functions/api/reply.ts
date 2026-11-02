@@ -1,5 +1,5 @@
 import { providerCompletion } from "../../src/aiProviders";
-import { characterReplyPrompt, echoesPlayer, characterReplyRequestSchema, characterReplySchema, characterReplySystem } from "../../src/characterReply";
+import { characterReplyPrompt, echoesPlayer, finishReply, characterReplyRequestSchema, characterReplySchema, characterReplySystem } from "../../src/characterReply";
 type Env = {
   ANTHROPIC_API_KEY?: string;
   ANTHROPIC_REPLY_MODEL?: string;
@@ -42,6 +42,7 @@ export async function onReplyPost({ request, env }: { request: Request; env: Env
     const ask = async () => characterReplySchema.parse(JSON.parse((await providerCompletion("anthropic", { ...env, ANTHROPIC_MODEL: env.ANTHROPIC_REPLY_MODEL || "claude-haiku-5-5" }, characterReplySystem, characterReplyPrompt(body), 400)).replace(/^```(?:json)?\s*|\s*```$/g, "")));
     let result = await ask();
     if (echoesPlayer(body, result.text)) result = await ask();
+    result = finishReply(body, result);
     return Response.json(result, { headers: playtest ? cors : {} });
   } catch {
     return reply("The character could not answer. The authored story continues unchanged.", 502);

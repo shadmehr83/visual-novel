@@ -6,6 +6,8 @@ export default defineConfig({
   plugins: [publishedDataPlugin(), claudeLocalPlugin(), react()],
   build: {
     rollupOptions: {
+      // play.html is the shareable game-only page; it never loads the editor.
+      input: { main: "index.html", play: "play.html" },
       output: {
         manualChunks: (id: string) =>
           id.startsWith("\0virtual:published-media-") ? id.slice(1).replace(":", "-") : undefined,

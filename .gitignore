@@ -14,3 +14,6 @@ test-results/
 
 __pycache__/
 *.pyc
+
+# Local AI playthrough logs (Claude replies); private to this computer.
+playtest-logs/

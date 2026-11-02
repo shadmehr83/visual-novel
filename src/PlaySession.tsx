@@ -5,6 +5,7 @@ import { SoundSession, SessionSoundControls } from "./Sound";
 import { FullscreenButton } from "./FullscreenButton";
 import { ProgressView } from "./ProgressView";
 import type { Project, Runtime } from "./model";
+import { aiLog } from "./characterReply";
 const PauseContext = createContext(false);
 const AuthorEditingContext = createContext(false);
 export const useAuthorEditing = () => useContext(AuthorEditingContext);
@@ -57,6 +58,7 @@ export function PlaySession({ children, playing, onExit, onRestart, project, run
         <FullscreenButton />
         {exportControls && <><PlaybackSetting mode={exportControls.mode} onMode={exportControls.onMode} /><SessionSoundControls /></>}
         {project && runtime && <button onClick={() => setProgress(true)}>View Current Progress</button>}
+        {aiLog.read().length > 0 && <button data-help="Save a file of every AI conversation in this browser (your texts, the character's answers and choices) to send to the author." onClick={() => aiLog.download()}>Download AI chat log</button>}
         <button onClick={() => {setPaused(false); setProgress(false); onRestart();}}>Restart story</button>
         {onExit && <button onClick={() => {setPaused(false); document.querySelector(".presentation")?.classList.remove("presentation"); if (document.fullscreenElement) void document.exitFullscreen().catch(() => {}); onExit();}}>Back to editor</button>}
         {exportControls ? <>

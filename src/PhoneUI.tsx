@@ -12,7 +12,7 @@ import { deviceScreen, deviceDialogue, allowsReply } from "./interactions";
 import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import type { Project, Scene, Runtime, Node } from "./model";
 import { SelfReply } from "./SelfReply";
-import { pendingReply } from "./characterReply";
+import { pendingReply, type ReplyThread } from "./characterReply";
 export function PhoneUI({
   project,
   scene,
@@ -33,7 +33,7 @@ export function PhoneUI({
   node: Node;
   runtime: Runtime | null;
   onStep: (id?: string) => void;
-  onReply: (text: string, choiceId?: string, answer?: string) => void;
+  onReply: (text: string, choiceId?: string, thread?: ReplyThread) => void;
   onRestart?: () => void;
   onAppearance?: (a: DeviceAppearance) => void;
   onUpload?: (a: Project["assets"][number], target: string) => void;
@@ -329,13 +329,13 @@ export function PhoneUI({
                   </div>
                 ),
               )}
-              {replying && (
-                <div className="message-bubble message-you">
-                  <span>{waiting.text}</span>
-                  <small>You</small>
+              {replying && waiting.messages.map((m, i) => (
+                <div key={"free" + i} className={"message-bubble " + (m.sender === "You" ? "message-you" : "message-contact")}>
+                  <span>{m.text}</span>
+                  <small>{m.sender === "You" ? "You" : config.contact}</small>
                 </div>
-              )}
-              {(typing || replying) && (
+              ))}
+              {(typing || (replying && waiting.typing)) && (
                 <div
                   className="typing-bubble"
                   aria-label={config.contact + " is typing"}
@@ -359,13 +359,13 @@ export function PhoneUI({
                     <button onClick={onRestart}>Restart story</button>
                   )}
                 </div>
-              ) : typing || replying ? (
+              ) : typing || (replying && waiting.typing) ? (
                 <span className="small muted">{config.contact} is typing…</span>
               ) : null}
               {!runtime?.ended && !typing && (
-                <div hidden={replying} className="device-reply-area">
-                  {/* Kept mounted while the character types so the reply can finish. */}
-                  {choices.length ? (
+                <div className="device-reply-area">
+                  {/* The reply box stays mounted during a free conversation; authored replies wait until it ends. */}
+                  {replying ? null : choices.length ? (
                     <div className="device-replies">
                       {choices.map((c) => (
                         <button key={c.id} onClick={() => onStep(c.id)}>

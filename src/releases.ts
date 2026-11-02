@@ -1,4 +1,4 @@
-export const ENGINE_VERSION = "2.24.0";
+export const ENGINE_VERSION = "2.25.0-claude";
 export type ReleaseFeature = {
   name: string;
   description: string;
@@ -22,20 +22,27 @@ const f = (
   action?: string,
 ): ReleaseFeature => ({ name, description, steps: path.split(" → "), action });
 export const releases: Release[] = [
- {version:"2.24.0",name:"Chat replies, chosen-path intent and Claude edition exports",by:"Claude",date:"2026-11-02",timestamp:"2026-11-02T12:30:00Z",features:[
+ {version:"2.25.0-claude",name:"Free texting that finds its way back, playthrough logs and a play link",by:"Claude",date:"2026-11-02",timestamp:"2026-11-02T14:30:00Z",features:[
+ f("Keep texting the character", "After a self-reply you can keep texting. The character answers each message, steers off-topic chats back to the story and, after about four free texts (or sooner when you engage with the story), the authored route continues on your chosen path.", "Play story → Phone chat → Self-reply → Reply to the character", "author-play"),
+ f("No repeated authored line", "When the character's answer already moves the story on, it carries the next authored line's plans and details in its own words and that line is skipped, so nothing is said twice.", "Play story → Self-reply → Continue", "author-play"),
+ f("Natural side answers", "Characters may answer harmless side questions such as where or when, using place and scene names from the story, without revealing secrets or later twists.", "Play story → Self-reply → Ask a question", "author-play"),
+ f("AI playthrough log", "Every AI conversation is logged with scene, line, chosen path, your text, the answer, whether the story moved on and response time. Download or clear it in the Assistant; the local studio also writes playtest-logs/. Testers can download theirs from the Pause menu.", "Assistant → Character replies → Download log", "assistant"),
+ f("Shareable play link", "/play opens the published story as a game only, with no editor. Add ?layout=phone for the phone player and ?code=<playtest code> for live character replies.", "Your site → /play", "export-player")
+ ]},
+ {version:"2.24.0-claude",name:"Chat replies, chosen-path intent and Claude edition exports",by:"Claude",date:"2026-11-02",timestamp:"2026-11-02T12:30:00Z",features:[
  f("Replies appear in the phone chat", "Your self-reply is sent as a chat message, the contact shows typing dots while the answer is written, and the answer arrives as their own message before the authored conversation continues.", "Play story → Phone chat → Self-reply → Send response", "author-play"),
  f("Your words follow the chosen path", "Pick an authored reply under Follow this authored path, then write your own words. The character reads them with that reply's tone and consequence (suspicious, joking, earnest) and steers toward that route without repeating the authored text.", "Self-reply → Follow this authored path → Send response", "author-play"),
  f("Faster in-game replies", "Character replies use Claude's fastest, lightest model (Haiku) with a clear conversation transcript; studio proposals keep the stronger model.", "Assistant → Character replies", "assistant"),
  f("Claude edition playable export", "Export desktop or phone games as a Claude edition: testers type their own replies and characters answer live through your hosted game server and its playtest code. It has a distinct title badge and needs an internet connection; the offline export is unchanged.", "Library → Advanced playable export → Character replies → Claude edition", "export-player"),
  f("Larger author playthrough stage", "Author's playthrough controls now fit on one compact row and the game stage keeps a playable minimum size; the preview scrolls instead of shrinking the game.", "Author’s playthrough → Scene preview", "author-play")
  ]},
- {version:"2.23.0",name:"Claude on this computer and automatic character replies",by:"Claude",date:"2026-11-02",timestamp:"2026-11-02T10:30:00Z",features:[
+ {version:"2.23.0-claude",name:"Claude on this computer and automatic character replies",by:"Claude",date:"2026-11-02",timestamp:"2026-11-02T10:30:00Z",features:[
  f("Claude (this computer)", "Use Claude with your own Claude Pro sign-in instead of an API key. Run `claude auth login` once; the local studio then shows Claude Pro connected. No studio password is needed.", "Assistant → Character replies → Claude (this computer)", "assistant"),
  f("Automatic character replies", "Self-reply no longer needs a tick box or password. After you send your own words, the speaker types back in their voice, then Continue story resumes the authored line. Choose Claude on this computer, the Claude API or Off in the Assistant.", "Play story → Self-reply → Send response", "author-play"),
  f("Claude for dialogue proposals", "Claude (this computer) is now a provider choice for Assistant tasks. Dialogue rewrites and other proposals still need your approval before anything changes.", "Assistant → API assistant → Provider for this task", "assistant"),
  f("New and Claude markers", "Controls added in the latest updates show a ✓ marker; hover them for what they do. Work made by Claude carries a small Claude tag here and in the studio.", "Update history → Latest release", "assistant")
  ]},
- {version:"2.22.0",name:"Characters answer self-replies with Claude",by:"Claude",date:"2026-11-02",timestamp:"2026-11-02T08:40:00Z",features:[
+ {version:"2.22.0-claude",name:"Characters answer self-replies with Claude",by:"Claude",date:"2026-11-02",timestamp:"2026-11-02T08:40:00Z",features:[
  f("In-character Claude replies", "The speaker answers a self-reply in their own voice using their character notes and recent scene dialogue, then the authored story continues unchanged. The live site uses ANTHROPIC_API_KEY and STUDIO_ACCESS_TOKEN server secrets; exported games keep the offline behaviour.", "Play story → Self-reply → Let Claude answer in character", "author-play")
  ]},
  {version:"2.21.1",name:"Independent scene inspector scrolling",date:"2026-10-30",timestamp:"2026-10-30T01:16:00Z",features:[

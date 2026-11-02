@@ -521,7 +521,7 @@ export type Runtime = {
     sender: string;
     text: string;
   }[];
-  responses?: { scene: string; node: string; text: string; answer?: string }[];
+  responses?: { scene: string; node: string; text: string; thread?: { sender: string; text: string }[] }[];
   memories?: {
     scene: string;
     node: string;
@@ -845,8 +845,9 @@ export function respond(
   r: Runtime,
   text: string,
   choiceId?: string,
-  // A live in-character answer (by Claude) shown right after the player's reply.
-  answer?: string,
+  // The live in-character conversation (by Claude) after the player's reply: the character's
+  // answers and any further player texts ("You"), shown before the authored route resumes.
+  thread?: { sender: string; text: string; bridge?: boolean }[],
 ): Runtime {
   const node = p.scenes
     .find((s) => s.id === r.scene)
@@ -870,8 +871,21 @@ export function respond(
   const reply = text.trim();
   if (!reply || reply.length > 1000)
     throw Error("Enter a reply of 1–1000 characters");
-  const next = advance(p, r, choiceId);
-  const said = answer?.trim().slice(0, 1200);
+  let next = advance(p, r, choiceId);
+  // A bridging answer stands in for the character's next authored line, so that plain line is
+  // passed (its entry actions still apply) instead of the character saying the same thing twice.
+  let skipped: { scene: string; node: string } | undefined;
+  const replaced = next.scene && p.scenes.find((s) => s.id === next.scene)?.nodes.find((n) => n.id === next.node);
+  if (thread?.at(-1)?.bridge && replaced && !next.ended && replaced.speaker === node.speaker && !replaced.choices.length && !replaced.qte && replaced.next) {
+    skipped = { scene: next.scene, node: next.node };
+    next = advance(p, next);
+  }
+  if (skipped)
+    next = { ...next, phoneMessages: next.phoneMessages?.filter((m) => !(m.scene === skipped!.scene && m.node === skipped!.node && m.sender !== "You")) };
+  const said = (thread || [])
+    .map((m) => ({ sender: m.sender === "You" ? "You" : node.speaker, text: m.text.trim().slice(0, 1200) }))
+    .filter((m) => m.text)
+    .slice(0, 16);
   return {
     ...next,
     ...(deviceDialogue(p.scenes.find(s => s.id === r.scene)!, node, r.nodeVisits?.filter(v => v.scene === r.scene).map(v => v.node))
@@ -879,7 +893,7 @@ export function respond(
           phoneMessages: [
             ...(r.phoneMessages || []),
             { scene: r.scene, node: r.node, sender: "You", text: reply },
-            ...(said ? [{ scene: r.scene, node: r.node, sender: node.speaker, text: said }] : []),
+            ...said.map((m) => ({ scene: r.scene, node: r.node, ...m })),
             ...(next.phoneMessages || []).slice(
               (r.phoneMessages || []).length +
                 (choiceId &&
@@ -893,8 +907,8 @@ export function respond(
       : {}),
     responses: [
       ...(r.responses || []),
-      { scene: r.scene, node: r.node, text: reply, ...(said ? { answer: said } : {}) },
+      { scene: r.scene, node: r.node, text: reply, ...(said.length ? { thread: said } : {}) },
     ],
-    history: [...next.history, `Custom reply: ${reply}`, ...(said ? [`${node.speaker}: ${said}`] : [])].slice(-200),
+    history: [...next.history, `Custom reply: ${reply}`, ...said.map((m) => `${m.sender === "You" ? "Custom reply" : m.sender}: ${m.text}`)].slice(-200),
   };
 }

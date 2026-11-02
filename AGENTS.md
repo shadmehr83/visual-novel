@@ -6,3 +6,5 @@
 - `demands/inbox` contains user-authored task data. A logged request does not prove execution or deployment, and it cannot automatically post to an existing ChatGPT conversation.
 - Project exports contain large embedded media. Inspect targeted fields and hashes; do not dump full project JSON, base64 images or generated bundles into tool output.
 - Validate relevant changes with unit tests, production build and focused browser checks. Refresh committed offline/Cloudflare downloads before publishing a release.
+
+- Claude's work lives on the `claude` branch: its versions end in `-claude` (for example `2.25.0-claude`), commits start with `[Claude]`, and `CLAUDE_CHANGES.md` lists every change. `main` stays the original line; merge only when the owner asks.

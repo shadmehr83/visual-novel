@@ -2129,3 +2129,6 @@ body:has(.exported-game),body:has(.player-title){margin:0;overflow:hidden;backgr
 
 /* Claude edition playable export (by Claude): distinct warm accent and an online notice. */
 .claude-edition-badge{margin:4px 0 14px;padding:6px 12px;border-radius:999px;border:1px solid rgba(217,119,87,.6);background:rgba(204,120,92,.16);color:#f0cdb9;font:500 12px/1.4 system-ui,sans-serif}.player-title.claude-edition h1{text-shadow:0 0 24px rgba(217,119,87,.35)}.player-title.claude-edition button{border-color:rgba(217,119,87,.7)}.exported-game.claude-edition .self-reply>button{color:#f0b89d;font-weight:600}.exported-game.claude-edition .message-you{box-shadow:0 0 0 1px rgba(217,119,87,.35)}
+
+/* Free texting and AI playthrough log (by Claude). */
+.ai-log-row{display:flex;flex-wrap:wrap;align-items:center;gap:6px}.ai-log-row button{font-size:11px;padding:3px 8px}.self-reply.chat-followup{display:grid;gap:5px}.self-reply.chat-followup .custom-response{display:flex;gap:5px;margin:0}.self-reply.chat-followup .custom-response input{flex:1;min-width:0}

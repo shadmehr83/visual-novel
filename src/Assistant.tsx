@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { applyProposal, aiContext, proposalSchema, type Proposal } from "./ai";
 import type { Project } from "./model";
 import { ClaudeMark } from "./ClaudeMark";
-import { characterReplyMode, claudeLocalStatus, setCharacterReplyMode, studioSession, type CharacterReplyMode, type ClaudeLocalStatus } from "./characterReply";
+import { aiLog, characterReplyMode, claudeLocalStatus, setCharacterReplyMode, studioSession, type CharacterReplyMode, type ClaudeLocalStatus } from "./characterReply";
 // "claude-local" uses this computer's Claude Code sign-in (local studio only, no API key).
 type TaskProvider = Provider | "claude-local";
 export function Assistant({
@@ -26,6 +26,8 @@ export function Assistant({
   const [available,setAvailable]=useState<Record<string,boolean>>({});
   const [local,setLocal]=useState<ClaudeLocalStatus|null>(null);
   const [replyMode,setReplyMode]=useState<CharacterReplyMode>(characterReplyMode);
+  const [logCount,setLogCount]=useState(()=>aiLog.read().length);
+  useEffect(()=>{const t=setInterval(()=>setLogCount(aiLog.read().length),3000);return()=>clearInterval(t);},[]);
   useEffect(()=>{let live=true;claudeLocalStatus().then(s=>{if(live)setLocal(s);});return()=>{live=false;};},[]);
   const localLabel=local?.connected?"· connected":local?"· not connected":"· checking…";
   const useLocal=routes[task]==="claude-local";
@@ -171,6 +173,11 @@ export function Assistant({
           <option value="off">Off · authored story only</option>
         </select></label>
         {replyMode==="claude-local" && <p className={"small claude-status"+(local?.connected?" ok":"")} role="status">{local?.connected ? "✓ Claude Pro connected through Claude Code on this computer. Characters answer automatically." : local?.reason || "Checking Claude on this computer…"}</p>}
+        <div className="ai-log-row" data-help="Every AI conversation is logged with its scene, line, chosen path, your text, the answer, whether the story moved on and how long it took. Use it to keep favourite answers, tune replies or spot conversations that ran too long.">
+          <span className="small">Playthrough log · {logCount} AI {logCount === 1 ? "reply" : "replies"}{local?.logFolder ? " · also saved to playtest-logs/" : ""}</span>
+          <button disabled={!logCount} aria-label="Download AI playthrough log" onClick={() => aiLog.download()}>Download log</button>
+          <button disabled={!logCount} aria-label="Clear AI playthrough log" onClick={() => { if (confirm("Clear the AI playthrough log saved in this browser? Files in playtest-logs/ are kept.")) { aiLog.clear(); setLogCount(0); } }}>Clear</button>
+        </div>
         {replyMode==="anthropic" && <label>Studio access password<input type="password" autoComplete="off" aria-label="Character reply studio password" data-help="Needed only for the server API key mode. Kept in memory for this tab, never saved." defaultValue={studioSession.password} onChange={e=>{studioSession.password=e.target.value;}} /></label>}
       </section>
       <div

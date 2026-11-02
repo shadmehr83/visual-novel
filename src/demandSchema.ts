@@ -2,7 +2,8 @@ import { z } from "zod";
 export const demandSchema = z.object({
   id: z.string().uuid(),
   createdAt: z.string().datetime({ offset: true }),
-  engineVersion: z.string().regex(/^\d+\.\d+\.\d+$/),
+  // A suffix marks a parallel line, e.g. 2.25.0-claude.
+  engineVersion: z.string().regex(/^\d+\.\d+\.\d+(-[a-z0-9]+)?$/),
   text: z.string().trim().min(1).max(8000),
   status: z.enum(["open", "done"]),
   context: z.object({
