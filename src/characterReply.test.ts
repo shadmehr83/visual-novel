@@ -1,5 +1,6 @@
 import { afterEach, expect, it, vi } from "vitest";
 import { demo } from "./demo";
+import { allowsReply } from "./interactions";
 import { respond, shownChoice, shownText, start } from "./model";
 import { askCharacter, characterReplyMode, characterReplyPrompt, characterReplyRequest, finishReply, keepRewrites, MAX_FREE_TURNS, setCharacterReplyMode } from "./characterReply";
 import { onReplyGet, onReplyPost } from "../functions/api/reply";
@@ -160,4 +161,16 @@ it("strips speaker labels the model adds to adapted lines", () => {
   const upcoming = [{ id: "p", speaker: "Player", text: "Why didn't you?", choices: [] }, { id: "m", speaker: "Maria", text: "I had a speech.", choices: [] }];
   expect(keepRewrites("s", upcoming, { lines: [{ id: "p", text: "Player: Why didn't you?", choices: [] }, { id: "m", text: "Maria: Okay, I had a speech.", choices: [] }] }))
     .toEqual([{ scene: "s", node: "m", text: "Okay, I had a speech." }]);
+});
+
+it("turns Self-reply off for one dialogue only", () => {
+  const p = demo();
+  const scene = p.scenes[0];
+  const [first, second] = scene.nodes;
+  first.allowSelfReply = false;
+  expect(allowsReply(scene, first, false)).toBe(false);
+  expect(allowsReply(scene, first, true)).toBe(false);
+  expect(allowsReply(scene, second, false)).toBe(true);
+  expect(first.allowCustomResponse).toBeUndefined();
+  expect(() => respond(p, { ...start(p), scene: scene.id, node: first.id }, "hi")).toThrow();
 });

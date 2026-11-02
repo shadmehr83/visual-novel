@@ -1992,6 +1992,22 @@ export default function App() {
                       >
                         Delete dialogue node
                       </button>
+                      <label className="consent" data-help="Turn Self-reply off for this one dialogue only, in the dialogue box and on the phone. Other dialogues and the two options below are not changed.">
+                        <input
+                          type="checkbox"
+                          disabled={editingLocked}
+                          aria-label="Self-reply on this dialogue"
+                          checked={node.allowSelfReply !== false}
+                          onChange={(ev) =>
+                            updateScene((s) => {
+                              const n = s.nodes.find((n) => n.id === node.id)!;
+                              if (ev.target.checked) delete n.allowSelfReply;
+                              else n.allowSelfReply = false;
+                            })
+                          }
+                        />
+                        Self-reply on this dialogue (this line only)
+                      </label>
                       <label className="consent">
                         <input
                           type="checkbox"

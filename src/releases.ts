@@ -1,4 +1,4 @@
-export const ENGINE_VERSION = "2.27.1-claude";
+export const ENGINE_VERSION = "2.27.2-claude";
 export type ReleaseFeature = {
   name: string;
   description: string;
@@ -22,6 +22,9 @@ const f = (
   action?: string,
 ): ReleaseFeature => ({ name, description, steps: path.split(" → "), action });
 export const releases: Release[] = [
+ {version:"2.27.2-claude",name:"Self-reply on or off per dialogue",by:"Claude",date:"2026-11-03",timestamp:"2026-11-03T04:15:00Z",features:[
+ f("Self-reply on this dialogue", "A new switch in the dialogue editor turns Self-reply off for the selected line only, in the dialogue box and on the phone. Other lines and the normal/device custom-response options are not changed.", "Dialogue editor → Self-reply on this dialogue", "editor")
+ ]},
  {version:"2.27.1-claude",name:"AI status only for the author, and an advanced dialogue switch",by:"Claude",date:"2026-11-03",timestamp:"2026-11-03T03:30:00Z",features:[
  f("No AI labels inside the game", "The game itself shows no AI tags. Author's playthrough shows the status instead: 'AI · parallel to Scene · Dialogue' for adapted lines, or 'AI · extra responses after Scene · Dialogue' during a free conversation. The dialogue editor below lists the parallel or the extra messages.", "Author’s playthrough → toolbar and Dialogue editor", "author-play"),
  f("Normal / Advanced dialogue editor", "The Dialogue tab under the preview switches between the normal line editor and the Dialogue advanced map, now that the preview and editor scroll together.", "Dialogue tab → Normal / Advanced", "dialogues")

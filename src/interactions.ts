@@ -60,6 +60,7 @@ export function hingeWindow(
 }
 
 export function allowsReply(scene: Scene, node: Node, inPhone: boolean) {
+  if (node.allowSelfReply === false) return false;
   if (inPhone)
     return (
       (node.allowPhoneCustomResponse ?? node.allowCustomResponse) !== false

@@ -122,6 +122,9 @@ export function SelfReply({
       show({ ...c, typing: false, error });
     }
   }
+  // The dialogue's own "Self-reply on this dialogue" switch hides the option for this line only.
+  const thisLine = story?.project.scenes.find((s) => s.id === story.runtime.scene)?.nodes.find((n) => n.id === nodeId);
+  if (thisLine?.allowSelfReply === false && !convo) return null;
   if (convo) {
     if (convo.typing) return inChat ? null : (
       <div className="self-reply claude-reply" data-no-advance aria-live="polite">

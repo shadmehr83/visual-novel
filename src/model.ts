@@ -80,6 +80,8 @@ const node = z.object({
   notes: z.string().max(10000).optional(),
   qte: qteSchema.optional(),
   allowCustomResponse: z.boolean().optional(),
+  // Per-dialogue master switch (by Claude): false hides Self-reply on this line only, in every view.
+  allowSelfReply: z.boolean().optional(),
   allowPhoneCustomResponse: z.boolean().optional(),
   portrait: z.string().nullable().optional(),
   id: z.string(),
