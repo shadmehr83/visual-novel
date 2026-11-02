@@ -2117,3 +2117,6 @@ body:has(.exported-game),body:has(.player-title){margin:0;overflow:hidden;backgr
 .phone-export[data-progression="screen"] :is(.player-continue,.device-continue,.device-story-continue){display:none}
 .phone-export .put-device-away{top:auto;bottom:max(6px,env(safe-area-inset-bottom));left:8px;font-size:11px;padding:6px;max-width:45%}
 @media(orientation:landscape){.phone-export .dialogue-overlay{max-height:65%;left:5%;right:5%}.phone-export .stage:has(.device-story-progress) .device-overlay:not(.device-desktop){top:50%!important;left:65%!important;height:90%!important;width:calc(90dvh * 9 / 19.5)!important;transform:translate(-50%,-50%)!important}.phone-export .device-story-progress{left:3%;right:55%;bottom:10%;max-height:75%}}
+
+/* Claude in-character replies (by Claude). */
+.claude-reply{display:grid;gap:5px;padding:8px 10px;border-left:2px solid #d9a3c2;background:rgba(20,12,18,.55);border-radius:6px}.claude-reply p{margin:0;line-height:1.4}.claude-reply-you{opacity:.8;font-size:.9em}.claude-reply-thinking{font-style:italic;opacity:.75}.claude-reply>button{justify-self:start}.claude-reply small,.claude-reply-toggle{font-size:10px;opacity:.8}.claude-reply-toggle{display:flex;gap:5px;align-items:center}

@@ -1,4 +1,4 @@
-export const ENGINE_VERSION = "2.21.1";
+export const ENGINE_VERSION = "2.22.0";
 export type ReleaseFeature = {
   name: string;
   description: string;
@@ -20,6 +20,9 @@ const f = (
   action?: string,
 ): ReleaseFeature => ({ name, description, steps: path.split(" → "), action });
 export const releases: Release[] = [
+ {version:"2.22.0",name:"Characters answer self-replies with Claude (by Claude)",date:"2026-11-02",timestamp:"2026-11-02T08:40:00Z",features:[
+ f("In-character Claude replies (by Claude)", "Tick Let Claude answer in character in Self-reply and enter the studio password. The speaker answers your words in their own voice using their character notes and recent scene dialogue, then the authored story continues unchanged. Requires ANTHROPIC_API_KEY and STUDIO_ACCESS_TOKEN server secrets; exported games keep the offline behaviour.", "Play story → Self-reply → Let Claude answer in character", "author-play")
+ ]},
  {version:"2.21.1",name:"Independent scene inspector scrolling",date:"2026-10-30",timestamp:"2026-10-30T01:16:00Z",features:[
  f("Scroll scene details without moving the map", "The right-hand scene and dialogue inspector stays within its workspace and scrolls independently. Scrolling past its edges no longer passes scrolling to the surrounding workspace.", "Scenes advanced → Select a scene → Scroll the right-hand panel", "scenes")
  ]},

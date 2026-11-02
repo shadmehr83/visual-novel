@@ -26,6 +26,12 @@ In the connected Cloudflare Pages project, add these **server-side secrets** for
 
 The production build includes `dist/_worker.js` (Cloudflare Pages advanced mode), so both Git deployments and the refreshed Direct Upload ZIP include the API. A plain static host or `vite preview` does not execute this worker; the offline helper remains available there. No request goes to a remote provider until the user checks the text-sharing consent and presses Ask AI. Scene/dialogue text, character notes and asset names/IDs are sent; artwork and audio bytes are omitted. Clear the consent checkbox to stop sending future requests.
 
+## In-character Claude replies (by Claude)
+
+During **Play story** or **Author's playthrough**, open **Self-reply**, tick **Let Claude answer in character**, and enter the studio password. After you send a reply, the speaking character answers it in their own voice, then **Continue story** carries on with the authored next line. Claude receives your reply, the current and next authored lines, the speaker's character notes and up to twelve recent lines from the scene. It cannot change variables, clues, choices or the route, and its answer is not saved to the project.
+
+Server secrets: `ANTHROPIC_API_KEY` (an Anthropic API key with API billing; a Claude subscription does not include API credit) and the same `STUDIO_ACCESS_TOKEN`. Optional plain variable `ANTHROPIC_MODEL` defaults to `claude-sonnet-5-5`. The endpoint is `/api/reply`. Exported playable HTML games keep the original offline self-reply behaviour.
+
 ## Voice
 
 Dictation uses the browser's SpeechRecognition implementation. Chrome/Edge over HTTPS are the recommended starting point. Browser support and microphone permissions vary. The browser may use an external speech service; an explicit notice precedes microphone activation. Voice changes the request text only, and never applies edits automatically. Stop dictation with the same button. Errors leave typing available. Proposal read-aloud uses browser speech synthesis. Real microphone quality and regional speech-service availability need testing on your own device; automated tests use a simulated recognition service.

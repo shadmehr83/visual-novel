@@ -9,6 +9,9 @@ const PauseContext = createContext(false);
 const AuthorEditingContext = createContext(false);
 export const useAuthorEditing = () => useContext(AuthorEditingContext);
 export const usePaused = () => useContext(PauseContext);
+// Story position for in-character Claude replies; exported games have no studio server.
+const StoryContext = createContext<{ project: Project; runtime: Runtime; studio: boolean } | null>(null);
+export const useStory = () => useContext(StoryContext);
 export function PlaySession({ children, playing, onExit, onRestart, project, runtime, authorEditing = false, exportControls }: {
   exportControls?: { mode: "continue" | "enter" | "screen"; onMode: (mode: "continue" | "enter" | "screen") => void; onSaveQuit: () => void; onQuit: () => void; error?: string };
   authorEditing?: boolean;
@@ -65,7 +68,7 @@ export function PlaySession({ children, playing, onExit, onRestart, project, run
       </>}
     </section></div>}
   </>;
-  return <AuthorEditingContext.Provider value={authorEditing}><PauseContext.Provider value={playing && paused}><SoundSession playing={playing} paused={paused} showControls={!exportControls}>
+  return <StoryContext.Provider value={project && runtime ? { project, runtime, studio: !exportControls } : null}><AuthorEditingContext.Provider value={authorEditing}><PauseContext.Provider value={playing && paused}><SoundSession playing={playing} paused={paused} showControls={!exportControls}>
     <div className={playing && paused ? "play-session session-paused" : "play-session"}><div className="session-content">{children}</div>{host ? createPortal(controls, host) : controls}</div>
-  </SoundSession></PauseContext.Provider></AuthorEditingContext.Provider>;
+  </SoundSession></PauseContext.Provider></AuthorEditingContext.Provider></StoryContext.Provider>;
 }
