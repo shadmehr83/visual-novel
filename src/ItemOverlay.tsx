@@ -22,7 +22,7 @@ export function ItemOverlay({
   node: Node;
   runtime: Runtime | null;
   onStep: (id?: string) => void;
-  onReply?: (text: string, branch?: string) => void;
+  onReply?: (text: string, branch?: string, answer?: string) => void;
 }) {
   const sound = useSound();
   const [selected, setSelected] = useState<string | null>(null);

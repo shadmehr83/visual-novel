@@ -521,7 +521,7 @@ export type Runtime = {
     sender: string;
     text: string;
   }[];
-  responses?: { scene: string; node: string; text: string }[];
+  responses?: { scene: string; node: string; text: string; answer?: string }[];
   memories?: {
     scene: string;
     node: string;
@@ -845,6 +845,8 @@ export function respond(
   r: Runtime,
   text: string,
   choiceId?: string,
+  // A live in-character answer (by Claude) shown right after the player's reply.
+  answer?: string,
 ): Runtime {
   const node = p.scenes
     .find((s) => s.id === r.scene)
@@ -869,6 +871,7 @@ export function respond(
   if (!reply || reply.length > 1000)
     throw Error("Enter a reply of 1–1000 characters");
   const next = advance(p, r, choiceId);
+  const said = answer?.trim().slice(0, 1200);
   return {
     ...next,
     ...(deviceDialogue(p.scenes.find(s => s.id === r.scene)!, node, r.nodeVisits?.filter(v => v.scene === r.scene).map(v => v.node))
@@ -876,6 +879,7 @@ export function respond(
           phoneMessages: [
             ...(r.phoneMessages || []),
             { scene: r.scene, node: r.node, sender: "You", text: reply },
+            ...(said ? [{ scene: r.scene, node: r.node, sender: node.speaker, text: said }] : []),
             ...(next.phoneMessages || []).slice(
               (r.phoneMessages || []).length +
                 (choiceId &&
@@ -889,8 +893,8 @@ export function respond(
       : {}),
     responses: [
       ...(r.responses || []),
-      { scene: r.scene, node: r.node, text: reply },
+      { scene: r.scene, node: r.node, text: reply, ...(said ? { answer: said } : {}) },
     ],
-    history: [...next.history, `Custom reply: ${reply}`].slice(-200),
+    history: [...next.history, `Custom reply: ${reply}`, ...(said ? [`${node.speaker}: ${said}`] : [])].slice(-200),
   };
 }

@@ -18,6 +18,7 @@ import { createRoot } from "react-dom/client";
 import { start, advance, respond, putAwayDevice, validateProject, type Runtime } from "./model";
 import { Stage } from "./Stage";
 import { Qte, SceneAudio } from "./EngineTools";
+import { onlinePlay } from "./characterReply";
 function Player() {
   const [project, setProject] = useState(() =>
     validateProject(
@@ -31,7 +32,9 @@ function Player() {
   const [saved, setSaved] = useState(() => {
     try { return readPlayerSave(localStorage,saveKey,project,scope); } catch { return null; }
   });
-  const [atTitle, setAtTitle] = useState(!!saved);
+  // Claude edition exports start on the title screen so testers see it needs a connection.
+  const claudeEdition = !!onlinePlay();
+  const [atTitle, setAtTitle] = useState(!!saved || claudeEdition);
   const [saveError,setSaveError] = useState("");
   const [runtime, rawSetRuntime] = useState(() => startScope(project,scope));
   const setRuntime = (next: Runtime | ((r:Runtime)=>Runtime)) => rawSetRuntime(before=>limitScope(before,typeof next === 'function' ? next(before):next,scope));
@@ -47,7 +50,8 @@ function Player() {
     catch { setSaveError("Progress could not be saved in this browser. Free storage or allow local storage, then try again. The story is still open."); }
   };
   const restart = () => { setRuntime(startScope(project,scope)); setAtTitle(false); };
-  if(atTitle) return <main className="player-title"><h1>{project.title}</h1>
+  if(atTitle) return <main className={"player-title" + (claudeEdition ? " claude-edition" : "")}><h1>{project.title}</h1>
+    {claudeEdition && <p className="claude-edition-badge">Claude edition · characters answer your own replies live · needs an internet connection</p>}
     {saved && <button data-help="Resume your last saved dialogue, choices and chat transcript in this browser." onClick={()=>{setRuntime(saved);setAtTitle(false);}}>Continue saved game</button>}
     <button data-help="Begin this exported story from its opening. The previous saved checkpoint is kept until you choose Save and quit again." onClick={restart}>Start new game</button>
     <p>Progress stays in this browser on this device. Reopen the same exported game to continue.</p>
@@ -55,7 +59,7 @@ function Player() {
   return (
     <PlaySession key="game" playing project={project} runtime={runtime} onRestart={restart}
       exportControls={{mode,onMode:setMode,onSaveQuit:saveQuit,onQuit:quit,error:saveError}}>
-      <main className={"standalone-experience exported-game " + (mobile ? "phone-export" : "desktop-export")}
+      <main className={"standalone-experience exported-game " + (mobile ? "phone-export" : "desktop-export") + (claudeEdition ? " claude-edition" : "")}
         data-progression={mode}
         style={{"--story-font":project.settings.dialogueFont || "Georgia", "--story-size":(project.settings.dialogueSize || 17)+"px"} as React.CSSProperties}>
         <PlaybackControls mode={mode} onMode={setMode} showSetting={false}
@@ -90,7 +94,7 @@ function Player() {
 
             {hasItemUI(scene, node) ? (
               <ItemOverlay
-                onReply={(text, branch) => setRuntime(r => respond(project, r, text, branch))}
+                onReply={(text, branch, answer) => setRuntime(r => respond(project, r, text, branch, answer))}
                 project={project}
                 scene={scene}
                 node={node}
@@ -131,8 +135,8 @@ function Player() {
                 node={node}
                 runtime={runtime}
                 onStep={(id) => setRuntime((r) => advance(project, r, id))}
-                onReply={(text, branch) =>
-                  setRuntime((r) => respond(project, r, text, branch))
+                onReply={(text, branch, answer) =>
+                  setRuntime((r) => respond(project, r, text, branch, answer))
                 }
               />
             ) : node.qte ? (
@@ -195,8 +199,8 @@ function Player() {
                         choiceAvailable(c, runtime.values),
                     )}
                     nodeId={node.id}
-                    onSend={(text, branch) =>
-                      setRuntime((r) => respond(project, r, text, branch))
+                    onSend={(text, branch, answer) =>
+                      setRuntime((r) => respond(project, r, text, branch, answer))
                     }
                   />
                 )}

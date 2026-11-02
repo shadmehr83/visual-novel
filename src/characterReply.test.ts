@@ -1,6 +1,6 @@
 import { afterEach, expect, it, vi } from "vitest";
 import { demo } from "./demo";
-import { start } from "./model";
+import { respond, start } from "./model";
 import { askCharacter, characterReplyMode, characterReplyRequest, setCharacterReplyMode } from "./characterReply";
 import { onReplyGet, onReplyPost } from "../functions/api/reply";
 
@@ -35,7 +35,7 @@ it("routes in-character replies to Claude and returns only the character's text"
   expect(await res.json()).toEqual({ text: "I am, thank you." });
   expect(f.mock.calls[0][0]).toBe("https://api.anthropic.com/v1/messages");
   const sent = JSON.parse(f.mock.calls[0][1].body);
-  expect(sent.model).toBe("claude-sonnet-5-5");
+  expect(sent.model).toBe("claude-haiku-5-5");
   expect(sent.max_tokens).toBe(400);
   expect(sent.system).toContain("Never reveal anything the character could not know");
 });
@@ -64,4 +64,31 @@ it("defaults to Claude on this computer and sends local replies without a passwo
   expect(await askCharacter(characterReplyRequest(p, start(p), "Hello")!, "claude-local")).toBe("Hi.");
   expect(f.mock.calls[0][0]).toBe("/api/claude-local/reply");
   expect(f.mock.calls[0][1].headers.Authorization).toBeUndefined();
+});
+
+it("reads a self-reply through the chosen authored path and records the answer as the character's message", () => {
+  const p = demo();
+  const scene = p.scenes.find((s) => s.nodes.some((n) => n.choices.length))!;
+  const node = scene.nodes.find((n) => n.choices.length)!;
+  const r = { ...start(p), scene: scene.id, node: node.id };
+  const choice = node.choices[0];
+  const body = characterReplyRequest(p, r, "Depends why you're asking.", choice.id)!;
+  expect(body.chosenPath).toBe(choice.text);
+  const result = respond(p, r, "Depends why you're asking.", choice.id, "Fair. Suspicious answer.");
+  expect(result.responses!.at(-1)).toMatchObject({ text: "Depends why you're asking.", answer: "Fair. Suspicious answer." });
+  expect(result.history).toContain(`${node.speaker}: Fair. Suspicious answer.`);
+});
+
+it("lets Claude edition exports use the playtest code from any origin", async () => {
+  const f = vi.fn().mockResolvedValue(Response.json({ content: [{ type: "text", text: '{"text":"Hey."}' }] }));
+  vi.stubGlobal("fetch", f);
+  const p = demo();
+  const body = characterReplyRequest(p, start(p), "Hello")!;
+  const play = (token: string) => new Request("https://studio.test/api/reply", { method: "POST", headers: { origin: "null", "x-playtest-token": token }, body: JSON.stringify(body) });
+  const playEnv = { ANTHROPIC_API_KEY: "k", PLAYTEST_TOKEN: "share-me" };
+  expect((await onReplyPost({ request: play("wrong"), env: playEnv })).status).toBe(401);
+  const ok = await onReplyPost({ request: play("share-me"), env: playEnv });
+  expect(ok.status).toBe(200);
+  expect(ok.headers.get("access-control-allow-origin")).toBe("*");
+  expect((await onReplyPost({ request: play("share-me"), env: { ANTHROPIC_API_KEY: "k" } })).status).toBe(503);
 });

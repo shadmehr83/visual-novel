@@ -1,7 +1,9 @@
 import type { ExportScope } from "./exportScope";
 import { validateProject, type Project } from "./model";
 import { portableFeedProject } from "./feedLibrary";
-export async function exportPlayer(project: Project, scope?: ExportScope, target: "desktop" | "phone" = "desktop") {
+import type { OnlinePlay } from "./characterReply";
+// `claude` makes the Claude edition (by Claude): characters answer self-replies through the hosted game server.
+export async function exportPlayer(project: Project, scope?: ExportScope, target: "desktop" | "phone" = "desktop", claude?: OnlinePlay) {
   validateProject(project);
   project = await portableFeedProject(project);
   // Coding requests belong to editable project backups, not the public game.
@@ -30,11 +32,11 @@ export async function exportPlayer(project: Project, scope?: ExportScope, target
       }
     })
     .join("\n");
-  const html = `<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>Visual novel player</title><style>${style.replace(/<\/style/gi, "<\\/style")}</style></head><body><div id="root"></div><script id="player-target" type="application/json">${JSON.stringify(target)}</script><script id="story-range" type="application/json">${JSON.stringify(scope || null).replace(/</g, "\\u003c")}</script><script id="story-data" type="application/json">${JSON.stringify(project).replace(/</g, "\\u003c")}</script><script>${code.replace(/<\/script/gi, "<\\/script")}</script></body></html>`;
+  const html = `<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>${claude ? "Visual novel player · Claude edition" : "Visual novel player"}</title><style>${style.replace(/<\/style/gi, "<\\/style")}</style></head><body><div id="root"></div><script id="player-target" type="application/json">${JSON.stringify(target)}</script>${claude ? `<script id="claude-play" type="application/json">${JSON.stringify(claude).replace(/</g, "\\u003c")}</script>` : ""}<script id="story-range" type="application/json">${JSON.stringify(scope || null).replace(/</g, "\\u003c")}</script><script id="story-data" type="application/json">${JSON.stringify(project).replace(/</g, "\\u003c")}</script><script>${code.replace(/<\/script/gi, "<\\/script")}</script></body></html>`;
   const url = URL.createObjectURL(new Blob([html], { type: "text/html" }));
   const link = document.createElement("a");
   link.href = url;
-  link.download = target === "phone" ? "visual-novel-phone.html" : "visual-novel-player.html";
+  link.download = (target === "phone" ? "visual-novel-phone" : "visual-novel-player") + (claude ? "-claude" : "") + ".html";
   link.click();
   setTimeout(() => URL.revokeObjectURL(url), 1000);
 }

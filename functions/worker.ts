@@ -1,7 +1,7 @@
 import { demandConfiguration, publishDemand } from "./api/demands";
 import { publishProject } from "./api/project";
 import { onRequestGet, onRequestPost } from "./api/assistant";
-import { onReplyGet, onReplyPost } from "./api/reply";
+import { onReplyGet, onReplyOptions, onReplyPost } from "./api/reply";
 export default {
   async fetch(
     request: Request,
@@ -34,9 +34,10 @@ export default {
     if (path === "/api/reply") {
       if (request.method === "GET") return onReplyGet({ env });
       if (request.method === "POST") return onReplyPost({ request, env });
+      if (request.method === "OPTIONS") return onReplyOptions();
       return new Response("Method not allowed", {
         status: 405,
-        headers: { Allow: "GET, POST" },
+        headers: { Allow: "GET, POST, OPTIONS" },
       });
     }
     return env.ASSETS.fetch(request);

@@ -9,9 +9,10 @@ import {
 } from "./DeviceAppearance";
 import { usePaused } from "./PlaySession";
 import { deviceScreen, deviceDialogue, allowsReply } from "./interactions";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import type { Project, Scene, Runtime, Node } from "./model";
 import { SelfReply } from "./SelfReply";
+import { pendingReply } from "./characterReply";
 export function PhoneUI({
   project,
   scene,
@@ -32,7 +33,7 @@ export function PhoneUI({
   node: Node;
   runtime: Runtime | null;
   onStep: (id?: string) => void;
-  onReply: (text: string, choiceId?: string) => void;
+  onReply: (text: string, choiceId?: string, answer?: string) => void;
   onRestart?: () => void;
   onAppearance?: (a: DeviceAppearance) => void;
   onUpload?: (a: Project["assets"][number], target: string) => void;
@@ -76,6 +77,8 @@ export function PhoneUI({
     if (effective !== "off") setScreen(effective);
   }, [effective, scene.id]);
   const [typing, setTyping] = useState(false);
+  const waiting = useSyncExternalStore(pendingReply.subscribe, pendingReply.get);
+  const replying = !!waiting && waiting.scene === scene.id && waiting.node === node.id;
   const [keyboardVisible, setKeyboardVisible] = useState(config.keyboard);
   useEffect(
     () => setKeyboardVisible(config.keyboard),
@@ -326,7 +329,13 @@ export function PhoneUI({
                   </div>
                 ),
               )}
-              {typing && (
+              {replying && (
+                <div className="message-bubble message-you">
+                  <span>{waiting.text}</span>
+                  <small>You</small>
+                </div>
+              )}
+              {(typing || replying) && (
                 <div
                   className="typing-bubble"
                   aria-label={config.contact + " is typing"}
@@ -350,10 +359,12 @@ export function PhoneUI({
                     <button onClick={onRestart}>Restart story</button>
                   )}
                 </div>
-              ) : typing ? (
+              ) : typing || replying ? (
                 <span className="small muted">{config.contact} is typing…</span>
-              ) : (
-                <>
+              ) : null}
+              {!runtime?.ended && !typing && (
+                <div hidden={replying} className="device-reply-area">
+                  {/* Kept mounted while the character types so the reply can finish. */}
                   {choices.length ? (
                     <div className="device-replies">
                       {choices.map((c) => (
@@ -375,9 +386,10 @@ export function PhoneUI({
                       choices={choices}
                       nodeId={node.id}
                       onSend={onReply}
+                      inChat
                     />
                   )}
-                </>
+                </div>
               )}
             </div>
           )}

@@ -34,6 +34,10 @@ Choose who answers in **Assistant → Character replies**: **Claude (this comput
 
 Server secrets: `ANTHROPIC_API_KEY` (an Anthropic API key with API billing; a Claude subscription does not include API credit) and the same `STUDIO_ACCESS_TOKEN`. Optional plain variable `ANTHROPIC_MODEL` defaults to `claude-sonnet-5-5`. The endpoint is `/api/reply`. Exported playable HTML games keep the original offline self-reply behaviour.
 
+### Claude edition playable export (by Claude)
+
+**Advanced playable export → Character replies → Claude edition** makes a desktop or phone game in which testers' self-replies are answered live. It needs an internet connection. Add these Cloudflare Pages secrets: `ANTHROPIC_API_KEY`, and `PLAYTEST_TOKEN`, a code you choose. Enter the site address and that code when exporting. The code is embedded in the file, so share it only with people you trust, and change the secret to switch old copies off. Replies use `claude-haiku-5-5` unless `ANTHROPIC_REPLY_MODEL` is set.
+
 ## Voice
 
 Dictation uses the browser's SpeechRecognition implementation. Chrome/Edge over HTTPS are the recommended starting point. Browser support and microphone permissions vary. The browser may use an external speech service; an explicit notice precedes microphone activation. Voice changes the request text only, and never applies edits automatically. Stop dictation with the same button. Errors leave typing available. Proposal read-aloud uses browser speech synthesis. Real microphone quality and regional speech-service availability need testing on your own device; automated tests use a simulated recognition service.

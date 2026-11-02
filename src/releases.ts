@@ -1,4 +1,4 @@
-export const ENGINE_VERSION = "2.23.0";
+export const ENGINE_VERSION = "2.24.0";
 export type ReleaseFeature = {
   name: string;
   description: string;
@@ -22,6 +22,13 @@ const f = (
   action?: string,
 ): ReleaseFeature => ({ name, description, steps: path.split(" → "), action });
 export const releases: Release[] = [
+ {version:"2.24.0",name:"Chat replies, chosen-path intent and Claude edition exports",by:"Claude",date:"2026-11-02",timestamp:"2026-11-02T12:30:00Z",features:[
+ f("Replies appear in the phone chat", "Your self-reply is sent as a chat message, the contact shows typing dots while the answer is written, and the answer arrives as their own message before the authored conversation continues.", "Play story → Phone chat → Self-reply → Send response", "author-play"),
+ f("Your words follow the chosen path", "Pick an authored reply under Follow this authored path, then write your own words. The character reads them with that reply's tone and consequence (suspicious, joking, earnest) and steers toward that route without repeating the authored text.", "Self-reply → Follow this authored path → Send response", "author-play"),
+ f("Faster in-game replies", "Character replies use Claude's fastest, lightest model (Haiku) with a clear conversation transcript; studio proposals keep the stronger model.", "Assistant → Character replies", "assistant"),
+ f("Claude edition playable export", "Export desktop or phone games as a Claude edition: testers type their own replies and characters answer live through your hosted game server and its playtest code. It has a distinct title badge and needs an internet connection; the offline export is unchanged.", "Library → Advanced playable export → Character replies → Claude edition", "export-player"),
+ f("Larger author playthrough stage", "Author's playthrough controls now fit on one compact row and the game stage keeps a playable minimum size; the preview scrolls instead of shrinking the game.", "Author’s playthrough → Scene preview", "author-play")
+ ]},
  {version:"2.23.0",name:"Claude on this computer and automatic character replies",by:"Claude",date:"2026-11-02",timestamp:"2026-11-02T10:30:00Z",features:[
  f("Claude (this computer)", "Use Claude with your own Claude Pro sign-in instead of an API key. Run `claude auth login` once; the local studio then shows Claude Pro connected. No studio password is needed.", "Assistant → Character replies → Claude (this computer)", "assistant"),
  f("Automatic character replies", "Self-reply no longer needs a tick box or password. After you send your own words, the speaker types back in their voice, then Continue story resumes the authored line. Choose Claude on this computer, the Claude API or Off in the Assistant.", "Play story → Self-reply → Send response", "author-play"),

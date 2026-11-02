@@ -2,6 +2,16 @@
 
 Every change in this list was written by Claude (Anthropic) at the request of the repository owner. Matching commits start with `[Claude]` and carry a `Co-authored-by: Claude <noreply@anthropic.com>` trailer.
 
+## Iteration 3 — Phone chat replies, chosen-path intent, Claude edition export, bigger stage (2026-11-02, engine 2.24.0)
+
+- **Phone chat:** your self-reply appears as your chat bubble, the contact shows typing dots, and their answer arrives as their own message before the authored conversation continues (`src/PhoneUI.tsx`, `src/SelfReply.tsx`, `src/model.ts` `respond(…, answer)`, `src/playerSave.ts`).
+- **Chosen path:** the authored reply you pick under *Follow this authored path* is sent as the intent behind your own words. Claude reacts to that tone and consequence and steers toward the route without repeating the authored text (`src/characterReply.ts`: transcript prompt, perspective note, echo retry).
+- **Speed:** in-game replies use Haiku, the fastest and lightest model. The local bridge passes the character rules as the system prompt and skips MCP and session saving (`scripts/claude-local-plugin.ts`, `functions/api/reply.ts`). Replies take about 4–8 seconds through Claude Code.
+- **No Claude tag inside the story:** tags stay in the studio only.
+- **Claude edition export:** Advanced playable export → Character replies → Claude edition, for both desktop and phone layouts. The file embeds the game server address and a playtest code, has its own title badge and warm accent, and calls `/api/reply` with `X-Playtest-Token`. The server needs the `ANTHROPIC_API_KEY` and `PLAYTEST_TOKEN` secrets (`src/AdvancedExport.tsx`, `src/playerExport.ts`, `src/Player.tsx`, `functions/api/reply.ts`, `functions/worker.ts`).
+- **Author's playthrough:** controls compacted to one row, and the game stage keeps a playable minimum size (`src/style.css`).
+- Update history 2.24.0, ✓ New markers, tests, and a refreshed `downloads/stillframe-studio.html`.
+
 ## Iteration 2 — Claude on this computer, automatic replies, Claude and ✓ New markers (2026-11-02, engine 2.23.0)
 
 Uses your own Claude Pro sign-in, through Claude Code on this computer, instead of an API key. Self-reply now gets an answer automatically: no tick box and no password.
