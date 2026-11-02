@@ -5,10 +5,11 @@ export const taskHelp: Record<AssistantTask,string> = {
  "system-ui":"Suggest phone and item UI settings. Engine code changes use AI Demand Export.",
  effects:"Suggest lighting, rain and camera adjustments for the selected scene."
 };
-export async function providerCompletion(provider:Provider,env:{AI_API_KEY?:string;AI_MODEL?:string;ANTHROPIC_API_KEY?:string;ANTHROPIC_MODEL?:string},system:string,body:unknown,maxTokens=2500) {
+// quick: short in-game replies skip thinking (Haiku 5.5 thinks by default and would spend the token budget on it).
+export async function providerCompletion(provider:Provider,env:{AI_API_KEY?:string;AI_MODEL?:string;ANTHROPIC_API_KEY?:string;ANTHROPIC_MODEL?:string},system:string,body:unknown,maxTokens=2500,quick=false) {
  const anthropic=provider==="anthropic";
  const response=await fetch(anthropic?"https://api.anthropic.com/v1/messages":"https://api.openai.com/v1/chat/completions",{
  method:"POST",signal:AbortSignal.timeout(30000),headers:anthropic?{"x-api-key":env.ANTHROPIC_API_KEY!,"anthropic-version":"2023-06-01","Content-Type":"application/json"}:{Authorization:"Bearer "+env.AI_API_KEY,"Content-Type":"application/json"},
- body:JSON.stringify(anthropic?{model:env.ANTHROPIC_MODEL||"claude-sonnet-5-5",max_tokens:maxTokens,system,messages:[{role:"user",content:typeof body==="string"?body:JSON.stringify(body)}]}:{model:env.AI_MODEL||"gpt-4.1-mini",max_tokens:maxTokens,response_format:{type:"json_object"},messages:[{role:"system",content:system},{role:"user",content:typeof body==="string"?body:JSON.stringify(body)}]})});
+ body:JSON.stringify(anthropic?{model:env.ANTHROPIC_MODEL||"claude-sonnet-5-5",max_tokens:maxTokens,...(quick?{thinking:{type:"disabled"}}:{}),system,messages:[{role:"user",content:typeof body==="string"?body:JSON.stringify(body)}]}:{model:env.AI_MODEL||"gpt-4.1-mini",max_tokens:maxTokens,response_format:{type:"json_object"},messages:[{role:"system",content:system},{role:"user",content:typeof body==="string"?body:JSON.stringify(body)}]})});
  if(!response.ok){let why="";try{why=(await response.json())?.error?.message||"";}catch{}throw Error(`Provider unavailable (${response.status}${why?": "+why.slice(0,200):""})`);}const result=await response.json();return anthropic?result.content.filter((x:any)=>x.type==="text").map((x:any)=>x.text).join(""):result.choices[0].message.content;
 }

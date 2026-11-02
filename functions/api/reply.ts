@@ -39,7 +39,7 @@ export async function onReplyPost({ request, env }: { request: Request; env: Env
   }
   try {
     // The fastest, lightest model keeps in-game replies quick.
-    const ask = async () => characterReplySchema.parse(JSON.parse((await providerCompletion("anthropic", { ...env, ANTHROPIC_MODEL: env.ANTHROPIC_REPLY_MODEL || "claude-haiku-5-5" }, characterReplySystem, characterReplyPrompt(body), 400)).replace(/^```(?:json)?\s*|\s*```$/g, "")));
+    const ask = async () => characterReplySchema.parse(JSON.parse((await providerCompletion("anthropic", { ...env, ANTHROPIC_MODEL: env.ANTHROPIC_REPLY_MODEL || "claude-haiku-5-5" }, characterReplySystem, characterReplyPrompt(body), 1000, true)).replace(/^```(?:json)?\s*|\s*```$/g, "")));
     let result = await ask();
     if (echoesPlayer(body, result.text)) result = await ask();
     result = finishReply(body, result);

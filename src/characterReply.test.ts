@@ -1,4 +1,4 @@
-import { afterEach, expect, it, vi } from "vitest";
+﻿import { afterEach, expect, it, vi } from "vitest";
 import { demo } from "./demo";
 import { respond, start } from "./model";
 import { askCharacter, characterReplyMode, characterReplyPrompt, characterReplyRequest, finishReply, MAX_FREE_TURNS, setCharacterReplyMode } from "./characterReply";
@@ -36,7 +36,7 @@ it("routes in-character replies to Claude and returns only the character's text"
   expect(f.mock.calls[0][0]).toBe("https://api.anthropic.com/v1/messages");
   const sent = JSON.parse(f.mock.calls[0][1].body);
   expect(sent.model).toBe("claude-haiku-5-5");
-  expect(sent.max_tokens).toBe(400);
+  expect(sent.max_tokens).toBe(1000);expect(sent.thinking).toEqual({type:"disabled"});
   expect(sent.system).toContain("Never reveal anything the character could not know");
 });
 
@@ -98,7 +98,7 @@ it("skips the character's next plain authored line when Claude's answer bridges 
 it("caps the free conversation and always returns to the story on the last turn", async () => {
   const p = demo();
   const body = { ...characterReplyRequest(p, start(p), "Anyway, do you like soup?")!, turn: MAX_FREE_TURNS };
-  expect(finishReply(body, { text: "Soup is fine. Anyway…", advance: false }).advance).toBe(true);
+  expect(finishReply(body, { text: "Soup is fine. Anywayâ€¦", advance: false }).advance).toBe(true);
   expect(characterReplyPrompt(body)).toContain("last free turn");
   expect(characterReplyPrompt({ ...body, turn: 1 })).not.toContain("last free turn");
 });
