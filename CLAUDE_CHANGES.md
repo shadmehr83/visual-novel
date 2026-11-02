@@ -4,6 +4,12 @@ Every change in this list was written by Claude (Anthropic) at the request of th
 
 > **Where this lives:** branch `claude` on GitHub. Versions end in `-claude`. `main` is the original line and is untouched.
 
+## Iteration 7 — Author-only AI status, Normal/Advanced editor, per-line Self-reply (2026-11-03, engine 2.27.2-claude)
+
+- **No AI tags inside the game.** Author's playthrough shows "AI · parallel to Scene · Dialogue" or "AI · extra responses after Scene · Dialogue · n messages", and the dialogue editor lists the parallel or the extra messages.
+- **Normal / Advanced switch** in the bottom Dialogue tab, which shows the Dialogue advanced map (`FlowEditor`) under the preview at a fixed, scrollable height.
+- **"Self-reply on this dialogue"** (`allowSelfReply` on a node): hides Self-reply on that line only, everywhere. The normal/device custom-response options are untouched.
+
 ## Iteration 6 — One AI panel, narrated-scene replies, AI labels, preview window, fifth Insta clip (2026-11-03, engine 2.27.0-claude)
 
 - **AI panel** (`src/Assistant.tsx`): one **AI assistant** tab where each job picks its AI: Claude Code on this computer (shows which Claude model and plan), OpenAI API, or Claude API. The Claude API asks for confirmation for anything but character texts. **AI Demand Export** stays as its own tab, and the old "Cilia AI assistant" and "OFFLINE MODE" labels are gone.
