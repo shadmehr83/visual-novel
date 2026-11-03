@@ -39,6 +39,8 @@ export function removeDialogue(scene: Scene, id: string) {
     delete scene.phone.returnControl;
   if (scene.phone?.dialogueRange && [scene.phone.dialogueRange.start, scene.phone.dialogueRange.end].includes(id))
     delete scene.phone.dialogueRange;
+  if (scene.storyTimers?.range && [scene.storyTimers.range.start, scene.storyTimers.range.end].includes(id))
+    delete scene.storyTimers.range;
   if (scene.items)
     scene.items.options = scene.items.options.filter((item) =>
       scene.nodes.some((n) => n.choices.some((c) => c.id === item.choice)),

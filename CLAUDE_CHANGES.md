@@ -4,6 +4,10 @@ Every change in this list was written by Claude (Anthropic) at the request of th
 
 > **Where this lives:** branch `claude` on GitHub. Versions end in `-claude`. `main` is the original line and is untouched.
 
+## Stillframe 3.4 — story timer switches (2026-11-04, engine 3.4.0-claude)
+
+- Merged `claude` (2.32.0-claude): timer on/off and bar shown/hidden per dialogue, per scene and for a dialogue range, in both dialogue editors. Details are under Iteration 12 below.
+
 ## Stillframe 3.3 — new game settings (2026-11-04, engine 3.3.0-claude)
 
 - Merged `claude` (2.31.0-claude): Start new game asks for the player's settings, and the pause menu groups them under Settings with a Timed decisions switch. Details are under Iteration 11 below.
@@ -54,6 +58,13 @@ Same `claude-v3` line. The 3.0 top bar, palette and features stay; the rest of t
   - A transition waits up to 1.5 s for a new GIF's first frame.
   - "Smooth" is a true cross-dissolve: the new view stays opaque beneath the fading old one, so there is no dip to the dark stage.
 - Tests: `src/recentFeatures.test.tsx`; all 209 tests pass.
+## Iteration 12 — Story timer per dialogue, range and scene (2026-11-04, engine 2.32.0-claude)
+
+- **Model:** `node.timerOff` and `node.timerHidden` (true/false override, unset follows the scene). `scene.storyTimers` `{off, hidden, range: {enabled, start, end, effect: "hidden" | "off"}}`. The range counts along the path played, like the texting range, and is removed when its start or end dialogue is deleted (`src/authoring.ts`).
+- **Rules** (`timerRule` in `src/storyTiming.ts`): the dialogue's own choice wins, then the range, then the scene. Off stops auto-continue and timed decisions; a line's own `autoAdvance` still runs. Hidden keeps the timer running with `visibility:hidden`; in the studio the bar shows as a faint dashed outline (`src/StoryTimer.tsx`).
+- **Editors:** `src/StoryTimerControls.tsx` in the Normal dialogue editor and in the Advanced (map) editor's selected dialogue; the map's scene view shows the scene part. Editable during Author's playthrough.
+- Search entries, New marks, tests in `src/storyTimer.test.tsx`.
+
 ## Iteration 11 — New game settings (2026-11-04, engine 2.31.0-claude)
 
 - **Title screen:** every game (play link and exports) now opens on its title screen. Start new game opens `src/NewGameSetup.tsx`, which asks three questions. How to move on: Continue on screen, Enter (not on phones), or a click/tap on the scene. Whether dialogue is timed (auto-continue). Whether decisions have a time limit, asked only when the story has timed decisions. Choices apply at once. A note says they can be changed anytime from Pause menu → Settings.

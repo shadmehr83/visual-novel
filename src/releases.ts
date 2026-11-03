@@ -1,4 +1,4 @@
-export const ENGINE_VERSION = "3.3.0-claude";
+export const ENGINE_VERSION = "3.4.0-claude";
 export type ReleaseFeature = {
   name: string;
   description: string;
@@ -22,7 +22,10 @@ const f = (
   action?: string,
 ): ReleaseFeature => ({ name, description, steps: path.split(" → "), action });
 export const releases: Release[] = [
- {version:"3.3.0-claude",name:"New game settings in Stillframe 3",by:"Claude",date:"2026-11-04",timestamp:"2026-11-03T16:50:00Z",features:[
+ {version:"3.4.0-claude",name:"Story timer switches in Stillframe 3",by:"Claude",date:"2026-11-04",timestamp:"2026-11-03T17:23:05Z",features:[
+ f("Story timer switches in both designs", "The per-dialogue, range and scene timer switches from the classic studio (2.32.0-claude) are in Stillframe 3 too, in the Normal and Advanced dialogue editors.", "Dialogue → Normal → Story timer", "dialogue")
+ ]},
+ {version:"3.3.0-claude",name:"New game settings in Stillframe 3",by:"Claude",commit:"340fe42",date:"2026-11-04",timestamp:"2026-11-03T16:44:30Z",features:[
  f("New game settings in both designs", "The classic studio's new game settings (2.31.0-claude) and the pause menu's Settings group, with its Timed decisions switch, come to Stillframe 3 too.", "Play link or exported game → Start new game", "author-play")
  ]},
  {version:"3.2.0-claude",name:"Story timers in Stillframe 3",by:"Claude",commit:"a989cea",date:"2026-11-03",timestamp:"2026-11-03T05:30:38Z",features:[
@@ -48,6 +51,11 @@ export const releases: Release[] = [
  f("New badges", "Controls added in the latest releases carry a green New pill; hover it to see the version that added it.", "Any workspace → Hover a New pill", "updates"),
  f("Faster and lighter", "Stillframe 3 runs from an optimised build (about five times faster per edit, half the memory), and autosave stores artwork once instead of copying every image on each change.", "Stillframe 3 → Edit any line", "editor"),
  f("Smooth GIF and still backgrounds", "Moving from a still background to an animated GIF, or back, is now a clean cross-fade: a GIF starts on its poster or a ready frame, each frame is prepared once and reused, and the old picture waits for the new one, so nothing flashes dark or blinks.", "Play story → Café → A table by the window", "background")
+ ]},
+ {version:"2.32.0-claude",name:"Story timer per dialogue, range and scene",by:"Claude",date:"2026-11-04",timestamp:"2026-11-03T17:20:02Z",features:[
+ f("Timer on or off per dialogue", "Each dialogue has Timer on this dialogue: Follow scene, On or Off. Off stops auto-continue and a timed decision's countdown on that line; a line's own Auto-advance time still runs. It is in both the Normal and the Advanced dialogue editor, and works during Author's playthrough.", "Dialogue → Normal → Story timer → Timer on this dialogue", "dialogue"),
+ f("Hide the timer bar", "Timer bar on this dialogue can hide the bar while the timer keeps running, so players cannot see how long is left. In the studio a hidden bar shows as a faint dashed outline so you know it is running.", "Dialogue → Normal → Story timer → Timer bar on this dialogue", "dialogue"),
+ f("Timers for a scene or a dialogue range", "Under Whole scene or a dialogue range, switch every timer in a scene off, hide every bar, or apply either one from one dialogue to another. A dialogue's own On/Off or Shown/Hidden choice wins over the scene.", "Dialogue → Advanced → Story timer → From one dialogue to another", "dialogue")
  ]},
  {version:"2.31.0-claude",name:"New game settings",by:"Claude",commit:"96b3f12",date:"2026-11-04",timestamp:"2026-11-03T16:38:07Z",features:[
  f("New game settings", "Start new game now asks players how to move the story on (Continue on screen, Enter or a click on the scene) and whether the dialogue is timed, plus whether decisions have a time limit when the story has any. A note says these can be changed anytime from the pause menu.", "Play link or exported game → Start new game", "author-play"),

@@ -6,7 +6,8 @@ const introduced:Record<string,string>={"AI Demand Export":"2.17.0","API assista
   "Self-reply on this dialogue":"2.27.2-claude","Export playable HTML · with Claude":"2.28.0-claude","Export phone game · with Claude":"2.28.0-claude",
   "Dialogue switched on":"2.29.0-claude","Search by AI":"2.29.0-claude","✦ Ask Claude":"2.29.0-claude","Open playtest admin ↗":"2.29.0-claude","Enlarge background of …":"2.29.0-claude",
   "Windows":"3.0.0-claude","Export & share":"3.1.0-claude","Dark palette":"3.1.1-claude","Switch to classic design":"3.1.1-claude",
-  "Timed decision":"2.30.0-claude","Timed decisions":"2.30.0-claude","Auto-continue dialogue":"2.30.0-claude","Auto-continue dialogue by default":"2.30.0-claude"};
+  "Timed decision":"2.30.0-claude","Timed decisions":"2.30.0-claude","Auto-continue dialogue":"2.30.0-claude","Auto-continue dialogue by default":"2.30.0-claude",
+  "Timer on this dialogue":"2.32.0-claude","Timer bar on this dialogue":"2.32.0-claude","Timers on in this scene":"2.32.0-claude","Hide timer bar in this scene":"2.32.0-claude","Timer dialogue range":"2.32.0-claude"};
 const prefixes=Object.keys(introduced).filter(k=>k.endsWith('…'));
 const versionOf=(name:string)=>introduced[name]||introduced[prefixes.find(p=>name.startsWith(p.slice(0,-1)))||''];
 // Releases made by Claude also carry a Claude tag on their new controls. Controls inside the game itself stay unmarked.

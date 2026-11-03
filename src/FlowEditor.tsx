@@ -1,4 +1,5 @@
 import {SceneAudioTracks} from "./SceneAudioTracks";
+import { StoryTimerControls } from "./StoryTimerControls";
 import { cloneData as structuredClone } from "./cloneData";
 import { FlowPanelSize, useFlowPanelSize } from "./FlowPanelSize";
 import { BackgroundStoryboard } from "./BackgroundStoryboard";
@@ -512,6 +513,7 @@ export function FlowEditor({
                       {scene.nodes[0].text.slice(0, 80)}
                     </p>
                     <SceneAudioTracks project={project} scene={scene} update={updateScene} />
+                    <StoryTimerControls scene={scene} update={updateScene} sceneOpen />
                     <BackgroundStoryboard
                       key={scene.id}
                       project={project}
@@ -629,6 +631,7 @@ export function FlowEditor({
                         </select>
                       </label>
                     )}
+                    <StoryTimerControls scene={scene} node={node} update={updateScene} />
                     <button onClick={() => onOriginal(scene.id, node.id)}>
                       All dialogue settings in original editor
                     </button>

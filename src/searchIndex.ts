@@ -46,6 +46,8 @@ const defs:[string,string,string,string?][]=[
  ['Project settings','Open project options, workspace sizing and interface preferences.','settings','reduced effects safe area'],
  ['Auto-continue dialogue','Make lines without replies move on by themselves (3, 4 or 8 seconds), shown as a bar; players can switch it in the pause menu.','settings','auto advance timer qte reading time automatic continue'],
  ['Timed decisions','Give a reply line a countdown bar; when it runs out a chosen reply is taken. Switch it per decision in the dialogue editor or for the whole project in Settings.','dialogue','qte timer countdown choice time limit decision'],
+ ['Timer on this dialogue','Switch the story timer (auto-continue and timed decisions) on or off for one dialogue, a dialogue range or a whole scene, in the Normal or Advanced dialogue editor.','dialogue','qte timer off disable scene range story timer'],
+ ['Timer bar on this dialogue','Hide the timer bar while the timer keeps running, for one dialogue, a dialogue range or a whole scene. In the studio a hidden bar shows as a faint outline.','dialogue','qte timer hide invisible bar visible range scene'],
  ['Save and publish project','Export the full project with embedded artwork or use the configured publisher.','save','backup github sync json export'],
  ['Restore artwork','Recover missing published artwork and outfit cards while retaining custom project edits.','restore-artwork','missing empty folders images recovery'],
  ['Update history','Search version history and find directions for older and newer features.','updates','release help instructions'],

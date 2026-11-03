@@ -2199,3 +2199,10 @@ body:has(.exported-game),body:has(.player-title){margin:0;overflow:hidden;backgr
 .setup-actions{display:flex;gap:10px;justify-content:flex-end}
 .new-game-setup .setup-actions button{padding:10px 20px;font-size:15px}
 .new-game-setup .setup-actions button:first-child{background:transparent}
+/* Hidden story timer (by Claude): runs without showing; the studio shows a faint outline */
+.story-timer-hidden{visibility:hidden}
+.story-timer-ghost{visibility:visible;background:transparent;outline:1px dashed #ffffff59;outline-offset:-1px}
+.story-timer-ghost>span{opacity:.18}
+.story-timer-controls h4{margin:0 0 6px;font-size:12px;text-transform:uppercase;letter-spacing:.05em}
+.story-timer-controls details{margin-top:6px}
+.story-timer-controls summary{cursor:pointer;font-size:12px}

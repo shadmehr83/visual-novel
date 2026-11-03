@@ -1,9 +1,9 @@
 import { useEffect, useLayoutEffect, useRef, useState, useSyncExternalStore } from "react";
-import { useAuthorEditing, usePaused } from "./PlaySession";
+import { useAuthorEditing, usePaused, useStory } from "./PlaySession";
 import { pendingReply } from "./characterReply";
 import { choiceAvailable } from "./choices";
 import type { Node, Project, Runtime } from "./model";
-import { autoContinuePreference, decisionTimer, estimateLines, readingSeconds, timedDecisionsPreference } from "./storyTiming";
+import { autoContinuePreference, decisionTimer, estimateLines, readingSeconds, timedDecisionsPreference, timerRule } from "./storyTiming";
 // Story timer bar (by Claude). Plain lines move on by themselves when auto-continue is on (or the
 // line has its own Auto-advance time); timed decisions take a reply when time runs out. The bar
 // shows the time left without numbers: inside the dialogue box, or in the scene's lower-right
@@ -27,8 +27,13 @@ export function StoryTimer({ project, node, runtime, text, corner = false, onCon
   const root = useRef<HTMLDivElement>(null), fill = useRef<HTMLSpanElement>(null);
   const latest = useRef({ onContinue, onChoose });
   latest.current = { onContinue, onChoose };
-  // A player who turned timed decisions off gets no countdown; the reply waits for them.
-  const decision = timedOn ? decisionTimer(project, node) : null;
+  const story = useStory();
+  const scene = project.scenes.find((s) => s.id === runtime.scene);
+  const rule = scene ? timerRule(scene, node, runtime.nodeVisits?.filter((v) => v.scene === scene.id).map((v) => v.node)) : { off: false, hidden: false };
+  // A player who turned timed decisions off gets no countdown; the reply waits for them. A timer
+  // switched off for this line or scene stops auto-continue and countdowns; a line's own
+  // Auto-advance time still runs.
+  const decision = timedOn && !rule.off ? decisionTimer(project, node) : null;
   const replies = node.choices.filter((c) => choiceAvailable(c, runtime.values));
   const fallback = replies.find((c) => c.id === decision?.choice) || replies[0];
   const seconds = runtime.ended
@@ -37,7 +42,7 @@ export function StoryTimer({ project, node, runtime, text, corner = false, onCon
       ? (fallback ? decision.seconds * (project.settings.timing || 1) : 0)
       : node.choices.length || node.qte
         ? 0
-        : (node.autoAdvance ?? (autoOn ? readingSeconds(text, lines ?? estimateLines(text)) : 0));
+        : (node.autoAdvance ?? (autoOn && !rule.off ? readingSeconds(text, lines ?? estimateLines(text)) : 0));
   // Lines are counted as the dialogue box shows them.
   useLayoutEffect(() => {
     if (corner) return;
@@ -85,11 +90,15 @@ export function StoryTimer({ project, node, runtime, text, corner = false, onCon
     return () => cancelAnimationFrame(frame);
   }, [restart, held]);
   if (!seconds) return null;
+  // A hidden bar still runs. Players never see it; in the studio it shows as a faint outline.
+  const hidden = rule.hidden ? (story?.studio ? " story-timer-hidden story-timer-ghost" : " story-timer-hidden") : "";
   return (
     <div
       ref={root}
-      className={"story-timer" + (corner ? " story-timer-corner" : "") + (decision ? " story-timer-decision" : "") + (held ? " story-timer-held" : "")}
+      className={"story-timer" + (corner ? " story-timer-corner" : "") + (decision ? " story-timer-decision" : "") + (held ? " story-timer-held" : "") + hidden}
       role="timer"
+      aria-hidden={rule.hidden && !story?.studio ? true : undefined}
+      title={rule.hidden && story?.studio ? "Timer bar hidden from players (the timer still runs)" : undefined}
       aria-label={decision ? "Time left to choose a reply" : "Time until the story continues"}
       data-no-advance
     >
