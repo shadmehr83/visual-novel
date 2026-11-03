@@ -1,0 +1,1573 @@
+/* Stillframe 3.1 (by Claude): the studio laid out like a game-engine editor.
+   Panels meet edge to edge with hairline dividers; every panel has the same slim header;
+   the viewport is a quiet canvas; the inspector is a column of foldable groups.
+   Everything is scoped to html[data-ui="v3"]; story artwork, devices and the game keep their look. */
+html[data-ui="v3"] {
+  --v3-canvas: #ebe9e3;
+  --v3-dot: #d9d5cc;
+  --v3-ink: #23272c;
+  --fs: var(--ui-font-size, 12px);
+}
+html[data-ui="v3"] .app[data-theme="warm"] {
+  --v3-canvas: #e7dcc8;
+  --v3-dot: #d6c8ad;
+  --v3-ink: #3a3328;
+}
+html[data-ui="v3"] .app {
+  font-size: var(--fs);
+}
+
+/* ---------- Panel headers: one slim style for every dockable panel ---------- */
+html[data-ui="v3"] .app .panel-chrome {
+  height: 32px;
+  min-height: 32px;
+  padding: 0 6px 0 4px;
+  gap: 2px;
+  background: var(--v3-surface);
+  border-bottom: 1px solid var(--v3-line);
+  color: var(--v3-muted);
+}
+html[data-ui="v3"] .app .panel-drag-title {
+  font: 650 10.5px/1 var(--ui-font);
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: var(--v3-muted);
+}
+html[data-ui="v3"] .app .panel-chrome :is(button, summary) {
+  min-width: 24px;
+  height: 24px;
+  border-radius: 6px;
+  color: var(--v3-muted);
+  border: 0;
+}
+html[data-ui="v3"] .app .panel-chrome .panel-grip {
+  opacity: 0.35;
+}
+/* Window actions appear when the header is hovered or focused. */
+html[data-ui="v3"] .app .panel-chrome > :is(button:not(.panel-grip), details) {
+  opacity: 0;
+  transition: opacity 0.12s;
+}
+html[data-ui="v3"] .app .panel-chrome:is(:hover, :focus-within) > :is(button, details) {
+  opacity: 1;
+}
+html[data-ui="v3"] .app .workspace-pane > .panel-chrome {
+  height: 26px;
+  min-height: 26px;
+  background: var(--v3-surface-2);
+}
+/* With one workspace its header row is left out; Windows & docking still moves it. */
+html[data-ui="v3"] .app .single-workspace > .main-workspace > .panel-chrome {
+  display: none;
+}
+html[data-ui="v3"] .app .workspace-pane > .panel-chrome .panel-drag-title {
+  font-size: 9.5px;
+}
+html[data-ui="v3"] .floating-dock > .panel-chrome {
+  border-radius: 10px 10px 0 0;
+}
+
+/* ---------- Workspace frame ---------- */
+html[data-ui="v3"] .app .workspace {
+  background: var(--v3-canvas);
+}
+html[data-ui="v3"] .app .dock-resident {
+  border-color: var(--v3-line);
+}
+html[data-ui="v3"] .app .dock-slot {
+  background: var(--v3-line);
+  gap: 1px;
+}
+
+/* ---------- Activity bar ---------- */
+html[data-ui="v3"] .app .rail {
+  background: var(--v3-surface-2);
+  border-right: 1px solid var(--v3-line);
+  gap: 4px;
+  padding: 10px 0 12px;
+}
+html[data-ui="v3"] .app .rail:not(.rail-top) button {
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  border-radius: 10px;
+}
+html[data-ui="v3"] .app .rail button {
+  color: var(--v3-muted);
+}
+html[data-ui="v3"] .app .rail button:hover {
+  color: var(--v3-text);
+}
+html[data-ui="v3"] .app .rail button.active {
+  background: var(--v3-accent-soft);
+  color: var(--v3-accent-hover);
+}
+html[data-ui="v3"] .app .rail:not(.rail-top) button.active::before {
+  left: -8px;
+  top: 10px;
+  height: 20px;
+  width: 3px;
+  border-radius: 0 3px 3px 0;
+  background: var(--v3-accent);
+}
+html[data-ui="v3"] .app .rail .avatar {
+  width: 28px;
+  height: 28px;
+  border: 0;
+  background: var(--v3-ink);
+  color: #fff;
+  font-weight: 650;
+}
+
+/* ---------- Story outline (library) ---------- */
+html[data-ui="v3"] .app .library {
+  background: var(--v3-surface);
+  border-right: 1px solid var(--v3-line);
+}
+/* Outline order: header, chapter picker, then the scene list. */
+html[data-ui="v3"] .app .library > .panel-chrome { order: -3; }
+html[data-ui="v3"] .app .library > .panel-heading { order: -2; }
+html[data-ui="v3"] .app .library > .chapter-library { order: -1; }
+html[data-ui="v3"] .app .library > .panel-heading {
+  height: 44px;
+  min-height: 44px;
+  padding: 0 10px 0 14px;
+  border-bottom: 0;
+  font: 650 calc(var(--fs) + 1px) / 1 var(--ui-font);
+  color: var(--v3-text);
+}
+html[data-ui="v3"] .app .library > .panel-heading button {
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border: 1px solid var(--v3-line-strong);
+  border-radius: 8px;
+  color: var(--v3-text-2);
+}
+html[data-ui="v3"] .app .library .section-label {
+  margin: 4px 14px 8px;
+  font: 650 10px/1 var(--ui-font);
+  letter-spacing: 0.08em;
+  color: var(--v3-muted);
+}
+html[data-ui="v3"] .app .library .section-label span {
+  font-size: 10px;
+  color: var(--v3-muted);
+  font-variant-numeric: tabular-nums;
+}
+html[data-ui="v3"] .app .chapter-library {
+  display: grid;
+  gap: 4px;
+  padding: 0 10px 10px;
+  margin: 0;
+  border: 0;
+}
+html[data-ui="v3"] .app .chapter-library label {
+  font-size: calc(var(--fs) - 1px);
+  color: var(--v3-muted);
+}
+html[data-ui="v3"] .app .chapter-library select {
+  margin-top: 4px;
+  font-weight: 600;
+}
+html[data-ui="v3"] .app .chapter-library > button {
+  justify-content: flex-start;
+  padding: 4px 4px;
+  border: 0;
+  background: transparent;
+  color: var(--v3-accent-hover);
+  font-weight: 600;
+}
+html[data-ui="v3"] .app .scene-list {
+  padding: 4px 6px 8px;
+  gap: 1px;
+  border-top: 1px solid var(--v3-line);
+}
+html[data-ui="v3"] .app .scene-card {
+  align-items: center;
+  gap: 10px;
+  padding: 6px 8px;
+  border: 0;
+  border-radius: 8px;
+}
+html[data-ui="v3"] .app .scene-card.selected {
+  background: var(--v3-accent-soft);
+  box-shadow: inset 3px 0 0 var(--v3-accent);
+}
+html[data-ui="v3"] .app .scene-thumb {
+  width: 64px;
+  min-width: 64px;
+  height: 36px;
+  border-radius: 6px;
+  box-shadow: 0 0 0 1px rgb(0 0 0 / 6%);
+}
+html[data-ui="v3"] .app .scene-thumb small {
+  bottom: 2px;
+  left: 2px;
+  padding: 2px 3px;
+  border-radius: 3px;
+  background: rgb(15 18 20 / 62%);
+  color: #fff;
+  font: 650 8.5px/1 ui-monospace, "Cascadia Mono", Consolas, monospace;
+}
+html[data-ui="v3"] .app .scene-title {
+  flex: 1;
+  min-width: 0;
+  max-width: none;
+  font: 600 var(--fs) / 1.3 var(--ui-font);
+  color: var(--v3-text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+html[data-ui="v3"] .app .scene-title > span {
+  margin-top: 2px;
+  font: 400 calc(var(--fs) - 1.5px) / 1.3 var(--ui-font);
+  color: var(--v3-muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+html[data-ui="v3"] .app .scene-dot,
+html[data-ui="v3"] .app .story-note {
+  display: none;
+}
+html[data-ui="v3"] .app .subscene-list {
+  margin: 6px 10px 10px;
+  border: 1px solid var(--v3-line);
+  border-radius: 10px;
+  background: var(--v3-surface-2);
+  overflow: hidden;
+}
+html[data-ui="v3"] .app .subscene-list > summary {
+  padding: 9px 12px;
+  font-weight: 600;
+  color: var(--v3-text-2);
+  cursor: pointer;
+}
+html[data-ui="v3"] .app .subscene-list[open] > summary {
+  border-bottom: 1px solid var(--v3-line);
+}
+html[data-ui="v3"] .app .subscene-list > div {
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--v3-line);
+}
+html[data-ui="v3"] .app .library-body {
+  padding: 10px 14px 14px;
+}
+html[data-ui="v3"] .app .library-body h3 {
+  font: 650 calc(var(--fs) + 0.5px) / 1.3 var(--ui-font);
+  color: var(--v3-text);
+}
+/* Artwork shows as a two-column asset browser. */
+html[data-ui="v3"] .app .library-body:has(> .asset-row) {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  align-content: start;
+}
+html[data-ui="v3"] .app .library-body:has(> .asset-row) > :not(.asset-row) {
+  grid-column: 1 / -1;
+}
+html[data-ui="v3"] .app .asset-row {
+  position: relative;
+  display: block;
+  margin: 0;
+}
+html[data-ui="v3"] .app .asset-card {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 3px;
+  width: 100%;
+  height: auto;
+  padding: 4px 4px 7px;
+  border: 1px solid var(--v3-line);
+  border-radius: 10px;
+  background: var(--v3-surface);
+  text-align: left;
+}
+html[data-ui="v3"] .app .asset-card img {
+  width: 100%;
+  height: auto;
+  aspect-ratio: 16 / 10;
+  object-fit: cover;
+  border-radius: 7px;
+}
+html[data-ui="v3"] .app .asset-card b {
+  padding: 0 3px;
+  font: 600 calc(var(--fs) - 1px) / 1.3 var(--ui-font);
+  color: var(--v3-text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+html[data-ui="v3"] .app .asset-card small {
+  padding: 0 3px;
+  font-size: 10px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+html[data-ui="v3"] .app .asset-row .asset-expand-icon {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  opacity: 0;
+}
+html[data-ui="v3"] .app .asset-row:is(:hover, :focus-within) .asset-expand-icon {
+  opacity: 1;
+}
+html[data-ui="v3"] .app .character-card {
+  border-radius: 10px;
+  border-color: var(--v3-line);
+}
+html[data-ui="v3"] .app .asset-card.selected {
+  border-color: var(--v3-accent);
+  box-shadow: 0 0 0 2px var(--v3-accent-soft);
+}
+html[data-ui="v3"] .app button.wide.dashed {
+  border: 1.5px dashed var(--v3-line-strong);
+  background: var(--v3-surface-2);
+  color: var(--v3-text-2);
+  border-radius: 10px;
+  padding: 12px;
+}
+
+/* Export & share: one button pinned to the bottom of the outline, opening upwards. */
+html[data-ui="v3"] .app .v3-export {
+  position: sticky;
+  bottom: 0;
+  z-index: 6;
+  margin-top: auto;
+  padding: 8px 10px;
+  background: var(--v3-surface);
+  border-top: 1px solid var(--v3-line);
+}
+html[data-ui="v3"] .app .v3-popover > summary {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 8px 12px;
+  border: 1px solid var(--v3-line-strong);
+  border-radius: 9px;
+  background: var(--v3-surface);
+  color: var(--v3-text);
+  font-weight: 600;
+  list-style: none;
+  cursor: pointer;
+}
+html[data-ui="v3"] .app .v3-popover > summary::-webkit-details-marker {
+  display: none;
+}
+html[data-ui="v3"] .app .v3-popover > summary:hover,
+html[data-ui="v3"] .app .v3-popover[open] > summary {
+  background: var(--v3-hover);
+}
+html[data-ui="v3"] .app .v3-popover-menu {
+  position: absolute;
+  left: 8px;
+  right: 8px;
+  bottom: calc(100% - 2px);
+  max-height: min(70vh, 640px);
+  overflow: auto;
+  padding: 6px;
+  background: var(--v3-surface);
+  border: 1px solid var(--v3-line);
+  border-radius: 12px;
+  box-shadow: var(--v3-shadow-pop);
+}
+html[data-ui="v3"] .app .v3-popover-menu > .library-footer {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  gap: 1px;
+}
+html[data-ui="v3"] .app .v3-popover-menu > .library-footer > button {
+  justify-content: flex-start;
+  gap: 10px;
+  width: 100%;
+  padding: 8px 10px;
+  font-size: var(--fs);
+  color: var(--v3-text);
+  text-align: left;
+}
+html[data-ui="v3"] .app .v3-popover-menu > .library-footer > button svg {
+  color: var(--v3-muted);
+  flex: 0 0 auto;
+}
+html[data-ui="v3"] .app .v3-popover-menu .advanced-export {
+  margin: 4px 0;
+  padding: 6px 10px;
+  border-block: 1px solid var(--v3-line);
+}
+html[data-ui="v3"] .app .v3-popover-menu .advanced-export > summary {
+  padding: 4px 0;
+  font-weight: 600;
+  color: var(--v3-text-2);
+}
+
+/* ---------- Viewport ---------- */
+html[data-ui="v3"] .app .workspace > main.ui-pane {
+  background: var(--v3-canvas);
+}
+html[data-ui="v3"] .app .workspace-toolbar {
+  height: 38px;
+  min-height: 38px;
+  padding: 0 14px;
+  gap: 10px;
+  background: var(--v3-surface);
+  border-bottom: 1px solid var(--v3-line);
+}
+html[data-ui="v3"] .app .breadcrumb {
+  gap: 6px;
+  font-size: var(--fs);
+  color: var(--v3-muted);
+}
+html[data-ui="v3"] .app .breadcrumb b {
+  font-weight: 650;
+  color: var(--v3-text);
+}
+html[data-ui="v3"] .app .workspace-toolbar .badge {
+  padding: 4px 9px;
+  border-radius: 999px;
+  background: var(--v3-sunken);
+  font: 650 9.5px/1 var(--ui-font);
+  letter-spacing: 0.08em;
+  color: var(--v3-muted);
+}
+html[data-ui="v3"] .app .workspace-toolbar > button {
+  padding: 4px 10px;
+  border: 1px solid var(--v3-line-strong);
+  font-size: calc(var(--fs) - 0.5px);
+}
+/* The project notice is one quiet line instead of a banner. */
+html[data-ui="v3"] .app .snapshot-toolbar {
+  flex-wrap: nowrap;
+  gap: 8px;
+  padding: 5px 14px;
+  background: var(--v3-surface-2);
+  border-bottom: 1px solid var(--v3-line);
+  font-size: calc(var(--fs) - 1px);
+}
+html[data-ui="v3"] .app .snapshot-toolbar > span {
+  min-width: 0;
+  color: var(--v3-muted);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+html[data-ui="v3"] .app .snapshot-toolbar button {
+  flex-shrink: 0;
+  padding: 4px 10px;
+  font-size: calc(var(--fs) - 1px);
+  white-space: nowrap;
+}
+html[data-ui="v3"] .app .snapshot-toolbar button:not(.primary) {
+  border: 1px solid var(--v3-line-strong);
+  background: var(--v3-surface);
+}
+html[data-ui="v3"] .app .snapshot-toolbar button.primary {
+  background: var(--v3-surface);
+  border: 1px solid var(--v3-accent-line);
+  color: var(--v3-accent-hover);
+  box-shadow: none;
+}
+html[data-ui="v3"] .app .snapshot-toolbar button.primary:hover {
+  background: var(--v3-accent-soft);
+}
+/* The viewport fits the whole stage into its space instead of scrolling inside it;
+   the script panel below keeps its own (resizable) height. */
+html[data-ui="v3"] .app .preview-area .stage-frame {
+  min-height: 140px;
+}
+html[data-ui="v3"] .app .workspace > main.ui-pane > .bottom-panel:not(.collapsed) {
+  min-height: min(260px, 40vh) !important;
+}
+/* The stage sits on a dotted canvas, like a scene view. */
+html[data-ui="v3"] .app .preview-area {
+  padding: 0 18px;
+  background-color: var(--v3-canvas);
+  background-image: radial-gradient(circle, var(--v3-dot) 1px, transparent 1.2px);
+  background-size: 18px 18px;
+}
+html[data-ui="v3"] .app .preview-area > .panel-chrome {
+  margin: 0 -18px 0;
+}
+html[data-ui="v3"] .app .preview-header {
+  gap: 12px;
+  min-height: 52px;
+  margin: 0;
+  padding: 8px 0;
+}
+html[data-ui="v3"] .app .preview-header > div:first-child {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px 10px;
+  min-width: 0;
+}
+html[data-ui="v3"] .app .preview-header h1 {
+  order: -1;
+  margin: 0;
+  font: 650 calc(var(--fs) + 4px) / 1.2 var(--ui-font);
+  letter-spacing: -0.2px;
+  color: var(--v3-text);
+}
+html[data-ui="v3"] .app .preview-header .eyebrow {
+  padding: 4px 8px;
+  border-radius: 999px;
+  background: var(--v3-surface);
+  box-shadow: 0 0 0 1px var(--v3-line);
+  font: 650 9.5px/1 var(--ui-font);
+  letter-spacing: 0.07em;
+  color: var(--v3-muted);
+}
+html[data-ui="v3"] .app .chapter-badge {
+  padding: 4px 9px;
+  border: 0;
+  border-radius: 999px;
+  background: var(--v3-surface);
+  box-shadow: 0 0 0 1px var(--v3-line);
+  font-size: calc(var(--fs) - 1px);
+  color: var(--v3-text-2);
+}
+/* Viewport tools float in one pill, like a scene-view toolbar. */
+html[data-ui="v3"] .app .preview-tools {
+  gap: 2px;
+  padding: 3px;
+  border-radius: 10px;
+  background: var(--v3-surface);
+  box-shadow: 0 0 0 1px var(--v3-line), var(--v3-shadow);
+  font-size: calc(var(--fs) - 1px);
+  color: var(--v3-muted);
+}
+html[data-ui="v3"] .app .preview-tools button {
+  padding: 5px 9px;
+  border-radius: 7px;
+  color: var(--v3-text-2);
+  font-size: calc(var(--fs) - 0.5px);
+}
+html[data-ui="v3"] .app .preview-tools button.active {
+  background: var(--v3-accent-soft);
+  color: var(--v3-accent-hover);
+}
+html[data-ui="v3"] .app .preview-tools > span:first-of-type {
+  margin: 0 2px 0 6px;
+  padding: 0;
+  border: 0;
+  font: 650 10.5px/1 ui-monospace, "Cascadia Mono", Consolas, monospace;
+  color: var(--v3-muted);
+}
+html[data-ui="v3"] .app .preview-tools small {
+  margin-right: 8px;
+  font: 650 9.5px/1 var(--ui-font);
+  letter-spacing: 0.06em;
+  color: var(--v3-new);
+}
+html[data-ui="v3"] .app .preview-tools .live-dot {
+  margin: 0 2px 0 8px;
+}
+html[data-ui="v3"] .app .live-dot {
+  background: var(--v3-new);
+  box-shadow: 0 0 0 3px rgb(11 132 87 / 15%);
+}
+html[data-ui="v3"] .app .stage {
+  border: 0;
+  border-radius: 10px;
+  box-shadow: 0 1px 2px rgb(0 0 0 / 12%), 0 14px 34px rgb(24 26 30 / 20%);
+}
+html[data-ui="v3"] .app .scene-transition {
+  border-radius: 10px;
+}
+html[data-ui="v3"] .app .stage-footer {
+  height: 44px;
+  font-size: calc(var(--fs) - 1px);
+  color: var(--v3-muted);
+}
+html[data-ui="v3"] .app .stage-footer button {
+  padding: 5px 10px;
+  border: 1px solid var(--v3-line-strong);
+  background: var(--v3-surface);
+  color: var(--v3-text-2);
+  font-size: calc(var(--fs) - 0.5px);
+}
+html[data-ui="v3"] .app .footer-sep {
+  color: var(--v3-line-strong);
+}
+html[data-ui="v3"] .app :is(.preview-window-bar, .preview-window-actions) button {
+  border: 1px solid var(--v3-line-strong);
+  background: var(--v3-surface);
+}
+/* While the story plays: Pause menu and Fullscreen sit above the viewport toolbar,
+   and the sound control lives in the status bar instead of over the outline. */
+html[data-ui="v3"] .app .preview-area:has(> .play-hud) > .preview-header {
+  padding-top: 44px;
+}
+html[data-ui="v3"] .app .preview-area > .play-hud {
+  top: 40px;
+  right: 18px;
+}
+html[data-ui="v3"] .app .preview-area > .play-hud button {
+  padding: 5px 11px;
+  border: 1px solid var(--v3-line-strong);
+  border-radius: 8px;
+  background: var(--v3-surface);
+  color: var(--v3-text);
+  box-shadow: var(--v3-shadow);
+}
+html[data-ui="v3"] .app .preview-area > .play-hud button:hover {
+  background: var(--v3-hover);
+}
+html[data-ui="v3"] .playback-setting {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--v3-text-2);
+}
+html[data-ui="v3"] .playback-setting select {
+  width: auto;
+  padding: 3px 6px;
+}
+html[data-ui="v3"] body:has(.app) .story-sound {
+  left: auto;
+  right: 12px;
+  bottom: 2px;
+  height: 24px;
+  padding: 0 8px;
+  border: 1px solid var(--v3-line);
+  border-radius: 7px;
+  background: var(--v3-surface);
+  color: var(--v3-text-2);
+}
+html[data-ui="v3"] body:has(.story-sound) .app-footer > span:last-child {
+  visibility: hidden;
+}
+html[data-ui="v3"] body:has(.app) .story-sound button {
+  padding: 2px 6px;
+  color: var(--v3-text-2);
+}
+html[data-ui="v3"] .app .author-play-toolbar {
+  border-radius: 10px;
+  background: var(--v3-surface);
+  border: 1px solid var(--v3-accent-line);
+  box-shadow: var(--v3-shadow);
+  color: var(--v3-text);
+}
+
+/* ---------- Script panel (dialogue editor) ---------- */
+html[data-ui="v3"] .app .bottom-panel {
+  background: var(--v3-surface);
+  border-top: 1px solid var(--v3-line);
+}
+html[data-ui="v3"] .app .bottom-tabs {
+  height: 42px;
+  min-height: 42px;
+  align-items: center;
+  gap: 2px;
+  padding: 0 10px;
+  background: var(--v3-surface-2);
+  border-bottom: 1px solid var(--v3-line);
+}
+html[data-ui="v3"] .app .bottom-tabs > button {
+  height: 30px;
+  padding: 0 11px;
+  gap: 6px;
+  border-radius: 8px;
+  color: var(--v3-text-2);
+  font-size: var(--fs);
+}
+html[data-ui="v3"] .app .bottom-tabs > button.active {
+  background: var(--v3-surface);
+  color: var(--v3-text);
+  font-weight: 600;
+  border-color: transparent;
+  box-shadow: 0 0 0 1px var(--v3-line), var(--v3-shadow);
+}
+html[data-ui="v3"] .app .bottom-tabs > button.active::after {
+  display: none;
+}
+html[data-ui="v3"] .app .bottom-tabs > button.active svg {
+  color: var(--v3-accent);
+}
+/* Collapse / Expand sits at the far right, like a panel control. */
+html[data-ui="v3"] .app .bottom-tabs > button:first-child {
+  order: 100;
+  margin-left: 4px;
+  color: var(--v3-muted);
+  font-size: calc(var(--fs) - 1px);
+}
+html[data-ui="v3"] .app .bottom-tabs > span {
+  order: 98;
+}
+html[data-ui="v3"] .app .bottom-tabs > button:last-child:not(:first-child) {
+  order: 99;
+  border: 1px solid var(--v3-accent-line);
+  background: var(--v3-accent-soft);
+  color: var(--v3-accent-hover);
+  font-weight: 600;
+}
+html[data-ui="v3"] .app .dialogue-view-switch {
+  display: flex;
+  margin-left: 10px;
+  padding: 2px;
+  gap: 2px;
+  border-radius: 9px;
+  background: var(--v3-sunken);
+}
+html[data-ui="v3"] .app .dialogue-view-switch button {
+  height: 26px;
+  padding: 0 10px;
+  border: 0;
+  border-radius: 7px;
+  background: transparent;
+  color: var(--v3-muted);
+  font-size: calc(var(--fs) - 0.5px);
+}
+html[data-ui="v3"] .app .dialogue-view-switch button.active {
+  background: var(--v3-surface);
+  color: var(--v3-text);
+  font-weight: 600;
+  box-shadow: var(--v3-shadow), 0 0 0 1px rgb(0 0 0 / 4%);
+}
+html[data-ui="v3"] .app .dialogue-editor {
+  grid-template-columns: minmax(200px, 250px) minmax(0, 1fr);
+}
+/* Script outline: one row per line, the selected line marked by an accent bar. */
+html[data-ui="v3"] .app .node-list {
+  padding: 6px;
+  background: var(--v3-surface-2);
+  border-right: 1px solid var(--v3-line);
+}
+html[data-ui="v3"] .app .node-list button {
+  gap: 8px;
+  margin-bottom: 1px;
+  padding: 7px 8px;
+  border: 0;
+  border-radius: 8px;
+}
+html[data-ui="v3"] .app .node-list button.active {
+  background: var(--v3-surface);
+  box-shadow: inset 3px 0 0 var(--v3-accent), 0 0 0 1px var(--v3-line);
+}
+html[data-ui="v3"] .app .node-list button > span:first-child {
+  min-width: 18px;
+  margin-top: 1px;
+  font: 600 10px/1.6 ui-monospace, "Cascadia Mono", Consolas, monospace;
+  color: var(--v3-muted);
+}
+html[data-ui="v3"] .app .node-list button > div {
+  font: 650 var(--fs) / 1.4 var(--ui-font);
+  color: var(--v3-text);
+}
+html[data-ui="v3"] .app .node-list small {
+  font: 400 calc(var(--fs) - 0.5px) / 1.45 var(--ui-font);
+  color: var(--v3-muted);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+html[data-ui="v3"] .app .node-count {
+  padding: 1px 6px;
+  border-radius: 999px;
+  background: var(--v3-accent-soft);
+  font-size: 10px !important;
+  font-weight: 650;
+}
+html[data-ui="v3"] .app .node-fields {
+  padding: 16px 20px 28px;
+}
+html[data-ui="v3"] .app .node-fields label {
+  font: 600 calc(var(--fs) - 0.5px) / 1.35 var(--ui-font);
+  color: var(--v3-text-2);
+}
+html[data-ui="v3"] .app .node-fields :is(input:not([type="checkbox"]):not([type="range"]), select) {
+  padding: 7px 10px;
+  font-size: var(--fs);
+}
+html[data-ui="v3"] .app .node-fields textarea {
+  padding: 10px 12px;
+  font: 400 calc(var(--fs) + 2px) / 1.6 var(--story-font, Georgia), Georgia, serif;
+  background: var(--v3-surface);
+}
+html[data-ui="v3"] .app .field-row {
+  gap: 14px;
+}
+html[data-ui="v3"] .app .choices-heading {
+  font: 650 calc(var(--fs) + 0.5px) / 1.3 var(--ui-font);
+  color: var(--v3-text);
+}
+html[data-ui="v3"] .app .choice-editor {
+  padding: 10px 12px;
+  border: 1px solid var(--v3-line);
+  border-radius: 10px;
+  background: var(--v3-surface-2);
+}
+html[data-ui="v3"] .app .dialogue-device-quick {
+  padding: 14px 16px;
+  border: 1px solid var(--v3-line);
+  border-radius: 12px;
+  background: var(--v3-surface-2);
+}
+html[data-ui="v3"] .app .dialogue-device-quick h3 {
+  font: 650 calc(var(--fs) + 0.5px) / 1.3 var(--ui-font);
+  color: var(--v3-text);
+}
+
+/* ---------- Inspector ---------- */
+html[data-ui="v3"] .app .inspector {
+  background: var(--v3-surface);
+  border-left: 1px solid var(--v3-line);
+}
+html[data-ui="v3"] .app .inspector :is(.dock-title, .control-group-label) {
+  display: none;
+}
+/* Order: header, tabs, effect chips, selection, this tab's properties, effect groups, layout. */
+html[data-ui="v3"] .app .inspector .panel-heading { order: 1; }
+html[data-ui="v3"] .app .inspector .inspector-tabs { order: 2; }
+html[data-ui="v3"] .app .inspector .effect-tabs { order: 3; }
+html[data-ui="v3"] .app .inspector .selection-toolbar { order: 4; }
+html[data-ui="v3"] .app .inspector .properties-dock > fieldset { order: 5; }
+html[data-ui="v3"] .app .inspector .specialized-controls { order: 6; }
+html[data-ui="v3"] .app .inspector .panel-layout { order: 8; }
+html[data-ui="v3"] .app .inspector .inspector-foot { order: 9; }
+html[data-ui="v3"] .app .inspector .panel-heading {
+  height: 44px;
+  min-height: 44px;
+  padding: 0 10px 0 14px;
+  border-bottom: 0;
+  font: 650 calc(var(--fs) + 1px) / 1 var(--ui-font);
+  color: var(--v3-text);
+}
+html[data-ui="v3"] .app .inspector .panel-heading svg {
+  color: var(--v3-accent);
+}
+html[data-ui="v3"] .app .inspector .panel-heading button {
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  color: var(--v3-muted);
+}
+/* Six inspector tabs as icon tiles. */
+html[data-ui="v3"] .app .inspector-tabs {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 4px;
+  padding: 0 10px 10px;
+  border-bottom: 1px solid var(--v3-line);
+}
+html[data-ui="v3"] .app .inspector-tabs button {
+  flex-direction: column;
+  gap: 4px;
+  height: 52px;
+  padding: 4px;
+  border: 1px solid var(--v3-line);
+  border-radius: 10px;
+  background: var(--v3-surface);
+  color: var(--v3-text-2);
+  font-size: calc(var(--fs) - 1px);
+  outline: none;
+}
+html[data-ui="v3"] .app .inspector-tabs button svg {
+  width: 17px;
+  height: 17px;
+  color: var(--v3-muted);
+}
+html[data-ui="v3"] .app .inspector-tabs button:is(.active, [aria-pressed="true"]) {
+  background: var(--v3-accent-soft);
+  border-color: var(--v3-accent-line);
+  color: var(--v3-accent-hover);
+  font-weight: 650;
+}
+/* Atmosphere stays marked while one of its effect chips is chosen. */
+html[data-ui="v3"] .app .inspector[data-inspector="Atmosphere"] .inspector-tabs button:first-child {
+  background: var(--v3-accent-soft);
+  border-color: var(--v3-accent-line);
+  color: var(--v3-accent-hover);
+  font-weight: 650;
+}
+html[data-ui="v3"] .app .inspector[data-inspector="Atmosphere"] .inspector-tabs button:first-child svg,
+html[data-ui="v3"] .app .inspector-tabs button:is(.active, [aria-pressed="true"]) svg {
+  color: var(--v3-accent);
+}
+/* Effect panels as filter chips; they belong to Atmosphere, so other tabs hide them. */
+html[data-ui="v3"] .app .effect-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  padding: 10px;
+  background: var(--v3-surface-2);
+  border-bottom: 1px solid var(--v3-line);
+}
+html[data-ui="v3"] .app .workspace:not(.split-docks) .inspector:not([data-inspector="Atmosphere"]) .effect-tabs {
+  display: none;
+}
+html[data-ui="v3"] .app .effect-tabs button {
+  height: 26px;
+  padding: 0 9px;
+  gap: 5px;
+  border: 1px solid var(--v3-line);
+  border-radius: 999px;
+  background: var(--v3-surface);
+  color: var(--v3-text-2);
+  font-size: calc(var(--fs) - 1px);
+  outline: none;
+}
+html[data-ui="v3"] .app .effect-tabs button svg {
+  width: 14px;
+  height: 14px;
+  color: var(--v3-muted);
+}
+/* Unselected effect chips show only their icon (the name is in hover help), so all 13 fit in two rows. */
+html[data-ui="v3"] .app .effect-tabs button:not(.active):not([aria-pressed="true"]) {
+  width: 30px;
+  padding: 0;
+  font-size: 0;
+}
+html[data-ui="v3"] .app .effect-tabs button:is(.active, [aria-pressed="true"]) {
+  background: var(--v3-ink);
+  border-color: var(--v3-ink);
+  color: #fff;
+  font-weight: 600;
+}
+html[data-ui="v3"] .app .effect-tabs button:is(.active, [aria-pressed="true"]) svg {
+  color: #fff;
+}
+html[data-ui="v3"] .app .panel-layout {
+  display: flex;
+  align-items: flex-end;
+  flex-wrap: wrap;
+  gap: 10px;
+  padding: 12px 14px;
+  border-top: 1px solid var(--v3-line);
+  background: var(--v3-surface-2);
+}
+html[data-ui="v3"] .app .panel-layout label {
+  flex: 1 1 120px;
+  font-size: calc(var(--fs) - 1px);
+  color: var(--v3-muted);
+}
+html[data-ui="v3"] .app .inspector-foot {
+  padding: 14px;
+  font: 600 9.5px/1 var(--ui-font);
+  letter-spacing: 0.08em;
+  color: var(--v3-muted);
+}
+
+/* Foldable groups, like components in an engine inspector (src/v3/folds.ts). */
+html[data-ui="v3"] .app :is(.inspector, .flow-details) .property-section {
+  margin: 0;
+  padding: 0 14px 14px;
+  border: 0;
+  border-bottom: 1px solid var(--v3-line);
+  border-radius: 0;
+  background: transparent;
+}
+html[data-ui="v3"] .app :is(.inspector, .flow-details) .property-section .property-section {
+  padding: 0 0 10px;
+  border-bottom: 0;
+}
+html[data-ui="v3"] .app :is(.inspector, .flow-details) .property-section > :is(h2, h3) {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 -14px 4px;
+  padding: 11px 14px;
+  font: 650 calc(var(--fs) + 0.5px) / 1.3 var(--ui-font);
+  color: var(--v3-text);
+}
+html[data-ui="v3"] .app :is(.inspector, .flow-details) .property-section .property-section > :is(h2, h3) {
+  margin: 0 0 4px;
+  padding: 9px 0;
+}
+html[data-ui="v3"] .app :is(.inspector, .flow-details) .property-section > :is(h2, h3)[role="button"] {
+  cursor: pointer;
+  user-select: none;
+}
+html[data-ui="v3"] .app :is(.inspector, .flow-details) .property-section > :is(h2, h3)[role="button"]:hover {
+  background: var(--v3-hover);
+}
+html[data-ui="v3"] .app :is(.inspector, .flow-details) .property-section > :is(h2, h3)[role="button"]::before {
+  content: "";
+  flex: 0 0 auto;
+  width: 6px;
+  height: 6px;
+  margin: 0 2px 2px 1px;
+  border-right: 1.6px solid var(--v3-muted);
+  border-bottom: 1.6px solid var(--v3-muted);
+  transform: rotate(45deg);
+  transition: transform 0.15s;
+}
+html[data-ui="v3"] .app .property-section[data-v3-fold="closed"] {
+  padding-bottom: 0;
+}
+html[data-ui="v3"] .app .property-section[data-v3-fold="closed"] > :is(h2, h3) {
+  margin-bottom: 0;
+}
+html[data-ui="v3"] .app .property-section[data-v3-fold="closed"] > :is(h2, h3)::before {
+  transform: rotate(-45deg);
+  margin-bottom: 0;
+}
+html[data-ui="v3"] .app .property-section[data-v3-fold="closed"] > :not(h2, h3) {
+  display: none !important;
+}
+html[data-ui="v3"] .app .property-section h3 > svg {
+  color: var(--v3-muted);
+}
+html[data-ui="v3"] .app .property-section :is(p, .help) {
+  font-size: calc(var(--fs) - 1px);
+  line-height: 1.55;
+  color: var(--v3-muted);
+  margin: 0 0 10px;
+}
+html[data-ui="v3"] .app .property-section > label:not(.slider):not(.color-row):not(.toggle-row) {
+  margin-bottom: 12px;
+}
+html[data-ui="v3"] .app .property-section details > summary {
+  padding: 6px 0;
+  font-weight: 600;
+  color: var(--v3-text-2);
+}
+
+/* Property rows: label and value on one line, slider below, exact value at its side. */
+html[data-ui="v3"] .app .slider {
+  margin: 10px 0 12px;
+  font-size: calc(var(--fs) - 0.5px);
+}
+html[data-ui="v3"] .app .slider > span {
+  color: var(--v3-text-2);
+}
+html[data-ui="v3"] .app .slider output {
+  min-width: 40px;
+  padding: 3px 6px;
+  border: 0;
+  border-radius: 6px;
+  background: var(--v3-sunken);
+  color: var(--v3-text);
+  font: 600 10.5px/1 ui-monospace, "Cascadia Mono", Consolas, monospace;
+}
+/* The exact-value box already shows the number, so the read-only bubble is left out. */
+html[data-ui="v3"] .app .slider:has(.exact-range) output {
+  display: none;
+}
+html[data-ui="v3"] .app .slider:has(.exact-range) {
+  align-items: center;
+  column-gap: 10px;
+  row-gap: 2px;
+}
+html[data-ui="v3"] .app .slider > .exact-range {
+  width: 64px !important;
+  margin: 0;
+}
+html[data-ui="v3"] .app input[type="range"] {
+  -webkit-appearance: none;
+  appearance: none;
+  height: 18px;
+  padding: 0;
+  margin: 6px 0 2px;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+}
+html[data-ui="v3"] .app input[type="range"]::-webkit-slider-runnable-track {
+  height: 4px;
+  border-radius: 999px;
+  background: #dcd8d0;
+}
+html[data-ui="v3"] .app input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 14px;
+  height: 14px;
+  margin-top: -5px;
+  border-radius: 50%;
+  background: #fff;
+  border: 2px solid var(--v3-accent);
+  box-shadow: 0 1px 3px rgb(0 0 0 / 20%);
+  cursor: ew-resize;
+}
+html[data-ui="v3"] .app input[type="range"]::-moz-range-track {
+  height: 4px;
+  border-radius: 999px;
+  background: #dcd8d0;
+}
+html[data-ui="v3"] .app input[type="range"]::-moz-range-thumb {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: #fff;
+  border: 2px solid var(--v3-accent);
+}
+html[data-ui="v3"] .app .exact-range {
+  height: 26px;
+  border-radius: 6px !important;
+  font: 600 11px/1 ui-monospace, "Cascadia Mono", Consolas, monospace !important;
+}
+html[data-ui="v3"] .app .color-row {
+  margin: 10px 0;
+  font-size: calc(var(--fs) - 0.5px);
+  color: var(--v3-text-2);
+}
+html[data-ui="v3"] .app .color-row > span {
+  padding: 3px 6px;
+  border: 1px solid var(--v3-line);
+  border-radius: 7px;
+  background: var(--v3-surface);
+}
+html[data-ui="v3"] .app .color-row code {
+  font-size: 10.5px;
+  color: var(--v3-text-2);
+}
+html[data-ui="v3"] .app .toggle-row {
+  margin: 10px 0;
+  font-size: calc(var(--fs) - 0.5px);
+  color: var(--v3-text-2);
+}
+html[data-ui="v3"] .app .region-box {
+  margin-top: 12px;
+  padding: 12px;
+  border: 1px solid var(--v3-line);
+  border-radius: 10px;
+  background: var(--v3-surface-2);
+}
+html[data-ui="v3"] .app .region-box > div:first-child {
+  font-size: calc(var(--fs) - 0.5px);
+  font-weight: 600;
+}
+html[data-ui="v3"] .app .region-box p {
+  font-size: calc(var(--fs) - 1px);
+  color: var(--v3-muted);
+}
+html[data-ui="v3"] .app .region-box :is(.wide, .field-row button) {
+  font-size: calc(var(--fs) - 0.5px);
+  background: var(--v3-surface);
+  border: 1px solid var(--v3-line-strong);
+  color: var(--v3-text-2);
+}
+html[data-ui="v3"] .app .region-box .wide.primary {
+  background: var(--v3-accent);
+  border-color: var(--v3-accent);
+  color: #fff;
+}
+html[data-ui="v3"] .app :is(.subtle, button.subtle) {
+  color: var(--v3-muted);
+}
+html[data-ui="v3"] .app button.wide {
+  justify-content: center;
+}
+html[data-ui="v3"] .app button.danger {
+  color: #b23a2a;
+  border: 1px solid #efc3ba;
+  background: #fdf3f1;
+}
+html[data-ui="v3"] .app .selection-toolbar {
+  margin: 8px 10px;
+  border: 1px solid var(--v3-accent-line);
+  border-radius: 12px;
+  background: var(--v3-surface);
+  box-shadow: var(--v3-shadow-pop);
+}
+html[data-ui="v3"] .app .sound-cue {
+  border-radius: 10px;
+  border-color: var(--v3-line);
+  background: var(--v3-surface-2);
+}
+
+/* ---------- Story maps (Chapters, Scenes and Dialogue advanced) ---------- */
+html[data-ui="v3"] .app .flow-workspace {
+  padding: 0;
+  gap: 0;
+  background: var(--v3-canvas);
+}
+html[data-ui="v3"] .app .flow-heading {
+  gap: 14px;
+  padding: 14px 18px 4px;
+}
+html[data-ui="v3"] .app .flow-heading h1 {
+  margin: 4px 0 0;
+  font: 650 calc(var(--fs) + 8px) / 1.15 var(--ui-font);
+  letter-spacing: -0.3px;
+  color: var(--v3-text);
+}
+html[data-ui="v3"] .app .flow-heading .eyebrow {
+  font: 650 9.5px/1 var(--ui-font);
+  letter-spacing: 0.08em;
+  color: var(--v3-muted);
+}
+html[data-ui="v3"] .app .flow-heading p {
+  margin: 0;
+  font-size: calc(var(--fs) - 0.5px);
+  color: var(--v3-muted);
+}
+html[data-ui="v3"] .app .flow-heading > button {
+  border: 1px solid var(--v3-line-strong);
+  background: var(--v3-surface);
+}
+html[data-ui="v3"] .app .flow-toolbar {
+  padding: 8px 18px 12px;
+  font-size: var(--fs);
+}
+html[data-ui="v3"] .app .flow-toolbar > button {
+  border: 1px solid var(--v3-line-strong);
+  background: var(--v3-surface);
+}
+html[data-ui="v3"] .app .flow-body {
+  margin: 0 18px 18px;
+  border: 1px solid var(--v3-line);
+  border-radius: 14px;
+  background: var(--v3-surface);
+  box-shadow: var(--v3-shadow);
+}
+html[data-ui="v3"] .app .flow-canvas-area {
+  background: var(--v3-canvas);
+}
+html[data-ui="v3"] .app .flow-view-tools {
+  gap: 2px;
+  padding: 6px 8px;
+  background: var(--v3-surface);
+  border-bottom: 1px solid var(--v3-line);
+}
+html[data-ui="v3"] .app .flow-view-tools button {
+  padding: 5px 9px;
+  border-radius: 7px;
+  font-size: calc(var(--fs) - 0.5px);
+  color: var(--v3-text-2);
+}
+html[data-ui="v3"] .app .flow-view-tools output {
+  font: 600 11px/1 ui-monospace, "Cascadia Mono", Consolas, monospace;
+  color: var(--v3-text-2);
+}
+html[data-ui="v3"] .app .flow-canvas {
+  background-color: var(--v3-canvas);
+  background-image: radial-gradient(circle, var(--v3-dot) 1px, transparent 1.2px);
+}
+html[data-ui="v3"] .app .flow-status {
+  background: var(--v3-surface);
+  border-top: 1px solid var(--v3-line);
+  font-size: calc(var(--fs) - 1.5px);
+}
+/* Node cards: white boards with a tinted title bar and round ports, like a node editor. */
+html[data-ui="v3"] .app .flow-card {
+  background: var(--v3-surface);
+  border: 1px solid var(--v3-line-strong);
+  border-radius: 12px;
+  box-shadow: 0 1px 2px rgb(0 0 0 / 6%), 0 8px 20px rgb(24 26 30 / 9%);
+}
+html[data-ui="v3"] .app .flow-card.selected {
+  outline: 2px solid var(--v3-accent);
+  outline-offset: 2px;
+}
+html[data-ui="v3"] .app .flow-card.destination {
+  background: var(--v3-surface-2);
+  border-style: dashed;
+}
+html[data-ui="v3"] .app .flow-card-heading {
+  border-radius: 12px 12px 0 0 !important;
+  border-bottom: 1px solid var(--v3-line) !important;
+  background: linear-gradient(var(--v3-surface-2), var(--v3-sunken)) !important;
+  color: var(--v3-text) !important;
+}
+html[data-ui="v3"] .app .flow-card.scene .flow-card-heading {
+  background: linear-gradient(#f3f6fb, #e7edf6) !important;
+}
+html[data-ui="v3"] .app .flow-card.chapter .flow-card-heading {
+  background: linear-gradient(#f8efe8, #f1e2d6) !important;
+}
+html[data-ui="v3"] .app .flow-entry {
+  padding: 2px 5px;
+  border-radius: 4px;
+  background: var(--v3-new-soft);
+  color: var(--v3-new);
+  font: 700 9px/1 var(--ui-font);
+}
+html[data-ui="v3"] .app .flow-card-text {
+  color: var(--v3-muted);
+}
+html[data-ui="v3"] .app :is(.flow-input, .flow-output) {
+  border: 2px solid var(--v3-accent) !important;
+  background: var(--v3-surface) !important;
+  color: var(--v3-accent) !important;
+  box-shadow: 0 1px 2px rgb(0 0 0 / 12%);
+}
+html[data-ui="v3"] .app :is(.flow-input, .flow-output):hover {
+  background: var(--v3-accent) !important;
+  color: #fff !important;
+}
+html[data-ui="v3"] .app .flow-port-row {
+  border-top: 1px solid var(--v3-line);
+}
+html[data-ui="v3"] .app .flow-route-label {
+  color: var(--v3-text-2) !important;
+}
+html[data-ui="v3"] .app .flow-quick-add button {
+  border: 1px solid var(--v3-line);
+  background: var(--v3-surface);
+  color: var(--v3-text-2);
+  border-radius: 999px;
+}
+html[data-ui="v3"] .app .flow-edge-line {
+  stroke: #a3aab2;
+}
+html[data-ui="v3"] .app .flow-edge.choice-edge .flow-edge-line {
+  stroke: #d39a73;
+}
+html[data-ui="v3"] .app .flow-details {
+  background: var(--v3-surface);
+  border-left: 1px solid var(--v3-line);
+}
+html[data-ui="v3"] .app .flow-details :is(input, select, textarea) {
+  background: var(--v3-surface);
+  color: var(--v3-text);
+  border-color: var(--v3-line-strong);
+  border-radius: 7px;
+  font-size: var(--fs);
+}
+html[data-ui="v3"] .app .flow-details label {
+  font-size: calc(var(--fs) - 0.5px);
+  color: var(--v3-text-2);
+}
+html[data-ui="v3"] .app .flow-details p {
+  font-size: calc(var(--fs) - 1px);
+  color: var(--v3-muted);
+}
+html[data-ui="v3"] .app .flow-panel-sizing {
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--v3-line);
+  background: var(--v3-surface-2);
+}
+html[data-ui="v3"] .app .flow-panel-divider {
+  background: var(--v3-surface-2);
+  border-inline-color: var(--v3-line);
+}
+
+/* ---------- Other workspaces: chapters, devices, update history ---------- */
+html[data-ui="v3"] .app .secondary-workspace {
+  background: var(--v3-canvas);
+}
+/* Page headers share one style: small eyebrow, title, one muted line. */
+html[data-ui="v3"] .app :is(.chapter-workspace > header, .device-workspace-heading, .release-heading) {
+  padding: 18px 24px 12px;
+  background: transparent;
+  border: 0;
+  box-shadow: none;
+}
+html[data-ui="v3"] .app :is(.chapter-workspace, .device-workspace, .release-workspace) h1 {
+  margin: 4px 0 2px;
+  font: 650 calc(var(--fs) + 10px) / 1.15 var(--ui-font);
+  letter-spacing: -0.4px;
+  color: var(--v3-text);
+}
+html[data-ui="v3"] .app :is(.chapter-workspace, .device-workspace, .release-workspace) .eyebrow {
+  font: 650 9.5px/1 var(--ui-font);
+  letter-spacing: 0.08em;
+  color: var(--v3-muted);
+}
+html[data-ui="v3"] .app :is(.chapter-workspace > header, .device-workspace-heading) > button,
+html[data-ui="v3"] .app .device-workspace-heading button {
+  border: 1px solid var(--v3-line-strong);
+  background: var(--v3-surface);
+}
+/* Chapter tabs and device sections as segmented tabs. */
+html[data-ui="v3"] .app :is(.chapter-workspace > nav, .device-section-tabs) {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin: 0 24px 14px;
+  padding: 3px;
+  width: fit-content;
+  max-width: calc(100% - 48px);
+  border-radius: 10px;
+  background: var(--v3-sunken);
+}
+html[data-ui="v3"] .app :is(.chapter-workspace > nav, .device-section-tabs) button {
+  padding: 6px 12px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--v3-text-2);
+  box-shadow: none;
+}
+html[data-ui="v3"] .app :is(.chapter-workspace > nav, .device-section-tabs) button:is(.active, [aria-pressed="true"], [aria-selected="true"]) {
+  background: var(--v3-surface);
+  color: var(--v3-text);
+  font-weight: 600;
+  box-shadow: var(--v3-shadow), 0 0 0 1px rgb(0 0 0 / 4%);
+}
+html[data-ui="v3"] .app .chapter-workspace > nav small {
+  color: var(--v3-muted);
+}
+/* Content sits on white cards over the canvas. */
+html[data-ui="v3"] .app .chapter-columns {
+  gap: 16px;
+  padding: 0 24px 24px;
+}
+html[data-ui="v3"] .app :is(.chapter-settings, .chapter-starts, .device-empty) {
+  padding: 18px 20px;
+  border: 1px solid var(--v3-line);
+  border-radius: 14px;
+  background: var(--v3-surface);
+  box-shadow: var(--v3-shadow);
+}
+html[data-ui="v3"] .app :is(.chapter-settings, .chapter-starts) h2 {
+  font: 650 calc(var(--fs) + 3px) / 1.25 var(--ui-font);
+  color: var(--v3-text);
+}
+html[data-ui="v3"] .app :is(.chapter-scene, .chapter-preview) {
+  border: 1px solid var(--v3-line);
+  border-radius: 10px;
+  background: var(--v3-surface-2);
+}
+html[data-ui="v3"] .app .device-workspace-toolbar {
+  padding: 0 24px 12px;
+}
+html[data-ui="v3"] .app .device-workspace > :not(.device-workspace-heading):not(.device-workspace-toolbar):not(.device-section-tabs) {
+  margin-inline: 24px;
+}
+/* Update history reads as a timeline of release cards. */
+html[data-ui="v3"] .app .release-workspace {
+  max-width: 1100px;
+  margin: 0 auto;
+}
+html[data-ui="v3"] .app .release-entry {
+  margin-bottom: 12px;
+  border: 1px solid var(--v3-line);
+  border-radius: 14px;
+  background: var(--v3-surface);
+  box-shadow: var(--v3-shadow);
+}
+html[data-ui="v3"] .app .release-version {
+  color: var(--v3-accent);
+}
+html[data-ui="v3"] .app .release-feature {
+  border-color: var(--v3-line);
+}
+html[data-ui="v3"] .app .feature-destinations button {
+  border: 1px solid var(--v3-line);
+  border-radius: 999px;
+  background: var(--v3-surface-2);
+  font-size: calc(var(--fs) - 1px);
+}
+/* Small tab groups inside panels (tools, assistant modes). */
+html[data-ui="v3"] .app :is(.tool-tabs, .assistant-modes) {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 3px;
+  padding: 3px;
+  border: 0;
+  border-radius: 10px;
+  background: var(--v3-sunken);
+}
+html[data-ui="v3"] .app :is(.tool-tabs, .assistant-modes) button {
+  padding: 5px 10px;
+  border: 0;
+  border-radius: 7px;
+  background: transparent;
+  color: var(--v3-text-2);
+  font-size: calc(var(--fs) - 0.5px);
+}
+html[data-ui="v3"] .app :is(.tool-tabs, .assistant-modes) button:is(.active, [aria-pressed="true"], [aria-selected="true"]) {
+  background: var(--v3-surface);
+  color: var(--v3-text);
+  font-weight: 600;
+  box-shadow: var(--v3-shadow), 0 0 0 1px rgb(0 0 0 / 4%);
+}
+
+/* ---------- Dialogs ---------- */
+html[data-ui="v3"] .modal {
+  padding: 24px 26px;
+}
+html[data-ui="v3"] .modal :is(h1, h2) {
+  font: 650 20px/1.25 var(--ui-font);
+  letter-spacing: -0.3px;
+  color: var(--v3-text);
+}
+html[data-ui="v3"] .modal h3 {
+  font: 650 14px/1.3 var(--ui-font);
+  color: var(--v3-text);
+}
+html[data-ui="v3"] .modal p {
+  color: var(--v3-text-2);
+  line-height: 1.55;
+}
+html[data-ui="v3"] .modal :is(input:not([type="checkbox"]):not([type="range"]):not([type="color"]), select, textarea) {
+  background: var(--v3-surface);
+  color: var(--v3-text);
+  border: 1px solid var(--v3-line-strong);
+  border-radius: 8px;
+}
+html[data-ui="v3"] .modal button:not(.primary) {
+  border: 1px solid var(--v3-line-strong);
+  border-radius: 8px;
+  background: var(--v3-surface);
+  color: var(--v3-text);
+}
+html[data-ui="v3"] .modal button:not(.primary):hover {
+  background: var(--v3-hover);
+}
+html[data-ui="v3"] .modal .property-section {
+  border-color: var(--v3-line);
+}
+/* Workspace settings: a wide two-column sheet of cards instead of one long column. */
+html[data-ui="v3"] .modal:has(.window-layout-settings) {
+  width: min(940px, 94vw);
+  max-width: none;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  align-items: start;
+  gap: 14px 20px;
+}
+html[data-ui="v3"] .modal:has(.window-layout-settings) > :is(.close, svg, h2, p, details, .toggle-row, button.wide) {
+  grid-column: 1 / -1;
+}
+html[data-ui="v3"] .modal:has(.window-layout-settings) > :is(section, .property-section) {
+  margin: 0;
+  padding: 16px 18px;
+  border: 1px solid var(--v3-line);
+  border-radius: 14px;
+  background: var(--v3-surface-2);
+}
+html[data-ui="v3"] .modal:has(.window-layout-settings) > .playtest-admin-link {
+  grid-column: 1 / -1;
+}
+html[data-ui="v3"] .modal :is(a.button-link, .button-link) {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 12px;
+  border: 1px solid var(--v3-line-strong);
+  border-radius: 8px;
+  background: var(--v3-surface);
+  color: var(--v3-text);
+  text-decoration: none;
+  font-weight: 600;
+}
+html[data-ui="v3"] .hover-help :is(b, p) {
+  color: inherit;
+}
+html[data-ui="v3"] .hover-help p {
+  opacity: 0.82;
+}
+
+/* ---------- Status bar ---------- */
+html[data-ui="v3"] .app .app-footer {
+  height: 28px;
+  padding: 0 14px;
+  background: var(--v3-surface);
+  border-top: 1px solid var(--v3-line);
+  color: var(--v3-muted);
+  font-size: 11px;
+  letter-spacing: 0;
+}
+html[data-ui="v3"] .app .app-footer > span:nth-child(2) {
+  font: 600 10px/1 var(--ui-font);
+  letter-spacing: 0.06em;
+}
+html[data-ui="v3"] .app .app-footer > span:last-child {
+  font: italic 11px/1 Georgia, serif;
+  color: var(--v3-muted);
+}

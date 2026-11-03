@@ -5,7 +5,7 @@ import {V3} from './v3/ui';
 const introduced:Record<string,string>={"AI Demand Export":"2.17.0","API assistant":"2.17.0","Assistant task":"2.18.0","AI task provider":"2.18.0","Restore all window positions":"2.18.0","Reset preview window":"2.18.0","Character replies":"2.23.0-claude","Export edition":"2.24.0-claude","Custom reply path":"2.24.0-claude","Download AI playthrough log":"2.25.0-claude","Keep texting":"2.25.0-claude",
   "Self-reply on this dialogue":"2.27.2-claude","Export playable HTML · with Claude":"2.28.0-claude","Export phone game · with Claude":"2.28.0-claude",
   "Dialogue switched on":"2.29.0-claude","Search by AI":"2.29.0-claude","✦ Ask Claude":"2.29.0-claude","Open playtest admin ↗":"2.29.0-claude","Enlarge background of …":"2.29.0-claude",
-  "Windows":"3.0.0-claude"};
+  "Windows":"3.0.0-claude","Export & share":"3.1.0-claude"};
 const prefixes=Object.keys(introduced).filter(k=>k.endsWith('…'));
 const versionOf=(name:string)=>introduced[name]||introduced[prefixes.find(p=>name.startsWith(p.slice(0,-1)))||''];
 // Releases made by Claude also carry a Claude tag on their new controls. Controls inside the game itself stay unmarked.

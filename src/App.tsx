@@ -94,8 +94,39 @@ import {
   X,
   FolderOpen,
   PanelsTopLeft,
+  CloudSun,
+  Image as ImageIcon,
+  LayoutDashboard,
+  Palette,
+  ToggleRight,
+  ArrowRightLeft,
+  LayoutGrid,
+  Lightbulb,
+  Wind,
+  Clapperboard,
+  Shirt,
+  Smartphone,
+  Lamp,
+  Bookmark,
+  Camera,
+  Share2,
+  ScrollText,
+  type LucideIcon,
 } from "lucide-react";
 import { V3 } from "./v3/ui";
+import { unfoldAround, useFolds } from "./v3/folds";
+import { V3Popover } from "./v3/Popover";
+// Stillframe 3 shows an icon beside each inspector tab, effect panel and dialogue tab.
+const v3Icons: Record<string, LucideIcon> = {
+  Atmosphere: CloudSun, Background: ImageIcon, Workspace: LayoutDashboard, Appearance: Palette, Active: ToggleRight, Transitions: ArrowRightLeft,
+  All: LayoutGrid, Rain: CloudRain, Lighting: Lightbulb, Motion: Wind, Cinematics: Clapperboard, "Outfits & Items": Shirt, Phone: Smartphone,
+  "Light Library": Lamp, "Effect Presets": Bookmark, Camera, Sound: Volume2, "Sub-scenes": Layers, Save,
+  "Items & outfits": Shirt, "Event log": ScrollText,
+};
+const v3Icon = (name: string) => {
+  const Icon = V3 ? v3Icons[name] : undefined;
+  return Icon ? <Icon size={14} aria-hidden="true" /> : null;
+};
 import { downloadLocalEditor } from "./localEditor";
 import { exportPlayer } from "./playerExport";
 import { demo } from "./demo";
@@ -191,6 +222,7 @@ function Toggle({
 }
 export default function App() {
   const [workspace, setWorkspace] = useWorkspace();
+  useFolds(V3);
   const [view, setView] = useState<StudioView>("editor");
   const [cameraPreview, setCameraPreview] = useState(0);
   const paneStyle = (key: string) =>
@@ -804,6 +836,7 @@ export default function App() {
       if(!target && revealControl.label)target=nodes.find(el=>el.getClientRects().length>0&&normal(el.getAttribute('aria-label')||el.textContent||'').includes(normal(revealControl.label!)));
       if(!target)return;
       for(let p:HTMLElement|null=target;p;p=p.parentElement)if(p instanceof HTMLDetailsElement)p.open=true;
+      unfoldAround(target);
       target.scrollIntoView({block:'center',behavior:'smooth'});
       const input=target.matches('input,select,textarea,button')?target:target.querySelector<HTMLElement>('input,select,textarea,button');
       input?.focus({preventScroll:true});highlighted=target.closest<HTMLElement>('label,.clue,.property-section')||target;highlighted.classList.add('feature-reveal');
@@ -1353,6 +1386,7 @@ export default function App() {
                   edit={edit}
                 />
               )}
+              <V3Popover className="v3-export" label="Export & share" icon={<Share2 size={15} aria-hidden="true" />} help="Open a project file, or export: playable HTML and phone games with or without Claude, advanced export, the local editor and the complete project file.">
               <div className="library-footer">
                 {!document.documentElement.hasAttribute(
                   "data-stillframe-standalone",
@@ -1394,6 +1428,7 @@ export default function App() {
                   <Download size={15} /> Export project
                 </button>
               </div>
+              </V3Popover>
             </aside>
             </DockPanel>
             <main
@@ -1863,7 +1898,7 @@ export default function App() {
                       ) : t === "State & clues" ? (
                         <Code2 size={14} />
                       ) : (
-                        <BookOpen size={14} />
+                        v3Icon(t) || <BookOpen size={14} />
                       )}{" "}
                       {t}
                     </button>
@@ -2471,7 +2506,7 @@ export default function App() {
                         setInspector("Atmosphere");
                       }}
                     >
-                      {panel}
+                      {v3Icon(panel)}{panel}
                     </button>
                   ))}
                 </div>
@@ -2611,7 +2646,7 @@ export default function App() {
                       className={inspector === t && (t !== "Atmosphere" || effectPanel === "All") ? "active" : ""}
                       onClick={() => {setInspector(t); if(t === "Atmosphere")setEffectPanel("All");}}
                     >
-                      {t}
+                      {v3Icon(t)}{t}
                     </button>
                   ))}
                 </div>

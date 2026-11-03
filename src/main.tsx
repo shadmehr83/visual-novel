@@ -8,6 +8,7 @@ import "./devices.css";
 import "./insta.css";
 import "./docking.css";
 import "./v3/stillframe3.css";
+import "./v3/stillframe31.css";
 createRoot(document.getElementById("root")!).render(
   <RecoveryBoundary>
     <App />

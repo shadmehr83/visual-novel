@@ -4,6 +4,26 @@ Every change in this list was written by Claude (Anthropic) at the request of th
 
 > **Where this lives:** branch `claude` on GitHub. Versions end in `-claude`. `main` is the original line and is untouched.
 
+## Stillframe 3.1 — engine-style redesign (2026-11-03, engine 3.1.0-claude)
+
+Same `claude-v3` line. The 3.0 top bar, palette and features stay; the rest of the studio is laid out like a game-engine editor. The layout is mostly `src/v3/stillframe31.css`, scoped to `html[data-ui="v3"]`, plus small JSX hooks.
+- **Panels:** joined edge to edge with hairlines. Every dock panel has the same 32 px header, whose window buttons show on hover. The single-workspace header row is hidden (Windows & docking still moves it). There's an icon activity bar and a 28 px status bar.
+- **Story outline:** the chapter picker comes first, then compact scene rows with 16:9 thumbnails and an accent bar for the selection. The static story note is hidden. Artwork shows as a two-column asset browser. The eight export buttons are in one **Export & share** menu (`src/v3/Popover.tsx`) pinned to the bottom of the outline; it closes on an outside click, on Escape or after an action.
+- **Viewport:**
+  - The project notice is now one quiet line.
+  - The scene title, badges and tools sit in one toolbar.
+  - The stage fits the available space on a dotted canvas, with no scrolling inside the preview. The script panel's minimum height is now `min(260px, 40vh)`.
+  - In play, Pause menu and Fullscreen sit above the toolbar, and the sound control is in the status bar.
+- **Script panel:** chip tabs, a segmented Normal/Advanced switch, and Add node and Collapse at the right. The outline has numbered rows with two-line previews, and the editors are carded.
+- **Inspector:**
+  - The six tabs are icon tiles.
+  - The 13 effect panels are icon chips (the chosen one named) and show only under Atmosphere.
+  - The order is: header, tabs, chips, this tab's properties, effect groups, then layout.
+  - **Foldable groups** (`src/v3/folds.ts`): each group heading in the inspector and the map details folds like an engine component. The All view starts folded, each tab's state is saved in localStorage, and Search features unfolds the group around a found control.
+  - Sliders use the exact-value box instead of a duplicate bubble.
+- **Maps:** node-editor look, with white boards, tinted title bars, round copper ports, a dotted canvas and lighter wires. Chapter, device and update pages use the same page headers, segmented tabs and cards. The settings dialog is a two-column sheet.
+- New pill on Export & share (3.1.0). Tests: `src/v3/folds.test.ts`; `src/recentFeatures.test.tsx` now runs as Stillframe 3. All 210 tests pass (`emberDialogue` can time out under a full parallel run and passes alone).
+
 ## Stillframe 3 — experimental light studio (2026-11-03, engine 3.0.0-claude)
 
 > **Separate line:** branch `claude-v3`, worked on in the `stillframe-3` folder next to `visual-novel`, kept local. It runs at http://localhost:5174 (double-click `Start Stillframe 3.cmd`, or `npm run stillframe3`) with its own browser storage, so it never touches the classic studio at 5173. The classic studio stays the main line: new features land on `claude` first and are merged into `claude-v3` afterwards.

@@ -1,4 +1,4 @@
-export const ENGINE_VERSION = "3.0.0-claude";
+export const ENGINE_VERSION = "3.1.0-claude";
 export type ReleaseFeature = {
   name: string;
   description: string;
@@ -22,6 +22,14 @@ const f = (
   action?: string,
 ): ReleaseFeature => ({ name, description, steps: path.split(" → "), action });
 export const releases: Release[] = [
+ {version:"3.1.0-claude",name:"Stillframe 3.1: an engine-style studio",by:"Claude",date:"2026-11-03",timestamp:"2026-11-03T13:00:00Z",features:[
+ f("Engine-style layout", "Panels now meet edge to edge with thin dividers and the same slim header, whose window buttons appear on hover. The left activity bar switches the outline, and a quiet status bar runs along the bottom. The single-workspace header row is gone; Windows & docking still moves it.", "Stillframe 3 → Editor", "editor"),
+ f("Foldable inspector", "Every group of controls in the inspector and in the map details folds like a component in a game engine. The All effects view starts folded as a short list of what the scene has, and each tab remembers what you opened.", "Controls → Click a group title", "effect:All"),
+ f("Two-level inspector menu", "The inspector's six tabs are icon tiles. Atmosphere's effect panels are icon chips, with the chosen one named, and they only show under Atmosphere.", "Controls → Atmosphere → Effect chips", "active"),
+ f("Viewport fits the stage", "The scene preview scales to the space it has instead of scrolling inside itself, sits on a dotted canvas, and its tools float in one toolbar beside the scene title.", "Editor → Scene preview", "editor"),
+ f("Story outline and asset browser", "Scenes are compact rows under the chapter picker, the selected one marked by an accent bar. Artwork shows as a two-column grid, and every export is in one Export & share menu.", "Story library → Export & share", "library:Scenes"),
+ f("Node-editor maps", "Chapters, Scenes and Dialogue advanced draw white boards with round ports on a dotted canvas, and their side panels fold. Chapter, device and update pages use the same cards and segmented tabs. The settings dialog is a two-column sheet.", "Dialogue advanced → Map", "dialogues")
+ ]},
  {version:"3.0.0-claude",name:"Stillframe 3: a lighter, faster studio",by:"Claude",date:"2026-11-03",timestamp:"2026-11-03T12:00:00Z",features:[
  f("Stillframe 3 light studio", "A calm light design with one top bar and one row for menus, workspace tabs and quick tools. Every feature of the classic studio is still here; Stillframe 3 runs separately at localhost:5174 with its own saved project.", "Stillframe 3 → Top bar", "editor"),
  f("Windows menu", "Tools and controls placement, Windows & docking, Restore artwork and Layout & project settings now sit in one Windows menu instead of their own row.", "Top bar → Windows", "windows"),
