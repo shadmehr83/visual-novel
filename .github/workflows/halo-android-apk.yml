@@ -1,4 +1,4 @@
-name: Build HALO Android v6
+name: Build HALO Android v7
 on:
   push:
     branches: [halo-android-build]
@@ -33,7 +33,7 @@ jobs:
           mkdir -p 'app'
           cat > 'app/build.gradle' <<'HALO_FILE_END'
           plugins { id 'com.android.application' }
-          android { namespace 'app.halo.music'; compileSdk 35; defaultConfig { applicationId 'app.halo.music'; minSdk 26; targetSdk 35; versionCode 6; versionName '6.0' }; compileOptions { sourceCompatibility JavaVersion.VERSION_17; targetCompatibility JavaVersion.VERSION_17 } }
+          android { namespace 'app.halo.music'; compileSdk 35; defaultConfig { applicationId 'app.halo.music'; minSdk 26; targetSdk 35; versionCode 7; versionName '7.0' }; compileOptions { sourceCompatibility JavaVersion.VERSION_17; targetCompatibility JavaVersion.VERSION_17 } }
           dependencies { implementation 'androidx.browser:browser:1.8.0' }
           HALO_FILE_END
           mkdir -p 'app/src/main'
@@ -118,6 +118,12 @@ jobs:
               private static final int AUDIO_PERMISSION_REQUEST = 49;
               private final Handler handler = new Handler(Looper.getMainLooper());
               private WebView web;
+              private LinearLayout musicBrowserPanel;
+              private android.widget.FrameLayout musicBrowserHolder;
+              private android.widget.EditText musicBrowserAddress;
+              private android.widget.TextView musicBrowserCount;
+              private final java.util.ArrayList<WebView> musicBrowserTabs = new java.util.ArrayList<>();
+              private int musicBrowserActive=-1;
               private TextView helpText;
               private Button enableMedia;
               private Button enableEffects;
@@ -184,9 +190,9 @@ jobs:
                   fileParams.setMargins(dp(10),0,dp(10),dp(5));
                   root.addView(localFile,fileParams);
           musicBrowser=new Button(this);
-          musicBrowser.setText("Open YouTube Music · secure Chrome sign-in");
+          musicBrowser.setText("Open music browser inside HALO");
           musicBrowser.setAllCaps(false);
-          musicBrowser.setOnClickListener(v->openMusicBrowser());
+          musicBrowser.setOnClickListener(v->openInsideMusicBrowser("https://music.youtube.com/"));
           LinearLayout.LayoutParams browserParams=new LinearLayout.LayoutParams(-1,dp(44));
           browserParams.setMargins(dp(10),0,dp(10),dp(5));
           root.addView(musicBrowser,browserParams);
@@ -225,6 +231,64 @@ jobs:
                       }
                   });
                   root.addView(web, new LinearLayout.LayoutParams(-1, 0, 1));
+                  musicBrowserPanel = new LinearLayout(this);
+                  musicBrowserPanel.setOrientation(LinearLayout.VERTICAL);
+                  musicBrowserPanel.setBackgroundColor(Color.rgb(11,15,25));
+                  LinearLayout browserTools = new LinearLayout(this);
+                  browserTools.setGravity(Gravity.CENTER_VERTICAL);
+                  browserTools.setPadding(dp(5),dp(4),dp(5),dp(4));
+                  Button returnHalo=new Button(this);returnHalo.setAllCaps(false);returnHalo.setText("HALO");
+                  returnHalo.setOnClickListener(v->closeMusicBrowserView());
+                  browserTools.addView(returnHalo,new LinearLayout.LayoutParams(dp(67),dp(45)));
+                  Button browserBack=new Button(this);browserBack.setAllCaps(false);browserBack.setText("‹");
+                  browserBack.setOnClickListener(v->{WebView b=activeMusicBrowser();if(b!=null&&b.canGoBack())b.goBack();});
+                  browserTools.addView(browserBack,new LinearLayout.LayoutParams(dp(46),dp(45)));
+                  musicBrowserAddress=new android.widget.EditText(this);
+                  musicBrowserAddress.setSingleLine(true);
+                  musicBrowserAddress.setInputType(android.text.InputType.TYPE_CLASS_TEXT|android.text.InputType.TYPE_TEXT_VARIATION_URI);
+                  musicBrowserAddress.setTextColor(Color.WHITE);
+                  musicBrowserAddress.setTextSize(12);
+                  musicBrowserAddress.setHint("https://music.youtube.com");
+                  musicBrowserAddress.setHintTextColor(Color.rgb(140,151,169));
+                  musicBrowserAddress.setOnEditorActionListener((field,action,event)->{
+                      String entered=field.getText().toString().trim();
+                      if(!entered.contains("://"))entered="https://"+entered;
+                      try{Uri u=Uri.parse(entered);if(!"https".equalsIgnoreCase(u.getScheme()))return true;WebView b=activeMusicBrowser();if(b!=null)b.loadUrl(u.toString());}catch(Exception ignored){}
+                      return true;
+                  });
+                  browserTools.addView(musicBrowserAddress,new LinearLayout.LayoutParams(0,dp(45),1));
+                  Button go=new Button(this);go.setText("→");go.setAllCaps(false);
+                  go.setOnClickListener(v->{
+                     String entered=musicBrowserAddress.getText().toString().trim();
+                     if(!entered.contains("://"))entered="https://"+entered;
+                     try{Uri u=Uri.parse(entered);if("https".equalsIgnoreCase(u.getScheme())){WebView b=activeMusicBrowser();if(b!=null)b.loadUrl(entered);}}catch(Exception ignored){}
+                  });
+                  browserTools.addView(go,new LinearLayout.LayoutParams(dp(46),dp(45)));
+                  musicBrowserPanel.addView(browserTools,new LinearLayout.LayoutParams(-1,dp(55)));
+                  LinearLayout extraTools=new LinearLayout(this);
+                  extraTools.setPadding(dp(8),0,dp(8),dp(5));
+                  musicBrowserCount=new android.widget.TextView(this);
+                  musicBrowserCount.setTextColor(Color.rgb(205,213,229));
+                  musicBrowserCount.setGravity(Gravity.CENTER_VERTICAL);
+                  musicBrowserCount.setTextSize(11);
+                  extraTools.addView(musicBrowserCount,new LinearLayout.LayoutParams(0,dp(40),1));
+                  Button switchTab=new Button(this);switchTab.setText("Tabs");switchTab.setAllCaps(false);
+                  switchTab.setOnClickListener(v->{if(!musicBrowserTabs.isEmpty())showMusicBrowserTab((musicBrowserActive+1)%musicBrowserTabs.size());});
+                  extraTools.addView(switchTab,new LinearLayout.LayoutParams(dp(72),dp(40)));
+                  Button addTab=new Button(this);addTab.setText("+");addTab.setAllCaps(false);
+                  addTab.setOnClickListener(v->openInsideMusicBrowser("https://music.youtube.com/"));
+                  extraTools.addView(addTab,new LinearLayout.LayoutParams(dp(46),dp(40)));
+                  Button closeTab=new Button(this);closeTab.setText("×");closeTab.setAllCaps(false);
+                  closeTab.setOnClickListener(v->removeMusicBrowserTab());
+                  extraTools.addView(closeTab,new LinearLayout.LayoutParams(dp(46),dp(40)));
+                  Button secure=new Button(this);secure.setText("Sign in");secure.setAllCaps(false);
+                  secure.setOnClickListener(v->openSecureBrowser(activeMusicBrowser()==null?"https://music.youtube.com/":activeMusicBrowser().getUrl()));
+                  extraTools.addView(secure,new LinearLayout.LayoutParams(dp(79),dp(40)));
+                  musicBrowserPanel.addView(extraTools,new LinearLayout.LayoutParams(-1,dp(49)));
+                  musicBrowserHolder=new android.widget.FrameLayout(this);
+                  musicBrowserPanel.addView(musicBrowserHolder,new LinearLayout.LayoutParams(-1,0,1));
+                  root.addView(musicBrowserPanel,new LinearLayout.LayoutParams(-1,0,1));
+                  musicBrowserPanel.setVisibility(View.GONE);
                   if (Build.VERSION.SDK_INT >= 30) {
                       root.setOnApplyWindowInsetsListener((view,insets)->{
                           android.graphics.Insets bars=insets.getInsets(android.view.WindowInsets.Type.statusBars()|android.view.WindowInsets.Type.navigationBars());
@@ -255,10 +319,72 @@ jobs:
                   helpText.setText(!granted ? "One-time setup: allow HALO notification access to detect YouTube Music." :
                       "HALO is linked to Android media controls" + (measured ? " · live audio frequencies" : " · visual animation"));
               }
-              private void openMusicBrowser(){
-              try{new CustomTabsIntent.Builder().setShowTitle(true).build().launchUrl(this,Uri.parse("https://music.youtube.com/"));}
-              catch(Exception e){try{startActivity(new Intent(Intent.ACTION_VIEW,Uri.parse("https://music.youtube.com/")));}catch(Exception ignored){}}
-          }
+              private WebView activeMusicBrowser(){
+                 return musicBrowserActive>=0&&musicBrowserActive<musicBrowserTabs.size()?musicBrowserTabs.get(musicBrowserActive):null;
+              }
+              private void showMusicBrowserTab(int index){
+                 if(index<0||index>=musicBrowserTabs.size())return;
+                 musicBrowserActive=index;
+                 for(int i=0;i<musicBrowserTabs.size();i++)musicBrowserTabs.get(i).setVisibility(i==index?View.VISIBLE:View.GONE);
+                 WebView chosen=activeMusicBrowser();
+                 musicBrowserAddress.setText(chosen==null?"":chosen.getUrl());
+                 musicBrowserCount.setText("Tab "+(index+1)+"/"+musicBrowserTabs.size());
+                 musicBrowserPanel.setVisibility(View.VISIBLE);
+                 web.setVisibility(View.GONE);
+              }
+              private void openInsideMusicBrowser(String address){
+                 try{
+                    Uri uri=Uri.parse(address==null?"https://music.youtube.com/":address);
+                    if(!"https".equalsIgnoreCase(uri.getScheme()))return;
+                    WebView browser=new WebView(this);
+                    WebSettings settings=browser.getSettings();
+                    settings.setJavaScriptEnabled(true);
+                    settings.setDomStorageEnabled(true);
+                    settings.setAllowFileAccess(false);
+                    settings.setAllowContentAccess(false);
+                    settings.setMixedContentMode(WebSettings.MIXED_CONTENT_NEVER_ALLOW);
+                    settings.setMediaPlaybackRequiresUserGesture(true);
+                    browser.setBackgroundColor(Color.rgb(9,13,22));
+                    browser.setWebChromeClient(new WebChromeClient());
+                    browser.setWebViewClient(new WebViewClient(){
+                        @Override public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest req){
+                            String scheme=req.getUrl().getScheme();
+                            if("http".equalsIgnoreCase(scheme)||"https".equalsIgnoreCase(scheme))return false;
+                            return true;
+                        }
+                        @Override public void onPageFinished(WebView view,String url){
+                            if(view==activeMusicBrowser())musicBrowserAddress.setText(url);
+                        }
+                    });
+                    musicBrowserTabs.add(browser);
+                    musicBrowserHolder.addView(browser,new android.widget.FrameLayout.LayoutParams(-1,-1));
+                    showMusicBrowserTab(musicBrowserTabs.size()-1);
+                    browser.loadUrl(uri.toString());
+                 }catch(Exception ignored){}
+              }
+              private void closeMusicBrowserView(){
+                 musicBrowserPanel.setVisibility(View.GONE);
+                 web.setVisibility(View.VISIBLE);
+                 pageReady=false;
+                 web.evaluateJavascript("window.haloNativeReady && window.haloNativeReady()",null);
+                 pageReady=true;pushToWeb();
+              }
+              private void removeMusicBrowserTab(){
+                 WebView browser=activeMusicBrowser();
+                 if(browser==null){closeMusicBrowserView();return;}
+                 musicBrowserHolder.removeView(browser);
+                 musicBrowserTabs.remove(musicBrowserActive);
+                 browser.stopLoading();browser.destroy();
+                 if(musicBrowserTabs.size()==0){musicBrowserActive=-1;closeMusicBrowserView();}
+                 else showMusicBrowserTab(Math.min(musicBrowserActive,musicBrowserTabs.size()-1));
+              }
+              private void openSecureBrowser(String url){
+                 try{
+                     Uri u=Uri.parse(url==null?"https://music.youtube.com/":url);
+                     if(!"https".equalsIgnoreCase(u.getScheme()))return;
+                     new CustomTabsIntent.Builder().setShowTitle(true).build().launchUrl(this,u);
+                 }catch(Exception e){try{startActivity(new Intent(Intent.ACTION_VIEW,Uri.parse("https://music.youtube.com/")));}catch(Exception ignored){}}
+              }
           private void openNotificationSettings() {
                   try {
                       if (Build.VERSION.SDK_INT >= 30) {
@@ -388,7 +514,9 @@ jobs:
               private void handleCommand(Uri uri) {
                   String command = uri.getPath() == null ? "" : uri.getPath();
                   if ("/local".equals(command)) {openLocalFile();return;}
-          if ("/browser".equals(command)) {openMusicBrowser();return;}
+          if ("/browser".equals(command)) {openInsideMusicBrowser("https://music.youtube.com/");return;}
+          if ("/browser-open".equals(command)) {openInsideMusicBrowser(uri.getQueryParameter("url"));return;}
+          if ("/browser-auth".equals(command)) {openSecureBrowser(uri.getQueryParameter("url"));return;}
                   if ("/settings".equals(command)) {openNotificationSettings();return;}
                   if ("/audio".equals(command)) {requestAudioPermission();return;}
                   if (controller == null) return;
@@ -471,11 +599,17 @@ jobs:
               @Override protected void onDestroy() {
                   handler.removeCallbacksAndMessages(null);
                   closeVisualizer();
+                  for(WebView b:musicBrowserTabs){try{b.stopLoading();b.destroy();}catch(Exception ignored){}}
+                  musicBrowserTabs.clear();
                   if (web != null) { web.stopLoading(); web.destroy(); web=null; }
                   super.onDestroy();
               }
               @Override public void onBackPressed() {
-                  if (web != null && web.canGoBack()) web.goBack();
+                  if(musicBrowserPanel!=null&&musicBrowserPanel.getVisibility()==View.VISIBLE){
+                     WebView b=activeMusicBrowser();
+                     if(b!=null&&b.canGoBack())b.goBack();
+                     else closeMusicBrowserView();
+                  } else if(web!=null&&web.canGoBack())web.goBack();
                   else super.onBackPressed();
               }
           }
@@ -664,6 +798,6 @@ jobs:
       - name: Save APK
         uses: actions/upload-artifact@v4
         with:
-          name: HALO-Android-6.0
+          name: HALO-Android-7.0
           path: app/build/outputs/apk/debug/app-debug.apk
           if-no-files-found: error
