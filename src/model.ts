@@ -81,6 +81,9 @@ const node = z.object({
   qte: qteSchema.optional(),
   // Timed decision (by Claude): the replies count down; when time runs out `choice` (or the first reply) is taken.
   timedChoice: z.object({ enabled: z.boolean(), seconds: z.number().min(2).max(60), choice: z.string().optional() }).optional(),
+  // Story timer overrides (by Claude): true/false beat the scene's setting; unset follows the scene.
+  timerOff: z.boolean().optional(),
+  timerHidden: z.boolean().optional(),
   allowCustomResponse: z.boolean().optional(),
   // Per-dialogue master switch (by Claude): false hides Self-reply on this line only, in every view.
   allowSelfReply: z.boolean().optional(),
@@ -364,6 +367,12 @@ const scene = z.object({
     })
     .optional(),
   joints: z.array(jointSchema).max(20).optional(),
+  // Story timers for this scene (by Claude): all off, bar hidden, or either one for a dialogue range.
+  storyTimers: z.object({
+    off: z.boolean().optional(),
+    hidden: z.boolean().optional(),
+    range: z.object({ enabled: z.boolean(), start: z.string(), end: z.string(), effect: z.enum(["hidden", "off"]) }).optional(),
+  }).optional(),
   transition: transitionSchema.optional(),
   exitTransition: transitionSchema.optional(),
   phone: deviceSchema.optional(),

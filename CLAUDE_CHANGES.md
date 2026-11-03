@@ -4,6 +4,13 @@ Every change in this list was written by Claude (Anthropic) at the request of th
 
 > **Where this lives:** branch `claude` on GitHub. Versions end in `-claude`. `main` is the original line and is untouched.
 
+## Iteration 12 — Story timer per dialogue, range and scene (2026-11-04, engine 2.32.0-claude)
+
+- **Model:** `node.timerOff` and `node.timerHidden` (true/false override, unset follows the scene). `scene.storyTimers` `{off, hidden, range: {enabled, start, end, effect: "hidden" | "off"}}`. The range counts along the path played, like the texting range, and is removed when its start or end dialogue is deleted (`src/authoring.ts`).
+- **Rules** (`timerRule` in `src/storyTiming.ts`): the dialogue's own choice wins, then the range, then the scene. Off stops auto-continue and timed decisions; a line's own `autoAdvance` still runs. Hidden keeps the timer running with `visibility:hidden`; in the studio the bar shows as a faint dashed outline (`src/StoryTimer.tsx`).
+- **Editors:** `src/StoryTimerControls.tsx` in the Normal dialogue editor and in the Advanced (map) editor's selected dialogue; the map's scene view shows the scene part. Editable during Author's playthrough.
+- Search entries, New marks, tests in `src/storyTimer.test.tsx`.
+
 ## Iteration 11 — New game settings (2026-11-04, engine 2.31.0-claude)
 
 - **Title screen:** every game (play link and exports) now opens on its title screen. Start new game opens `src/NewGameSetup.tsx`, which asks three questions. How to move on: Continue on screen, Enter (not on phones), or a click/tap on the scene. Whether dialogue is timed (auto-continue). Whether decisions have a time limit, asked only when the story has timed decisions. Choices apply at once. A note says they can be changed anytime from Pause menu → Settings.

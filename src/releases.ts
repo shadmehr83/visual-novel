@@ -1,4 +1,4 @@
-export const ENGINE_VERSION = "2.31.0-claude";
+export const ENGINE_VERSION = "2.32.0-claude";
 export type ReleaseFeature = {
   name: string;
   description: string;
@@ -22,6 +22,11 @@ const f = (
   action?: string,
 ): ReleaseFeature => ({ name, description, steps: path.split(" → "), action });
 export const releases: Release[] = [
+ {version:"2.32.0-claude",name:"Story timer per dialogue, range and scene",by:"Claude",date:"2026-11-04",timestamp:"2026-11-03T17:20:02Z",features:[
+ f("Timer on or off per dialogue", "Each dialogue has Timer on this dialogue: Follow scene, On or Off. Off stops auto-continue and a timed decision's countdown on that line; a line's own Auto-advance time still runs. It is in both the Normal and the Advanced dialogue editor, and works during Author's playthrough.", "Dialogue → Normal → Story timer → Timer on this dialogue", "dialogue"),
+ f("Hide the timer bar", "Timer bar on this dialogue can hide the bar while the timer keeps running, so players cannot see how long is left. In the studio a hidden bar shows as a faint dashed outline so you know it is running.", "Dialogue → Normal → Story timer → Timer bar on this dialogue", "dialogue"),
+ f("Timers for a scene or a dialogue range", "Under Whole scene or a dialogue range, switch every timer in a scene off, hide every bar, or apply either one from one dialogue to another. A dialogue's own On/Off or Shown/Hidden choice wins over the scene.", "Dialogue → Advanced → Story timer → From one dialogue to another", "dialogue")
+ ]},
  {version:"2.31.0-claude",name:"New game settings",by:"Claude",commit:"96b3f12",date:"2026-11-04",timestamp:"2026-11-03T16:38:07Z",features:[
  f("New game settings", "Start new game now asks players how to move the story on (Continue on screen, Enter or a click on the scene) and whether the dialogue is timed, plus whether decisions have a time limit when the story has any. A note says these can be changed anytime from the pause menu.", "Play link or exported game → Start new game", "author-play"),
  f("Pause menu Settings", "The pause menu groups Advance story, Auto-continue dialogue, Timed decisions and sound under Settings. Players can now switch timed decisions off for themselves; the author's timers stay in the project.", "Play story → Pause menu → Settings", "author-play")

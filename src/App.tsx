@@ -57,6 +57,7 @@ import { SelfReply } from "./SelfReply";
 import { LastLine } from "./LastLine";
 import { StoryTimer } from "./StoryTimer";
 import { TimedDecisionControls } from "./TimedDecisionControls";
+import { StoryTimerControls } from "./StoryTimerControls";
 import { CLAUDE_SITE, claudeExport, pendingReply } from "./characterReply";
 import { SelectionToolbar } from "./SelectionToolbar";
 import { useWorkspace, contrast } from "./workspace";
@@ -2064,6 +2065,8 @@ export default function App() {
                         />
                         Dialogue switched on (off = skipped in play, kept in the project)
                       </label>
+                      <StoryTimerControls scene={selected} node={node} disabled={editingLocked}
+                        update={(fn) => updateScene(fn)} />
                       <label className="consent">
                         <input
                           type="checkbox"
