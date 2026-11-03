@@ -1,4 +1,4 @@
-name: Build HALO Android v7
+name: Build HALO Android v8
 on:
   push:
     branches: [halo-android-build]
@@ -33,7 +33,7 @@ jobs:
           mkdir -p 'app'
           cat > 'app/build.gradle' <<'HALO_FILE_END'
           plugins { id 'com.android.application' }
-          android { namespace 'app.halo.music'; compileSdk 35; defaultConfig { applicationId 'app.halo.music'; minSdk 26; targetSdk 35; versionCode 7; versionName '7.0' }; compileOptions { sourceCompatibility JavaVersion.VERSION_17; targetCompatibility JavaVersion.VERSION_17 } }
+          android { namespace 'app.halo.music'; compileSdk 35; defaultConfig { applicationId 'app.halo.music'; minSdk 26; targetSdk 35; versionCode 8; versionName '8.0' }; compileOptions { sourceCompatibility JavaVersion.VERSION_17; targetCompatibility JavaVersion.VERSION_17 } }
           dependencies { implementation 'androidx.browser:browser:1.8.0' }
           HALO_FILE_END
           mkdir -p 'app/src/main'
@@ -46,7 +46,7 @@ jobs:
               <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
               <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK"/>
               <uses-permission android:name="android.permission.WAKE_LOCK"/>
-              <application android:allowBackup="false" android:label="HALO Music" android:theme="@android:style/Theme.Material.NoActionBar" android:usesCleartextTraffic="false">
+              <application android:allowBackup="false" android:label="HALO Music" android:icon="@mipmap/ic_launcher" android:theme="@android:style/Theme.Material.NoActionBar" android:usesCleartextTraffic="false">
                   <activity android:name=".MainActivity" android:exported="true" android:configChanges="orientation|screenSize|keyboardHidden">
                       <intent-filter>
                           <action android:name="android.intent.action.MAIN"/>
@@ -56,6 +56,14 @@ jobs:
                   <service android:name=".MainActivity$Listener" android:label="HALO music detection" android:permission="android.permission.BIND_NOTIFICATION_LISTENER_SERVICE" android:exported="true">
                       <intent-filter><action android:name="android.service.notification.NotificationListenerService"/></intent-filter>
                   </service>
+                  <receiver android:name=".HaloMusicWidget" android:exported="true">
+                    <intent-filter><action android:name="android.appwidget.action.APPWIDGET_UPDATE"/></intent-filter>
+                    <meta-data android:name="android.appwidget.provider" android:resource="@xml/music_widget_info"/>
+                  </receiver>
+                  <receiver android:name=".HaloWeatherWidget" android:exported="true">
+                    <intent-filter><action android:name="android.appwidget.action.APPWIDGET_UPDATE"/></intent-filter>
+                    <meta-data android:name="android.appwidget.provider" android:resource="@xml/weather_widget_info"/>
+                  </receiver>
                   <service android:name=".HaloPlaybackService" android:exported="false" android:foregroundServiceType="mediaPlayback" android:stopWithTask="false"/>
               </application>
           </manifest>
@@ -111,7 +119,10 @@ jobs:
            */
           public final class MainActivity extends Activity {
               // Keep the same notification listener component as the first installed HALO version.
-              public static final class Listener extends NotificationListenerService { }
+              public static final class Listener extends NotificationListenerService {
+                  @Override public void onListenerConnected(){super.onListenerConnected();HaloMusicWidget.updateAll(this);}
+                  @Override public void onNotificationPosted(android.service.notification.StatusBarNotification sbn){HaloMusicWidget.updateAll(this);}
+              }
               private static final int LOCAL_FILE_PICK = 73;
               private static final String SITE = "https://halo-atmosphere.shadmehr-testing-ground.workers.dev/";
               private static final String YOUTUBE_MUSIC = "com.google.android.apps.youtube.music";
@@ -382,7 +393,7 @@ jobs:
                  try{
                      Uri u=Uri.parse(url==null?"https://music.youtube.com/":url);
                      if(!"https".equalsIgnoreCase(u.getScheme()))return;
-                     new CustomTabsIntent.Builder().setShowTitle(true).build().launchUrl(this,u);
+                     new CustomTabsIntent.Builder().setShowTitle(true).setInitialActivityHeightPx(dp(610)).build().launchUrl(this,u);
                  }catch(Exception e){try{startActivity(new Intent(Intent.ACTION_VIEW,Uri.parse("https://music.youtube.com/")));}catch(Exception ignored){}}
               }
           private void openNotificationSettings() {
@@ -514,6 +525,15 @@ jobs:
               private void handleCommand(Uri uri) {
                   String command = uri.getPath() == null ? "" : uri.getPath();
                   if ("/local".equals(command)) {openLocalFile();return;}
+                  if ("/weather".equals(command)) {
+                      try {
+                          String city=uri.getQueryParameter("city");
+                          double lat=Double.parseDouble(uri.getQueryParameter("lat"));
+                          double lon=Double.parseDouble(uri.getQueryParameter("lon"));
+                          HaloWeatherWidget.setLocation(this,city==null?"Melbourne":city,lat,lon);
+                      }catch(Exception ignored){}
+                      return;
+                  }
           if ("/browser".equals(command)) {openInsideMusicBrowser("https://music.youtube.com/");return;}
           if ("/browser-open".equals(command)) {openInsideMusicBrowser(uri.getQueryParameter("url"));return;}
           if ("/browser-auth".equals(command)) {openSecureBrowser(uri.getQueryParameter("url"));return;}
@@ -787,6 +807,162 @@ jobs:
               @Override public android.os.IBinder onBind(Intent intent){return null;}
           }
           HALO_FILE_END
+
+          mkdir -p 'app/src/main/java/app/halo/music'
+          cat > 'app/src/main/java/app/halo/music/HaloMusicWidget.java' <<'HALO_V8_FILE_END'
+          package app.halo.music;
+          import android.app.*;import android.appwidget.*;import android.content.*;import android.media.*;import android.media.session.*;import android.widget.*;import java.util.*;
+          public class HaloMusicWidget extends AppWidgetProvider{
+            static MediaController current(Context c){
+              try{MediaSessionManager m=(MediaSessionManager)c.getSystemService(Context.MEDIA_SESSION_SERVICE);
+                List<MediaController> xs=m.getActiveSessions(new ComponentName(c,MainActivity.Listener.class));MediaController best=null;int rank=-1;
+                for(MediaController x:xs){if(x.getMetadata()==null)continue;int n=1;
+                  PlaybackState p=x.getPlaybackState();if(p!=null&&p.getState()==PlaybackState.STATE_PLAYING)n+=20;
+                  if(x.getPackageName().equals("com.google.android.apps.youtube.music"))n+=8;
+                  if(n>rank){best=x;rank=n;}}
+                return best;
+              }catch(Exception e){return null;}
+            }
+            static PendingIntent click(Context c,String cmd,int code){
+              return PendingIntent.getBroadcast(c,code,new Intent(c,HaloMusicWidget.class).setAction(cmd),PendingIntent.FLAG_UPDATE_CURRENT|PendingIntent.FLAG_IMMUTABLE);
+            }
+            public static void updateAll(Context c){AppWidgetManager m=AppWidgetManager.getInstance(c);
+              int[] ids=m.getAppWidgetIds(new ComponentName(c,HaloMusicWidget.class));if(ids.length>0)update(c,m,ids);}
+            static void update(Context c,AppWidgetManager m,int[] ids){MediaController x=current(c);
+              MediaMetadata md=x==null?null:x.getMetadata();PlaybackState p=x==null?null:x.getPlaybackState();
+              String title=md==null?"Waiting for music":md.getString(MediaMetadata.METADATA_KEY_TITLE);
+              String artist=md==null?"Enable music access in HALO":md.getString(MediaMetadata.METADATA_KEY_ARTIST);
+              if(title==null)title="Now playing";if(artist==null)artist="Music";
+              for(int id:ids){RemoteViews r=new RemoteViews(c.getPackageName(),R.layout.widget_music);
+                r.setTextViewText(R.id.wm_title,title);r.setTextViewText(R.id.wm_artist,artist);
+                r.setTextViewText(R.id.wm_play,p!=null&&p.getState()==PlaybackState.STATE_PLAYING?"Ⅱ":"▶");
+                r.setOnClickPendingIntent(R.id.wm_prev,click(c,"app.halo.music.PREV",133));
+                r.setOnClickPendingIntent(R.id.wm_play,click(c,"app.halo.music.TOGGLE",134));
+                r.setOnClickPendingIntent(R.id.wm_next,click(c,"app.halo.music.NEXT",135));
+                r.setOnClickPendingIntent(R.id.wm_open,PendingIntent.getActivity(c,136,new Intent(c,MainActivity.class),PendingIntent.FLAG_UPDATE_CURRENT|PendingIntent.FLAG_IMMUTABLE));
+                m.updateAppWidget(id,r);
+              }
+            }
+            @Override public void onUpdate(Context c,AppWidgetManager m,int[] ids){update(c,m,ids);}
+            @Override public void onReceive(Context c,Intent i){super.onReceive(c,i);
+              String a=i.getAction();if(a==null)return;
+              MediaController x=current(c);if(x==null)return;
+              MediaController.TransportControls t=x.getTransportControls();
+              if(a.equals("app.halo.music.NEXT"))t.skipToNext();
+              if(a.equals("app.halo.music.PREV"))t.skipToPrevious();
+              if(a.equals("app.halo.music.TOGGLE")){PlaybackState p=x.getPlaybackState();
+                if(p!=null&&p.getState()==PlaybackState.STATE_PLAYING)t.pause();else t.play();}
+              updateAll(c);
+            }
+          }
+          HALO_V8_FILE_END
+          mkdir -p 'app/src/main/java/app/halo/music'
+          cat > 'app/src/main/java/app/halo/music/HaloWeatherWidget.java' <<'HALO_V8_FILE_END'
+          package app.halo.music;
+          import android.app.*;import android.appwidget.*;import android.content.*;import android.widget.*;
+          import org.json.*;import java.io.*;import java.net.*;import java.nio.charset.StandardCharsets;
+          public class HaloWeatherWidget extends AppWidgetProvider{
+           static void updateAll(Context c){AppWidgetManager m=AppWidgetManager.getInstance(c);int[] ids=m.getAppWidgetIds(new ComponentName(c,HaloWeatherWidget.class));if(ids.length>0)load(c,m,ids);}
+           public static void setLocation(Context c,String city,double lat,double lon){
+            if(!Double.isFinite(lat)||!Double.isFinite(lon)||Math.abs(lat)>90||Math.abs(lon)>180)return;
+            c.getSharedPreferences("halo-weather",0).edit().putString("city",city).putString("lat",""+lat).putString("lon",""+lon).apply();updateAll(c);
+           }
+           static void load(Context c,AppWidgetManager m,int[] ids){new Thread(()->{
+            android.content.SharedPreferences p=c.getSharedPreferences("halo-weather",0);
+            String city=p.getString("city","Melbourne"),lat=p.getString("lat","-37.8136"),lon=p.getString("lon","144.9631");
+            String temp="--°",icon="☾",desc="Weather unavailable",rain="Rain --";
+            try{
+             URL u=new URL("https://api.open-meteo.com/v1/forecast?latitude="+lat+"&longitude="+lon+"&current=temperature_2m,weather_code,is_day,precipitation&hourly=precipitation_probability&forecast_days=1&timezone=auto");
+             HttpURLConnection h=(HttpURLConnection)u.openConnection();h.setConnectTimeout(6500);h.setReadTimeout(6500);
+             try(InputStream in=h.getInputStream();ByteArrayOutputStream out=new ByteArrayOutputStream()){
+              byte[] buf=new byte[2048];int n;while((n=in.read(buf))>=0)out.write(buf,0,n);
+              JSONObject d=new JSONObject(new String(out.toByteArray(),StandardCharsets.UTF_8));
+              JSONObject now=d.getJSONObject("current");int code=now.optInt("weather_code",0),day=now.optInt("is_day",1);
+              temp=Math.round(now.optDouble("temperature_2m",0))+"°";
+              desc=code>=95?"Storm":code>=61?"Rain":code>=51?"Drizzle":code>=45?"Fog":code>=3?"Cloudy":code>=1?"Partly cloudy":"Clear";
+              icon=code>=61?"☂":day==1?"☼":"☾";
+              JSONObject hh=d.optJSONObject("hourly");if(hh!=null&&hh.optJSONArray("precipitation_probability")!=null)rain="Rain "+hh.getJSONArray("precipitation_probability").optInt(0)+"%";
+             }finally{h.disconnect();}
+            }catch(Exception ignored){}
+            for(int id:ids){
+             RemoteViews r=new RemoteViews(c.getPackageName(),R.layout.widget_weather);
+             r.setTextViewText(R.id.ww_city,city);r.setTextViewText(R.id.ww_temp,temp);
+             r.setTextViewText(R.id.ww_desc,desc);r.setTextViewText(R.id.ww_rain,rain);r.setTextViewText(R.id.ww_icon,icon);
+             r.setOnClickPendingIntent(R.id.ww_root,PendingIntent.getActivity(c,177,new Intent(c,MainActivity.class),PendingIntent.FLAG_UPDATE_CURRENT|PendingIntent.FLAG_IMMUTABLE));
+             m.updateAppWidget(id,r);
+            }
+           }).start();}
+           @Override public void onUpdate(Context c,AppWidgetManager m,int[] ids){load(c,m,ids);}
+          }
+          HALO_V8_FILE_END
+          mkdir -p 'app/src/main/res/drawable'
+          cat > 'app/src/main/res/drawable/widget_bg.xml' <<'HALO_V8_FILE_END'
+          <?xml version="1.0" encoding="utf-8"?>
+          <shape xmlns:android="http://schemas.android.com/apk/res/android" android:shape="rectangle">
+            <corners android:radius="23dp"/>
+            <gradient android:startColor="#ED1C2B41" android:centerColor="#F00F1A2B" android:endColor="#F0201D40" android:angle="0"/>
+            <stroke android:width="1dp" android:color="#77A4BCD5"/>
+          </shape>
+          HALO_V8_FILE_END
+          mkdir -p 'app/src/main/res/drawable'
+          cat > 'app/src/main/res/drawable/icon_bg.xml' <<'HALO_V8_FILE_END'
+          <?xml version="1.0" encoding="utf-8"?>
+          <shape xmlns:android="http://schemas.android.com/apk/res/android"><solid android:color="#10172B"/><corners android:radius="22dp"/></shape>
+          HALO_V8_FILE_END
+          mkdir -p 'app/src/main/res/drawable'
+          cat > 'app/src/main/res/drawable/icon_fg.xml' <<'HALO_V8_FILE_END'
+          <?xml version="1.0" encoding="utf-8"?>
+          <vector xmlns:android="http://schemas.android.com/apk/res/android" android:width="108dp" android:height="108dp" android:viewportWidth="108" android:viewportHeight="108">
+           <path android:fillColor="#00FFFFFF" android:strokeColor="#87E5E9" android:strokeWidth="3.5" android:pathData="M 85,54 A 31,31 0,1 1,23 54 A 31,31 0,1 1,85 54"/>
+           <path android:fillColor="#00FFFFFF" android:strokeColor="#B0A1FF" android:strokeWidth="2" android:pathData="M 19,68 C 40,84 79,24 90,45"/>
+           <path android:fillColor="#D8E9FF" android:pathData="M69,33 A10,10 0,1 1,60 22 A8,8 0,1 0,69 33"/>
+           <path android:fillColor="#00FFFFFF" android:strokeColor="#D3EEFF" android:strokeWidth="2" android:pathData="M27,56 L34,56 L34,49 L39,64 L44,42 L50,60 L55,46 L59,55 L80,55"/>
+          </vector>
+          HALO_V8_FILE_END
+          mkdir -p 'app/src/main/res/layout'
+          cat > 'app/src/main/res/layout/widget_music.xml' <<'HALO_V8_FILE_END'
+          <?xml version="1.0" encoding="utf-8"?>
+          <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android" android:layout_width="match_parent" android:layout_height="match_parent" android:orientation="vertical" android:gravity="center_vertical" android:padding="12dp" android:background="@drawable/widget_bg">
+           <LinearLayout android:id="@+id/wm_open" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical">
+            <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:text="◌  H A L O     N O W  P L A Y I N G" android:textColor="#95D5E4" android:textSize="9sp"/>
+            <TextView android:id="@+id/wm_title" android:layout_width="match_parent" android:layout_height="wrap_content" android:ellipsize="end" android:singleLine="true" android:textColor="#F0F5FF" android:textSize="16sp" android:textStyle="bold" android:text="Waiting for music"/>
+            <TextView android:id="@+id/wm_artist" android:layout_width="match_parent" android:layout_height="wrap_content" android:ellipsize="end" android:singleLine="true" android:textColor="#B6C5D7" android:textSize="11sp" android:text="HALO"/>
+           </LinearLayout>
+           <LinearLayout android:layout_width="match_parent" android:layout_height="46dp" android:layout_marginTop="7dp" android:gravity="center" android:orientation="horizontal">
+            <TextView android:id="@+id/wm_prev" android:layout_width="0dp" android:layout_weight="1" android:layout_height="match_parent" android:gravity="center" android:text="❮❮" android:textSize="19sp" android:textColor="#CFD5E6"/>
+            <TextView android:id="@+id/wm_play" android:layout_width="0dp" android:layout_weight="1" android:layout_height="match_parent" android:gravity="center" android:text="▶" android:textSize="24sp" android:textColor="#98F7EB"/>
+            <TextView android:id="@+id/wm_next" android:layout_width="0dp" android:layout_weight="1" android:layout_height="match_parent" android:gravity="center" android:text="❯❯" android:textSize="19sp" android:textColor="#CFD5E6"/>
+           </LinearLayout>
+          </LinearLayout>
+          HALO_V8_FILE_END
+          mkdir -p 'app/src/main/res/layout'
+          cat > 'app/src/main/res/layout/widget_weather.xml' <<'HALO_V8_FILE_END'
+          <?xml version="1.0" encoding="utf-8"?>
+          <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android" android:id="@+id/ww_root" android:layout_width="match_parent" android:layout_height="match_parent" android:orientation="horizontal" android:gravity="center_vertical" android:padding="13dp" android:background="@drawable/widget_bg">
+           <LinearLayout android:layout_width="0dp" android:layout_weight="1" android:layout_height="match_parent" android:gravity="center_vertical" android:orientation="vertical">
+            <TextView android:id="@+id/ww_city" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="Melbourne" android:textColor="#B8CDDF" android:textSize="12sp" android:ellipsize="end" android:singleLine="true"/>
+            <TextView android:id="@+id/ww_temp" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="--°" android:textColor="#F7F9FF" android:textSize="32sp"/>
+            <TextView android:id="@+id/ww_desc" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="Weather" android:textColor="#E2E8F2" android:textSize="11sp" android:ellipsize="end" android:singleLine="true"/>
+            <TextView android:id="@+id/ww_rain" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="Rain --" android:textColor="#96E9EA" android:textSize="11sp"/>
+           </LinearLayout>
+           <TextView android:id="@+id/ww_icon" android:layout_width="62dp" android:layout_height="match_parent" android:gravity="center" android:text="☾" android:textSize="46sp" android:textColor="#B3E1FE"/>
+          </LinearLayout>
+          HALO_V8_FILE_END
+          mkdir -p 'app/src/main/res/xml'
+          cat > 'app/src/main/res/xml/music_widget_info.xml' <<'HALO_V8_FILE_END'
+          <?xml version="1.0" encoding="utf-8"?>
+          <appwidget-provider xmlns:android="http://schemas.android.com/apk/res/android" android:minWidth="220dp" android:minHeight="110dp" android:targetCellWidth="3" android:targetCellHeight="2" android:updatePeriodMillis="1800000" android:initialLayout="@layout/widget_music" android:resizeMode="horizontal|vertical" android:widgetCategory="home_screen"/>
+          HALO_V8_FILE_END
+          mkdir -p 'app/src/main/res/xml'
+          cat > 'app/src/main/res/xml/weather_widget_info.xml' <<'HALO_V8_FILE_END'
+          <?xml version="1.0" encoding="utf-8"?>
+          <appwidget-provider xmlns:android="http://schemas.android.com/apk/res/android" android:minWidth="220dp" android:minHeight="110dp" android:targetCellWidth="3" android:targetCellHeight="2" android:updatePeriodMillis="1800000" android:initialLayout="@layout/widget_weather" android:resizeMode="horizontal|vertical" android:widgetCategory="home_screen"/>
+          HALO_V8_FILE_END
+          mkdir -p 'app/src/main/res/mipmap-anydpi-v26'
+          cat > 'app/src/main/res/mipmap-anydpi-v26/ic_launcher.xml' <<'HALO_V8_FILE_END'
+          <?xml version="1.0" encoding="utf-8"?>
+          <adaptive-icon xmlns:android="http://schemas.android.com/apk/res/android"><background android:drawable="@drawable/icon_bg"/><foreground android:drawable="@drawable/icon_fg"/></adaptive-icon>
+          HALO_V8_FILE_END
       - name: Install Android SDK
         run: |
           SDKMGR=$(find /usr/local/lib/android/sdk/cmdline-tools -name sdkmanager -type f | head -n 1)
@@ -798,6 +974,6 @@ jobs:
       - name: Save APK
         uses: actions/upload-artifact@v4
         with:
-          name: HALO-Android-7.0
+          name: HALO-Android-8.0
           path: app/build/outputs/apk/debug/app-debug.apk
           if-no-files-found: error
