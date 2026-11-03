@@ -1,4 +1,4 @@
-export const ENGINE_VERSION = "2.30.0-claude";
+export const ENGINE_VERSION = "2.31.0-claude";
 export type ReleaseFeature = {
   name: string;
   description: string;
@@ -22,7 +22,11 @@ const f = (
   action?: string,
 ): ReleaseFeature => ({ name, description, steps: path.split(" → "), action });
 export const releases: Release[] = [
- {version:"2.30.0-claude",name:"Story timers: auto-continue and timed decisions",by:"Claude",date:"2026-11-03",timestamp:"2026-11-03T05:30:00Z",features:[
+ {version:"2.31.0-claude",name:"New game settings",by:"Claude",date:"2026-11-04",timestamp:"2026-11-03T16:40:00Z",features:[
+ f("New game settings", "Start new game now asks players how to move the story on (Continue on screen, Enter or a click on the scene) and whether the dialogue is timed, plus whether decisions have a time limit when the story has any. A note says these can be changed anytime from the pause menu.", "Play link or exported game → Start new game", "author-play"),
+ f("Pause menu Settings", "The pause menu groups Advance story, Auto-continue dialogue, Timed decisions and sound under Settings. Players can now switch timed decisions off for themselves; the author's timers stay in the project.", "Play story → Pause menu → Settings", "author-play")
+ ]},
+ {version:"2.30.0-claude",name:"Story timers: auto-continue and timed decisions",by:"Claude",commit:"1fd91ba",date:"2026-11-03",timestamp:"2026-11-03T05:20:38Z",features:[
  f("Auto-continue dialogue", "Lines without replies can move on by themselves: 3 seconds for under 10 words, 4 seconds for one line, 8 seconds for two lines (4 more per extra line). Settings → Auto-continue dialogue by default sets what players start with.", "Settings → Auto-continue dialogue by default", "settings"),
  f("Player auto-continue switch", "Players turn auto-continue on or off for themselves in the pause menu, in the studio and in exported games. Their choice is kept in their browser.", "Play story → Pause menu → Auto-continue dialogue", "settings"),
  f("Timed decisions", "A reply line can count down: switch on Timed decision in the dialogue editor, set the seconds and the reply taken when time runs out. Settings → Timed decisions switches them all off and on again without losing them.", "Dialogue editor → Timed decision", "dialogue"),

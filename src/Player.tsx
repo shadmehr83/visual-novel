@@ -22,6 +22,7 @@ import { aiLog, onlinePlay, type AiLogEntry } from "./characterReply";
 import { nickname, playtest, setNickname } from "./playtest";
 import { LastLine } from "./LastLine";
 import { StoryTimer } from "./StoryTimer";
+import { NewGameSetup } from "./NewGameSetup";
 function Player() {
   const [project, setProject] = useState(() =>
     validateProject(
@@ -35,9 +36,10 @@ function Player() {
   const [saved, setSaved] = useState(() => {
     try { return readPlayerSave(localStorage,saveKey,project,scope); } catch { return null; }
   });
-  // Claude edition exports start on the title screen so testers see it needs a connection.
   const claudeEdition = !!onlinePlay();
-  const [atTitle, setAtTitle] = useState(!!saved || claudeEdition);
+  // Every game opens on its title screen; Start new game asks for the player's settings first.
+  const [atTitle, setAtTitle] = useState(true);
+  const [setup, setSetup] = useState(false);
   const [saveError,setSaveError] = useState("");
   const [runtime, rawSetRuntime] = useState(() => startScope(project,scope));
   const setRuntime = (next: Runtime | ((r:Runtime)=>Runtime)) => rawSetRuntime(before=>limitScope(before,typeof next === 'function' ? next(before):next,scope));
@@ -83,15 +85,16 @@ function Player() {
     try { savePlayerProgress(localStorage,saveKey,runtime); setSaved(runtime); quit(); }
     catch { setSaveError("Progress could not be saved in this browser. Free storage or allow local storage, then try again. The story is still open."); }
   };
-  const restart = () => { setRuntime(startScope(project,scope)); setAtTitle(false); seen.current = null; playtest.record("open", project.scenes[0]?.title, { start: "new game", layout: mobile ? "phone" : "desktop" }); };
+  const restart = () => { setRuntime(startScope(project,scope)); setAtTitle(false); setSetup(false); seen.current = null; playtest.record("open", project.scenes[0]?.title, { start: "new game", layout: mobile ? "phone" : "desktop" }); };
   if (access === "blocked") return <main className="player-title claude-edition"><h1>{project.title}</h1>
     <p className="claude-edition-badge">This playtest is no longer available on this device. If you think this is a mistake, contact the author.</p>
   </main>;
+  if (atTitle && setup) return <NewGameSetup project={project} mobile={mobile} mode={mode} onMode={setMode} onBegin={restart} onBack={() => setSetup(false)} />;
   if(atTitle) return <main className={"player-title" + (claudeEdition ? " claude-edition" : "")}><h1>{project.title}</h1>
     {claudeEdition && <p className="claude-edition-badge">Claude edition · characters answer your own replies live · needs an internet connection</p>}
     {claudeEdition && <label className="playtest-name">Your name for the author (optional)<input value={name} maxLength={40} placeholder="e.g. Alex" onChange={e=>{setName(e.target.value);setNickname(e.target.value);}} /></label>}
     {saved && <button data-help="Resume your last saved dialogue, choices and chat transcript in this browser." onClick={()=>{setRuntime(saved);setAtTitle(false);seen.current=null;playtest.record("open", project.scenes.find(s=>s.id===saved.scene)?.title, { start: "continue saved game", layout: mobile ? "phone" : "desktop" });}}>Continue saved game</button>}
-    <button data-help="Begin this exported story from its opening. The previous saved checkpoint is kept until you choose Save and quit again." onClick={restart}>Start new game</button>
+    <button data-help="Choose how the story moves on and whether it is timed, then begin from the opening. The previous saved checkpoint is kept until you choose Save and quit again." onClick={() => setSetup(true)}>Start new game</button>
     <p>Progress stays in this browser on this device. Reopen the same exported game to continue.</p>
     {claudeEdition && <p className="playtest-notice">This is a playtest. To help the author fix problems, it records your choices, the messages you type, the characters' answers, your approximate country and your browser type, linked to a random ID kept in this browser. No account, email or IP address is stored.</p>}
   </main>;

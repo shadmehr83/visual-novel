@@ -2175,3 +2175,23 @@ body:has(.exported-game),body:has(.player-title){margin:0;overflow:hidden;backgr
 .timed-decision{margin:6px 0 10px;padding:8px 10px;border:1px solid var(--line,#303537);border-radius:6px}
 .timed-decision .field-row{margin-top:6px}
 .auto-continue-setting{display:flex;align-items:center;gap:8px;margin:6px 0}
+/* New game settings and the pause menu's Settings group (by Claude) */
+.pause-settings{margin:12px 0;padding:6px 12px 10px;border:1px solid #ffffff2e;border-radius:8px;min-width:0}
+.pause-settings legend{padding:0 6px;font-size:12px;letter-spacing:.06em;text-transform:uppercase;opacity:.8}
+.exported-game .pause-dialog .pause-settings .playback-setting{margin:8px 0}
+.new-game-setup{height:100dvh;min-height:0;overflow:auto;justify-content:flex-start}
+.new-game-setup>h1{margin:auto 0 0}
+.new-game-setup>section{width:min(480px,100%);margin:0 0 auto;text-align:left}
+.new-game-setup h2{margin:0 0 12px;font-size:18px;text-align:center}
+.new-game-setup fieldset{border:0;margin:0 0 16px;padding:0;min-width:0}
+.new-game-setup legend{font-weight:600;margin-bottom:8px;padding:0}
+.setup-option{display:flex;align-items:flex-start;gap:10px;margin:6px 0;padding:10px 12px;border:1px solid #ffffff2e;border-radius:8px;background:#ffffff0d;color:#f6e8ef;cursor:pointer}
+.setup-option.picked{border-color:#bb9dad;background:#675165a6}
+.setup-option input{flex:none;width:auto;margin:3px 0 0;accent-color:#d6b3c6}
+.setup-option span{flex:1;min-width:0}
+.setup-option b{display:block;font-size:15px}
+.setup-option small{display:block;margin-top:2px;font-size:13px;opacity:.75;line-height:1.4}
+.new-game-setup .setup-note{max-width:none;margin:4px 0 16px;padding:10px 12px;border-left:3px solid #bb9dad;background:#ffffff0d;font-size:13px}
+.setup-actions{display:flex;gap:10px;justify-content:flex-end}
+.new-game-setup .setup-actions button{padding:10px 20px;font-size:15px}
+.new-game-setup .setup-actions button:first-child{background:transparent}

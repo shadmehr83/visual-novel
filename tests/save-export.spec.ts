@@ -19,6 +19,7 @@ test('latest GitHub prompt loads current remote project and each asset has an ex
  await page.route('**/player.js',r=>r.fulfill({contentType:'application/javascript',body:code}));
  const download=page.waitForEvent('download');await page.getByRole('button',{name:'Export selected playable HTML',exact:true}).click();const file=await download;expect(file.suggestedFilename()).toBe('visual-novel-player.html');
  const player=await page.context().newPage();await player.setContent(await readFile((await file.path())!,'utf8'));
+ await player.getByRole('button',{name:'Start new game',exact:true}).click();await player.getByRole('button',{name:'Start the story',exact:true}).click();
  await expect(player.locator('.dialogue-overlay')).toContainText('Range B');
  await player.getByRole('button',{name:'Continue',exact:true}).click();await expect(player.locator('.dialogue-overlay')).toContainText('Range C');
  await player.getByRole('button',{name:'Continue',exact:true}).click();await expect(player.getByRole('button',{name:'Restart story',exact:true})).toBeVisible();

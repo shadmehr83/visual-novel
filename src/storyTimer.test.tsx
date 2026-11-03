@@ -1,9 +1,10 @@
 import { afterEach, expect, it, vi } from "vitest";
-import { act, render } from "@testing-library/react";
+import { act, fireEvent, render } from "@testing-library/react";
 import { demo } from "./demo";
 import { start, type Node } from "./model";
 import { StoryTimer } from "./StoryTimer";
-import { autoContinuePreference, decisionTimer, readingSeconds } from "./storyTiming";
+import { NewGameSetup } from "./NewGameSetup";
+import { autoContinuePreference, decisionTimer, readingSeconds, timedDecisionsPreference } from "./storyTiming";
 
 // Story timers (by Claude): reading times, timed decisions and the player's auto-continue switch.
 afterEach(() => {
@@ -37,6 +38,34 @@ it("takes the chosen reply when a timed decision runs out", () => {
   act(() => vi.advanceTimersByTime(700));
   expect(onChoose).toHaveBeenCalledWith("b");
   expect(onContinue).not.toHaveBeenCalled();
+});
+it("lets the player turn timed decisions off", () => {
+  const p = demo();
+  timedDecisionsPreference.set(p, false);
+  const view = render(<StoryTimer project={p} node={line({ choices, timedChoice: { enabled: true, seconds: 2 } })} runtime={start(p)} text="Choose" onChoose={() => {}} onContinue={() => {}} />);
+  expect(view.container.querySelector(".story-timer")).toBeNull();
+  act(() => timedDecisionsPreference.set(p, true));
+  expect(view.container.querySelector(".story-timer")).not.toBeNull();
+});
+it("asks new players how to continue and whether to time the story", () => {
+  const p = demo();
+  p.scenes[0].nodes[0] = line({ choices, timedChoice: { enabled: true, seconds: 5 } });
+  const onMode = vi.fn(), onBegin = vi.fn();
+  const view = render(<NewGameSetup project={p} mobile={false} mode="continue" onMode={onMode} onBegin={onBegin} onBack={() => {}} />);
+  fireEvent.click(view.getByLabelText(/Press Enter/));
+  expect(onMode).toHaveBeenCalledWith("enter");
+  fireEvent.click(view.getByLabelText(/Yes, move on by itself/));
+  expect(autoContinuePreference.get(p)).toBe(true);
+  fireEvent.click(view.getByLabelText(/No, let me take my time/));
+  expect(timedDecisionsPreference.get(p)).toBe(false);
+  expect(view.getByText(/change these settings anytime/)).toBeTruthy();
+  fireEvent.click(view.getByRole("button", { name: "Start the story" }));
+  expect(onBegin).toHaveBeenCalled();
+  view.unmount();
+  // Phones have no Enter key, and stories without timed decisions skip that question.
+  const plain = render(<NewGameSetup project={demo()} mobile mode="screen" onMode={() => {}} onBegin={() => {}} onBack={() => {}} />);
+  expect(plain.queryByLabelText(/Press Enter/)).toBeNull();
+  expect(plain.queryByText("Should decisions have a time limit?")).toBeNull();
 });
 it("continues plain lines only while the player has auto-continue on", () => {
   vi.useFakeTimers({ toFake: ["requestAnimationFrame", "cancelAnimationFrame", "performance", "setTimeout"] });

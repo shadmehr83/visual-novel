@@ -6,7 +6,7 @@ import { FullscreenButton } from "./FullscreenButton";
 import { ProgressView } from "./ProgressView";
 import type { Project, Runtime } from "./model";
 import { aiLog } from "./characterReply";
-import { AutoContinueSetting } from "./AutoContinueSetting";
+import { AutoContinueSetting, TimedDecisionsSetting } from "./AutoContinueSetting";
 const PauseContext = createContext(false);
 const AuthorEditingContext = createContext(false);
 export const useAuthorEditing = () => useContext(AuthorEditingContext);
@@ -57,8 +57,11 @@ export function PlaySession({ children, playing, onExit, onRestart, project, run
       {progress && project && runtime ? <><button autoFocus onClick={() => setProgress(false)}>Back to pause menu</button><ProgressView project={project} runtime={runtime} /></> : <>
         <button autoFocus onClick={() => setPaused(false)}>Resume story</button>
         <FullscreenButton />
-        {project && <AutoContinueSetting project={project} />}
-        {exportControls && <><PlaybackSetting mode={exportControls.mode} onMode={exportControls.onMode} /><SessionSoundControls /></>}
+        {(project || exportControls) && <fieldset className="pause-settings"><legend>Settings</legend>
+          {exportControls && <PlaybackSetting mode={exportControls.mode} onMode={exportControls.onMode} />}
+          {project && <><AutoContinueSetting project={project} /><TimedDecisionsSetting project={project} /></>}
+          {exportControls && <SessionSoundControls />}
+        </fieldset>}
         {project && runtime && <button onClick={() => setProgress(true)}>View Current Progress</button>}
         {aiLog.read().length > 0 && <button data-help="Save a file of every AI conversation in this browser (your texts, the character's answers and choices) to send to the author." onClick={() => aiLog.download()}>Download AI chat log</button>}
         <button onClick={() => {setPaused(false); setProgress(false); onRestart();}}>Restart story</button>
