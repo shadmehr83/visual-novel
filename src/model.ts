@@ -79,6 +79,8 @@ const node = z.object({
   phoneNotice: z.string().max(300).optional(),
   notes: z.string().max(10000).optional(),
   qte: qteSchema.optional(),
+  // Timed decision (by Claude): the replies count down; when time runs out `choice` (or the first reply) is taken.
+  timedChoice: z.object({ enabled: z.boolean(), seconds: z.number().min(2).max(60), choice: z.string().optional() }).optional(),
   allowCustomResponse: z.boolean().optional(),
   // Per-dialogue master switch (by Claude): false hides Self-reply on this line only, in every view.
   allowSelfReply: z.boolean().optional(),
@@ -500,6 +502,10 @@ export const projectSchema = z.object({
     guides: z.boolean(),
     skipQte: z.boolean().optional(),
     timing: z.number().min(0.5).max(3).optional(),
+    // Story timers (by Claude): auto-continue is the game's default (players can change it in
+    // the pause menu); timedDecisions false pauses every timed decision without losing them.
+    autoContinue: z.boolean().optional(),
+    timedDecisions: z.boolean().optional(),
   }),
   metadata: z.object({ created: z.string() }),
 });

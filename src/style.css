@@ -2168,3 +2168,14 @@ body:has(.exported-game),body:has(.player-title){margin:0;overflow:hidden;backgr
    as it fades, so GIF and still backgrounds never dip through the dark stage. Both wait for a new GIF's first frame. */
 .scene-out+.scene-in-smooth{animation:none}
 .scene-transition[data-waiting]>:is(.scene-in,.scene-out){animation-play-state:paused}
+/* Story timers (by Claude): a draining bar, no numbers. In the dialogue box it runs along the bottom
+   edge; while a phone or computer screen is up it sits in the scene's lower-right corner. */
+.story-timer{position:absolute;left:0;right:0;bottom:0;height:3px;background:#ffffff14;border-radius:0 0 3px 3px;overflow:hidden;pointer-events:none}
+.story-timer>span{display:block;height:100%;background:var(--accent,#d5ac91);transform-origin:left center;transform:scaleX(1);opacity:.85}
+.story-timer-decision>span{background:#e0a36f}
+.story-timer-held>span{opacity:.35}
+.story-timer-corner{left:auto;top:auto;right:2.5%;bottom:3%;width:min(22%,180px);height:5px;border-radius:999px;background:#0008;box-shadow:0 0 0 1px #ffffff26;z-index:6}
+.story-timer-corner>span{border-radius:999px}
+.timed-decision{margin:6px 0 10px;padding:8px 10px;border:1px solid var(--line,#303537);border-radius:6px}
+.timed-decision .field-row{margin-top:6px}
+.auto-continue-setting{display:flex;align-items:center;gap:8px;margin:6px 0}

@@ -1,4 +1,4 @@
-export const ENGINE_VERSION = "3.1.1-claude";
+export const ENGINE_VERSION = "3.2.0-claude";
 export type ReleaseFeature = {
   name: string;
   description: string;
@@ -22,6 +22,9 @@ const f = (
   action?: string,
 ): ReleaseFeature => ({ name, description, steps: path.split(" → "), action });
 export const releases: Release[] = [
+ {version:"3.2.0-claude",name:"Story timers in Stillframe 3",by:"Claude",date:"2026-11-03",timestamp:"2026-11-03T05:40:00Z",features:[
+ f("Story timers in both designs", "Auto-continue dialogue and timed decisions from the classic studio (2.30.0-claude) work in Stillframe 3 too, with the same pause-menu switch and timer bar.", "Dialogue editor → Timed decision", "dialogue")
+ ]},
  {version:"3.1.1-claude",name:"Design switch, dark palette and fixes",by:"Claude",date:"2026-11-03",timestamp:"2026-11-03T01:45:00Z",features:[
  f("Studio design switch", "Settings → Studio design switches between Stillframe 3.1 and the classic studio, after saving your project. Stillframe 3.1 opens on every start; the classic design lasts until you close the tab. Both edit the same project and show this Update history. View → Switch to classic design does the same.", "Settings → Studio design", "settings"),
  f("Dark palette", "The moon button in the top bar, or Settings → Studio design → Palette, shows the Stillframe 3.1 layout in the dark colours of the classic studio. Your choice is remembered.", "Top bar → Dark palette", "settings"),
@@ -43,7 +46,13 @@ export const releases: Release[] = [
  f("Faster and lighter", "Stillframe 3 runs from an optimised build (about five times faster per edit, half the memory), and autosave stores artwork once instead of copying every image on each change.", "Stillframe 3 → Edit any line", "editor"),
  f("Smooth GIF and still backgrounds", "Moving from a still background to an animated GIF, or back, is now a clean cross-fade: a GIF starts on its poster or a ready frame, each frame is prepared once and reused, and the old picture waits for the new one, so nothing flashes dark or blinks.", "Play story → Café → A table by the window", "background")
  ]},
- {version:"2.29.0-claude",name:"Bug-fix pass, AI search and on/off dialogues",by:"Claude",date:"2026-11-03",timestamp:"2026-11-03T09:00:00Z",features:[
+ {version:"2.30.0-claude",name:"Story timers: auto-continue and timed decisions",by:"Claude",date:"2026-11-03",timestamp:"2026-11-03T05:30:00Z",features:[
+ f("Auto-continue dialogue", "Lines without replies can move on by themselves: 3 seconds for under 10 words, 4 seconds for one line, 8 seconds for two lines (4 more per extra line). Settings → Auto-continue dialogue by default sets what players start with.", "Settings → Auto-continue dialogue by default", "settings"),
+ f("Player auto-continue switch", "Players turn auto-continue on or off for themselves in the pause menu, in the studio and in exported games. Their choice is kept in their browser.", "Play story → Pause menu → Auto-continue dialogue", "settings"),
+ f("Timed decisions", "A reply line can count down: switch on Timed decision in the dialogue editor, set the seconds and the reply taken when time runs out. Settings → Timed decisions switches them all off and on again without losing them.", "Dialogue editor → Timed decision", "dialogue"),
+ f("Timer bar", "The time left shows as a draining bar, never as seconds: along the bottom of the dialogue box, or in the scene's lower-right corner while a phone or computer screen is up. It waits while the story is paused, while you type and while a character answers. A line's own Auto-advance time uses the same bar.", "Play story → Dialogue box", "author-play")
+ ]},
+ {version:"2.29.0-claude",name:"Bug-fix pass, AI search and on/off dialogues",by:"Claude",commit:"3c48da5",date:"2026-11-03",timestamp:"2026-11-02T15:46:45Z",features:[
  f("Switch dialogues and replies off", "Each dialogue box and reply on the Dialogue advanced map has an On/Off switch. Switched-off items fade and are skipped in Play story and Author's playthrough, but stay in your project to bring back with one click. The normal editor has the same switch for dialogues.", "Dialogue advanced → On / Off on a box or reply", "dialogues"),
  f("AI parallels on the map", "During a playthrough, dialogues and replies that Claude adapted are outlined in warm orange on the Dialogue advanced map, with the parallel text shown on the box.", "Author’s playthrough → Dialogue advanced", "dialogues"),
  f("Search by AI", "In the local studio, search (Ctrl+K) asks Claude Code on this computer when nothing matches, or when you press Ask Claude, so misspelled or described searches find the right feature. Switch it in Assistant → AI assistant.", "Search features → Ask Claude", "assistant"),

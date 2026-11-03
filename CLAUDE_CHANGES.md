@@ -4,6 +4,10 @@ Every change in this list was written by Claude (Anthropic) at the request of th
 
 > **Where this lives:** branch `claude` on GitHub. Versions end in `-claude`. `main` is the original line and is untouched.
 
+## Stillframe 3.2 — story timers (2026-11-03, engine 3.2.0-claude)
+
+- Merged `claude` (2.30.0-claude): auto-continue, timed decisions and the timer bar now work in Stillframe 3 and in its classic design. Details are under Iteration 10 below.
+
 ## Stillframe 3.1.1 — design switch, dark palette, phone and history fixes (2026-11-03, engine 3.1.1-claude)
 
 - **Design switch:** `index.html` marks the page with `data-sf3`. A tiny start-up script drops `data-ui="v3"` only when this tab chose the classic design (sessionStorage), so every new start opens Stillframe 3.1. Settings → **Studio design** (`src/v3/StudioDesign.tsx`) and View → Switch to … design save the project, then reload in the other design. Both designs share the project, saves and Update history. The local build never registers the offline service worker in either design.
@@ -46,6 +50,12 @@ Same `claude-v3` line. The 3.0 top bar, palette and features stay; the rest of t
   - A transition waits up to 1.5 s for a new GIF's first frame.
   - "Smooth" is a true cross-dissolve: the new view stays opaque beneath the fading old one, so there is no dip to the dark stage.
 - Tests: `src/recentFeatures.test.tsx`; all 209 tests pass.
+## Iteration 10 — Story timers: auto-continue and timed decisions (2026-11-03, engine 2.30.0-claude)
+
+- **Auto-continue** (`src/storyTiming.ts`): plain lines move on after 3 s (under 10 words), 4 s (one line) or 8 s (two lines), plus 4 s per extra line. Lines are counted as the dialogue box shows them, or estimated on a phone. The project default is `settings.autoContinue` (Settings → Auto-continue dialogue by default). Players switch it in the pause menu (`src/AutoContinueSetting.tsx`); their choice is kept per game in localStorage.
+- **Timed decisions:** `node.timedChoice` `{enabled, seconds, choice}`. The dialogue editor has Timed decision, Seconds to choose and When time runs out (`src/TimedDecisionControls.tsx`). When time runs out, the chosen reply is taken, or the first available one. `settings.timedDecisions === false` switches them all off without losing them. Project timing scales decision time.
+- **Timer bar** (`src/StoryTimer.tsx`): a draining bar with no numbers, along the bottom of the dialogue box, or in the scene's lower-right corner while a phone or computer screen is up. It holds while paused, while the author edits, while the player types, while a character answers, and while a phone message is still being typed. A line's own `autoAdvance` now runs here (moved out of `SceneAudio`), so it shows the bar too. Used in the studio's play mode and in exported games.
+- Search entries, New marks, tests in `src/storyTimer.test.tsx`. The 2.29.0 release now has its real commit time.
 
 ## Iteration 9 — Bug-fix pass, AI search, on/off dialogues, image expand (2026-11-03, engine 2.29.0-claude)
 

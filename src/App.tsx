@@ -55,6 +55,8 @@ import { SceneTransition } from "./SceneTransition";
 import { DeviceOverlay as PhoneUI } from "./DeviceOverlay";
 import { SelfReply } from "./SelfReply";
 import { LastLine } from "./LastLine";
+import { StoryTimer } from "./StoryTimer";
+import { TimedDecisionControls } from "./TimedDecisionControls";
 import { CLAUDE_SITE, claudeExport, pendingReply } from "./characterReply";
 import { SelectionToolbar } from "./SelectionToolbar";
 import { useWorkspace, contrast } from "./workspace";
@@ -1581,7 +1583,7 @@ export default function App() {
                 </div>}
                 {activeView && <p role="status">Editing sub-scene: <strong>{activeView.title}</strong> · Lighting, rain and ambience controls apply to this view.</p>}
                       {playing && (
-                        <SceneAudio project={project} scene={scene} nodeId={node.id} choices={runtime?.choices} choiceSource={runtime?.memories?.at(-1)} onAdvance={() => step()} />
+                        <SceneAudio project={project} scene={scene} nodeId={node.id} choices={runtime?.choices} choiceSource={runtime?.memories?.at(-1)} />
                       )}
                 <div className="stage-frame">
                   <SceneTransition
@@ -1720,6 +1722,10 @@ export default function App() {
                             }}
                           />
                         )}
+                      {playing && runtime && !node.qte && !hasItemUI(scene, node) &&
+                        deviceScreen(scene, node, runtime.nodeVisits?.filter((v) => v.scene === scene.id).map((v) => v.node)) !== "off" && (
+                          <StoryTimer corner project={project} node={node} runtime={runtime} text={shownText(runtime, scene.id, node)} onContinue={() => step()} onChoose={(id) => step(id)} />
+                        )}
                       {!maskMode &&
                         placingLight === null &&
                         !regionEditor &&
@@ -1829,6 +1835,7 @@ export default function App() {
                                       }}
                                     />
                                   )}
+                                {runtime && <StoryTimer project={project} node={node} runtime={runtime} text={shownText(runtime, scene.id, node)} onContinue={() => step()} onChoose={(id) => step(id)} />}
                               </>
                             ) : (
                               <span className="dialogue-hint">
@@ -2206,6 +2213,10 @@ export default function App() {
                           <Plus size={13} /> Add choice
                         </button>
                       </div>
+                      {node.choices.length > 0 && (
+                        <TimedDecisionControls project={project} node={node} disabled={playing && !authorPlay}
+                          update={(fn) => updateScene((s) => fn(s.nodes.find((n) => n.id === node.id)!))} />
+                      )}
                       {node.choices.map((c, i) => (
                         <div className="choice-editor" key={c.id}>
                           <span>{String(i + 1).padStart(2, "0")}</span>
@@ -3454,6 +3465,15 @@ export default function App() {
                       })
                     }
                   />
+                  {/* Story timers (by Claude): the game's auto-continue default and the master switch for timed decisions. */}
+                  <label className="toggle-row" data-help="Players start with auto-continue on: lines without replies move on after 3 seconds (under 10 words), 4 seconds (one line) or 8 seconds (two lines). Each player can still switch it in the pause menu.">
+                    <span>Auto-continue dialogue by default</span>
+                    <input type="checkbox" aria-label="Auto-continue dialogue by default" checked={!!project.settings.autoContinue} onChange={(e) => edit((p) => { p.settings.autoContinue = e.target.checked; })} />
+                  </label>
+                  <label className="toggle-row" data-help="Switch every timed decision on or off at once. Each decision keeps its own time and reply, so switching back on restores them.">
+                    <span>Timed decisions</span>
+                    <input type="checkbox" aria-label="Timed decisions" checked={project.settings.timedDecisions !== false} onChange={(e) => edit((p) => { p.settings.timedDecisions = e.target.checked; })} />
+                  </label>
                   <p className="muted">
                     {document.documentElement.hasAttribute(
                       "data-stillframe-standalone",

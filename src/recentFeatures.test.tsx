@@ -6,20 +6,20 @@ vi.hoisted(() => {
 });
 import { RecentFeatures } from "./RecentFeatures";
 
-// New-feature marks (by Claude): recent controls are marked, matched by full or starting name; the game stays unmarked.
-it("marks recent controls by name or name start, but not inside the game", async () => {
-  document.body.innerHTML = `<button>✦ Ask Claude</button><button aria-label="Enlarge background of Café">⤢</button>
-    <label><input type="checkbox" aria-label="Dialogue switched on"> Dialogue switched on</label>
-    <div class="stage-frame"><button>✦ Ask Claude</button></div><button>Old control</button>`;
+// New-feature marks (by Claude): recent controls are marked with their version; the game and older controls stay unmarked.
+it("marks recent controls, but not inside the game or from older releases", async () => {
+  document.body.innerHTML = `<details><summary>Export &amp; share</summary></details>
+    <label><input type="checkbox" aria-label="Timed decision"> Timed decision</label>
+    <div class="stage-frame"><button aria-label="Dark palette">◐</button></div>
+    <button>✦ Ask Claude</button><button aria-label="Dark palette">◐</button>`;
   const view = render(<RecentFeatures />);
   await new Promise((r) => setTimeout(r, 200));
-  const [ask, enlarge, inGame, old] = document.querySelectorAll<HTMLElement>("button");
-  expect(ask.dataset.recent).toBe("2.29.0-claude");
-  expect(ask.dataset.new).toBe("v2.29.0");
-  expect(enlarge.dataset.recent).toBe("2.29.0-claude");
-  expect(document.querySelector<HTMLInputElement>("input")!.dataset.recent).toBe("2.29.0-claude");
-  expect(document.querySelector<HTMLElement>("label")!.dataset.new).toBe("v2.29.0");
+  const [inGame, older, palette] = document.querySelectorAll<HTMLElement>("button");
+  expect(document.querySelector<HTMLElement>("summary")!.dataset.new).toBe("v3.1.0");
+  expect(document.querySelector<HTMLInputElement>("input")!.dataset.recent).toBe("2.30.0-claude");
+  expect(document.querySelector<HTMLElement>("label")!.dataset.new).toBe("v2.30.0");
+  expect(palette.dataset.recent).toBe("3.1.1-claude");
   expect(inGame.dataset.recent).toBeUndefined();
-  expect(old.dataset.recent).toBeUndefined();
+  expect(older.dataset.recent).toBeUndefined();
   view.unmount();
 });
