@@ -1,7 +1,8 @@
-name: HALO Android build
+name: Build HALO Android background player
 on:
   push:
     branches: [halo-android-build]
+  workflow_dispatch:
 jobs:
   apk:
     runs-on: ubuntu-latest
@@ -15,10 +16,10 @@ jobs:
       - uses: gradle/actions/setup-gradle@v4
         with:
           gradle-version: '8.10.2'
-      - name: Write Android source
+      - name: Write HALO Android sources
         shell: bash
         run: |
-          set -e
+          set -eu
           cat > 'settings.gradle' <<'HALO_FILE_END'
           pluginManagement { repositories { google(); mavenCentral(); gradlePluginPortal() } }
           dependencyResolutionManagement { repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS); repositories { google(); mavenCentral() } }
@@ -31,254 +32,590 @@ jobs:
           mkdir -p 'app'
           cat > 'app/build.gradle' <<'HALO_FILE_END'
           plugins { id 'com.android.application' }
-          android { namespace 'app.halo.music'; compileSdk 35; defaultConfig { applicationId 'app.halo.music'; minSdk 26; targetSdk 35; versionCode 1; versionName '1.0' }; compileOptions { sourceCompatibility JavaVersion.VERSION_17; targetCompatibility JavaVersion.VERSION_17 } }
+          android { namespace 'app.halo.music'; compileSdk 35; defaultConfig { applicationId 'app.halo.music'; minSdk 26; targetSdk 35; versionCode 2; versionName '2.0' }; compileOptions { sourceCompatibility JavaVersion.VERSION_17; targetCompatibility JavaVersion.VERSION_17 } }
           HALO_FILE_END
           mkdir -p 'app/src/main'
           cat > 'app/src/main/AndroidManifest.xml' <<'HALO_FILE_END'
           <?xml version="1.0" encoding="utf-8"?>
           <manifest xmlns:android="http://schemas.android.com/apk/res/android">
-          <uses-permission android:name="android.permission.INTERNET"/>
-          <uses-permission android:name="android.permission.RECORD_AUDIO"/>
-          <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS"/>
-          <application android:allowBackup="false" android:label="HALO Music" android:usesCleartextTraffic="false" android:theme="@android:style/Theme.Material.NoActionBar">
-          <activity android:name=".MainActivity" android:exported="true"><intent-filter><action android:name="android.intent.action.MAIN"/><category android:name="android.intent.category.LAUNCHER"/></intent-filter></activity>
-          <service android:name=".MainActivity$Listener" android:label="HALO music detection" android:permission="android.permission.BIND_NOTIFICATION_LISTENER_SERVICE" android:exported="true"><intent-filter><action android:name="android.service.notification.NotificationListenerService"/></intent-filter></service>
-          </application></manifest>
+              <uses-permission android:name="android.permission.INTERNET"/>
+              <uses-permission android:name="android.permission.RECORD_AUDIO"/>
+              <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS"/>
+              <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
+              <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK"/>
+              <uses-permission android:name="android.permission.WAKE_LOCK"/>
+              <application android:allowBackup="false" android:label="HALO Music" android:theme="@android:style/Theme.Material.NoActionBar" android:usesCleartextTraffic="false">
+                  <activity android:name=".MainActivity" android:exported="true" android:configChanges="orientation|screenSize|keyboardHidden">
+                      <intent-filter>
+                          <action android:name="android.intent.action.MAIN"/>
+                          <category android:name="android.intent.category.LAUNCHER"/>
+                      </intent-filter>
+                  </activity>
+                  <service android:name=".MainActivity$Listener" android:label="HALO music detection" android:permission="android.permission.BIND_NOTIFICATION_LISTENER_SERVICE" android:exported="true">
+                      <intent-filter><action android:name="android.service.notification.NotificationListenerService"/></intent-filter>
+                  </service>
+                  <service android:name=".HaloPlaybackService" android:exported="false" android:foregroundServiceType="mediaPlayback" android:stopWithTask="false"/>
+              </application>
+          </manifest>
           HALO_FILE_END
           mkdir -p 'app/src/main/java/app/halo/music'
           cat > 'app/src/main/java/app/halo/music/MainActivity.java' <<'HALO_FILE_END'
           package app.halo.music;
+          
           import android.Manifest;
-          import android.app.*;
-          import android.os.*;
-          import android.content.*;
+          import android.app.Activity;
+          import android.app.Service;
+          import android.service.notification.NotificationListenerService;
+          import android.content.ComponentName;
+          import android.content.Intent;
           import android.content.pm.PackageManager;
           import android.graphics.Color;
           import android.media.MediaMetadata;
-          import android.media.session.*;
-          import android.media.session.MediaController;
           import android.media.audiofx.Visualizer;
-          import android.provider.Settings;
+          import android.media.session.MediaController;
+          import android.media.session.MediaSession;
+          import android.media.session.MediaSessionManager;
+          import android.media.session.PlaybackState;
           import android.net.Uri;
-          import android.view.*;
-          import android.webkit.*;
-          import android.widget.*;
-          import java.util.*;
+          import android.os.Build;
+          import android.os.Bundle;
+          import android.os.Handler;
+          import android.os.Looper;
+          import android.provider.Settings;
+          import android.webkit.WebChromeClient;
+          import android.webkit.WebResourceRequest;
+          import android.webkit.WebSettings;
+          import android.webkit.WebView;
+          import android.webkit.WebViewClient;
+          import android.view.Gravity;
+          import android.view.View;
+          import android.widget.Button;
+          import android.widget.LinearLayout;
+          import android.widget.TextView;
           import org.json.JSONObject;
+          import java.util.List;
+          import java.util.Locale;
           
-          public class MainActivity extends Activity {
-            public static class Listener extends android.service.notification.NotificationListenerService {}
-            private WebView browser;
-            private MediaController playing;
-            private MediaSessionManager sessions;
-            private ComponentName listener;
-            private Button accessButton, audioButton;
-            private final Handler handler=new Handler(Looper.getMainLooper());
-            private boolean running=false,loaded=false;
-            private Visualizer visual;
-            private float bass=0,mid=0,high=0;
-            private boolean audioData=false;
-            private final Runnable refresh=new Runnable(){
-              @Override public void run(){
-                if(!running)return;
-                try{pollMusic();push();}catch(Exception ignored){}
-                handler.postDelayed(this,650);
-              }
-            };
-            @Override public void onCreate(Bundle b){
-              super.onCreate(b);
-              getWindow().setStatusBarColor(Color.rgb(8,12,20));
-              getWindow().setNavigationBarColor(Color.rgb(8,12,20));
-              sessions=(MediaSessionManager)getSystemService(MEDIA_SESSION_SERVICE);
-              listener=new ComponentName(this,Listener.class);
-              LinearLayout column=new LinearLayout(this);
-              column.setOrientation(LinearLayout.VERTICAL);
-              column.setBackgroundColor(Color.rgb(8,12,20));
-              LinearLayout buttons=new LinearLayout(this);
-              accessButton=new Button(this);
-              accessButton.setAllCaps(false);
-              accessButton.setText("Connect YouTube Music");
-              accessButton.setOnClickListener(v->grantMedia());
-              buttons.addView(accessButton,new LinearLayout.LayoutParams(0,120,1));
-              audioButton=new Button(this);
-              audioButton.setText("Audio-reactive effects");
-              audioButton.setAllCaps(false);
-              audioButton.setOnClickListener(v->grantAudio());
-              buttons.addView(audioButton,new LinearLayout.LayoutParams(0,120,1));
-              column.addView(buttons);
-              browser=new WebView(this);
-              browser.setBackgroundColor(Color.rgb(8,12,20));
-              browser.getSettings().setJavaScriptEnabled(true);
-              browser.getSettings().setDomStorageEnabled(true);
-              browser.getSettings().setMixedContentMode(WebSettings.MIXED_CONTENT_NEVER_ALLOW);
-              browser.setWebChromeClient(new WebChromeClient());
-              browser.setWebViewClient(new WebViewClient(){
-                @Override public boolean shouldOverrideUrlLoading(WebView view,WebResourceRequest req){
-                  Uri u=req.getUrl();
-                  if("halo".equals(u.getScheme())){
-                    if(req.isForMainFrame() && "control".equals(u.getHost()))command(u);
-                    return true;
+          /**
+           * HALO Android: reads Android's active MediaSession after explicit user permission.
+           * The page is the public HALO interface; metadata is pushed only to the local WebView.
+           * Playback commands come only from main-frame halo://control URLs.
+           */
+          public final class MainActivity extends Activity {
+              // Keep the same notification listener component as the first installed HALO version.
+              public static final class Listener extends NotificationListenerService { }
+              private static final int LOCAL_FILE_PICK = 73;
+              private static final String SITE = "https://halo-atmosphere.shadmehr-testing-ground.workers.dev/";
+              private static final String YOUTUBE_MUSIC = "com.google.android.apps.youtube.music";
+              private static final int AUDIO_PERMISSION_REQUEST = 49;
+              private final Handler handler = new Handler(Looper.getMainLooper());
+              private WebView web;
+              private TextView helpText;
+              private Button enableMedia;
+              private Button enableEffects;
+              private Button localFile;
+              private boolean pageReady = false;
+              private boolean resumed = false;
+              private MediaSessionManager sessions;
+              private ComponentName listener;
+              private MediaController controller;
+              private Visualizer visualizer;
+              private volatile float bass = 0, mids = 0, highs = 0;
+              private volatile boolean measured = false;
+              private long lastSessionRefresh = 0;
+              private long lastAudioAttempt = 0;
+              private final Runnable refresh = new Runnable() {
+                  @Override public void run() {
+                      if (!resumed) return;
+                      try { refreshMedia(); pushToWeb(); } catch (Exception ignored) { }
+                      handler.postDelayed(this, 650);
                   }
-                  if(req.isForMainFrame()&&!"halo-atmosphere.shadmehr-testing-ground.workers.dev".equals(u.getHost())){
-                    try{startActivity(new Intent(Intent.ACTION_VIEW,u));}catch(Exception ignored){}
-                    return true;
+              };
+          
+              @Override public void onCreate(Bundle state) {
+                  super.onCreate(state);
+                  getWindow().setStatusBarColor(Color.rgb(8, 12, 20));
+                  getWindow().setNavigationBarColor(Color.rgb(8, 12, 20));
+                  sessions = (MediaSessionManager) getSystemService(MEDIA_SESSION_SERVICE);
+                  listener = new ComponentName(this, Listener.class);
+          
+                  LinearLayout root = new LinearLayout(this);
+                  root.setOrientation(LinearLayout.VERTICAL);
+                  root.setBackgroundColor(Color.rgb(8, 12, 20));
+                  helpText = new TextView(this);
+                  helpText.setTextColor(Color.rgb(225, 221, 255));
+                  helpText.setTextSize(12);
+                  helpText.setPadding(dp(15), dp(9), dp(15), dp(7));
+                  helpText.setText("HALO · Connect your YouTube Music session");
+                  root.addView(helpText, new LinearLayout.LayoutParams(-1, -2));
+          
+                  LinearLayout buttons = new LinearLayout(this);
+                  buttons.setGravity(Gravity.CENTER_VERTICAL);
+                  buttons.setPadding(dp(10), 0, dp(10), dp(7));
+                  enableMedia = new Button(this);
+                  enableMedia.setText("Enable music access");
+                  enableMedia.setAllCaps(false);
+                  enableMedia.setOnClickListener(v -> openNotificationSettings());
+                  buttons.addView(enableMedia, new LinearLayout.LayoutParams(0, dp(45), 1));
+                  enableEffects = new Button(this);
+                  enableEffects.setText("Enable audio pulse");
+                  enableEffects.setAllCaps(false);
+                  enableEffects.setOnClickListener(v -> requestAudioPermission());
+                  LinearLayout.LayoutParams audioParams = new LinearLayout.LayoutParams(0, dp(45), 1);
+                  audioParams.leftMargin = dp(6);
+                  buttons.addView(enableEffects, audioParams);
+                  root.addView(buttons, new LinearLayout.LayoutParams(-1, -2));
+                  localFile = new Button(this);
+                  localFile.setText("Play a file in background  ·  screen-off supported");
+                  localFile.setAllCaps(false);
+                  localFile.setOnClickListener(v -> openLocalFile());
+                  LinearLayout.LayoutParams fileParams=new LinearLayout.LayoutParams(-1,dp(44));
+                  fileParams.setMargins(dp(10),0,dp(10),dp(5));
+                  root.addView(localFile,fileParams);
+          
+                  web = new WebView(this);
+                  web.setBackgroundColor(Color.rgb(8, 12, 20));
+                  WebSettings opts = web.getSettings();
+                  opts.setJavaScriptEnabled(true);
+                  opts.setDomStorageEnabled(true);
+                  opts.setAllowFileAccess(false);
+                  opts.setAllowContentAccess(false);
+                  opts.setMixedContentMode(WebSettings.MIXED_CONTENT_NEVER_ALLOW);
+                  opts.setMediaPlaybackRequiresUserGesture(true);
+                  web.setWebChromeClient(new WebChromeClient());
+                  web.setWebViewClient(new WebViewClient() {
+                      @Override public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest req) {
+                          Uri u = req.getUrl();
+                          if ("halo".equalsIgnoreCase(u.getScheme())) {
+                              if (req.isForMainFrame() && "control".equals(u.getHost())) handleCommand(u);
+                              return true;
+                          }
+                          if ("https".equalsIgnoreCase(u.getScheme()) &&
+                              "halo-atmosphere.shadmehr-testing-ground.workers.dev".equalsIgnoreCase(u.getHost())) return false;
+                          if (req.isForMainFrame()) {
+                              try { startActivity(new Intent(Intent.ACTION_VIEW, u)); } catch (Exception ignored) { }
+                              return true;
+                          }
+                          return false;
+                      }
+                      @Override public void onPageFinished(WebView view, String url) {
+                          pageReady = url.startsWith(SITE);
+                          if (pageReady) {
+                              web.evaluateJavascript("window.haloNativeReady && window.haloNativeReady()", null);
+                              pushToWeb();
+                          }
+                      }
+                  });
+                  root.addView(web, new LinearLayout.LayoutParams(-1, 0, 1));
+                  if (Build.VERSION.SDK_INT >= 30) {
+                      root.setOnApplyWindowInsetsListener((view,insets)->{
+                          android.graphics.Insets bars=insets.getInsets(android.view.WindowInsets.Type.statusBars()|android.view.WindowInsets.Type.navigationBars());
+                          view.setPadding(0,bars.top,0,bars.bottom);
+                          return insets;
+                      });
                   }
-                  return false;
-                }
-                @Override public void onPageFinished(WebView view,String url){
-                  loaded=url.startsWith("https://halo-atmosphere.shadmehr-testing-ground.workers.dev/");
-                  if(loaded){browser.evaluateJavascript("window.haloNativeReady&&window.haloNativeReady()",null);push();}
-                }
-              });
-              column.addView(browser,new LinearLayout.LayoutParams(-1,0,1));
-              setContentView(column);
-              browser.loadUrl("https://halo-atmosphere.shadmehr-testing-ground.workers.dev/");
-            }
-            private boolean allowed(){
-              String s=Settings.Secure.getString(getContentResolver(),"enabled_notification_listeners");
-              return s!=null&&s.contains(getPackageName());
-            }
-            private boolean audioPerm(){return checkSelfPermission(Manifest.permission.RECORD_AUDIO)==PackageManager.PERMISSION_GRANTED;}
-            private void grantMedia(){
-              try{
-                Intent i=new Intent(Settings.ACTION_NOTIFICATION_LISTENER_DETAIL_SETTINGS);
-                i.putExtra(Settings.EXTRA_NOTIFICATION_LISTENER_COMPONENT_NAME,listener.flattenToString());
-                startActivity(i);
-              }catch(Exception e){startActivity(new Intent(Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS));}
-            }
-            private void grantAudio(){
-              if(!audioPerm())requestPermissions(new String[]{Manifest.permission.RECORD_AUDIO},12);
-              else initAudio();
-            }
-            @Override public void onRequestPermissionsResult(int code,String[] perms,int[] grants){
-              super.onRequestPermissionsResult(code,perms,grants);
-              if(code==12&&audioPerm())initAudio();
-            }
-            private void pollMusic(){
-              accessButton.setText(allowed()?"Media access connected ✓":"Connect YouTube Music");
-              audioButton.setText(audioPerm()?"Audio permission granted ✓":"Enable audio effects");
-              if(!allowed()){playing=null;return;}
-              try{
-                List<MediaController> list=sessions.getActiveSessions(listener);
-                int best=-1;
-                MediaController chosen=null;
-                for(MediaController c:list){
-                  if(c.getMetadata()==null)continue;
-                  int rank=1;
-                  String p=c.getPackageName();
-                  if(p.equals("com.google.android.apps.youtube.music"))rank+=12;
-                  if(p.equals("com.google.android.youtube"))rank+=5;
-                  PlaybackState state=c.getPlaybackState();
-                  if(state!=null&&state.getState()==PlaybackState.STATE_PLAYING)rank+=6;
-                  if(rank>best){best=rank;chosen=c;}
-                }
-                playing=chosen;
-              }catch(SecurityException e){playing=null;}
-              if(audioPerm()&&visual==null)initAudio();
-              if(visual!=null){
-                try{
-                  byte[] fft=new byte[visual.getCaptureSize()];
-                  if(visual.getFft(fft)==Visualizer.SUCCESS){
-                    float bs=0,ms=0,hs=0;int bn=0,mn=0,hn=0;
-                    int bins=fft.length/2;
-                    for(int i=1;i<bins;i++){
-                      int re=fft[i*2],im=fft[i*2+1];
-                      float e=(float)Math.min(1,Math.log1p(Math.sqrt(re*re+im*im))/5.5);
-                      if(i<8){bs+=e;bn++;}
-                      else if(i<48){ms+=e;mn++;}
-                      else if(i<140){hs+=e;hn++;}
-                    }
-                    bass=bs/Math.max(1,bn);mid=ms/Math.max(1,mn);high=hs/Math.max(1,hn);
-                    audioData=bass+mid+high>.04;
+                  setContentView(root);
+                  web.loadUrl(SITE);
+                  refreshButtons();
+              }
+          
+              private int dp(int n) { return Math.round(getResources().getDisplayMetrics().density * n); }
+          
+              private boolean hasListener() {
+                  String list = Settings.Secure.getString(getContentResolver(), "enabled_notification_listeners");
+                  return list != null && list.contains(getPackageName());
+              }
+              private boolean audioAllowed() {
+                  return Build.VERSION.SDK_INT < 23 || checkSelfPermission(Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED;
+              }
+              private void refreshButtons() {
+                  boolean granted = hasListener();
+                  enableMedia.setText(granted ? "Music access ✓" : "Enable music access");
+                  enableMedia.setEnabled(!granted);
+                  enableEffects.setText(audioAllowed() ? "Audio permission ✓" : "Enable audio pulse");
+                  enableEffects.setEnabled(!audioAllowed());
+                  helpText.setText(!granted ? "One-time setup: allow HALO notification access to detect YouTube Music." :
+                      "HALO is linked to Android media controls" + (measured ? " · live audio frequencies" : " · visual animation"));
+              }
+              private void openNotificationSettings() {
+                  try {
+                      if (Build.VERSION.SDK_INT >= 30) {
+                          Intent i = new Intent(Settings.ACTION_NOTIFICATION_LISTENER_DETAIL_SETTINGS);
+                          i.putExtra(Settings.EXTRA_NOTIFICATION_LISTENER_COMPONENT_NAME, listener.flattenToString());
+                          startActivity(i);
+                      } else startActivity(new Intent(Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS));
+                  } catch (Exception e) { startActivity(new Intent(Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS)); }
+              }
+              private void requestAudioPermission() {
+                  if (Build.VERSION.SDK_INT >= 23 && !audioAllowed()) {
+                      requestPermissions(new String[]{Manifest.permission.RECORD_AUDIO}, AUDIO_PERMISSION_REQUEST);
+                  } else startAudioVisualizer();
+              }
+              @Override public void onRequestPermissionsResult(int code, String[] permissions, int[] results) {
+                  super.onRequestPermissionsResult(code, permissions, results);
+                  if (code == AUDIO_PERMISSION_REQUEST && audioAllowed()) startAudioVisualizer();
+                  refreshButtons();
+              }
+          
+              private void refreshMedia() {
+                  boolean access = hasListener();
+                  refreshButtons();
+                  if (!access && HaloPlaybackService.getToken()==null) { controller = null; return; }
+                  long now = android.os.SystemClock.elapsedRealtime();
+                  if (now - lastSessionRefresh < 1100 && controller != null) return;
+                  lastSessionRefresh = now;
+                  try {
+                      List<MediaController> available = access ? sessions.getActiveSessions(listener) : new java.util.ArrayList<>();
+                      MediaSession.Token localToken=HaloPlaybackService.getToken();
+                      if(localToken!=null) {
+                          boolean found=false;
+                          for(MediaController c:available) if(c.getPackageName().equals(getPackageName()))found=true;
+                          if(!found)available.add(new MediaController(this,localToken));
+                      }
+                      MediaController preferred = null;
+                      int best = -1;
+                      for (MediaController c : available) {
+                          MediaMetadata m = c.getMetadata();
+                          if (m == null) continue;
+                          int score = 1;
+                          PlaybackState ps = c.getPlaybackState();
+                          boolean active=ps!=null&&ps.getState()==PlaybackState.STATE_PLAYING;
+                          if (YOUTUBE_MUSIC.equals(c.getPackageName())) score += active?12:2;
+                          else if ("com.google.android.youtube".equals(c.getPackageName())) score += active?7:1;
+                          else if (getPackageName().equals(c.getPackageName())) score+=active?13:2;
+                          if(active)score+=20;
+                          if (score > best) { preferred = c; best = score; }
+                      }
+                      controller = preferred;
+                  } catch (SecurityException se) { controller = null; }
+              }
+          
+              private void pushToWeb() {
+                  if (web == null || !pageReady) return;
+                  JSONObject obj = new JSONObject();
+                  try {
+                      obj.put("authorized", hasListener());
+                      obj.put("active", controller != null);
+                      if (controller != null) {
+                          MediaMetadata m = controller.getMetadata();
+                          PlaybackState s = controller.getPlaybackState();
+                          obj.put("package", controller.getPackageName());
+                          obj.put("title", m == null ? "" : String.valueOf(m.getDescription().getTitle() == null ? "" : m.getDescription().getTitle()));
+                          obj.put("artist", m == null ? "" : String.valueOf(m.getDescription().getSubtitle() == null ? "" : m.getDescription().getSubtitle()));
+                          obj.put("duration", m == null ? 0 : m.getLong(MediaMetadata.METADATA_KEY_DURATION));
+                          if (s != null) {
+                              long pos = Math.max(0, s.getPosition());
+                              if (s.getState() == PlaybackState.STATE_PLAYING && s.getPlaybackSpeed() > 0) {
+                                  pos += (long)((android.os.SystemClock.elapsedRealtime() - s.getLastPositionUpdateTime()) * s.getPlaybackSpeed());
+                              }
+                              obj.put("position", Math.max(0,pos));
+                              obj.put("playing", s.getState() == PlaybackState.STATE_PLAYING);
+                          } else { obj.put("position", 0); obj.put("playing", false); }
+                      }
+                      obj.put("audioAvailable", measured);
+                      obj.put("bass", measured ? bass : 0);
+                      obj.put("mid", measured ? mids : 0);
+                      obj.put("high", measured ? highs : 0);
+                      web.evaluateJavascript("window.haloNativeUpdate && window.haloNativeUpdate(" + obj.toString() + ")", null);
+                  } catch (Exception ignored) { }
+              }
+          
+              private void openLocalFile() {
+                  Intent pick=new Intent(Intent.ACTION_OPEN_DOCUMENT);
+                  pick.setType("audio/*");
+                  pick.addCategory(Intent.CATEGORY_OPENABLE);
+                  pick.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION|Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION);
+                  startActivityForResult(pick,LOCAL_FILE_PICK);
+              }
+              @Override protected void onActivityResult(int code,int resultCode,Intent data){
+                  super.onActivityResult(code,resultCode,data);
+                  if(code==LOCAL_FILE_PICK && resultCode==RESULT_OK && data!=null&&data.getData()!=null){
+                      Uri uri=data.getData();
+                      try{getContentResolver().takePersistableUriPermission(uri,Intent.FLAG_GRANT_READ_URI_PERMISSION);}catch(Exception ignored){}
+                      Intent play=HaloPlaybackService.playIntent(this,uri);
+                      if(Build.VERSION.SDK_INT>=26)startForegroundService(play);else startService(play);
+                      helpText.setText("Playing local audio in the background. Use notification controls when the screen is locked.");
+                      handler.postDelayed(()->{refreshMedia();pushToWeb();},900);
                   }
-                }catch(Exception ignored){audioData=false;}
               }
-            }
-            private void initAudio(){
-              if(!audioPerm()||visual!=null||!running)return;
-              try{
-                visual=new Visualizer(0);
-                visual.setEnabled(false);
-                visual.setCaptureSize(Visualizer.getCaptureSizeRange()[1]);
-                visual.setEnabled(true);
-              }catch(Exception ignored){closeAudio();}
-            }
-            private void closeAudio(){
-              if(visual!=null){
-                try{visual.setEnabled(false);}catch(Exception ignored){}
-                try{visual.release();}catch(Exception ignored){}
-                visual=null;
-              }
-              audioData=false;
-            }
-            private void push(){
-              if(!loaded||browser==null)return;
-              try{
-                JSONObject o=new JSONObject();
-                o.put("authorized",allowed());
-                o.put("active",playing!=null);
-                if(playing!=null){
-                  MediaMetadata m=playing.getMetadata();
-                  PlaybackState s=playing.getPlaybackState();
-                  o.put("package",playing.getPackageName());
-                  o.put("title",m==null?"":String.valueOf(m.getDescription().getTitle()));
-                  o.put("artist",m==null?"":String.valueOf(m.getDescription().getSubtitle()));
-                  o.put("duration",m==null?0:m.getLong(MediaMetadata.METADATA_KEY_DURATION));
-                  long pos=s==null?0:Math.max(0,s.getPosition());
-                  boolean started=s!=null&&s.getState()==PlaybackState.STATE_PLAYING;
-                  if(started&&s.getPlaybackSpeed()>0){
-                    pos+=(long)((SystemClock.elapsedRealtime()-s.getLastPositionUpdateTime())*s.getPlaybackSpeed());
+              private void handleCommand(Uri uri) {
+                  String command = uri.getPath() == null ? "" : uri.getPath();
+                  if ("/local".equals(command)) {openLocalFile();return;}
+                  if ("/settings".equals(command)) {openNotificationSettings();return;}
+                  if ("/audio".equals(command)) {requestAudioPermission();return;}
+                  if (controller == null) return;
+                  MediaController.TransportControls t = controller.getTransportControls();
+                  switch (command) {
+                      case "/toggle":
+                          PlaybackState s = controller.getPlaybackState();
+                          if (s != null && s.getState() == PlaybackState.STATE_PLAYING) t.pause();
+                          else t.play();
+                          break;
+                      case "/play": t.play(); break;
+                      case "/pause": t.pause(); break;
+                      case "/next": t.skipToNext(); break;
+                      case "/previous": t.skipToPrevious(); break;
+                      case "/seek":
+                          try { t.seekTo(Long.parseLong(uri.getQueryParameter("ms"))); } catch (Exception ignored) { }
+                          break;
+                      case "/settings": openNotificationSettings(); break;
+                      case "/audio": requestAudioPermission(); break;
                   }
-                  o.put("position",pos);o.put("playing",started);
-                }
-                o.put("audioAvailable",audioData);
-                o.put("bass",audioData?bass:0);
-                o.put("mid",audioData?mid:0);
-                o.put("high",audioData?high:0);
-                browser.evaluateJavascript("window.haloNativeUpdate&&window.haloNativeUpdate("+o.toString()+")",null);
-              }catch(Exception ignored){}
-            }
-            private void command(Uri u){
-              String cmd=u.getPath();
-              if("/settings".equals(cmd)){grantMedia();return;}
-              if("/audio".equals(cmd)){grantAudio();return;}
-              if(playing==null)return;
-              MediaController.TransportControls t=playing.getTransportControls();
-              PlaybackState s=playing.getPlaybackState();
-              if("/toggle".equals(cmd)){
-                if(s!=null&&s.getState()==PlaybackState.STATE_PLAYING)t.pause();
-                else t.play();
-              }else if("/previous".equals(cmd))t.skipToPrevious();
-              else if("/next".equals(cmd))t.skipToNext();
-              else if("/seek".equals(cmd)){
-                try{t.seekTo(Long.parseLong(u.getQueryParameter("ms")));}catch(Exception ignored){}
+                  handler.postDelayed(this::pushToWeb, 300);
               }
-              handler.postDelayed(this::push,250);
-            }
-            @Override public void onResume(){
-              super.onResume();running=true;handler.removeCallbacks(refresh);handler.post(refresh);
-            }
-            @Override public void onPause(){
-              running=false;handler.removeCallbacks(refresh);closeAudio();super.onPause();
-            }
-            @Override public void onDestroy(){
-              handler.removeCallbacksAndMessages(null);closeAudio();
-              if(browser!=null){browser.destroy();browser=null;}
-              super.onDestroy();
-            }
+          
+              private void startAudioVisualizer() {
+                  if (!resumed || !audioAllowed() || visualizer != null) return;
+                  long now = android.os.SystemClock.elapsedRealtime();
+                  if (now - lastAudioAttempt < 7000) return;
+                  lastAudioAttempt = now;
+                  try {
+                      // Android output-mix session 0, if permitted by this device and source.
+                      Visualizer v = new Visualizer(0);
+                      v.setEnabled(false);
+                      v.setCaptureSize(Visualizer.getCaptureSizeRange()[1]);
+                      v.setDataCaptureListener(new Visualizer.OnDataCaptureListener() {
+                          @Override public void onWaveFormDataCapture(Visualizer v, byte[] wave, int samplingRate) { }
+                          @Override public void onFftDataCapture(Visualizer v, byte[] fft, int samplingRate) {
+                              if (fft == null || fft.length < 32) return;
+                              int n = fft.length / 2;
+                              double sample = Math.max(8000, samplingRate / 1000.0);
+                              double b=0,m=0,h=0; int nb=0,nm=0,nh=0;
+                              for (int i=1;i<n;i++) {
+                                  int real = fft[i*2], imag = fft[i*2+1];
+                                  double hz = i * sample / fft.length;
+                                  double mag = Math.sqrt(real*real + imag*imag);
+                                  double energy = Math.min(1, Math.log1p(mag) / 5.4);
+                                  if(hz < 240) { b+=energy; nb++; }
+                                  else if(hz < 1900) { m+=energy; nm++; }
+                                  else if(hz < 9200) { h+=energy; nh++; }
+                              }
+                              float bb = (float)(b/Math.max(1,nb)), mm=(float)(m/Math.max(1,nm)), hh=(float)(h/Math.max(1,nh));
+                              if (bb+mm+hh > .04f) {
+                                  bass = bb; mids = mm; highs = hh; measured = true;
+                              } else { bass*=.8f; mids*=.8f; highs*=.8f; if(bass+mids+highs<.05f) measured=false; }
+                          }
+                      }, Math.max(1000, Visualizer.getMaxCaptureRate()/2), false, true);
+                      v.setEnabled(true);
+                      visualizer = v;
+                  } catch (Exception ex) { measured = false; closeVisualizer(); }
+              }
+              private void closeVisualizer() {
+                  if (visualizer != null) {
+                      try {visualizer.setEnabled(false);} catch (Exception ignored) { }
+                      try {visualizer.release();} catch (Exception ignored) { }
+                      visualizer = null;
+                  }
+                  measured = false;
+              }
+          
+              @Override protected void onResume() {
+                  super.onResume(); resumed=true;
+                  handler.removeCallbacks(refresh); handler.post(refresh);
+                  if (audioAllowed()) handler.postDelayed(this::startAudioVisualizer, 1000);
+              }
+              @Override protected void onPause() {
+                  resumed=false;
+                  handler.removeCallbacks(refresh);
+                  closeVisualizer();
+                  super.onPause();
+              }
+              @Override protected void onDestroy() {
+                  handler.removeCallbacksAndMessages(null);
+                  closeVisualizer();
+                  if (web != null) { web.stopLoading(); web.destroy(); web=null; }
+                  super.onDestroy();
+              }
+              @Override public void onBackPressed() {
+                  if (web != null && web.canGoBack()) web.goBack();
+                  else super.onBackPressed();
+              }
+          }
+          HALO_FILE_END
+          mkdir -p 'app/src/main/java/app/halo/music'
+          cat > 'app/src/main/java/app/halo/music/HaloPlaybackService.java' <<'HALO_FILE_END'
+          package app.halo.music;
+          
+          import android.app.*;
+          import android.content.*;
+          import android.content.pm.ServiceInfo;
+          import android.database.Cursor;
+          import android.media.*;
+          import android.media.session.MediaSession;
+          import android.media.session.PlaybackState;
+          import android.net.Uri;
+          import android.os.*;
+          import android.provider.OpenableColumns;
+          import java.io.IOException;
+          
+          /** Plays user-selected local audio independently of HALO's WebView or Activity. */
+          public final class HaloPlaybackService extends Service {
+              private static final String CHANNEL="halo_playback", ACTION_PLAY="app.halo.music.PLAY", ACTION_TOGGLE="app.halo.music.TOGGLE", ACTION_STOP="app.halo.music.STOP", ACTION_SEEK="app.halo.music.SEEK";
+              private static final int NOTIFICATION_ID=1961;
+              private static volatile MediaSession.Token currentToken;
+              private MediaPlayer player;
+              private MediaSession session;
+              private AudioManager audio;
+              private AudioFocusRequest focusRequest;
+              private Uri currentUri;
+              private String title="HALO Audio", artist="Local file";
+              private long duration=0;
+              private boolean prepared=false, playing=false, foreground=false;
+          
+              public static MediaSession.Token getToken(){return currentToken;}
+              public static Intent playIntent(Context c, Uri uri) {return new Intent(c,HaloPlaybackService.class).setAction(ACTION_PLAY).setData(uri);}
+              public static Intent toggleIntent(Context c){return new Intent(c,HaloPlaybackService.class).setAction(ACTION_TOGGLE);}
+              public static Intent stopIntent(Context c){return new Intent(c,HaloPlaybackService.class).setAction(ACTION_STOP);}
+              public static Intent seekIntent(Context c,long position){return new Intent(c,HaloPlaybackService.class).setAction(ACTION_SEEK).putExtra("position",position);}
+          
+              @Override public void onCreate(){
+                  super.onCreate();
+                  audio=(AudioManager)getSystemService(AUDIO_SERVICE);
+                  NotificationChannel ch=new NotificationChannel(CHANNEL,"HALO background music",NotificationManager.IMPORTANCE_LOW);
+                  ch.setDescription("Controls for audio opened directly in HALO");
+                  ((NotificationManager)getSystemService(NOTIFICATION_SERVICE)).createNotificationChannel(ch);
+                  session=new MediaSession(this,"HALO Local Player");
+                  session.setFlags(MediaSession.FLAG_HANDLES_MEDIA_BUTTONS|MediaSession.FLAG_HANDLES_TRANSPORT_CONTROLS);
+                  session.setCallback(new MediaSession.Callback(){
+                      @Override public void onPlay(){play();}
+                      @Override public void onPause(){pause();}
+                      @Override public void onStop(){stopSelf();}
+                      @Override public void onSeekTo(long pos){seek(pos);}
+                  });
+                  session.setActive(true);
+                  currentToken=session.getSessionToken();
+                  updateSession();
+              }
+          
+              @Override public int onStartCommand(Intent intent,int flags,int startId){
+                  if(intent==null){if(currentUri==null)stopSelf();return START_NOT_STICKY;}
+                  String action=intent.getAction();
+                  if(ACTION_PLAY.equals(action)&&intent.getData()!=null){
+                      // Android requires startForeground soon after startForegroundService.
+                      title="Loading audio…"; artist="HALO";
+                      enterForeground();
+                      open(intent.getData());
+                  }else if(ACTION_TOGGLE.equals(action)){
+                      if(playing)pause();else play();
+                  }else if(ACTION_SEEK.equals(action)){
+                      seek(intent.getLongExtra("position",0));
+                  }else if(ACTION_STOP.equals(action)){
+                      stopSelf();
+                  }
+                  return START_NOT_STICKY;
+              }
+          
+              private void open(Uri uri){
+                  releasePlayer();
+                  currentUri=uri;prepared=false;playing=false;
+                  title=findName(uri);artist="Local audio";duration=0;
+                  updateSession();updateNotification();
+                  try{
+                      MediaPlayer p=new MediaPlayer();
+                      p.setAudioAttributes(new AudioAttributes.Builder().setUsage(AudioAttributes.USAGE_MEDIA).setContentType(AudioAttributes.CONTENT_TYPE_MUSIC).build());
+                      p.setWakeMode(getApplicationContext(),PowerManager.PARTIAL_WAKE_LOCK);
+                      p.setDataSource(this,uri);
+                      player=p;
+                      p.setOnPreparedListener(mp->{prepared=true;duration=mp.getDuration();play();});
+                      p.setOnCompletionListener(mp->{playing=false;updateSession();updateNotification();});
+                      p.setOnErrorListener((mp,what,extra)->{playing=false;prepared=false;updateSession();updateNotification();return true;});
+                      p.prepareAsync();
+                  }catch(Exception e){
+                      title="Could not open audio";artist="Choose another audio file";
+                      updateSession();updateNotification();
+                      stopSelf();
+                  }
+              }
+              private String findName(Uri uri){
+                  try(Cursor c=getContentResolver().query(uri,new String[]{OpenableColumns.DISPLAY_NAME},null,null,null)){
+                      if(c!=null&&c.moveToFirst()){String result=c.getString(0);if(result!=null&&!result.isEmpty())return result;}
+                  }catch(Exception ignored){}
+                  String last=uri.getLastPathSegment();return last==null?"Local audio":last;
+              }
+              private boolean requestFocus(){
+                  if(Build.VERSION.SDK_INT>=26){
+                      if(focusRequest==null)focusRequest=new AudioFocusRequest.Builder(AudioManager.AUDIOFOCUS_GAIN)
+                          .setAudioAttributes(new AudioAttributes.Builder().setUsage(AudioAttributes.USAGE_MEDIA).setContentType(AudioAttributes.CONTENT_TYPE_MUSIC).build())
+                          .setOnAudioFocusChangeListener(change->{if(change<=AudioManager.AUDIOFOCUS_LOSS_TRANSIENT)pause();})
+                          .build();
+                      return audio.requestAudioFocus(focusRequest)==AudioManager.AUDIOFOCUS_REQUEST_GRANTED;
+                  }
+                  return audio.requestAudioFocus(change->{if(change<=AudioManager.AUDIOFOCUS_LOSS_TRANSIENT)pause();},AudioManager.STREAM_MUSIC,AudioManager.AUDIOFOCUS_GAIN)==AudioManager.AUDIOFOCUS_REQUEST_GRANTED;
+              }
+              private void play(){
+                  if(!prepared||player==null||!requestFocus())return;
+                  try{player.start();playing=true;updateSession();enterForeground();}
+                  catch(Exception ignored){playing=false;updateSession();updateNotification();}
+              }
+              private void pause(){
+                  try{if(prepared&&player!=null&&player.isPlaying())player.pause();}catch(Exception ignored){}
+                  playing=false;updateSession();updateNotification();
+              }
+              private void seek(long millis){
+                  if(!prepared||player==null)return;
+                  try{player.seekTo((int)Math.max(0,Math.min(duration,millis)));updateSession();updateNotification();}catch(Exception ignored){}
+              }
+              private void updateSession(){
+                  if(session==null)return;
+                  session.setMetadata(new MediaMetadata.Builder()
+                      .putString(MediaMetadata.METADATA_KEY_TITLE,title)
+                      .putString(MediaMetadata.METADATA_KEY_ARTIST,artist)
+                      .putLong(MediaMetadata.METADATA_KEY_DURATION,duration).build());
+                  long pos=0;try{if(prepared&&player!=null)pos=player.getCurrentPosition();}catch(Exception ignored){}
+                  session.setPlaybackState(new PlaybackState.Builder()
+                      .setActions(PlaybackState.ACTION_PLAY|PlaybackState.ACTION_PAUSE|PlaybackState.ACTION_PLAY_PAUSE|PlaybackState.ACTION_STOP|PlaybackState.ACTION_SEEK_TO)
+                      .setState(playing?PlaybackState.STATE_PLAYING:PlaybackState.STATE_PAUSED,pos,playing?1f:0f,SystemClock.elapsedRealtime()).build());
+              }
+              private PendingIntent actionPending(String action,int code){
+                  Intent i=new Intent(this,HaloPlaybackService.class).setAction(action);
+                  return PendingIntent.getService(this,code,i,PendingIntent.FLAG_UPDATE_CURRENT|PendingIntent.FLAG_IMMUTABLE);
+              }
+              private Notification notification(){
+                  PendingIntent show=PendingIntent.getActivity(this,5,new Intent(this,MainActivity.class)
+                      .addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP|Intent.FLAG_ACTIVITY_CLEAR_TOP),PendingIntent.FLAG_IMMUTABLE|PendingIntent.FLAG_UPDATE_CURRENT);
+                  return new Notification.Builder(this,CHANNEL)
+                      .setSmallIcon(android.R.drawable.ic_media_play)
+                      .setContentTitle(title).setContentText(artist)
+                      .setContentIntent(show).setOngoing(playing).setOnlyAlertOnce(true)
+                      .setVisibility(Notification.VISIBILITY_PUBLIC)
+                      .addAction(new Notification.Action.Builder(playing?android.R.drawable.ic_media_pause:android.R.drawable.ic_media_play,
+                           playing?"Pause":"Play",actionPending(ACTION_TOGGLE,6)).build())
+                      .addAction(new Notification.Action.Builder(android.R.drawable.ic_menu_close_clear_cancel,"Stop",actionPending(ACTION_STOP,7)).build())
+                      .setStyle(new Notification.MediaStyle().setMediaSession(session.getSessionToken()).setShowActionsInCompactView(0))
+                      .build();
+              }
+              private void enterForeground(){
+                  if(Build.VERSION.SDK_INT>=29)startForeground(NOTIFICATION_ID,notification(),ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PLAYBACK);
+                  else startForeground(NOTIFICATION_ID,notification());
+                  foreground=true;
+              }
+              private void updateNotification(){
+                  if(foreground)((NotificationManager)getSystemService(NOTIFICATION_SERVICE)).notify(NOTIFICATION_ID,notification());
+              }
+              private void releasePlayer(){
+                  if(player!=null){try{player.reset();}catch(Exception ignored){}try{player.release();}catch(Exception ignored){}player=null;}
+                  prepared=false;playing=false;
+              }
+              @Override public void onDestroy(){
+                  releasePlayer();
+                  if(focusRequest!=null&&Build.VERSION.SDK_INT>=26)audio.abandonAudioFocusRequest(focusRequest);
+                  if(session!=null){session.setActive(false);session.release();session=null;}
+                  currentToken=null;super.onDestroy();
+              }
+              @Override public android.os.IBinder onBind(Intent intent){return null;}
           }
           HALO_FILE_END
       - name: Install Android SDK
         run: |
           SDKMGR=$(find /usr/local/lib/android/sdk/cmdline-tools -name sdkmanager -type f | head -n 1)
           test -x "$SDKMGR"
-          yes | "$SDKMGR" --licenses >/dev/null || true
+          yes | "$SDKMGR" --licenses > /dev/null || true
           "$SDKMGR" 'platforms;android-35' 'build-tools;35.0.0'
-      - name: Build APK
+      - name: Build Android APK
         run: gradle --no-daemon :app:assembleDebug
       - name: Save APK
         uses: actions/upload-artifact@v4
         with:
-          name: HALO-Android-APK
+          name: HALO-Android-2.0
           path: app/build/outputs/apk/debug/app-debug.apk
           if-no-files-found: error
