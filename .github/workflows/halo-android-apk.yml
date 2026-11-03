@@ -812,6 +812,7 @@ jobs:
           cat > 'app/src/main/java/app/halo/music/HaloMusicWidget.java' <<'HALO_V8_FILE_END'
           package app.halo.music;
           import android.app.*;import android.appwidget.*;import android.content.*;import android.media.*;import android.media.session.*;import android.widget.*;import java.util.*;
+          import android.media.session.MediaController;
           public class HaloMusicWidget extends AppWidgetProvider{
             static MediaController current(Context c){
               try{MediaSessionManager m=(MediaSessionManager)c.getSystemService(Context.MEDIA_SESSION_SERVICE);
