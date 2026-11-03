@@ -22,7 +22,7 @@ const f = (
   action?: string,
 ): ReleaseFeature => ({ name, description, steps: path.split(" → "), action });
 export const releases: Release[] = [
- {version:"2.31.0-claude",name:"New game settings",by:"Claude",date:"2026-11-04",timestamp:"2026-11-03T16:40:00Z",features:[
+ {version:"2.31.0-claude",name:"New game settings",by:"Claude",commit:"96b3f12",date:"2026-11-04",timestamp:"2026-11-03T16:38:07Z",features:[
  f("New game settings", "Start new game now asks players how to move the story on (Continue on screen, Enter or a click on the scene) and whether the dialogue is timed, plus whether decisions have a time limit when the story has any. A note says these can be changed anytime from the pause menu.", "Play link or exported game → Start new game", "author-play"),
  f("Pause menu Settings", "The pause menu groups Advance story, Auto-continue dialogue, Timed decisions and sound under Settings. Players can now switch timed decisions off for themselves; the author's timers stay in the project.", "Play story → Pause menu → Settings", "author-play")
  ]},
@@ -41,20 +41,20 @@ export const releases: Release[] = [
  f("Clearer hover help", "Over 500 controls that only had generic hover text now explain what they do, and Self-reply's help mentions character replies.", "Any workspace → Hover a control", "workspace"),
  f("Story and map fixes", "Every branch of the story is now checked automatically (186 lines, 6 endings, no dead ends). The Scenes advanced map keeps two replies with the same id apart, so routes no longer mix up.", "Scenes advanced → Scene map", "scenes")
  ]},
- {version:"2.28.0-claude",name:"Playtest admin page and Claude exports",by:"Claude",date:"2026-11-03",timestamp:"2026-11-03T06:00:00Z",features:[
+ {version:"2.28.0-claude",name:"Playtest admin page and Claude exports",by:"Claude",commit:"c42f445",date:"2026-11-03",timestamp:"2026-11-02T14:15:10Z",features:[
  f("Playtest admin website", "/admin on the hosted site lists everyone who opens a Claude version: automatic tester name or the name they typed, device, country, visits, story steps, AI replies and how far they got. Open a tester to see their run (lines, choices, typed messages and the character's answers), and block, allow again or delete their records. Needs a PLAYTEST_DB database and an ADMIN_PASSWORD secret on Cloudflare.", "Your site → /admin", "export-player"),
  f("Testers without accounts", "Each tester gets a random ID kept in their browser and an automatic name; they can add their own name on the title screen, which also explains what the playtest records. Blocked testers see a short notice and get no AI replies.", "Play link → title screen", "export-player"),
  f("Export with or without Claude", "The library has Export playable HTML and Export phone game in two versions each: without Claude (offline) and with Claude (live character replies, tracked on the admin page).", "Library → Export … · with Claude", "export-player"),
  f("AI panel tabs fixed", "The AI assistant and AI Demand Export tabs no longer float over the panel's text when it scrolls.", "Assistant → AI assistant", "assistant")
  ]},
- {version:"2.27.2-claude",name:"Self-reply on or off per dialogue",by:"Claude",date:"2026-11-03",timestamp:"2026-11-03T04:15:00Z",features:[
+ {version:"2.27.2-claude",name:"Self-reply on or off per dialogue",by:"Claude",commit:"29d6c35",date:"2026-11-03",timestamp:"2026-11-02T13:48:35Z",features:[
  f("Self-reply on this dialogue", "A new switch in the dialogue editor turns Self-reply off for the selected line only, in the dialogue box and on the phone. Other lines and the normal/device custom-response options are not changed.", "Dialogue editor → Self-reply on this dialogue", "editor")
  ]},
- {version:"2.27.1-claude",name:"AI status only for the author, and an advanced dialogue switch",by:"Claude",date:"2026-11-03",timestamp:"2026-11-03T03:30:00Z",features:[
+ {version:"2.27.1-claude",name:"AI status only for the author, and an advanced dialogue switch",by:"Claude",commit:"e7c393d",date:"2026-11-03",timestamp:"2026-11-02T13:40:26Z",features:[
  f("No AI labels inside the game", "The game itself shows no AI tags. Author's playthrough shows the status instead: 'AI · parallel to Scene · Dialogue' for adapted lines, or 'AI · extra responses after Scene · Dialogue' during a free conversation. The dialogue editor below lists the parallel or the extra messages.", "Author’s playthrough → toolbar and Dialogue editor", "author-play"),
  f("Normal / Advanced dialogue editor", "The Dialogue tab under the preview switches between the normal line editor and the Dialogue advanced map, now that the preview and editor scroll together.", "Dialogue tab → Normal / Advanced", "dialogues")
  ]},
- {version:"2.27.0-claude",name:"One AI panel, clearer AI lines and a fifth Insta clip",by:"Claude",date:"2026-11-03",timestamp:"2026-11-03T02:00:00Z",features:[
+ {version:"2.27.0-claude",name:"One AI panel, clearer AI lines and a fifth Insta clip",by:"Claude",commit:"4c817fe",date:"2026-11-03",timestamp:"2026-11-02T13:23:22Z",features:[
  f("One AI assistant panel", "Assistant → AI assistant lists every job (character texts, dialogue rewrites, phone and item UI, lighting and effects) with its own AI: Claude Code on this computer, OpenAI or the Claude API. The Claude API is reserved for character texts and asks before being used elsewhere. AI Demand Export stays in its own tab.", "Assistant → AI assistant", "assistant"),
  f("Replies in narrated scenes", "Self-replies on narration (like arriving at the café) are answered by the character you are with, never by the narrator, and a chosen path is still followed. Outside the phone, the answer stays on screen until Continue story.", "Play story → Café → Self-reply", "author-play"),
  f("Last line reminder", "On lines with choices, a faint ↶ Last line button shows what was said just before, so you know what you are answering.", "Play story → a line with choices → ↶ Last line", "author-play"),
@@ -63,14 +63,14 @@ export const releases: Release[] = [
  f("Fifth Insta clip", "Harbour lights: rain on a lamp-lit harbour street with the Ferris wheel turning, 24 seconds with rain sound.", "Phone → Insta", "devices"),
  f("Less repetitive characters", "Character replies follow the story bible's voice notes and avoid repeating stock phrases such as 'that's an honest answer'.", "Play story → Self-reply", "author-play")
  ]},
- {version:"2.26.0-claude",name:"The script follows your conversation",by:"Claude",date:"2026-11-03",timestamp:"2026-11-02T18:30:00Z",features:[
+ {version:"2.26.0-claude",name:"The script follows your conversation",by:"Claude",commit:"72e261d",date:"2026-11-02",timestamp:"2026-11-02T12:29:47Z",features:[
  f("Adapted script after free texting", "When a free conversation ends, the next few written lines and reply options are rephrased to follow on from what was said, like a parallel take on the same scene. Meaning, information and branches stay the same, and the story rejoins the original after the next choice.", "Play story → Phone chat → Self-reply → keep texting", "author-play"),
  f("Conversations survive leaving the chat", "A free conversation in progress, including an answer still being typed, is kept when you open the pause menu or another workspace and is restored when you come back.", "Play story → Self-reply → Pause menu → Resume", "author-play")
  ]},
- {version:"2.25.1-claude",name:"Hosted studio texts with the Claude API",by:"Claude",date:"2026-11-02",timestamp:"2026-11-02T16:00:00Z",features:[
+ {version:"2.25.1-claude",name:"Hosted studio texts with the Claude API",by:"Claude",commit:"1659993",date:"2026-11-02",timestamp:"2026-11-02T11:41:40Z",features:[
  f("Claude API for character texts", "On the hosted studio, character replies use the Claude API automatically when opened from a link with ?code=<playtest code>; no password. Assistant → Character replies shows Claude API · texts only and whether it is connected. Other Assistant tasks keep their own provider.", "Assistant → Character replies", "assistant")
  ]},
- {version:"2.25.0-claude",name:"Free texting that finds its way back, playthrough logs and a play link",by:"Claude",date:"2026-11-02",timestamp:"2026-11-02T14:30:00Z",features:[
+ {version:"2.25.0-claude",name:"Free texting that finds its way back, playthrough logs and a play link",by:"Claude",commit:"6855f1d",date:"2026-11-02",timestamp:"2026-11-02T10:18:30Z",features:[
  f("Keep texting the character", "After a self-reply you can keep texting. The character answers each message, steers off-topic chats back to the story and, after about four free texts (or sooner when you engage with the story), the authored route continues on your chosen path.", "Play story → Phone chat → Self-reply → Reply to the character", "author-play"),
  f("No repeated authored line", "When the character's answer already moves the story on, it carries the next authored line's plans and details in its own words and that line is skipped, so nothing is said twice.", "Play story → Self-reply → Continue", "author-play"),
  f("Natural side answers", "Characters may answer harmless side questions such as where or when, using place and scene names from the story, without revealing secrets or later twists.", "Play story → Self-reply → Ask a question", "author-play"),

@@ -8,7 +8,7 @@ Every change in this list was written by Claude (Anthropic) at the request of th
 
 - **Title screen:** every game (play link and exports) now opens on its title screen. Start new game opens `src/NewGameSetup.tsx`, which asks three questions. How to move on: Continue on screen, Enter (not on phones), or a click/tap on the scene. Whether dialogue is timed (auto-continue). Whether decisions have a time limit, asked only when the story has timed decisions. Choices apply at once. A note says they can be changed anytime from Pause menu → Settings.
 - **Pause menu:** a Settings group holds Advance story, Auto-continue dialogue, the new **Timed decisions** player switch and sound (`src/PlaySession.tsx`, `src/AutoContinueSetting.tsx`). Player switches share one store in `src/storyTiming.ts` (`timedDecisionsPreference`, localStorage `stillframe-timed-decisions:<id>`). `StoryTimer` skips the countdown when the player turned it off.
-- Tests: `src/storyTimer.test.tsx`. The export browser tests now pass through the new screen. The 2.30.0 release has its commit and real time.
+- Tests: `src/storyTimer.test.tsx`. The export browser tests now pass through the new screen. Releases 2.25.0 to 2.31.0 now carry their commits and real commit times instead of placeholders.
 
 ## Iteration 10 — Story timers: auto-continue and timed decisions (2026-11-03, engine 2.30.0-claude)
 
