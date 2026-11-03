@@ -21,6 +21,7 @@ import { Qte, SceneAudio } from "./EngineTools";
 import { aiLog, onlinePlay, type AiLogEntry } from "./characterReply";
 import { nickname, playtest, setNickname } from "./playtest";
 import { LastLine } from "./LastLine";
+import { StoryTimer } from "./StoryTimer";
 function Player() {
   const [project, setProject] = useState(() =>
     validateProject(
@@ -104,7 +105,7 @@ function Player() {
           advance={() => setRuntime(r=>advance(project,r))}
           canAdvance={!runtime.ended && !node.choices.length && !node.qte} />
 
-            <SceneAudio project={project} scene={scene} nodeId={node.id} choices={runtime.choices} choiceSource={runtime.memories?.at(-1)} onAdvance={() => setRuntime(r => advance(project, r))} />
+            <SceneAudio project={project} scene={scene} nodeId={node.id} choices={runtime.choices} choiceSource={runtime.memories?.at(-1)} />
         <SceneTransition
           scene={scene}
           nodeId={node.id}
@@ -147,6 +148,9 @@ function Player() {
                   ?.filter((v) => v.scene === scene.id)
                   .map((v) => v.node),
               ) !== "off" ? (
+              <>
+              <StoryTimer corner project={project} node={node} runtime={runtime} text={shownText(runtime, scene.id, node)}
+                onContinue={() => setRuntime((r) => advance(project, r))} onChoose={(id) => setRuntime((r) => advance(project, r, id))} />
               <PhoneUI
                 onPutAway={() => setRuntime(r => putAwayDevice(project, r))}
                 onNotification={() => setRuntime(r => openNotification(project, r))}
@@ -177,6 +181,7 @@ function Player() {
                   setRuntime((r) => respond(project, r, text, branch, answer, rewrites))
                 }
               />
+              </>
             ) : node.qte ? (
               <Qte
                 key={runtime.scene + runtime.node + runtime.history.length}
@@ -243,6 +248,8 @@ function Player() {
                     }
                   />
                 )}
+                <StoryTimer project={project} node={node} runtime={runtime} text={shownText(runtime, scene.id, node)}
+                  onContinue={() => setRuntime((r) => advance(project, r))} onChoose={(id) => setRuntime((r) => advance(project, r, id))} />
               </div>
             )}
           </Stage>

@@ -44,6 +44,8 @@ const defs:[string,string,string,string?][]=[
  ['Split view','Open two shared workspaces, side by side or stacked.','split-view','two windows panes editor scenes dialogue'],
  ['Interface appearance','Choose editor theme, window colours, interface fonts and text size.','appearance','light dark warm font customization'],
  ['Project settings','Open project options, workspace sizing and interface preferences.','settings','reduced effects safe area'],
+ ['Auto-continue dialogue','Make lines without replies move on by themselves (3, 4 or 8 seconds), shown as a bar; players can switch it in the pause menu.','settings','auto advance timer qte reading time automatic continue'],
+ ['Timed decisions','Give a reply line a countdown bar; when it runs out a chosen reply is taken. Switch it per decision in the dialogue editor or for the whole project in Settings.','dialogue','qte timer countdown choice time limit decision'],
  ['Save and publish project','Export the full project with embedded artwork or use the configured publisher.','save','backup github sync json export'],
  ['Restore artwork','Recover missing published artwork and outfit cards while retaining custom project edits.','restore-artwork','missing empty folders images recovery'],
  ['Update history','Search version history and find directions for older and newer features.','updates','release help instructions'],

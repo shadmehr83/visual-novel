@@ -116,18 +116,15 @@ export function SceneAudio({
   nodeId,
   choices,
   choiceSource,
-  onAdvance,
 }: {
   project: Project;
   scene: Scene;
   nodeId?: string;
   choices?: string[];
   choiceSource?: { scene: string; node: string };
-  onAdvance?: () => void;
 }) {
   scene = sceneView(scene, nodeId);
   const sessionPaused = usePaused();
-  const authorEditing = useAuthorEditing();
   const { enabled, volume, play, onBlocked } = useSound();
   const [error, setError] = useState("");
   useFootsteps(project, scene, enabled && !sessionPaused, setError, volume);
@@ -135,13 +132,7 @@ export function SceneAudio({
   const cue = node?.sound || ((node?.phoneNotice || node?.speaker === "Phone") ? scene.phone?.notificationSound : undefined);
   const lastCue = useRef("");
   const lastNotice = useRef("");
-  const advanceRef = useRef(onAdvance);
-  advanceRef.current = onAdvance;
-  useEffect(() => {
-    if (!node?.autoAdvance || node.choices.length || node.qte || sessionPaused || authorEditing) return;
-    const timer = setTimeout(() => advanceRef.current?.(), node.autoAdvance * 1000);
-    return () => clearTimeout(timer);
-  }, [scene.id, nodeId, sessionPaused, authorEditing]);
+  // A line's own Auto-advance time runs in StoryTimer (by Claude), which also shows its bar.
   useEffect(() => {
     const key = scene.id + ":" + nodeId;
     if (!enabled || lastCue.current === key) return;

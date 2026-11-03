@@ -4,6 +4,13 @@ Every change in this list was written by Claude (Anthropic) at the request of th
 
 > **Where this lives:** branch `claude` on GitHub. Versions end in `-claude`. `main` is the original line and is untouched.
 
+## Iteration 10 — Story timers: auto-continue and timed decisions (2026-11-03, engine 2.30.0-claude)
+
+- **Auto-continue** (`src/storyTiming.ts`): plain lines move on after 3 s (under 10 words), 4 s (one line) or 8 s (two lines), plus 4 s per extra line. Lines are counted as the dialogue box shows them, or estimated on a phone. The project default is `settings.autoContinue` (Settings → Auto-continue dialogue by default). Players switch it in the pause menu (`src/AutoContinueSetting.tsx`); their choice is kept per game in localStorage.
+- **Timed decisions:** `node.timedChoice` `{enabled, seconds, choice}`. The dialogue editor has Timed decision, Seconds to choose and When time runs out (`src/TimedDecisionControls.tsx`). When time runs out, the chosen reply is taken, or the first available one. `settings.timedDecisions === false` switches them all off without losing them. Project timing scales decision time.
+- **Timer bar** (`src/StoryTimer.tsx`): a draining bar with no numbers, along the bottom of the dialogue box, or in the scene's lower-right corner while a phone or computer screen is up. It holds while paused, while the author edits, while the player types, while a character answers, and while a phone message is still being typed. A line's own `autoAdvance` now runs here (moved out of `SceneAudio`), so it shows the bar too. Used in the studio's play mode and in exported games.
+- Search entries, New marks, tests in `src/storyTimer.test.tsx`. The 2.29.0 release now has its real commit time.
+
 ## Iteration 9 — Bug-fix pass, AI search, on/off dialogues, image expand (2026-11-03, engine 2.29.0-claude)
 
 - **On/Off switches:** a node can now be switched off (`disabled`), and replies already had `enabled: false`. Both have On/Off pills on the Dialogue advanced map (`src/FlowCanvas.tsx`, `src/FlowEditor.tsx`, `src/flow.ts`) and a switch in the normal editor. `skipDisabled` in `src/model.ts` passes switched-off lines during play and start. Switched-off items are greyed and struck through.
