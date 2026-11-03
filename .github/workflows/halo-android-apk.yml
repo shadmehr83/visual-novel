@@ -26,6 +26,7 @@ jobs:
           rootProject.name='HALOAndroid'
           include ':app'
           HALO_FILE_END
+          echo 'android.useAndroidX=true' > gradle.properties
           cat > 'build.gradle' <<'HALO_FILE_END'
           plugins { id 'com.android.application' version '8.7.3' apply false }
           HALO_FILE_END
@@ -123,6 +124,7 @@ jobs:
               private Button localFile;
           private Button musicBrowser;
           private String artKey="",artValue="";
+          private long lastArtAttempt=0;
               private boolean pageReady = false;
               private boolean resumed = false;
               private MediaSessionManager sessions;
@@ -311,7 +313,9 @@ jobs:
               }
           
               private void updateArt(MediaMetadata m,String key){
-              if(key.equals(artKey))return;artKey=key;artValue="";
+              long now=android.os.SystemClock.elapsedRealtime();
+              if(key.equals(artKey)&&(!artValue.isEmpty()||now-lastArtAttempt<6000))return;
+              lastArtAttempt=now;artKey=key;artValue="";
               if(m==null)return;
               try{
                   Bitmap b=m.getDescription()==null?null:m.getDescription().getIconBitmap();
