@@ -1,4 +1,4 @@
-export const ENGINE_VERSION = "3.1.0-claude";
+export const ENGINE_VERSION = "3.1.1-claude";
 export type ReleaseFeature = {
   name: string;
   description: string;
@@ -22,7 +22,13 @@ const f = (
   action?: string,
 ): ReleaseFeature => ({ name, description, steps: path.split(" → "), action });
 export const releases: Release[] = [
- {version:"3.1.0-claude",name:"Stillframe 3.1: an engine-style studio",by:"Claude",date:"2026-11-03",timestamp:"2026-11-03T13:00:00Z",features:[
+ {version:"3.1.1-claude",name:"Design switch, dark palette and fixes",by:"Claude",date:"2026-11-03",timestamp:"2026-11-03T01:45:00Z",features:[
+ f("Studio design switch", "Settings → Studio design switches between Stillframe 3.1 and the classic studio, after saving your project. Stillframe 3.1 opens on every start; the classic design lasts until you close the tab. Both edit the same project and show this Update history. View → Switch to classic design does the same.", "Settings → Studio design", "settings"),
+ f("Dark palette", "The moon button in the top bar, or Settings → Studio design → Palette, shows the Stillframe 3.1 layout in the dark colours of the classic studio. Your choice is remembered.", "Top bar → Dark palette", "settings"),
+ f("Phone and game keep their colours", "The stage, phone, chat and game screens in Stillframe 3 use their original dark colours again instead of the studio's light palette.", "Editor → Scene preview", "devices"),
+ f("Update history uses the full width", "Update history now fills its panel, so release notes no longer squeeze into a narrow column when the panel is narrower than the window.", "Workspace → Update history", "updates")
+ ]},
+ {version:"3.1.0-claude",name:"Stillframe 3.1: an engine-style studio",by:"Claude",commit:"172ebcb",date:"2026-11-03",timestamp:"2026-11-03T01:01:46Z",features:[
  f("Engine-style layout", "Panels now meet edge to edge with thin dividers and the same slim header, whose window buttons appear on hover. The left activity bar switches the outline, and a quiet status bar runs along the bottom. The single-workspace header row is gone; Windows & docking still moves it.", "Stillframe 3 → Editor", "editor"),
  f("Foldable inspector", "Every group of controls in the inspector and in the map details folds like a component in a game engine. The All effects view starts folded as a short list of what the scene has, and each tab remembers what you opened.", "Controls → Click a group title", "effect:All"),
  f("Two-level inspector menu", "The inspector's six tabs are icon tiles. Atmosphere's effect panels are icon chips, with the chosen one named, and they only show under Atmosphere.", "Controls → Atmosphere → Effect chips", "active"),
@@ -30,7 +36,7 @@ export const releases: Release[] = [
  f("Story outline and asset browser", "Scenes are compact rows under the chapter picker, the selected one marked by an accent bar. Artwork shows as a two-column grid, and every export is in one Export & share menu.", "Story library → Export & share", "library:Scenes"),
  f("Node-editor maps", "Chapters, Scenes and Dialogue advanced draw white boards with round ports on a dotted canvas, and their side panels fold. Chapter, device and update pages use the same cards and segmented tabs. The settings dialog is a two-column sheet.", "Dialogue advanced → Map", "dialogues")
  ]},
- {version:"3.0.0-claude",name:"Stillframe 3: a lighter, faster studio",by:"Claude",date:"2026-11-03",timestamp:"2026-11-03T12:00:00Z",features:[
+ {version:"3.0.0-claude",name:"Stillframe 3: a lighter, faster studio",by:"Claude",commit:"ad6b9fc",date:"2026-11-03",timestamp:"2026-11-02T18:14:03Z",features:[
  f("Stillframe 3 light studio", "A calm light design with one top bar and one row for menus, workspace tabs and quick tools. Every feature of the classic studio is still here; Stillframe 3 runs separately at localhost:5174 with its own saved project.", "Stillframe 3 → Top bar", "editor"),
  f("Windows menu", "Tools and controls placement, Windows & docking, Restore artwork and Layout & project settings now sit in one Windows menu instead of their own row.", "Top bar → Windows", "windows"),
  f("New badges", "Controls added in the latest releases carry a green New pill; hover it to see the version that added it.", "Any workspace → Hover a New pill", "updates"),

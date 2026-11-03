@@ -1,1 +1,7 @@
-<!doctype html><html lang="en" data-ui="v3"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/><meta name="theme-color" content="#f4f3ef"/><title>Stillframe 3 — Visual Novel Studio</title></head><body><div id="root"></div><script type="module" src="/src/main.tsx"></script></body></html>
+<!doctype html><html lang="en" data-sf3 data-ui="v3"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/><meta name="theme-color" content="#f4f3ef"/><title>Stillframe 3 — Visual Novel Studio</title>
+<script>
+// Stillframe 3 (by Claude): every start opens the new design; Settings → Studio design can switch this tab
+// to the classic design until it is closed. The light or dark palette is remembered.
+try{var d=document.documentElement;if(sessionStorage.getItem("stillframe3-design")==="classic")d.removeAttribute("data-ui");if(localStorage.getItem("stillframe3-palette")==="dark")d.setAttribute("data-palette","dark");}catch(e){}
+</script>
+</head><body><div id="root"></div><script type="module" src="/src/main.tsx"></script></body></html>

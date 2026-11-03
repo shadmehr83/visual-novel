@@ -1,7 +1,7 @@
 import { useEffect, useRef, type ReactNode } from "react";
 import { BookOpen, Columns2, History, LayoutDashboard, MessagesSquare, Palette, PanelLeftClose, PanelLeftOpen, PenLine, Smartphone, Sparkles, Workflow, type LucideIcon } from "lucide-react";
 import { ENGINE_VERSION } from "./releases";
-import { V3 } from "./v3/ui";
+import { STILLFRAME3, V3 } from "./v3/ui";
 // Stillframe 3 shows short tab names with icons; the full name stays as the accessible name.
 const tabIcons = { editor: PenLine, chapters: BookOpen, scenes: Workflow, dialogues: MessagesSquare, devices: Smartphone, updates: History };
 const shortNames = { editor: "Editor", chapters: "Chapters", scenes: "Scenes", dialogues: "Dialogue", devices: "Devices", updates: "Updates" };
@@ -64,10 +64,11 @@ export function StudioMenu({
       document.removeEventListener("keydown", close);
     };
   }, []);
-  const command = (text: string, action: string, disabled = false) => (
+  const command = (text: string, action: string, disabled = false, help?: string) => (
     <button
       key={action}
       disabled={disabled}
+      data-help={help}
       onClick={(e) => {
         e.currentTarget.closest("details")?.removeAttribute("open");
         onAction(action);
@@ -110,6 +111,8 @@ export function StudioMenu({
             )}
             {command("Scene backgrounds…", "background")}
             {command("Playthrough event log", "events")}
+            {STILLFRAME3 && command(V3 ? "Switch to classic design" : "Switch to Stillframe 3.1 design", "design", false,
+              V3 ? "Save, then reload this tab in the classic studio design. A new start opens Stillframe 3.1 again." : "Save, then reload in the Stillframe 3.1 design.")}
             <hr />
             {[
               ["right", "Dock controls right"],

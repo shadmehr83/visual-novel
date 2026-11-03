@@ -21,13 +21,65 @@ html[data-ui="v3"] {
   --v3-radius-sm: 6px;
   --v3-shadow: 0 1px 2px rgb(24 26 30 / 6%);
   --v3-shadow-pop: 0 14px 36px rgb(24 26 30 / 14%), 0 2px 6px rgb(24 26 30 / 6%);
+  --v3-on-accent: #ffffff;
+  --v3-on-ink: #ffffff;
+  --v3-switch-off: #d8d5ce;
+  --v3-track: #dcd8d0;
+  --v3-scroll: #d3cfc7;
+  --v3-scroll-hover: #b8b3a9;
   background: var(--v3-bg);
   color-scheme: light;
+}
+/* Dark palette (by Claude): the classic studio's colours in the Stillframe 3 layout.
+   Chosen with the moon button in the top bar or Settings → Studio design. */
+html[data-ui="v3"][data-palette="dark"] {
+  --v3-bg: #151819;
+  --v3-surface: #1c2022;
+  --v3-surface-2: #191d1f;
+  --v3-sunken: #171b1d;
+  --v3-hover: #2a2f31;
+  --v3-line: #303537;
+  --v3-line-strong: #3d4447;
+  --v3-text: #e2e3de;
+  --v3-text-2: #b4bab6;
+  --v3-muted: #858c8c;
+  --v3-accent: #d5ac91;
+  --v3-accent-hover: #e2bea5;
+  --v3-accent-soft: #39312d;
+  --v3-accent-line: #6d6254;
+  --v3-new: #7fd3a4;
+  --v3-new-soft: rgb(80 160 110 / 18%);
+  --v3-shadow: 0 1px 2px rgb(0 0 0 / 30%);
+  --v3-shadow-pop: 0 16px 40px rgb(0 0 0 / 45%), 0 2px 6px rgb(0 0 0 / 30%);
+  --v3-on-accent: #1b1714;
+  --v3-on-ink: #151819;
+  --v3-switch-off: #42484a;
+  --v3-track: #3e4743;
+  --v3-scroll: #3a4043;
+  --v3-scroll-hover: #4c5357;
+  --v3-canvas: #161a1b;
+  --v3-dot: #262b2d;
+  --v3-ink: #e2e3de;
+  color-scheme: dark;
+}
+/* The stage, device screens and the game keep the classic colours in every palette. */
+html[data-ui="v3"] :is(.stage, .stage-frame, .device-shell, .standalone-experience) {
+  --panel: #1c2022;
+  --line: #303537;
+  --muted: #858c8c;
+  --accent: #d5ac91;
+  --ui-bg: initial;
+  --ui-text: initial;
+  --text: initial;
+  --hover: initial;
+  --ui-font: var(--ui-font-classic, Arial);
+  color-scheme: dark;
+  color: #d2d3ce;
 }
 html[data-ui="v3"] body {
   background: var(--v3-bg);
 }
-html[data-ui="v3"] .app[data-theme="warm"] {
+html[data-ui="v3"] .app[data-theme="v3-warm"] {
   --v3-bg: #efe7d8;
   --v3-surface: #fbf6ec;
   --v3-surface-2: #f6efe1;
@@ -56,41 +108,55 @@ html[data-ui="v3"] .app {
   background: var(--v3-bg);
   color: var(--v3-text);
 }
+/* Stillframe 3 uses its own theme names (v3-light, v3-warm), so the classic light theme's broad rules
+   never reach the stage, phone or game. What those rules did for the studio is repeated here with
+   the game areas left out; :where keeps these weaker than every specific Stillframe 3 rule. */
+html[data-ui="v3"] .app:where([data-theme="v3-light"], [data-theme="v3-warm"]) :where(label, h1, h3, .scene-title, .node-list button, .section-label, .brand, .breadcrumb b, .choices-heading, .story-note p, .app-footer > span):not(:where(.stage, .stage-frame, .device-shell, .standalone-experience) *) {
+  color: var(--v3-text);
+}
+html[data-ui="v3"] .app:where([data-theme="v3-light"], [data-theme="v3-warm"]) :where(.muted, .help, .small, .scene-title > span, .node-list small, .story-note small, .save-status, .snapshot-toolbar > span, .library-footer button, .bottom-tabs button, .stage-footer, .stage-footer button, .preview-tools, .eyebrow, .workspace-toolbar .badge, .inspector-tabs button, .inspector-foot):not(:where(.stage, .stage-frame, .device-shell, .standalone-experience) *) {
+  color: var(--v3-muted);
+}
+html[data-ui="v3"] .app:where([data-theme="v3-light"], [data-theme="v3-warm"]) :where(.clue, .state-grid > div, .choice-editor, .region-box):not(:where(.stage, .stage-frame, .device-shell, .standalone-experience) *) {
+  background: var(--v3-surface-2);
+  border-color: var(--v3-line);
+  color: var(--v3-text);
+}
 
 /* ---------- Controls (studio only: the stage, device screens and game keep their look) ---------- */
-html[data-ui="v3"] :is(.app, .modal-backdrop) button:not(:is(.stage-frame, .device-shell, .standalone-experience, .dialogue-overlay) *) {
+html[data-ui="v3"] :is(.app, .modal-backdrop) button:not(:is(.stage, .stage-frame, .device-shell, .standalone-experience, .dialogue-overlay) *) {
   border-radius: var(--v3-radius-sm);
   transition: background 0.12s, border-color 0.12s, color 0.12s;
 }
-html[data-ui="v3"] :is(.app, .modal-backdrop) button:not(.primary):not(:disabled):hover:not(:is(.stage-frame, .device-shell, .standalone-experience, .dialogue-overlay) *) {
+html[data-ui="v3"] :is(.app, .modal-backdrop) button:not(.primary):not(:disabled):hover:not(:is(.stage, .stage-frame, .device-shell, .standalone-experience, .dialogue-overlay) *) {
   background: var(--v3-hover);
 }
-html[data-ui="v3"] :is(.app, .modal-backdrop) button.primary:not(:is(.stage-frame, .device-shell, .standalone-experience, .dialogue-overlay) *) {
+html[data-ui="v3"] :is(.app, .modal-backdrop) button.primary:not(:is(.stage, .stage-frame, .device-shell, .standalone-experience, .dialogue-overlay) *) {
   background: var(--v3-accent);
   border-color: var(--v3-accent);
-  color: #fff;
+  color: var(--v3-on-accent);
   font-weight: 600;
   box-shadow: var(--v3-shadow);
 }
-html[data-ui="v3"] :is(.app, .modal-backdrop) button.primary:not(:disabled):hover:not(:is(.stage-frame, .device-shell, .standalone-experience, .dialogue-overlay) *) {
+html[data-ui="v3"] :is(.app, .modal-backdrop) button.primary:not(:disabled):hover:not(:is(.stage, .stage-frame, .device-shell, .standalone-experience, .dialogue-overlay) *) {
   background: var(--v3-accent-hover);
   border-color: var(--v3-accent-hover);
 }
-html[data-ui="v3"] :is(.app, .modal-backdrop) :is(input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="color"]), textarea, select):not(:is(.stage-frame, .device-shell, .standalone-experience, .dialogue-overlay) *) {
+html[data-ui="v3"] :is(.app, .modal-backdrop) :is(input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="color"]), textarea, select):not(:is(.stage, .stage-frame, .device-shell, .standalone-experience, .dialogue-overlay) *) {
   background: var(--v3-surface);
   color: var(--v3-text);
   border: 1px solid var(--v3-line-strong);
   border-radius: var(--v3-radius-sm);
 }
-html[data-ui="v3"] :is(.app, .modal-backdrop) :is(input, textarea, select):focus:not(:is(.stage-frame, .device-shell, .standalone-experience, .dialogue-overlay) *) {
+html[data-ui="v3"] :is(.app, .modal-backdrop) :is(input, textarea, select):focus:not(:is(.stage, .stage-frame, .device-shell, .standalone-experience, .dialogue-overlay) *) {
   border-color: var(--v3-accent);
   box-shadow: 0 0 0 3px rgb(176 86 42 / 14%);
 }
-html[data-ui="v3"] :is(.app, .modal-backdrop) :is(input, textarea, select):disabled:not(:is(.stage-frame, .device-shell, .standalone-experience, .dialogue-overlay) *) {
+html[data-ui="v3"] :is(.app, .modal-backdrop) :is(input, textarea, select):disabled:not(:is(.stage, .stage-frame, .device-shell, .standalone-experience, .dialogue-overlay) *) {
   background: var(--v3-sunken);
 }
 /* Readable on/off switches, lighter and slimmer. */
-html[data-ui="v3"] :is(.app, .modal-backdrop) input[type="checkbox"]:not(:is(.stage-frame, .device-shell, .standalone-experience) *) {
+html[data-ui="v3"] :is(.app, .modal-backdrop) input[type="checkbox"]:not(:is(.stage, .stage-frame, .device-shell, .standalone-experience) *) {
   width: 42px !important;
   min-width: 42px !important;
   max-width: 42px !important;
@@ -98,10 +164,10 @@ html[data-ui="v3"] :is(.app, .modal-backdrop) input[type="checkbox"]:not(:is(.st
   height: 22px !important;
   border: 0 !important;
   border-radius: 999px !important;
-  background: #d8d5ce !important;
+  background: var(--v3-switch-off) !important;
   transition: background 0.15s;
 }
-html[data-ui="v3"] :is(.app, .modal-backdrop) input[type="checkbox"]:not(:is(.stage-frame, .device-shell, .standalone-experience) *)::before {
+html[data-ui="v3"] :is(.app, .modal-backdrop) input[type="checkbox"]:not(:is(.stage, .stage-frame, .device-shell, .standalone-experience) *)::before {
   left: 3px;
   top: 3px;
   width: 16px;
@@ -109,19 +175,19 @@ html[data-ui="v3"] :is(.app, .modal-backdrop) input[type="checkbox"]:not(:is(.st
   background: #fff;
   box-shadow: 0 1px 2px rgb(0 0 0 / 25%);
 }
-html[data-ui="v3"] :is(.app, .modal-backdrop) input[type="checkbox"]:not(:is(.stage-frame, .device-shell, .standalone-experience) *)::after {
+html[data-ui="v3"] :is(.app, .modal-backdrop) input[type="checkbox"]:not(:is(.stage, .stage-frame, .device-shell, .standalone-experience) *)::after {
   top: 5px;
   right: 6px;
   font: 700 7.5px/12px system-ui, sans-serif;
-  color: #6f737a;
+  color: var(--v3-muted);
 }
-html[data-ui="v3"] :is(.app, .modal-backdrop) input[type="checkbox"]:checked:not(:is(.stage-frame, .device-shell, .standalone-experience) *) {
+html[data-ui="v3"] :is(.app, .modal-backdrop) input[type="checkbox"]:checked:not(:is(.stage, .stage-frame, .device-shell, .standalone-experience) *) {
   background: #23845a !important;
 }
-html[data-ui="v3"] :is(.app, .modal-backdrop) input[type="checkbox"]:checked:not(:is(.stage-frame, .device-shell, .standalone-experience) *)::before {
+html[data-ui="v3"] :is(.app, .modal-backdrop) input[type="checkbox"]:checked:not(:is(.stage, .stage-frame, .device-shell, .standalone-experience) *)::before {
   transform: translateX(20px);
 }
-html[data-ui="v3"] :is(.app, .modal-backdrop) input[type="checkbox"]:checked:not(:is(.stage-frame, .device-shell, .standalone-experience) *)::after {
+html[data-ui="v3"] :is(.app, .modal-backdrop) input[type="checkbox"]:checked:not(:is(.stage, .stage-frame, .device-shell, .standalone-experience) *)::after {
   left: 6px;
   color: #fff;
 }
@@ -131,30 +197,31 @@ html[data-ui="v3"] :is(.app, .modal-backdrop) input[type="checkbox"]:focus-visib
 html[data-ui="v3"] :is(.app, .modal-backdrop) input[type="range"] {
   accent-color: var(--v3-accent);
 }
-html[data-ui="v3"] :is(.app, .modal-backdrop) :is(label, .section-label, h3, h4):not(:is(.stage-frame, .device-shell, .standalone-experience, .dialogue-overlay) *) {
+html[data-ui="v3"] :is(.app, .modal-backdrop) :is(label, .section-label, h3, h4):not(:is(.stage, .stage-frame, .device-shell, .standalone-experience, .dialogue-overlay) *) {
   color: var(--v3-text-2);
 }
-html[data-ui="v3"] :is(.app, .modal-backdrop) :is(.muted, .help, .small, small):not(:is(.stage-frame, .device-shell, .standalone-experience, .dialogue-overlay) *) {
+html[data-ui="v3"] :is(.app, .modal-backdrop) :is(.muted, .help, .small, small):not(:is(.stage, .stage-frame, .device-shell, .standalone-experience, .dialogue-overlay) *) {
   color: var(--v3-muted);
 }
 html[data-ui="v3"] :is(.app, .modal-backdrop) :is(button, a, summary):focus-visible {
   outline: 2px solid var(--v3-accent);
   outline-offset: 2px;
 }
-html[data-ui="v3"] .app ::-webkit-scrollbar {
+/* Studio scrollbars only; the phone and game keep the default ones. */
+html[data-ui="v3"] .app :not(:is(.stage, .stage-frame, .device-shell, .standalone-experience) *)::-webkit-scrollbar {
   width: 10px;
   height: 10px;
 }
-html[data-ui="v3"] .app ::-webkit-scrollbar-thumb {
-  background: #d3cfc7;
+html[data-ui="v3"] .app :not(:is(.stage, .stage-frame, .device-shell, .standalone-experience) *)::-webkit-scrollbar-thumb {
+  background: var(--v3-scroll);
   border: 3px solid transparent;
   background-clip: padding-box;
   border-radius: 10px;
 }
-html[data-ui="v3"] .app ::-webkit-scrollbar-thumb:hover {
-  background-color: #b8b3a9;
+html[data-ui="v3"] .app :not(:is(.stage, .stage-frame, .device-shell, .standalone-experience) *)::-webkit-scrollbar-thumb:hover {
+  background-color: var(--v3-scroll-hover);
 }
-html[data-ui="v3"] .app ::-webkit-scrollbar-track {
+html[data-ui="v3"] .app :not(:is(.stage, .stage-frame, .device-shell, .standalone-experience) *)::-webkit-scrollbar-track {
   background: transparent;
 }
 
@@ -180,7 +247,7 @@ html[data-ui="v3"] .app .brand-icon {
   height: 28px;
   border-radius: 8px;
   background: var(--v3-text);
-  color: #fff;
+  color: var(--v3-surface);
 }
 html[data-ui="v3"] .app .brand-icon svg {
   width: 16px;
@@ -195,7 +262,7 @@ html[data-ui="v3"] .app .brand-sub.v3-mark {
   padding: 0 5px;
   border-radius: 6px;
   background: var(--v3-accent);
-  color: #fff;
+  color: var(--v3-on-accent);
   font-size: 12px;
   font-weight: 700;
   letter-spacing: 0;
@@ -341,7 +408,7 @@ html[data-ui="v3"] .app .studio-workspace-tabs button {
 }
 html[data-ui="v3"] .app .studio-workspace-tabs button:hover {
   color: var(--v3-text);
-  background: rgb(255 255 255 / 60%);
+  background: var(--v3-hover);
 }
 html[data-ui="v3"] .app .studio-workspace-tabs button[aria-selected="true"] {
   background: var(--v3-surface);
@@ -487,7 +554,7 @@ html[data-ui="v3"] .app :is(.panel-chrome, .dock-panel-header, .panel-heading) {
   color: var(--v3-muted);
   border-color: var(--v3-line);
 }
-html[data-ui="v3"] .app :is(header, .library, .inspector, .bottom-panel, .rail, .workspace-toolbar, .snapshot-toolbar, .effect-tabs, .panel-layout, .inspector-tabs, .app-footer) {
+html[data-ui="v3"] .app :is(.library, .inspector, .bottom-panel, .rail, .workspace-toolbar, .snapshot-toolbar, .effect-tabs, .panel-layout, .inspector-tabs, .app-footer) {
   background: var(--v3-surface);
   border-color: var(--v3-line);
 }
@@ -576,9 +643,9 @@ html[data-ui="v3"] :is(button, summary, a, label)[data-new]:hover::after {
 }
 
 html[data-ui="v3"] .app .claude-mark {
-  color: #a4471c;
-  background: #fbeee6;
-  border-color: #efc7b1;
+  color: var(--v3-accent-hover);
+  background: var(--v3-accent-soft);
+  border-color: var(--v3-accent-line);
 }
 html[data-ui="v3"] .app .new-mark {
   color: var(--v3-new);
@@ -586,9 +653,9 @@ html[data-ui="v3"] .app .new-mark {
   border-color: rgb(11 132 87 / 25%);
 }
 html[data-ui="v3"] .app .flow-switch {
-  background: #fff !important;
-  color: #1f7a50 !important;
-  border-color: #9fd2b8 !important;
+  background: var(--v3-surface) !important;
+  color: var(--v3-new) !important;
+  border-color: var(--v3-new) !important;
   box-shadow: var(--v3-shadow);
 }
 html[data-ui="v3"] .app .flow-switch.off {
@@ -596,7 +663,7 @@ html[data-ui="v3"] .app .flow-switch.off {
   border-color: #eab3a6 !important;
 }
 html[data-ui="v3"] .app .asset-expand-icon {
-  background: rgb(255 255 255 / 88%);
+  background: var(--v3-surface);
   color: var(--v3-text);
   box-shadow: var(--v3-shadow);
 }
@@ -636,7 +703,7 @@ html[data-ui="v3"] .feature-search-results > button span {
 }
 html[data-ui="v3"] .hover-help {
   background: var(--v3-text);
-  color: #f4f3ef;
+  color: var(--v3-surface);
   border: 0;
   border-radius: 10px;
   box-shadow: var(--v3-shadow-pop);

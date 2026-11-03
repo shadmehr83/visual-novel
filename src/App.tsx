@@ -111,9 +111,11 @@ import {
   Camera,
   Share2,
   ScrollText,
+  Moon,
   type LucideIcon,
 } from "lucide-react";
-import { V3 } from "./v3/ui";
+import { V3, STILLFRAME3, chooseDesign, choosePalette, savedPalette, type Design, type Palette as StudioPalette } from "./v3/ui";
+import { StudioDesign } from "./v3/StudioDesign";
 import { unfoldAround, useFolds } from "./v3/folds";
 import { V3Popover } from "./v3/Popover";
 // Stillframe 3 shows an icon beside each inspector tab, effect panel and dialogue tab.
@@ -223,6 +225,12 @@ function Toggle({
 export default function App() {
   const [workspace, setWorkspace] = useWorkspace();
   useFolds(V3);
+  // Stillframe 3's light or dark palette (by Claude); the classic design keeps its own theme setting.
+  const [palette, setPaletteState] = useState<StudioPalette>(savedPalette);
+  const setPalette = (next: StudioPalette) => {
+    choosePalette(next);
+    setPaletteState(next);
+  };
   const [view, setView] = useState<StudioView>("editor");
   const [cameraPreview, setCameraPreview] = useState(0);
   const paneStyle = (key: string) =>
@@ -356,6 +364,7 @@ export default function App() {
   const importInput = useRef<HTMLInputElement>(null);
   const revision = useRef(0);
   const saveQueue = useRef(Promise.resolve());
+  const switchingDesign = useRef(false);
   useEffect(() => {
     async function initialize() {
       try {
@@ -564,7 +573,7 @@ export default function App() {
   }, [project, runtime, loaded, canSave]);
   useEffect(() => {
     const warn = (e: BeforeUnloadEvent) => {
-      if (status === "Unsaved changes…") {
+      if (status === "Unsaved changes…" && !switchingDesign.current) {
         e.preventDefault();
       }
     };
@@ -845,8 +854,21 @@ export default function App() {
     const remove=setTimeout(()=>highlighted?.classList.remove('feature-reveal'),2400);
     return()=>{clearTimeout(timer);clearTimeout(remove);highlighted?.classList.remove('feature-reveal');};
   },[revealControl,inspector,effectPanel,view,playing]);
+  // Switches between the Stillframe 3.1 and classic designs (by Claude) after the project is saved.
+  async function switchDesign(design: Design) {
+    try {
+      await saveQueue.current.catch(() => {});
+      if (canSave) await save(project, runtime);
+    } catch (e) {
+      setError("The design was not switched because the project could not be saved: " + String(e));
+      return;
+    }
+    switchingDesign.current = true;
+    chooseDesign(design);
+  }
   function navigate(action: string) {
     if (action === "author-play") { startAuthorPlaythrough(); return; }
+    if (action === "design") { void switchDesign(V3 ? "classic" : "v3"); return; }
     if (action === "dialogue" && playing && authorPlay) {
       setBottom("Dialogue"); setCollapseBottom(false);
       setWorkspace(w => ({ ...w, dialogueMode: w.dialogueMode === "hidden" ? "pinned" : w.dialogueMode }));
@@ -3130,7 +3152,7 @@ export default function App() {
       onRestart={() => play(true)}
     >
       <div
-        data-theme={V3 && workspace.theme === "dark" ? "light" : workspace.theme}
+        data-theme={V3 ? (palette === "dark" ? "dark" : workspace.theme === "warm" ? "v3-warm" : "v3-light") : workspace.theme}
         onFocusCapture={(event) => {
           const target = event.target;
           setAuthorTyping(target instanceof HTMLTextAreaElement || (target instanceof HTMLInputElement && ["text", "number", "search"].includes(target.type)));
@@ -3152,6 +3174,7 @@ export default function App() {
             "--bottom-size": workspace.bottomHeight + "px",
             "--preview-scale": workspace.previewScale,
             "--ui-font": V3 && workspace.font === "Arial" ? '"Segoe UI Variable Text", "Segoe UI", system-ui, -apple-system, sans-serif' : workspace.font,
+            "--ui-font-classic": workspace.font,
             "--ui-font-size": workspace.fontSize + "px",
             "--story-font": project.settings.dialogueFont || "Georgia",
             "--story-size": (project.settings.dialogueSize || 17) + "px",
@@ -3216,6 +3239,15 @@ export default function App() {
               <Redo2 size={16} />
             </button>
             <div className="divider" />
+            {V3 && (
+              <button
+                aria-label={palette === "dark" ? "Light palette" : "Dark palette"}
+                data-help="Switch Stillframe 3 between its light palette and the dark colours of the classic studio. The stage, phone and game keep their own colours."
+                onClick={() => setPalette(palette === "dark" ? "light" : "dark")}
+              >
+                {palette === "dark" ? <Sun size={16} /> : <Moon size={16} />}
+              </button>
+            )}
             <button onClick={() => setModal("settings")} aria-label="Settings">
               <Settings2 size={17} />
             </button>
@@ -3383,6 +3415,7 @@ export default function App() {
                 <ProjectSave project={project} />
               ) : modal === "settings" ? (
                 <>
+                  {STILLFRAME3 && <StudioDesign palette={palette} onPalette={setPalette} onDesign={switchDesign} />}
                   {/* Playtest admin (by Claude): the hosted page that follows testers of the shared Claude version. */}
                   <section className="property-section playtest-admin-link">
                     <h3>Playtest admin</h3>

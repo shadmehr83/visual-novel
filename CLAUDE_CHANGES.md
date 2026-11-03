@@ -4,6 +4,14 @@ Every change in this list was written by Claude (Anthropic) at the request of th
 
 > **Where this lives:** branch `claude` on GitHub. Versions end in `-claude`. `main` is the original line and is untouched.
 
+## Stillframe 3.1.1 — design switch, dark palette, phone and history fixes (2026-11-03, engine 3.1.1-claude)
+
+- **Design switch:** `index.html` marks the page with `data-sf3`. A tiny start-up script drops `data-ui="v3"` only when this tab chose the classic design (sessionStorage), so every new start opens Stillframe 3.1. Settings → **Studio design** (`src/v3/StudioDesign.tsx`) and View → Switch to … design save the project, then reload in the other design. Both designs share the project, saves and Update history. The local build never registers the offline service worker in either design.
+- **Dark palette:** `html[data-palette="dark"]` maps the Stillframe 3 tokens to the classic dark colours. The light-only colours left in the stylesheets are now tokens (`--v3-on-accent`, `--v3-on-ink`, `--v3-switch-off`, `--v3-track`, `--v3-scroll`). Switch with the moon/sun button in the top bar or Settings → Studio design → Palette; the choice is kept in localStorage.
+- **Phone and game keep their colours:** Stillframe 3 now uses its own theme names (`v3-light`, `v3-warm`), so the classic light theme's broad rules (headers, headings, labels, inputs) no longer reach the stage or phone. Their studio part is repeated with `:where` and the game areas excluded. Inside `.stage`, `.stage-frame`, `.device-shell` and `.standalone-experience`, the classic colour tokens, colour scheme, text colour and interface font are restored. Studio scrollbars and sliders stay out of them.
+- **Update history** fills its panel. The classic padding was computed from the window width, which squeezed the notes in narrower panels.
+- Release times for 3.0.0 and 3.1.0 now use their real commit times.
+
 ## Stillframe 3.1 — engine-style redesign (2026-11-03, engine 3.1.0-claude)
 
 Same `claude-v3` line. The 3.0 top bar, palette and features stay; the rest of the studio is laid out like a game-engine editor. The layout is mostly `src/v3/stillframe31.css`, scoped to `html[data-ui="v3"]`, plus small JSX hooks.

@@ -8,7 +8,7 @@ html[data-ui="v3"] {
   --v3-ink: #23272c;
   --fs: var(--ui-font-size, 12px);
 }
-html[data-ui="v3"] .app[data-theme="warm"] {
+html[data-ui="v3"] .app[data-theme="v3-warm"] {
   --v3-canvas: #e7dcc8;
   --v3-dot: #d6c8ad;
   --v3-ink: #3a3328;
@@ -115,7 +115,7 @@ html[data-ui="v3"] .app .rail .avatar {
   height: 28px;
   border: 0;
   background: var(--v3-ink);
-  color: #fff;
+  color: var(--v3-on-ink);
   font-weight: 650;
 }
 
@@ -932,11 +932,11 @@ html[data-ui="v3"] .app .effect-tabs button:not(.active):not([aria-pressed="true
 html[data-ui="v3"] .app .effect-tabs button:is(.active, [aria-pressed="true"]) {
   background: var(--v3-ink);
   border-color: var(--v3-ink);
-  color: #fff;
+  color: var(--v3-on-ink);
   font-weight: 600;
 }
 html[data-ui="v3"] .app .effect-tabs button:is(.active, [aria-pressed="true"]) svg {
-  color: #fff;
+  color: var(--v3-on-ink);
 }
 html[data-ui="v3"] .app .panel-layout {
   display: flex;
@@ -1064,7 +1064,8 @@ html[data-ui="v3"] .app .slider > .exact-range {
   width: 64px !important;
   margin: 0;
 }
-html[data-ui="v3"] .app input[type="range"] {
+/* Studio sliders only; sliders inside the game or a device keep their own look. */
+html[data-ui="v3"] .app input[type="range"]:not(:is(.stage, .stage-frame, .device-shell, .standalone-experience) *) {
   -webkit-appearance: none;
   appearance: none;
   height: 18px;
@@ -1074,12 +1075,12 @@ html[data-ui="v3"] .app input[type="range"] {
   background: transparent;
   cursor: pointer;
 }
-html[data-ui="v3"] .app input[type="range"]::-webkit-slider-runnable-track {
+html[data-ui="v3"] .app input[type="range"]:not(:is(.stage, .stage-frame, .device-shell, .standalone-experience) *)::-webkit-slider-runnable-track {
   height: 4px;
   border-radius: 999px;
-  background: #dcd8d0;
+  background: var(--v3-track);
 }
-html[data-ui="v3"] .app input[type="range"]::-webkit-slider-thumb {
+html[data-ui="v3"] .app input[type="range"]:not(:is(.stage, .stage-frame, .device-shell, .standalone-experience) *)::-webkit-slider-thumb {
   -webkit-appearance: none;
   appearance: none;
   width: 14px;
@@ -1091,12 +1092,12 @@ html[data-ui="v3"] .app input[type="range"]::-webkit-slider-thumb {
   box-shadow: 0 1px 3px rgb(0 0 0 / 20%);
   cursor: ew-resize;
 }
-html[data-ui="v3"] .app input[type="range"]::-moz-range-track {
+html[data-ui="v3"] .app input[type="range"]:not(:is(.stage, .stage-frame, .device-shell, .standalone-experience) *)::-moz-range-track {
   height: 4px;
   border-radius: 999px;
-  background: #dcd8d0;
+  background: var(--v3-track);
 }
-html[data-ui="v3"] .app input[type="range"]::-moz-range-thumb {
+html[data-ui="v3"] .app input[type="range"]:not(:is(.stage, .stage-frame, .device-shell, .standalone-experience) *)::-moz-range-thumb {
   width: 12px;
   height: 12px;
   border-radius: 50%;
@@ -1152,7 +1153,7 @@ html[data-ui="v3"] .app .region-box :is(.wide, .field-row button) {
 html[data-ui="v3"] .app .region-box .wide.primary {
   background: var(--v3-accent);
   border-color: var(--v3-accent);
-  color: #fff;
+  color: var(--v3-on-accent);
 }
 html[data-ui="v3"] .app :is(.subtle, button.subtle) {
   color: var(--v3-muted);
@@ -1296,7 +1297,7 @@ html[data-ui="v3"] .app :is(.flow-input, .flow-output) {
 }
 html[data-ui="v3"] .app :is(.flow-input, .flow-output):hover {
   background: var(--v3-accent) !important;
-  color: #fff !important;
+  color: var(--v3-on-accent) !important;
 }
 html[data-ui="v3"] .app .flow-port-row {
   border-top: 1px solid var(--v3-line);
@@ -1429,9 +1430,18 @@ html[data-ui="v3"] .app .device-workspace > :not(.device-workspace-heading):not(
   margin-inline: 24px;
 }
 /* Update history reads as a timeline of release cards. */
+/* Uses the whole panel: the classic padding was measured from the window width, which squeezed
+   the text into a narrow column whenever the panel was narrower than the window. */
 html[data-ui="v3"] .app .release-workspace {
-  max-width: 1100px;
-  margin: 0 auto;
+  max-width: none;
+  margin: 0;
+  padding: 20px clamp(16px, 3%, 40px) 32px;
+}
+html[data-ui="v3"] .app .release-heading {
+  padding-inline: 0;
+}
+html[data-ui="v3"] .app .release-heading input {
+  max-width: 640px;
 }
 html[data-ui="v3"] .app .release-entry {
   margin-bottom: 12px;
@@ -1570,4 +1580,107 @@ html[data-ui="v3"] .app .app-footer > span:nth-child(2) {
 html[data-ui="v3"] .app .app-footer > span:last-child {
   font: italic 11px/1 Georgia, serif;
   color: var(--v3-muted);
+}
+
+/* ---------- Dark palette: the few colours that are not palette tokens ---------- */
+html[data-ui="v3"][data-palette="dark"] .app button.danger {
+  color: #f0a597;
+  border-color: #6b3a33;
+  background: #2a1d1b;
+}
+html[data-ui="v3"][data-palette="dark"] .app .flow-card.scene .flow-card-heading {
+  background: linear-gradient(#20262c, #1c2228) !important;
+}
+html[data-ui="v3"][data-palette="dark"] .app .flow-card.chapter .flow-card-heading {
+  background: linear-gradient(#2a2420, #25201c) !important;
+}
+html[data-ui="v3"][data-palette="dark"] .app .flow-edge-line {
+  stroke: #6f7b76;
+}
+
+/* ---------- Studio design switch (Settings) and palette button (top bar) ---------- */
+.design-switch {
+  margin: 4px 0 18px;
+  padding: 16px 18px;
+  border: 2px solid var(--accent, #d5ac91);
+  border-radius: 14px;
+}
+.design-switch h3 {
+  margin: 0 0 4px;
+}
+.design-switch > p {
+  margin: 0 0 12px;
+}
+.design-options {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+.design-options > button {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+  padding: 12px 14px;
+  border: 1px solid var(--line, #303537);
+  border-radius: 10px;
+  text-align: left;
+}
+.design-options > button[aria-pressed="true"] {
+  border: 2px solid var(--accent, #d5ac91);
+  padding: 11px 13px;
+}
+.design-options > button b {
+  font-size: 13px;
+}
+.design-options > button small {
+  font-size: 11px;
+  line-height: 1.45;
+  opacity: 0.8;
+}
+.palette-switch {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 12px;
+  font-size: 12px;
+}
+.palette-switch > div {
+  display: flex;
+  gap: 2px;
+  padding: 2px;
+  border-radius: 9px;
+  background: var(--v3-sunken, #171b1d);
+}
+.palette-switch button {
+  gap: 6px;
+  padding: 5px 12px;
+  border: 0;
+  border-radius: 7px;
+}
+.palette-switch button[aria-pressed="true"] {
+  background: var(--v3-surface, #2a2f31);
+  font-weight: 600;
+  box-shadow: 0 1px 2px rgb(0 0 0 / 15%);
+}
+html[data-ui="v3"] .modal .design-switch {
+  grid-column: 1 / -1;
+  border-color: var(--v3-accent);
+  background: var(--v3-surface);
+}
+html[data-ui="v3"] .modal .design-options > button {
+  border: 1px solid var(--v3-line-strong);
+  background: var(--v3-surface-2);
+}
+html[data-ui="v3"] .modal .design-options > button[aria-pressed="true"] {
+  border: 2px solid var(--v3-accent);
+  background: var(--v3-accent-soft);
+}
+html[data-ui="v3"] .modal .palette-switch button {
+  border: 0;
+  background: transparent;
+}
+html[data-ui="v3"] .modal .palette-switch button[aria-pressed="true"] {
+  background: var(--v3-surface);
+  color: var(--v3-text);
 }
