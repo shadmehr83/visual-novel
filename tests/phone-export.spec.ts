@@ -1,5 +1,7 @@
 import { test, expect } from "@playwright/test";
 import { readFile, writeFile } from "node:fs/promises";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 import { demo } from "../src/demo";
 import { makeDevice } from "../src/deviceFrame";
 function fixture() {
@@ -19,13 +21,16 @@ async function game(page: import('@playwright/test').Page, mobile:boolean) {
  await page.getByRole('button',{name:'Keep local project',exact:true}).click();
  await page.locator('input[accept=".json"]').setInputFiles({name:'compact-test.json',mimeType:'application/json',buffer:Buffer.from(JSON.stringify(fixture()))});
  const download=page.waitForEvent('download');
- await page.getByRole('button',{name:mobile?'Export phone game':'Export playable HTML',exact:true}).click();
+ await page.getByRole('button',{name:mobile?'Export phone game · without Claude':'Export playable HTML · without Claude',exact:true}).click();
  const file=await download;
  expect(file.suggestedFilename()).toBe(mobile?'visual-novel-phone.html':'visual-novel-player.html');
  const html=await readFile((await file.path())!,'utf8');
- await writeFile(mobile ? '/tmp/actual-phone-export.html' : '/tmp/actual-desktop-export.html',html);
+ await writeFile(join(tmpdir(),mobile ? 'actual-phone-export.html' : 'actual-desktop-export.html'),html);
  await page.route('**/exported-test-game',route=>route.fulfill({contentType:'text/html',body:html}));
  await page.goto('/exported-test-game');
+ await page.getByRole('button',{name:'Start new game',exact:true}).click();
+ await expect(page.getByRole('group',{name:'How do you want to move the story on?'})).toBeVisible();
+ await page.getByRole('button',{name:'Start the story',exact:true}).click();
 }
 test('phone export fills portrait and landscape viewports, keeps chat choices inside, and saves/quits correctly',async({page})=>{
  test.setTimeout(90000);
@@ -65,9 +70,9 @@ test('phone export fills portrait and landscape viewports, keeps chat choices in
  await expect(page.locator('.device-feed')).toContainText('Saved conversation position');
  await page.setViewportSize({width:844,height:390});
  const landscape=await stage.boundingBox();expect(landscape!.width).toBe(844);expect(landscape!.height).toBe(390);
- await page.screenshot({path:'/tmp/phone-export-landscape.png'});
+ await page.screenshot({path:join(tmpdir(),'phone-export-landscape.png')});
  await page.setViewportSize({width:390,height:844});
- await page.screenshot({path:'/tmp/phone-export-portrait.png'});
+ await page.screenshot({path:join(tmpdir(),'phone-export-portrait.png')});
  expect(errors).toEqual([]);
 });
 test('normal export places settings in pause and fullscreen contains the stage without a toolbar gap',async({page})=>{

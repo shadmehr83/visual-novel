@@ -3,7 +3,7 @@ import { useAuthorEditing, usePaused } from "./PlaySession";
 import { pendingReply } from "./characterReply";
 import { choiceAvailable } from "./choices";
 import type { Node, Project, Runtime } from "./model";
-import { autoContinuePreference, decisionTimer, estimateLines, readingSeconds } from "./storyTiming";
+import { autoContinuePreference, decisionTimer, estimateLines, readingSeconds, timedDecisionsPreference } from "./storyTiming";
 // Story timer bar (by Claude). Plain lines move on by themselves when auto-continue is on (or the
 // line has its own Auto-advance time); timed decisions take a reply when time runs out. The bar
 // shows the time left without numbers: inside the dialogue box, or in the scene's lower-right
@@ -19,6 +19,7 @@ export function StoryTimer({ project, node, runtime, text, corner = false, onCon
   onChoose: (id: string) => void;
 }) {
   const autoOn = useSyncExternalStore(autoContinuePreference.subscribe, () => autoContinuePreference.get(project));
+  const timedOn = useSyncExternalStore(timedDecisionsPreference.subscribe, () => timedDecisionsPreference.get(project));
   const paused = usePaused(), editing = useAuthorEditing();
   const chatting = useSyncExternalStore(pendingReply.subscribe, pendingReply.get);
   const [typing, setTyping] = useState(false);
@@ -26,7 +27,8 @@ export function StoryTimer({ project, node, runtime, text, corner = false, onCon
   const root = useRef<HTMLDivElement>(null), fill = useRef<HTMLSpanElement>(null);
   const latest = useRef({ onContinue, onChoose });
   latest.current = { onContinue, onChoose };
-  const decision = decisionTimer(project, node);
+  // A player who turned timed decisions off gets no countdown; the reply waits for them.
+  const decision = timedOn ? decisionTimer(project, node) : null;
   const replies = node.choices.filter((c) => choiceAvailable(c, runtime.values));
   const fallback = replies.find((c) => c.id === decision?.choice) || replies[0];
   const seconds = runtime.ended

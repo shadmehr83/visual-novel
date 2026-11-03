@@ -15,7 +15,8 @@ it("marks recent controls, but not inside the game or from older releases", asyn
   const view = render(<RecentFeatures />);
   await new Promise((r) => setTimeout(r, 200));
   const [inGame, older, palette] = document.querySelectorAll<HTMLElement>("button");
-  expect(document.querySelector<HTMLElement>("summary")!.dataset.new).toBe("v3.1.0");
+  // Export & share (3.1.0) is older than the five latest releases by time.
+  expect(document.querySelector<HTMLElement>("summary")!.dataset.new).toBeUndefined();
   expect(document.querySelector<HTMLInputElement>("input")!.dataset.recent).toBe("2.30.0-claude");
   expect(document.querySelector<HTMLElement>("label")!.dataset.new).toBe("v2.30.0");
   expect(palette.dataset.recent).toBe("3.1.1-claude");

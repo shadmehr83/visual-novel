@@ -16,32 +16,39 @@ export function decisionTimer(project: Project, node: Node) {
   return t;
 }
 
-// The player's auto-continue choice for one game, kept in this browser. Without one, the
-// author's default (Settings → Auto-continue dialogue by default) applies.
-const key = (project: Project) => "stillframe-auto-continue:" + project.id;
+// The player's own timer choices for one game, kept in this browser. Without one, the author's
+// default applies (Settings → Auto-continue dialogue by default; timed decisions start on).
 const listeners = new Set<() => void>();
-export const autoContinuePreference = {
-  get(project: Project): boolean {
-    try {
-      const saved = localStorage.getItem(key(project));
-      if (saved === "on" || saved === "off") return saved === "on";
-    } catch {
-      /* falls back to the author's default */
-    }
-    return !!project.settings.autoContinue;
-  },
-  set(project: Project, on: boolean) {
-    try {
-      localStorage.setItem(key(project), on ? "on" : "off");
-    } catch {
-      /* this page only */
-    }
-    listeners.forEach((l) => l());
-  },
-  subscribe(l: () => void) {
-    listeners.add(l);
-    return () => {
-      listeners.delete(l);
-    };
-  },
-};
+function playerPreference(name: string, fallback: (project: Project) => boolean) {
+  const key = (project: Project) => "stillframe-" + name + ":" + project.id;
+  return {
+    get(project: Project): boolean {
+      try {
+        const saved = localStorage.getItem(key(project));
+        if (saved === "on" || saved === "off") return saved === "on";
+      } catch {
+        /* falls back to the author's default */
+      }
+      return fallback(project);
+    },
+    set(project: Project, on: boolean) {
+      try {
+        localStorage.setItem(key(project), on ? "on" : "off");
+      } catch {
+        /* this page only */
+      }
+      listeners.forEach((l) => l());
+    },
+    subscribe(l: () => void) {
+      listeners.add(l);
+      return () => {
+        listeners.delete(l);
+      };
+    },
+  };
+}
+export const autoContinuePreference = playerPreference("auto-continue", (project) => !!project.settings.autoContinue);
+export const timedDecisionsPreference = playerPreference("timed-decisions", () => true);
+// Whether the story has any decision that would count down, so players are only asked when it matters.
+export const hasTimedDecisions = (project: Project) =>
+  project.scenes.some((s) => s.nodes.some((n) => decisionTimer(project, n)));
