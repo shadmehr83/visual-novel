@@ -268,7 +268,11 @@ jobs:
           }
           HALO_FILE_END
       - name: Install Android SDK
-        run: sdkmanager 'platforms;android-35' 'build-tools;35.0.0'
+        run: |
+          SDKMGR=$(find /usr/local/lib/android/sdk/cmdline-tools -name sdkmanager -type f | head -n 1)
+          test -x "$SDKMGR"
+          yes | "$SDKMGR" --licenses >/dev/null || true
+          "$SDKMGR" 'platforms;android-35' 'build-tools;35.0.0'
       - name: Build APK
         run: gradle --no-daemon :app:assembleDebug
       - name: Save APK
