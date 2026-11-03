@@ -12,7 +12,6 @@ jobs:
         with:
           distribution: temurin
           java-version: '17'
-      - uses: android-actions/setup-android@v3
       - uses: gradle/actions/setup-gradle@v4
         with:
           gradle-version: '8.10.2'
@@ -20,14 +19,12 @@ jobs:
         shell: bash
         run: |
           set -e
-          mkdir -p 'settings.gradl'
           cat > 'settings.gradle' <<'HALO_FILE_END'
           pluginManagement { repositories { google(); mavenCentral(); gradlePluginPortal() } }
           dependencyResolutionManagement { repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS); repositories { google(); mavenCentral() } }
           rootProject.name='HALOAndroid'
           include ':app'
           HALO_FILE_END
-          mkdir -p 'build.gradl'
           cat > 'build.gradle' <<'HALO_FILE_END'
           plugins { id 'com.android.application' version '8.7.3' apply false }
           HALO_FILE_END
