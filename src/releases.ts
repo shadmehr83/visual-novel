@@ -1,4 +1,4 @@
-export const ENGINE_VERSION = "3.5.0-claude";
+export const ENGINE_VERSION = "3.6.0-claude";
 export type ReleaseFeature = {
   name: string;
   description: string;
@@ -22,7 +22,12 @@ const f = (
   action?: string,
 ): ReleaseFeature => ({ name, description, steps: path.split(" → "), action });
 export const releases: Release[] = [
- {version:"3.5.0-claude",name:"One Stillframe: design switch in the hosted studio",by:"Claude",date:"2026-11-04",timestamp:"2026-11-04T01:41:18Z",features:[
+ {version:"3.6.0-claude",name:"Two screens: linked control window",by:"Claude",date:"2026-11-04",timestamp:"2026-11-04T03:12:24Z",features:[
+ f("Linked control window", "View → Open control window (second screen) opens the studio in a second window, placed on your other screen when the browser allows. Both windows edit the same project: a change in one, and the dialogue you select, shows in the other straight away. Locally, localhost:5175 opens the same control window for Stillframe 3.", "View → Open control window (second screen)", "workspace"),
+ f("Preview screen", "View → Preview screen lets the scene preview fill this window, for the screen where you watch the game while you edit in the control window. Exit preview screen brings the studio back.", "View → Preview screen (this window)", "workspace"),
+ f("Claude Code for every AI task", "In the studio on this computer, the AI panel now sends dialogue, effects (lighting, rain) and interface requests to Claude Code with your own Claude subscription by default, instead of an API key. A route you chose before stays as it is.", "AI → Assistant task → Claude Code · this computer", "assistant")
+ ]},
+ {version:"3.5.0-claude",name:"One Stillframe: design switch in the hosted studio",by:"Claude",commit:"b80bb52",date:"2026-11-04",timestamp:"2026-11-04T01:44:42Z",features:[
  f("Stillframe 3 design everywhere", "The hosted studio (the Claude version on GitHub) can now switch to the Stillframe 3 design in Settings → Studio design, or View → Switch to Stillframe 3 design. It opens in the classic design and remembers your choice in this browser. Local Stillframe 3 still opens in its new design on every start.", "Settings → Studio design → Stillframe 3", "settings"),
  f("Light or dark in both designs", "Settings → Studio design → Light / Dark works in either design: the classic studio switches its interface theme, and Stillframe 3 switches its palette.", "Settings → Studio design → Light / Dark", "settings"),
  f("One version line", "The hosted studio and local Stillframe 3 now run the same code and share version numbers in the Stillframe 3 style (3.x). Earlier 2.x releases stay listed below. The hosted studio also gains the Stillframe 3 speed-ups: artwork is stored once instead of copied on every save, and GIF backgrounds cross-fade cleanly.", "Workspace → Update history", "updates")

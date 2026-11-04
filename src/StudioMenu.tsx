@@ -111,6 +111,10 @@ export function StudioMenu({
             )}
             {command("Scene backgrounds…", "background")}
             {command("Playthrough event log", "events")}
+            {command("Open control window (second screen)", "control-window", false,
+              "Open the studio in a second, linked window, on your other screen when the browser allows. Edits and the selected dialogue show in both windows live.")}
+            {command("Preview screen (this window)", "preview-screen", false,
+              "Let the scene preview fill this window, for the screen where you watch the game while you edit in the control window.")}
             {command(V3 ? "Switch to classic design" : "Switch to Stillframe 3 design", "design", false,
               V3 ? "Save, then reload in the classic studio design." + (STILLFRAME3 ? " A new start opens Stillframe 3 again." : "") : "Save, then reload in the Stillframe 3 design.")}
             <hr />

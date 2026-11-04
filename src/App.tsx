@@ -58,6 +58,7 @@ import { LastLine } from "./LastLine";
 import { StoryTimer } from "./StoryTimer";
 import { TimedDecisionControls } from "./TimedDecisionControls";
 import { StoryTimerControls } from "./StoryTimerControls";
+import { openControlWindow, useWindowSync } from "./windowSync";
 import { CLAUDE_SITE, claudeExport, pendingReply } from "./characterReply";
 import { SelectionToolbar } from "./SelectionToolbar";
 import { useWorkspace, contrast } from "./workspace";
@@ -368,6 +369,21 @@ export default function App() {
   const revision = useRef(0);
   const saveQueue = useRef(Promise.resolve());
   const switchingDesign = useRef(false);
+  // Linked windows (by Claude): a control window on another screen edits the same project live.
+  const sync = useWindowSync({
+    loaded, project, setProject, sceneId, nodeId,
+    onSelect: (sid, nid) => { setSceneId(sid); setNodeId(nid); },
+  });
+  const controlWindow = new URLSearchParams(location.search).get("screen") === "controls";
+  // Preview screen: this window shows only the scene preview, filling the screen.
+  const [previewScreen, setPreviewScreen] = useState(false);
+  useEffect(() => {
+    if (previewScreen) document.documentElement.dataset.screen = "preview";
+    else delete document.documentElement.dataset.screen;
+  }, [previewScreen]);
+  useEffect(() => {
+    if (controlWindow) document.title = "Controls · " + document.title.replace(/^Controls · /, "");
+  }, [controlWindow]);
   useEffect(() => {
     async function initialize() {
       try {
@@ -554,6 +570,8 @@ export default function App() {
   }
   useEffect(() => {
     if (!loaded || !canSave) return;
+    // A change from a linked window is saved by that window.
+    if (project === sync.remote.current) { setStatus("Saved by the linked window"); return; }
     const rev = ++revision.current;
     setStatus("Unsaved changes…");
     const timer = setTimeout(
@@ -878,6 +896,8 @@ export default function App() {
       return;
     }
     if(action === "windows") {setModal("windows");return;}
+    if(action === "control-window") {void openControlWindow();return;}
+    if(action === "preview-screen") {setPreviewScreen(true);return;}
     if(action === "restore-artwork") {void restoreArtwork();return;}
     if(action === "split-view") {setPlaying(false);setWorkspace(w=>({...w,splitWorkspace:true,secondWorkspace:view === w.secondWorkspace ? (view === "dialogues" ? "scenes" : "dialogues") : w.secondWorkspace}));return;}
     if (
@@ -1511,6 +1531,13 @@ export default function App() {
                 }
               >
                 {/* Pinned to the top while the window is unlocked, so Lock is always reachable. */}
+                {previewScreen && (
+                  <div className="preview-screen-bar" data-no-advance>
+                    {sync.linked > 0 ? <span>Linked · edits from the control window show here</span> : <span>Preview screen</span>}
+                    {!sync.linked && <button onClick={() => void openControlWindow()} data-help="Open the studio controls in a second window, on your other screen when the browser allows. Both windows edit the same project live.">Open control window</button>}
+                    <button onClick={() => setPreviewScreen(false)} data-help="Show the full studio in this window again.">Exit preview screen</button>
+                  </div>
+                )}
                 {!playing && !workspace.previewLocked && <div className="preview-window-bar">{previewWindow.tools}</div>}
                 <div className="preview-header">
                   <div>
@@ -3228,6 +3255,11 @@ export default function App() {
               <i className={status.startsWith("Saved") ? "saved" : ""} />
               {status}
             </span>
+            {sync.linked > 0 && (
+              <span className="linked-windows" role="status" data-help="Another studio window at this address is linked: edits and the selected dialogue show in both, live.">
+                Linked · {sync.linked + 1} windows
+              </span>
+            )}
             <button
               title="Save project file"
               aria-label="Save project file"

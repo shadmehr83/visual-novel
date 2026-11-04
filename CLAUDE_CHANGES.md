@@ -4,6 +4,14 @@ Every change in this list was written by Claude (Anthropic) at the request of th
 
 > **Where this lives:** branch `claude` on GitHub (the hosted Claude version). Versions follow Stillframe 3 (3.x) and end in `-claude`. `main` is the original line and is untouched. The local Stillframe 3 studio (`npm run stillframe3`, localhost:5174) runs the same code from the local branch `claude-v3`, which is never pushed.
 
+## Stillframe 3.6 — two screens: linked control window (2026-11-04, engine 3.6.0-claude)
+
+- **Linked windows** (`src/windowSync.ts`): studio windows at the same address share every edit and the selected dialogue through a BroadcastChannel. Only artwork and sound that changed are sent. The window that made a change saves it; the others show it without saving (`App.tsx` autosave skips `sync.remote`). A window that falls behind asks for the full project. A *Linked · N windows* badge shows next to the save status. Before this, two tabs kept separate copies and the last to save silently overwrote the other.
+- **View → Open control window (second screen)** opens `?screen=controls` (window title *Controls · …*). It uses the Window Management API to place it on the other display when Chrome or Edge is allowed to; otherwise it opens beside you to drag across. **View → Preview screen** fills the window with the scene preview (`html[data-screen=preview]`), with an Exit button.
+- **localhost:5175** (`scripts/stillframe3.mjs`) redirects to `localhost:5174/?screen=controls`. It has to be the same address because browsers keep each address's storage apart.
+- **AI panel** (`src/Assistant.tsx`): on localhost, effects and interface tasks now default to Claude Code · this computer (subscription, no API key), like dialogue already did. Saved routes are kept.
+- Test: `src/windowSync.test.tsx`.
+
 ## Stillframe 3.5 — one Stillframe: design switch in the hosted studio (2026-11-04, engine 3.5.0-claude)
 
 - **One codebase:** `claude` now holds everything from Stillframe 3 (fast-forwarded to `claude-v3`), and both branches share the same code and version line. Earlier 2.x releases stay in Update history.

@@ -23,7 +23,9 @@ export function Assistant({
 }) {
   const [mode, setMode] = useState<"demand" | "provider">("provider");
   const [task,setTask]=useState<AssistantTask>("dialogue");
-  const [routes,setRoutes]=useState<Record<AssistantTask,TaskProvider>>(()=>{try{return {dialogue:"claude-local","system-ui":"openai",effects:"openai",...JSON.parse(localStorage.getItem("stillframe-ai-routes")||"{}")};}catch{return {dialogue:"claude-local","system-ui":"openai",effects:"openai"};}});
+  // On this computer's studio every task starts with Claude Code (your subscription, no API key);
+  // the hosted studio starts edits on its OpenAI key. A saved choice always wins.
+  const [routes,setRoutes]=useState<Record<AssistantTask,TaskProvider>>(()=>{const edits:TaskProvider=/^(localhost|127\.0\.0\.1)$/.test(location.hostname)?"claude-local":"openai";const start={dialogue:"claude-local","system-ui":edits,effects:edits} as Record<AssistantTask,TaskProvider>;try{return {...start,...JSON.parse(localStorage.getItem("stillframe-ai-routes")||"{}")};}catch{return start;}});
   const [available,setAvailable]=useState<Record<string,boolean>>({});
   const [local,setLocal]=useState<ClaudeLocalStatus|null>(null);
   const [replyMode,setReplyMode]=useState<CharacterReplyMode>(characterReplyMode);

@@ -2,6 +2,7 @@
 // development server, which is several times faster and uses about half the memory.
 // The build is redone automatically after each code change; refresh the page to load it.
 import { build, preview } from "vite";
+import { createServer } from "node:http";
 
 const port = Number(process.env.PORT || 5174);
 const outDir = "dist-v3";
@@ -17,4 +18,11 @@ watcher.on("event", async (event) => {
   // --open (used by "Start Stillframe 3.cmd") opens the studio in the browser once it is ready.
   server = await preview({ build: { outDir }, preview: { port, strictPort: true, host: "localhost", open: process.argv.includes("--open") } });
   console.log(`Stillframe 3 is ready at http://localhost:${port}/`);
+  // Second screen: localhost:5175 opens a control window linked to the studio. It is the same
+  // studio at :5174 (browsers keep each address's storage apart, so it must share the address).
+  createServer((req, res) => {
+    res.writeHead(302, { Location: `http://localhost:${port}/?screen=controls` });
+    res.end();
+  }).on("error", (e) => console.warn("Control window link not started:", e.message))
+    .listen(port + 1, "localhost", () => console.log(`Control window for a second screen: http://localhost:${port + 1}/`));
 });
