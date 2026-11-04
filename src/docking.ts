@@ -1,7 +1,7 @@
 import {z} from 'zod';
 export const dockModes=['home','float','left','right','top','bottom','split'] as const;
 export type DockMode=typeof dockModes[number];
-export const dockPanelSchema=z.object({mode:z.enum(dockModes),returnTo:z.enum(dockModes).optional(),x:z.number().finite(),y:z.number().finite(),width:z.number().min(220).max(2200),height:z.number().min(140).max(1600)});
+export const dockPanelSchema=z.object({mode:z.enum(dockModes),returnTo:z.enum(dockModes).optional(),x:z.number().finite(),y:z.number().finite(),width:z.number().min(220).max(2200),height:z.number().min(140).max(1600),min:z.boolean().optional()});
 export type PanelLayout=z.infer<typeof dockPanelSchema>;
 export type DockLayouts=Record<string,PanelLayout>;
 export function panelLayout(layouts:DockLayouts,id:string):PanelLayout {

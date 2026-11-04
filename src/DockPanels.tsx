@@ -17,6 +17,8 @@ import {
   GripHorizontal,
   PanelTop,
   Move,
+  Minus,
+  ChevronRight,
 } from "lucide-react";
 import { ResizeHandle } from "./ResizeHandle";
 import { PanelEdges } from "./PanelEdges";
@@ -49,6 +51,7 @@ type Controller = {
   drag: (id: string, e: React.PointerEvent<HTMLElement>) => void;
   saveSize: (id: string, e: React.PointerEvent<HTMLElement>) => void;
   raise: (id: string) => void;
+  minimise: (id: string, on: boolean) => void;
   front: string;
   resize: (
     id: string,
@@ -245,6 +248,7 @@ export function DockSurface({
     toggle,
     drag: startDrag,
     raise: setFront,
+    minimise: (id, on) => change(id, (p) => ({ ...p, min: on || undefined })),
     front,
     resize: (id, width, height, x, y) =>
       change(id, (p) => ({
@@ -353,8 +357,10 @@ export function DockPanel({
     return () => ctx?.register(id, false);
   }, [id, !!ctx]);
   const savedMode = ctx?.active ? panelLayout(ctx.layouts, id).mode : "home";
+  const savedMin = !!(ctx?.active && panelLayout(ctx.layouts, id).min);
   useEffect(() => {
-    if (savedMode !== "float" || !frame.current || !ctx) return;
+    // A minimised floating window is only a bar: its saved size must stay as it was.
+    if (savedMode !== "float" || savedMin || !frame.current || !ctx) return;
     let timer: ReturnType<typeof setTimeout>;
     const observer = new ResizeObserver(() => {
       clearTimeout(timer);
@@ -368,7 +374,7 @@ export function DockPanel({
       observer.disconnect();
       clearTimeout(timer);
     };
-  }, [savedMode, id]);
+  }, [savedMode, savedMin, id]);
   if (!ctx) return children;
   const p = panelLayout(ctx.layouts, id),
     mode = ctx.active ? (id.startsWith("workspace-") && p.mode !== "float" ? "home" : p.mode) : "home";
@@ -396,6 +402,18 @@ export function DockPanel({
           <GripHorizontal size={14} />
         </button>
         <span className="panel-drag-title">{title}</span>
+        {!id.startsWith("workspace-") && <button
+          type="button"
+          aria-label={"Minimise " + title}
+          data-help={
+            "Fold " +
+            title +
+            " down to a slim bar so the other panels get the room. Click the bar to show it again; nothing in it is lost."
+          }
+          onClick={() => ctx.minimise(id, true)}
+        >
+          <Minus size={12} />
+        </button>}
         <button
           type="button"
           aria-label={(mode === "float" ? "Restore " : "Pop out ") + title}
@@ -470,10 +488,24 @@ export function DockPanel({
         </details>
       </div>
     ) : null;
+  // Minimised (by Claude): the panel folds to a bar that shows it again with one click.
+  const minimised = ctx.active && !!p.min;
   const content = cloneElement(
     children,
-    { "data-dock-panel": id },
-    mode === "home" ? (
+    { "data-dock-panel": id, ...(minimised ? { "data-minimised": "" } : {}) },
+    minimised ? (
+      <button
+        type="button"
+        className="panel-minimised-bar"
+        aria-label={"Show " + title}
+        data-help={"Show " + title + " again where it was. Its settings and edits were kept while it was minimised."}
+        onClick={() => ctx.minimise(id, false)}
+      >
+        <ChevronRight size={13} />
+        <span>{title}</span>
+        <small>minimised · click to show</small>
+      </button>
+    ) : mode === "home" ? (
       <>
         {chrome}
         {children.props.children}
@@ -492,7 +524,7 @@ export function DockPanel({
             data-resident-panel={id}
             style={{ position: "relative" }}
           >
-            {chrome}
+            {!minimised && chrome}
             <div className="dock-body">{content}</div>
             <ResizeHandle
               label={"Resize " + title + " dock"}
@@ -531,7 +563,7 @@ export function DockPanel({
         left: bounds.x,
         top: bounds.y,
         width: bounds.width,
-        height: bounds.height,
+        height: minimised ? "auto" : bounds.height,
         zIndex: ctx.front === id ? 95 : 80,
       }}
       onPointerDownCapture={() => ctx.raise(id)}
@@ -539,12 +571,12 @@ export function DockPanel({
         if (e.target === e.currentTarget) ctx.saveSize(id, e);
       }}
     >
-      {chrome}
+      {!minimised && chrome}
       <div className="dock-body">{content}</div>
-      <PanelEdges
+      {!minimised && <PanelEdges
         title={title}
         onResize={(width, height, x, y) => ctx.resize(id, width, height, x, y)}
-      />
+      />}
     </section>,
     document.querySelector(".app") || document.body,
     id,

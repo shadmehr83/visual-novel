@@ -50,6 +50,8 @@ const defs:[string,string,string,string?][]=[
  ['Timer bar on this dialogue','Hide the timer bar while the timer keeps running, for one dialogue, a dialogue range or a whole scene. In the studio a hidden bar shows as a faint outline.','dialogue','qte timer hide invisible bar visible range scene'],
  ['Open control window (second screen)','Open the studio in a second, linked window on your other monitor. Edits and the selected dialogue show in both windows live. Locally, localhost:5175 opens it for Stillframe 3.','workspace','dual screen second monitor two windows linked control panel sync'],
  ['Preview screen (this window)','Let the scene preview fill this window while you edit in the control window on another screen.','workspace','full screen preview monitor dual screen big preview'],
+ ['Open preview window (preview only)','Open a third linked window that shows only the scene preview, for the screen where you watch the game.','workspace','preview only window third screen monitor dual screen watch game'],
+ ['Minimise Scene preview','Fold the scene preview (or any panel) into a slim bar; click the bar to show it again.','workspace','minimise minimize hide collapse close preview panel restore'],
  ['Save and publish project','Export the full project with embedded artwork or use the configured publisher.','save','backup github sync json export'],
  ['Restore artwork','Recover missing published artwork and outfit cards while retaining custom project edits.','restore-artwork','missing empty folders images recovery'],
  ['Update history','Search version history and find directions for older and newer features.','updates','release help instructions'],

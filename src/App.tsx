@@ -58,7 +58,9 @@ import { LastLine } from "./LastLine";
 import { StoryTimer } from "./StoryTimer";
 import { TimedDecisionControls } from "./TimedDecisionControls";
 import { StoryTimerControls } from "./StoryTimerControls";
-import { openControlWindow, useWindowSync } from "./windowSync";
+import { openStudioWindow, useWindowSync } from "./windowSync";
+import { SyncBadge } from "./SyncBadge";
+import { createPortal } from "react-dom";
 import { CLAUDE_SITE, claudeExport, pendingReply } from "./characterReply";
 import { SelectionToolbar } from "./SelectionToolbar";
 import { useWorkspace, contrast } from "./workspace";
@@ -227,7 +229,12 @@ function Toggle({
   );
 }
 export default function App() {
-  const [workspace, setWorkspace] = useWorkspace();
+  // Which linked window this is (by Claude): the main studio, a control window or a preview-only window.
+  const [screen] = useState<"controls" | "preview" | null>(() => {
+    const s = new URLSearchParams(location.search).get("screen");
+    return s === "controls" || s === "preview" ? s : null;
+  });
+  const [workspace, setWorkspace] = useWorkspace(screen);
   useFolds(V3);
   // Stillframe 3's light or dark palette (by Claude); the classic design keeps its own theme setting.
   const [palette, setPaletteState] = useState<StudioPalette>(savedPalette);
@@ -374,16 +381,25 @@ export default function App() {
     loaded, project, setProject, sceneId, nodeId,
     onSelect: (sid, nid) => { setSceneId(sid); setNodeId(nid); },
   });
-  const controlWindow = new URLSearchParams(location.search).get("screen") === "controls";
-  // Preview screen: this window shows only the scene preview, filling the screen.
-  const [previewScreen, setPreviewScreen] = useState(false);
+  const controlWindow = screen === "controls";
+  // Preview screen: this window shows only the scene preview, filling the screen. A preview
+  // window (?screen=preview) starts that way. The preview is moved to the top of the page
+  // (previewHost) so no panel, split or zoom of the studio can squeeze it.
+  const [previewScreen, setPreviewScreen] = useState(screen === "preview");
+  const [previewHost, setPreviewHost] = useState<HTMLDivElement | null>(null);
+  function showPreview(section: React.ReactElement) {
+    return previewScreen && previewHost
+      ? createPortal(section, previewHost)
+      : <DockPanel id="preview">{section}</DockPanel>;
+  }
   useEffect(() => {
     if (previewScreen) document.documentElement.dataset.screen = "preview";
     else delete document.documentElement.dataset.screen;
   }, [previewScreen]);
   useEffect(() => {
-    if (controlWindow) document.title = "Controls · " + document.title.replace(/^Controls · /, "");
-  }, [controlWindow]);
+    const name = screen === "controls" ? "Controls · " : screen === "preview" ? "Preview · " : "";
+    if (name) document.title = name + document.title.replace(/^(Controls|Preview) · /, "");
+  }, [screen]);
   useEffect(() => {
     async function initialize() {
       try {
@@ -896,7 +912,8 @@ export default function App() {
       return;
     }
     if(action === "windows") {setModal("windows");return;}
-    if(action === "control-window") {void openControlWindow();return;}
+    if(action === "control-window") {void openStudioWindow("controls");return;}
+    if(action === "preview-window") {void openStudioWindow("preview");return;}
     if(action === "preview-screen") {setPreviewScreen(true);return;}
     if(action === "restore-artwork") {void restoreArtwork();return;}
     if(action === "split-view") {setPlaying(false);setWorkspace(w=>({...w,splitWorkspace:true,secondWorkspace:view === w.secondWorkspace ? (view === "dialogues" ? "scenes" : "dialogues") : w.secondWorkspace}));return;}
@@ -1522,7 +1539,7 @@ export default function App() {
                   )}
                 </div>
               )}
-              <DockPanel id="preview">
+              {showPreview(
               <section
                 ref={previewWindow.previewRef}
                 className={
@@ -1533,9 +1550,9 @@ export default function App() {
                 {/* Pinned to the top while the window is unlocked, so Lock is always reachable. */}
                 {previewScreen && (
                   <div className="preview-screen-bar" data-no-advance>
-                    {sync.linked > 0 ? <span>Linked · edits from the control window show here</span> : <span>Preview screen</span>}
-                    {!sync.linked && <button onClick={() => void openControlWindow()} data-help="Open the studio controls in a second window, on your other screen when the browser allows. Both windows edit the same project live.">Open control window</button>}
-                    <button onClick={() => setPreviewScreen(false)} data-help="Show the full studio in this window again.">Exit preview screen</button>
+                    <SyncBadge sync={sync} screen={screen ?? "preview"} />
+                    {!sync.linked && <button onClick={() => void openStudioWindow("controls")} data-help="Open the studio controls in a second window, on your other screen when the browser allows. Both windows edit the same project live.">Open control window</button>}
+                    <button onClick={() => setPreviewScreen(false)} data-help="Show the full studio in this window again, with every panel. The linked windows stay linked.">Show full studio</button>
                   </div>
                 )}
                 {!playing && !workspace.previewLocked && <div className="preview-window-bar">{previewWindow.tools}</div>}
@@ -1905,8 +1922,8 @@ export default function App() {
                   </button>
                 </div>
                 {!playing && previewWindow.handle}
-              </section>
-              </DockPanel>
+              </section>,
+              )}
               <DockPanel id="dialogue">
               <section
                 className={
@@ -3255,11 +3272,8 @@ export default function App() {
               <i className={status.startsWith("Saved") ? "saved" : ""} />
               {status}
             </span>
-            {sync.linked > 0 && (
-              <span className="linked-windows" role="status" data-help="Another studio window at this address is linked: edits and the selected dialogue show in both, live.">
-                Linked · {sync.linked + 1} windows
-              </span>
-            )}
+            <SyncBadge sync={sync} screen={screen} />
+
             <button
               title="Save project file"
               aria-label="Save project file"
@@ -3386,6 +3400,7 @@ export default function App() {
         )
         } />
         </DockSurface>
+        {previewScreen && <div className="preview-screen-host" ref={setPreviewHost} />}
         <footer className="app-footer">
           <span>
             <span className="live-dot" /> All yours. Stored locally.
@@ -3570,7 +3585,7 @@ export default function App() {
           </div>
         )}
       </div>
-      <GithubLoadPrompt enabled={sourcePromptOpen && loaded && !playing} onClose={()=>setSourcePromptOpen(false)} onLoad={() => void loadPublishedCafe()} />
+      <GithubLoadPrompt enabled={sourcePromptOpen && loaded && !playing && !screen}onClose={()=>setSourcePromptOpen(false)} onLoad={() => void loadPublishedCafe()} />
       {previewAssetId && <ImagePreview asset={project.assets.find(a => a.id === previewAssetId)} onClose={() => setPreviewAssetId(null)} />}
     </PlaySession>
   );

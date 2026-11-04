@@ -1,4 +1,4 @@
-export const ENGINE_VERSION = "3.6.0-claude";
+export const ENGINE_VERSION = "3.7.0-claude";
 export type ReleaseFeature = {
   name: string;
   description: string;
@@ -22,7 +22,13 @@ const f = (
   action?: string,
 ): ReleaseFeature => ({ name, description, steps: path.split(" → "), action });
 export const releases: Release[] = [
- {version:"3.6.0-claude",name:"Two screens: linked control window",by:"Claude",date:"2026-11-04",timestamp:"2026-11-04T03:12:24Z",features:[
+ {version:"3.7.0-claude",name:"Two screens: preview window, minimise and sync status",by:"Claude",date:"2026-11-04",timestamp:"2026-11-04T04:59:17Z",features:[
+ f("Preview-only window", "View → Open preview window (preview only) opens a third linked window that shows just the scene preview, filling it, for the screen where you watch the game. Edits from the studio and the control window show in it straight away. Show full studio turns it into a normal studio window.", "View → Open preview window (preview only)", "workspace"),
+ f("Minimise any panel", "The new – button on a panel title bar (Scene preview, Story library, Dialogue editor, Controls) folds the panel into a slim bar so the others get the room. Click the bar to bring it back where it was. Each linked window keeps its own arrangement, so hiding the preview in the control window leaves the main window as it is.", "Scene preview title bar → Minimise", "workspace"),
+ f("Sync status", "The Linked badge next to the save status now says which window this is (control or preview window) and flashes each time a change is sent (↑) or received (↓), with how long ago. A control or preview window that is not linked says so, for example when it was opened in an Incognito window.", "Top bar → Linked badge", "workspace"),
+ f("Preview screen fills the window", "View → Preview screen (this window) now always fills the whole window, even with split view or a scaled layout, instead of being squeezed into one panel.", "View → Preview screen (this window)", "workspace")
+ ]},
+ {version:"3.6.0-claude",name:"Two screens: linked control window",by:"Claude",commit:"af09283",date:"2026-11-04",timestamp:"2026-11-04T03:15:41Z",features:[
  f("Linked control window", "View → Open control window (second screen) opens the studio in a second window, placed on your other screen when the browser allows. Both windows edit the same project: a change in one, and the dialogue you select, shows in the other straight away. Locally, localhost:5175 opens the same control window for Stillframe 3.", "View → Open control window (second screen)", "workspace"),
  f("Preview screen", "View → Preview screen lets the scene preview fill this window, for the screen where you watch the game while you edit in the control window. Exit preview screen brings the studio back.", "View → Preview screen (this window)", "workspace"),
  f("Claude Code for every AI task", "In the studio on this computer, the AI panel now sends dialogue, effects (lighting, rain) and interface requests to Claude Code with your own Claude subscription by default, instead of an API key. A route you chose before stays as it is.", "AI → Assistant task → Claude Code · this computer", "assistant")

@@ -2206,13 +2206,24 @@ body:has(.exported-game),body:has(.player-title){margin:0;overflow:hidden;backgr
 .story-timer-controls h4{margin:0 0 6px;font-size:12px;text-transform:uppercase;letter-spacing:.05em}
 .story-timer-controls details{margin-top:6px}
 .story-timer-controls summary{cursor:pointer;font-size:12px}
-/* Linked windows and preview screen (by Claude) */
+/* Linked windows, sync signal, preview screen and minimised panels (by Claude) */
 .linked-windows{display:inline-flex;align-items:center;gap:6px;padding:3px 9px;border-radius:999px;font-size:12px;background:#2f6f4f33;color:inherit;border:1px solid #4fae7d80;white-space:nowrap}
-.linked-windows::before{content:"";width:7px;height:7px;border-radius:50%;background:#4fae7d}
-html[data-screen="preview"] .preview-area{position:fixed!important;inset:0!important;z-index:180;margin:0!important;max-width:none!important;width:auto!important;height:auto!important;min-height:0!important;border:0!important;border-radius:0!important;padding:44px 16px 16px!important;background:#0d1015!important;display:flex;flex-direction:column;overflow:hidden;transform:none!important}
-html[data-screen="preview"] .preview-area>.preview-window-bar{display:none}
-html[data-screen="preview"] .preview-area .stage-frame{flex:1;min-height:0;max-height:none;display:flex;align-items:center;justify-content:center}
+.linked-windows small{opacity:.72;font-size:11px}
+.linked-windows.not-linked{background:#a0702a26;border-color:#d39a4a99}
+.linked-windows.not-linked::before{content:"";width:7px;height:7px;border-radius:50%;background:#d39a4a}
+.sync-dot{width:7px;height:7px;border-radius:50%;background:#4fae7d;flex:none}
+.sync-flash{animation:sync-flash .9s ease-out}
+@keyframes sync-flash{0%{box-shadow:0 0 0 0 #4fae7dcc;transform:scale(1.7)}100%{box-shadow:0 0 0 8px #4fae7d00;transform:scale(1)}}
+.preview-screen-host{position:fixed;inset:0;z-index:180;display:flex;background:#0d1015}
+.preview-screen-host>.preview-area{flex:1;position:relative!important;inset:auto!important;margin:0!important;max-width:none!important;width:auto!important;height:auto!important;min-height:0!important;border:0!important;border-radius:0!important;padding:50px 16px 16px!important;background:#0d1015!important;display:flex;flex-direction:column;overflow:hidden;transform:none!important}
+.preview-screen-host>.preview-area>.preview-window-bar{display:none}
+.preview-screen-host .stage-frame{flex:1;min-height:0;max-height:none;display:flex;align-items:center;justify-content:center}
 html[data-screen="preview"] :is(.app>header,.studio-navigation,.rail){visibility:hidden}
-.preview-screen-bar{position:absolute;top:8px;left:12px;right:auto;z-index:70;display:flex;align-items:center;gap:8px;font-size:12px;color:#d2d3ce}
-.preview-screen-bar span{margin-right:4px;opacity:.8}
+.preview-screen-bar{position:absolute;top:10px;left:12px;right:auto;z-index:70;display:flex;align-items:center;gap:8px;font-size:12px;color:#d2d3ce}
+.preview-screen-bar .linked-windows{color:#e8e9e4}
 .preview-screen-bar button{padding:5px 10px;border-radius:6px;border:1px solid #ffffff40;background:#ffffff14;color:#fff;cursor:pointer}
+[data-minimised]{min-height:0!important;height:auto!important;max-height:none!important;flex:0 0 auto!important;padding:0!important;overflow:hidden!important}
+.panel-minimised-bar{display:flex!important;align-items:center;gap:8px;width:100%;padding:8px 12px!important;border:1px dashed currentColor!important;border-radius:8px;background:transparent!important;cursor:pointer;opacity:.8;font-size:12px;text-align:left;color:inherit}
+.panel-minimised-bar:hover{opacity:1}
+.panel-minimised-bar small{margin-left:auto;opacity:.65}
+@media (max-width:1280px){.app>header .linked-windows small{display:none}}

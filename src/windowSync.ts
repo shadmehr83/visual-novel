@@ -58,6 +58,8 @@ export function useWindowSync({ loaded, project, setProject, sceneId, nodeId, on
   const latest = useRef({ project, sceneId, nodeId, setProject, onSelect });
   latest.current = { project, sceneId, nodeId, setProject, onSelect };
   const [peers, setPeers] = useState<string[]>([]);
+  // When an edit last went out or came in, and which way, for the "synced" signal.
+  const [activity, setActivity] = useState<{ at: number; way: "sent" | "received" } | null>(null);
   // When this window last made a change (or took one): older changes never replace newer ones.
   const lastEdit = useRef(0);
   const seen = useRef(new Map<string, number>());
@@ -70,6 +72,7 @@ export function useWindowSync({ loaded, project, setProject, sceneId, nodeId, on
     const media: Media = [];
     for (const [k, v] of mediaOf(p)) if (full || sent.current.get(k) !== v) { media.push([k, v]); sent.current.set(k, v); }
     post({ type: "project", from: me, project: strip(p), media, full, at: lastEdit.current });
+    if (!full) setActivity({ at: Date.now(), way: "sent" });
   };
 
   useEffect(() => {
@@ -101,6 +104,7 @@ export function useWindowSync({ loaded, project, setProject, sceneId, nodeId, on
         remote.current = next;
         lastEdit.current = msg.at;
         latest.current.setProject(next);
+        setActivity({ at: Date.now(), way: "received" });
       }
       if (msg.type === "select") {
         lastSelect.current = msg.sceneId + "/" + msg.nodeId;
@@ -147,12 +151,13 @@ export function useWindowSync({ loaded, project, setProject, sceneId, nodeId, on
     post({ type: "select", from: me, sceneId, nodeId });
   }, [sceneId, nodeId, loaded, peers.length]);
 
-  return { remote, linked: peers.length };
+  return { remote, linked: peers.length, activity };
 }
 
-// Opens a linked control window, on another screen when the browser can tell where it is.
-export async function openControlWindow() {
-  const url = location.origin + location.pathname + "?screen=controls";
+// Opens a linked control window or preview-only window, on another screen when the browser can
+// tell where it is. Each kind has its own window, so asking again brings the same one forward.
+export async function openStudioWindow(screen: "controls" | "preview") {
+  const url = location.origin + location.pathname + "?screen=" + screen;
   let features = "popup,width=1400,height=900";
   try {
     // Chrome and Edge ask once for permission to place windows on other displays.
@@ -165,5 +170,5 @@ export async function openControlWindow() {
   } catch {
     /* permission refused: open it here and drag it across */
   }
-  return window.open(url, "stillframe-controls", features);
+  return window.open(url, "stillframe-" + screen, features);
 }

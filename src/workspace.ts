@@ -32,11 +32,24 @@ export const workspaceSchema = z.object({
 });
 export type WorkspaceSettings = z.infer<typeof workspaceSchema>;
 export const defaults = () => workspaceSchema.parse({});
-export function useWorkspace() {
+// Linked windows (by Claude): a control or preview window keeps its own panel layout, so
+// minimising or moving a panel there leaves the main window as it is. It starts from the
+// main window's layout the first time it opens.
+export function workspaceKey(screen: string | null) {
+  return screen === "controls" || screen === "preview"
+    ? "stillframe-workspace-" + screen
+    : "stillframe-workspace";
+}
+export function useWorkspace(screen: string | null = null) {
+  const key = workspaceKey(screen);
   const [settings, setSettings] = useState<WorkspaceSettings>(() => {
     try {
       return workspaceSchema.parse(
-        JSON.parse(localStorage.getItem("stillframe-workspace") || "{}"),
+        JSON.parse(
+          localStorage.getItem(key) ||
+            localStorage.getItem("stillframe-workspace") ||
+            "{}",
+        ),
       );
     } catch {
       return defaults();
@@ -44,7 +57,7 @@ export function useWorkspace() {
   });
   useEffect(() => {
     try {
-      localStorage.setItem("stillframe-workspace", JSON.stringify(settings));
+      localStorage.setItem(key, JSON.stringify(settings));
     } catch {}
   }, [settings]);
   return [settings, setSettings] as const;

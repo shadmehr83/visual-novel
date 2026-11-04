@@ -4,6 +4,16 @@ Every change in this list was written by Claude (Anthropic) at the request of th
 
 > **Where this lives:** branch `claude` on GitHub (the hosted Claude version). Versions follow Stillframe 3 (3.x) and end in `-claude`. `main` is the original line and is untouched. The local Stillframe 3 studio (`npm run stillframe3`, localhost:5174) runs the same code from the local branch `claude-v3`, which is never pushed.
 
+## Stillframe 3.7 — two screens: preview window, minimise and sync status (2026-11-04, engine 3.7.0-claude)
+
+- **Preview-only window:** View → Open preview window (preview only) opens `?screen=preview` (title *Preview · …*), a linked window that starts as the preview screen. `openControlWindow` became `openStudioWindow("controls" | "preview")` in `src/windowSync.ts`; each kind reuses its own named window.
+- **Preview screen fix** (`src/App.tsx`): in preview-screen mode the preview section is rendered through a portal into `.preview-screen-host`, a direct child of `.app`, instead of being pinned with `position:fixed` inside the studio panels. A split view or scaled layout could trap the old overlay inside one panel (the glitch with a black stage in the control window). *Exit preview screen* is now *Show full studio*.
+- **Minimise panels** (`src/DockPanels.tsx`, `src/docking.ts`): a – button on each panel title bar (not the workspaces) sets `min` on that panel's saved layout and folds it into a *minimised · click to show* bar. Its saved size and position are kept (a minimised floating window skips its resize observer).
+- **Per-window layout** (`src/workspace.ts`): control and preview windows save their panel layout under `stillframe-workspace-controls` / `-preview`, starting from the main window's layout.
+- **Sync status** (`src/SyncBadge.tsx`): the badge names the window (Control / Preview window), flashes on every edit sent (↑) or received (↓) and shows how long ago. An unlinked control or preview window says *not linked* and explains that Incognito windows cannot link. `useWindowSync` returns `activity`.
+- Linked control and preview windows skip the *Continue your story* GitHub prompt.
+- Tests: `src/windowSync.test.tsx` (sync activity, per-window layout key, minimised panel schema).
+
 ## Stillframe 3.6 — two screens: linked control window (2026-11-04, engine 3.6.0-claude)
 
 - **Linked windows** (`src/windowSync.ts`): studio windows at the same address share every edit and the selected dialogue through a BroadcastChannel. Only artwork and sound that changed are sent. The window that made a change saves it; the others show it without saving (`App.tsx` autosave skips `sync.remote`). A window that falls behind asks for the full project. Each edit carries its time, so a window coming back from a long pause never replaces newer work; windows that close without a goodbye drop off after a quiet spell (heartbeat). A *Linked · N windows* badge shows next to the save status. Before this, two tabs kept separate copies and the last to save silently overwrote the other.

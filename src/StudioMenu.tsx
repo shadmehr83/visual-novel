@@ -113,8 +113,10 @@ export function StudioMenu({
             {command("Playthrough event log", "events")}
             {command("Open control window (second screen)", "control-window", false,
               "Open the studio in a second, linked window, on your other screen when the browser allows. Edits and the selected dialogue show in both windows live.")}
+            {command("Open preview window (preview only)", "preview-window", false,
+              "Open a separate linked window that shows only the scene preview, filling it. Put it on the screen where you watch the game; this window stays the full studio.")}
             {command("Preview screen (this window)", "preview-screen", false,
-              "Let the scene preview fill this window, for the screen where you watch the game while you edit in the control window.")}
+              "Let the scene preview fill this window instead, for the screen where you watch the game while you edit in the control window. Show full studio brings the panels back.")}
             {command(V3 ? "Switch to classic design" : "Switch to Stillframe 3 design", "design", false,
               V3 ? "Save, then reload in the classic studio design." + (STILLFRAME3 ? " A new start opens Stillframe 3 again." : "") : "Save, then reload in the Stillframe 3 design.")}
             <hr />

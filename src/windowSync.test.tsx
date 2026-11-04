@@ -22,6 +22,9 @@ it("shows an edit and a selection from one window in the other, without sending 
   act(() => a.result.current.setProject({ ...a.result.current.project, title: "Edited on the control screen" }));
   await waitFor(() => expect(b.result.current.project.title).toBe("Edited on the control screen"));
   expect(b.result.current.project.assets[0].data).toBe("data:image/png;base64,AAAA");
+  // Both windows show that a change just went across: sent here, received there.
+  expect(a.result.current.sync.activity?.way).toBe("sent");
+  expect(b.result.current.sync.activity?.way).toBe("received");
   // The receiving window does not echo the change back as its own.
   expect(b.result.current.sync.remote.current).toBe(b.result.current.project);
   // And back the other way, from the preview window to the control window.
@@ -33,4 +36,13 @@ it("shows an edit and a selection from one window in the other, without sending 
   a.unmount();
   await waitFor(() => expect(b.result.current.sync.linked).toBe(0));
   b.unmount();
+});
+it("keeps a separate panel layout for control and preview windows", async () => {
+  const { workspaceKey } = await import("./workspace");
+  expect(workspaceKey(null)).toBe("stillframe-workspace");
+  expect(workspaceKey("controls")).toBe("stillframe-workspace-controls");
+  expect(workspaceKey("preview")).toBe("stillframe-workspace-preview");
+  const { dockPanelSchema } = await import("./docking");
+  // A minimised panel keeps its saved size and position.
+  expect(dockPanelSchema.parse({ mode: "home", x: 1, y: 2, width: 850, height: 580, min: true }).min).toBe(true);
 });
