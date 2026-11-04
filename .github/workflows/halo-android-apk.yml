@@ -970,7 +970,7 @@ jobs:
           mkdir -p 'app/src/main/java/app/halo/music'
           cat > 'app/src/main/java/app/halo/music/HaloMusicWidget.java' <<'HALO_V9_END'
           package app.halo.music;
-          import android.app.*;import android.appwidget.*;import android.content.*;import android.graphics.*;import android.media.*;import android.media.session.*;import android.os.*;import android.widget.*;import java.util.*;
+          import android.app.*;import android.appwidget.*;import android.content.*;import android.graphics.*;import android.media.*;import android.media.session.*;import android.os.*;import android.widget.*;import java.util.*;import android.media.session.MediaController;
           public class HaloMusicWidget extends AppWidgetProvider {
            static final String TICK="app.halo.music.WIDGET_TICK",PREV="app.halo.music.PREV",NEXT="app.halo.music.NEXT",TOGGLE="app.halo.music.TOGGLE";
            static MediaController media(Context c){try{MediaSessionManager m=(MediaSessionManager)c.getSystemService(Context.MEDIA_SESSION_SERVICE);List<MediaController> xs=m.getActiveSessions(new ComponentName(c,MainActivity.Listener.class));MediaController best=null;int bestScore=-1;for(MediaController x:xs){if(x.getMetadata()==null)continue;PlaybackState p=x.getPlaybackState();int score=(p!=null&&p.getState()==PlaybackState.STATE_PLAYING?30:0)+("com.google.android.apps.youtube.music".equals(x.getPackageName())?10:1);if(score>bestScore){best=x;bestScore=score;}}return best;}catch(Exception e){return null;}}
