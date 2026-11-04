@@ -103,11 +103,12 @@ export function useWindowSync({ loaded, project, setProject, sceneId, nodeId, on
     };
   }, [loaded]);
 
-  // Local edits go out once per frame, so typing stays smooth.
+  // Local edits are grouped for a moment so typing stays smooth. A timer, not an animation
+  // frame: frames pause in a hidden or covered window, and the edit must still go out.
   useEffect(() => {
     if (!loaded || !peers.length || project === remote.current) return;
-    const frame = requestAnimationFrame(() => sendProject(project, false));
-    return () => cancelAnimationFrame(frame);
+    const timer = setTimeout(() => sendProject(project, false), 30);
+    return () => clearTimeout(timer);
   }, [project, loaded, peers.length]);
   useEffect(() => {
     const key = sceneId + "/" + nodeId;
