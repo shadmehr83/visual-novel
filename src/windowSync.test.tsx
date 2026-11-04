@@ -24,6 +24,9 @@ it("shows an edit and a selection from one window in the other, without sending 
   expect(b.result.current.project.assets[0].data).toBe("data:image/png;base64,AAAA");
   // The receiving window does not echo the change back as its own.
   expect(b.result.current.sync.remote.current).toBe(b.result.current.project);
+  // And back the other way, from the preview window to the control window.
+  act(() => b.result.current.setProject({ ...b.result.current.project, title: "Edited on the main screen" }));
+  await waitFor(() => expect(a.result.current.project.title).toBe("Edited on the main screen"));
   const scene = base.scenes[1];
   act(() => a.result.current.setSel({ sceneId: scene.id, nodeId: scene.nodes[0].id }));
   await waitFor(() => expect(b.result.current.sel.sceneId).toBe(scene.id));

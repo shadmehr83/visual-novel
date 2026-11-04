@@ -11,7 +11,8 @@ type Message =
   | { type: "hello"; from: string }
   | { type: "bye"; from: string }
   | { type: "here"; from: string }
-  | { type: "project"; from: string; project: Project; media: Media; full: boolean }
+  | { type: "beat"; from: string }
+  | { type: "project"; from: string; project: Project; media: Media; full: boolean; at: number }
   | { type: "select"; from: string; sceneId: string; nodeId: string };
 
 const mediaOf = (p: Project): Media => [
@@ -57,12 +58,18 @@ export function useWindowSync({ loaded, project, setProject, sceneId, nodeId, on
   const latest = useRef({ project, sceneId, nodeId, setProject, onSelect });
   latest.current = { project, sceneId, nodeId, setProject, onSelect };
   const [peers, setPeers] = useState<string[]>([]);
+  // When this window last made a change (or took one): older changes never replace newer ones.
+  const lastEdit = useRef(0);
+  const seen = useRef(new Map<string, number>());
+  const shown = useRef<Project | null>(null);
+  const linked = useRef(0);
+  linked.current = peers.length;
 
   const post = (msg: Message) => channel.current?.postMessage(msg);
   const sendProject = (p: Project, full: boolean) => {
     const media: Media = [];
     for (const [k, v] of mediaOf(p)) if (full || sent.current.get(k) !== v) { media.push([k, v]); sent.current.set(k, v); }
-    post({ type: "project", from: me, project: strip(p), media, full });
+    post({ type: "project", from: me, project: strip(p), media, full, at: lastEdit.current });
   };
 
   useEffect(() => {
@@ -71,20 +78,28 @@ export function useWindowSync({ loaded, project, setProject, sceneId, nodeId, on
     channel.current = ch;
     ch.onmessage = ({ data: msg }: MessageEvent<Message>) => {
       if (!msg || msg.from === me) return;
-      if (msg.type === "hello" || msg.type === "here")
-        setPeers((p) => (p.includes(msg.from) ? p : [...p, msg.from]));
-      if (msg.type === "hello") {
+      const known = seen.current.has(msg.from);
+      seen.current.set(msg.from, Date.now());
+      if (msg.type !== "bye") setPeers((p) => (p.includes(msg.from) ? p : [...p, msg.from]));
+      // A window just opened, or came back after a long pause: greet it and hand over this
+      // window's project. It keeps whichever of the two was changed last.
+      if (msg.type === "hello" || (!known && msg.type !== "bye")) {
         // A window just opened: greet it and hand over this window's current project.
         post({ type: "here", from: me });
         sendProject(latest.current.project, true);
         post({ type: "select", from: me, sceneId: latest.current.sceneId, nodeId: latest.current.nodeId });
       }
-      if (msg.type === "bye") setPeers((p) => p.filter((x) => x !== msg.from));
+      if (msg.type === "bye") {
+        seen.current.delete(msg.from);
+        setPeers((p) => p.filter((x) => x !== msg.from));
+      }
       if (msg.type === "project") {
+        if (msg.at < lastEdit.current) return;
         const next = rebuild(msg, latest.current.project);
         if (!next) return post({ type: "hello", from: me });
         for (const [k, v] of mediaOf(next)) sent.current.set(k, v);
         remote.current = next;
+        lastEdit.current = msg.at;
         latest.current.setProject(next);
       }
       if (msg.type === "select") {
@@ -95,7 +110,17 @@ export function useWindowSync({ loaded, project, setProject, sceneId, nodeId, on
     post({ type: "hello", from: me });
     const leave = () => post({ type: "bye", from: me });
     window.addEventListener("pagehide", leave);
+    // A window closed without saying goodbye is dropped after a quiet spell. Minimised windows
+    // may only tick once a minute, so the spell is long.
+    const beat = setInterval(() => {
+      post({ type: "beat", from: me });
+      const quiet = Date.now() - 75000;
+      const gone = [...seen.current].filter(([, at]) => at < quiet).map(([id]) => id);
+      gone.forEach((id) => seen.current.delete(id));
+      if (gone.length) setPeers((p) => p.filter((x) => !gone.includes(x)));
+    }, 5000);
     return () => {
+      clearInterval(beat);
       leave();
       window.removeEventListener("pagehide", leave);
       ch.close();
@@ -106,10 +131,15 @@ export function useWindowSync({ loaded, project, setProject, sceneId, nodeId, on
   // Local edits are grouped for a moment so typing stays smooth. A timer, not an animation
   // frame: frames pause in a hidden or covered window, and the edit must still go out.
   useEffect(() => {
-    if (!loaded || !peers.length || project === remote.current) return;
-    const timer = setTimeout(() => sendProject(project, false), 30);
+    if (!loaded) return;
+    // The project this window opened with is not an edit, so it still takes a linked window's newer work.
+    const first = shown.current === null, changed = project !== shown.current;
+    shown.current = project;
+    if (first || !changed || project === remote.current) return;
+    lastEdit.current = Date.now();
+    const timer = setTimeout(() => { if (linked.current) sendProject(project, false); }, 30);
     return () => clearTimeout(timer);
-  }, [project, loaded, peers.length]);
+  }, [project, loaded]);
   useEffect(() => {
     const key = sceneId + "/" + nodeId;
     if (!loaded || !peers.length || key === lastSelect.current) return;
