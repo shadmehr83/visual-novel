@@ -117,7 +117,7 @@ import {
   Moon,
   type LucideIcon,
 } from "lucide-react";
-import { V3, STILLFRAME3, chooseDesign, choosePalette, savedPalette, type Design, type Palette as StudioPalette } from "./v3/ui";
+import { V3, chooseDesign, choosePalette, savedPalette, type Design, type Palette as StudioPalette } from "./v3/ui";
 import { StudioDesign } from "./v3/StudioDesign";
 import { unfoldAround, useFolds } from "./v3/folds";
 import { V3Popover } from "./v3/Popover";
@@ -3429,7 +3429,9 @@ export default function App() {
                 <ProjectSave project={project} />
               ) : modal === "settings" ? (
                 <>
-                  {STILLFRAME3 && <StudioDesign palette={palette} onPalette={setPalette} onDesign={switchDesign} />}
+                  {/* Classic uses its own interface theme for Light / Dark; Stillframe 3 uses its palette. */}
+                  <StudioDesign palette={V3 ? palette : workspace.theme === "dark" ? "dark" : "light"}
+                    onPalette={V3 ? setPalette : (p) => setWorkspace((w) => ({ ...w, theme: p }))} onDesign={switchDesign} />
                   {/* Playtest admin (by Claude): the hosted page that follows testers of the shared Claude version. */}
                   <section className="property-section playtest-admin-link">
                     <h3>Playtest admin</h3>

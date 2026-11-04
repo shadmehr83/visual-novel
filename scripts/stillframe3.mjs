@@ -7,7 +7,8 @@ const port = Number(process.env.PORT || 5174);
 const outDir = "dist-v3";
 let server;
 // The bundled artwork chunks are large by design, so their size warning is left out.
-const watcher = await build({ build: { outDir, emptyOutDir: true, watch: {}, chunkSizeWarningLimit: 8192 }, logLevel: "warn" });
+// "stillframe3" mode marks the page as the local Stillframe 3 studio (see vite.config.ts).
+const watcher = await build({ mode: "stillframe3", build:{ outDir, emptyOutDir: true, watch: {}, chunkSizeWarningLimit: 8192 }, logLevel: "warn" });
 watcher.on("event", async (event) => {
   if (event.code === "BUNDLE_END") await event.result?.close();
   if (event.code === "ERROR") console.error("Stillframe 3 build failed:", event.error?.message || event.error);

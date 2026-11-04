@@ -2,7 +2,14 @@
 
 Every change in this list was written by Claude (Anthropic) at the request of the repository owner. Matching commits start with `[Claude]` and carry a `Co-authored-by: Claude <noreply@anthropic.com>` trailer.
 
-> **Where this lives:** branch `claude` on GitHub. Versions end in `-claude`. `main` is the original line and is untouched.
+> **Where this lives:** branch `claude` on GitHub (the hosted Claude version). Versions follow Stillframe 3 (3.x) and end in `-claude`. `main` is the original line and is untouched. The local Stillframe 3 studio (`npm run stillframe3`, localhost:5174) runs the same code from the local branch `claude-v3`, which is never pushed.
+
+## Stillframe 3.5 — one Stillframe: design switch in the hosted studio (2026-11-04, engine 3.5.0-claude)
+
+- **One codebase:** `claude` now holds everything from Stillframe 3 (fast-forwarded to `claude-v3`), and both branches share the same code and version line. Earlier 2.x releases stay in Update history.
+- **Design choice** (`index.html`, `src/v3/ui.ts`): a start-up script adds `data-ui="v3"`. The hosted studio and the dev server open in the classic design unless this browser chose Stillframe 3 (`localStorage["stillframe-design"]`). Local Stillframe 3 builds in `stillframe3` mode (`vite.config.ts` adds `data-sf3` and its title; `scripts/stillframe3.mjs`). It opens the new design unless the tab chose classic, as before, and skips the offline service worker.
+- **Settings → Studio design** (`src/v3/StudioDesign.tsx`) and View → Switch to … design now appear in every studio. Light / Dark works in both designs: the classic interface theme, or the Stillframe 3 palette.
+- The hosted studio also gets Stillframe 3's storage (artwork in a separate IndexedDB `media` store, version 2, migrated on the next save) and the GIF transition fixes.
 
 ## Stillframe 3.4 — story timer switches (2026-11-04, engine 3.4.0-claude)
 

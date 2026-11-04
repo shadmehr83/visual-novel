@@ -1,4 +1,4 @@
-export const ENGINE_VERSION = "3.4.0-claude";
+export const ENGINE_VERSION = "3.5.0-claude";
 export type ReleaseFeature = {
   name: string;
   description: string;
@@ -22,7 +22,12 @@ const f = (
   action?: string,
 ): ReleaseFeature => ({ name, description, steps: path.split(" → "), action });
 export const releases: Release[] = [
- {version:"3.4.0-claude",name:"Story timer switches in Stillframe 3",by:"Claude",date:"2026-11-04",timestamp:"2026-11-03T17:23:05Z",features:[
+ {version:"3.5.0-claude",name:"One Stillframe: design switch in the hosted studio",by:"Claude",date:"2026-11-04",timestamp:"2026-11-04T01:41:18Z",features:[
+ f("Stillframe 3 design everywhere", "The hosted studio (the Claude version on GitHub) can now switch to the Stillframe 3 design in Settings → Studio design, or View → Switch to Stillframe 3 design. It opens in the classic design and remembers your choice in this browser. Local Stillframe 3 still opens in its new design on every start.", "Settings → Studio design → Stillframe 3", "settings"),
+ f("Light or dark in both designs", "Settings → Studio design → Light / Dark works in either design: the classic studio switches its interface theme, and Stillframe 3 switches its palette.", "Settings → Studio design → Light / Dark", "settings"),
+ f("One version line", "The hosted studio and local Stillframe 3 now run the same code and share version numbers in the Stillframe 3 style (3.x). Earlier 2.x releases stay listed below. The hosted studio also gains the Stillframe 3 speed-ups: artwork is stored once instead of copied on every save, and GIF backgrounds cross-fade cleanly.", "Workspace → Update history", "updates")
+ ]},
+ {version:"3.4.0-claude",name:"Story timer switches in Stillframe 3",by:"Claude",commit:"692ec7c",date:"2026-11-04",timestamp:"2026-11-03T17:25:41Z",features:[
  f("Story timer switches in both designs", "The per-dialogue, range and scene timer switches from the classic studio (2.32.0-claude) are in Stillframe 3 too, in the Normal and Advanced dialogue editors.", "Dialogue → Normal → Story timer", "dialogue")
  ]},
  {version:"3.3.0-claude",name:"New game settings in Stillframe 3",by:"Claude",commit:"340fe42",date:"2026-11-04",timestamp:"2026-11-03T16:44:30Z",features:[
@@ -52,7 +57,7 @@ export const releases: Release[] = [
  f("Faster and lighter", "Stillframe 3 runs from an optimised build (about five times faster per edit, half the memory), and autosave stores artwork once instead of copying every image on each change.", "Stillframe 3 → Edit any line", "editor"),
  f("Smooth GIF and still backgrounds", "Moving from a still background to an animated GIF, or back, is now a clean cross-fade: a GIF starts on its poster or a ready frame, each frame is prepared once and reused, and the old picture waits for the new one, so nothing flashes dark or blinks.", "Play story → Café → A table by the window", "background")
  ]},
- {version:"2.32.0-claude",name:"Story timer per dialogue, range and scene",by:"Claude",date:"2026-11-04",timestamp:"2026-11-03T17:20:02Z",features:[
+ {version:"2.32.0-claude",name:"Story timer per dialogue, range and scene",by:"Claude",commit:"339ff97",date:"2026-11-04",timestamp:"2026-11-03T17:22:40Z",features:[
  f("Timer on or off per dialogue", "Each dialogue has Timer on this dialogue: Follow scene, On or Off. Off stops auto-continue and a timed decision's countdown on that line; a line's own Auto-advance time still runs. It is in both the Normal and the Advanced dialogue editor, and works during Author's playthrough.", "Dialogue → Normal → Story timer → Timer on this dialogue", "dialogue"),
  f("Hide the timer bar", "Timer bar on this dialogue can hide the bar while the timer keeps running, so players cannot see how long is left. In the studio a hidden bar shows as a faint dashed outline so you know it is running.", "Dialogue → Normal → Story timer → Timer bar on this dialogue", "dialogue"),
  f("Timers for a scene or a dialogue range", "Under Whole scene or a dialogue range, switch every timer in a scene off, hide every bar, or apply either one from one dialogue to another. A dialogue's own On/Off or Shown/Hidden choice wins over the scene.", "Dialogue → Advanced → Story timer → From one dialogue to another", "dialogue")

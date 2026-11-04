@@ -111,8 +111,8 @@ export function StudioMenu({
             )}
             {command("Scene backgrounds…", "background")}
             {command("Playthrough event log", "events")}
-            {STILLFRAME3 && command(V3 ? "Switch to classic design" : "Switch to Stillframe 3.1 design", "design", false,
-              V3 ? "Save, then reload this tab in the classic studio design. A new start opens Stillframe 3.1 again." : "Save, then reload in the Stillframe 3.1 design.")}
+            {command(V3 ? "Switch to classic design" : "Switch to Stillframe 3 design", "design", false,
+              V3 ? "Save, then reload in the classic studio design." + (STILLFRAME3 ? " A new start opens Stillframe 3 again." : "") : "Save, then reload in the Stillframe 3 design.")}
             <hr />
             {[
               ["right", "Dock controls right"],
