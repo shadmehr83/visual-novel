@@ -1,4 +1,4 @@
-name: Build HALO Android v8
+name: Build HALO Android v9
 on:
   push:
     branches: [halo-android-build]
@@ -33,7 +33,7 @@ jobs:
           mkdir -p 'app'
           cat > 'app/build.gradle' <<'HALO_FILE_END'
           plugins { id 'com.android.application' }
-          android { namespace 'app.halo.music'; compileSdk 35; defaultConfig { applicationId 'app.halo.music'; minSdk 26; targetSdk 35; versionCode 8; versionName '8.0' }; compileOptions { sourceCompatibility JavaVersion.VERSION_17; targetCompatibility JavaVersion.VERSION_17 } }
+          android { namespace 'app.halo.music'; compileSdk 35; defaultConfig { applicationId 'app.halo.music'; minSdk 26; targetSdk 35; versionCode 9; versionName '9.0' }; compileOptions { sourceCompatibility JavaVersion.VERSION_17; targetCompatibility JavaVersion.VERSION_17 } }
           dependencies { implementation 'androidx.browser:browser:1.8.0' }
           HALO_FILE_END
           mkdir -p 'app/src/main'
@@ -964,6 +964,151 @@ jobs:
           <?xml version="1.0" encoding="utf-8"?>
           <adaptive-icon xmlns:android="http://schemas.android.com/apk/res/android"><background android:drawable="@drawable/icon_bg"/><foreground android:drawable="@drawable/icon_fg"/></adaptive-icon>
           HALO_V8_FILE_END
+      - name: Apply HALO v9 widget upgrade
+        shell: bash
+        run: |
+          mkdir -p 'app/src/main/java/app/halo/music'
+          cat > 'app/src/main/java/app/halo/music/HaloMusicWidget.java' <<'HALO_V9_END'
+          package app.halo.music;
+          import android.app.*;import android.appwidget.*;import android.content.*;import android.graphics.*;import android.media.*;import android.media.session.*;import android.os.*;import android.widget.*;import java.util.*;
+          public class HaloMusicWidget extends AppWidgetProvider {
+           static final String TICK="app.halo.music.WIDGET_TICK",PREV="app.halo.music.PREV",NEXT="app.halo.music.NEXT",TOGGLE="app.halo.music.TOGGLE";
+           static MediaController media(Context c){try{MediaSessionManager m=(MediaSessionManager)c.getSystemService(Context.MEDIA_SESSION_SERVICE);List<MediaController> xs=m.getActiveSessions(new ComponentName(c,MainActivity.Listener.class));MediaController best=null;int bestScore=-1;for(MediaController x:xs){if(x.getMetadata()==null)continue;PlaybackState p=x.getPlaybackState();int score=(p!=null&&p.getState()==PlaybackState.STATE_PLAYING?30:0)+("com.google.android.apps.youtube.music".equals(x.getPackageName())?10:1);if(score>bestScore){best=x;bestScore=score;}}return best;}catch(Exception e){return null;}}
+           static PendingIntent action(Context c,String cmd,int n){return PendingIntent.getBroadcast(c,n,new Intent(c,HaloMusicWidget.class).setAction(cmd),PendingIntent.FLAG_IMMUTABLE|PendingIntent.FLAG_UPDATE_CURRENT);}
+           public static void updateAll(Context c){AppWidgetManager m=AppWidgetManager.getInstance(c);int[] ids=m.getAppWidgetIds(new ComponentName(c,HaloMusicWidget.class));if(ids.length>0)update(c,m,ids);}
+           static boolean expanded(Bundle b){return b!=null&&(b.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_WIDTH,0)>=245||b.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_HEIGHT,0)>=150);}
+           static Bitmap wave(boolean play,boolean large){int w=large?360:280,h=large?90:66;Bitmap bm=Bitmap.createBitmap(w,h,Bitmap.Config.ARGB_8888);Canvas c=new Canvas(bm);Paint p=new Paint(3);float phase=(SystemClock.elapsedRealtime()%90000)/1000f;for(int i=0;i<27;i++){float k=i/26f,shape=(float)Math.pow(Math.sin(Math.PI*k),1.4);float energy=play?.3f+.65f*(.5f+.5f*(float)Math.sin(i*.85f+phase*2)):.16f;float ht=(8+h*.69f*shape*energy);float x=9+i*(w-18)/26f;p.setColor(Color.rgb((int)(91+80*k),(int)(220-80*k),255));c.drawRoundRect(x-3,(h-ht)/2,x+3,(h+ht)/2,4,4,p);}return bm;}
+           static Bitmap scaled(Bitmap b){if(b==null)return null;int max=180;float sc=Math.min(1f,max/(float)Math.max(b.getWidth(),b.getHeight()));return Bitmap.createScaledBitmap(b,Math.max(1,(int)(b.getWidth()*sc)),Math.max(1,(int)(b.getHeight()*sc)),true);}
+           static void alarm(Context c,boolean active){try{AlarmManager a=(AlarmManager)c.getSystemService(Context.ALARM_SERVICE);PendingIntent pi=action(c,TICK,199);a.cancel(pi);if(active)a.set(AlarmManager.ELAPSED_REALTIME,SystemClock.elapsedRealtime()+60000,pi);}catch(Exception ignored){}}
+           static void update(Context c,AppWidgetManager m,int[] ids){MediaController ctrl=media(c);MediaMetadata md=ctrl==null?null:ctrl.getMetadata();PlaybackState ps=ctrl==null?null:ctrl.getPlaybackState();boolean playing=ps!=null&&ps.getState()==PlaybackState.STATE_PLAYING;String title=md==null?"Waiting for music":md.getString(MediaMetadata.METADATA_KEY_TITLE),artist=md==null?"Connect media in HALO":md.getString(MediaMetadata.METADATA_KEY_ARTIST);if(title==null||title.isEmpty())title="Now playing";if(artist==null||artist.isEmpty())artist="Music";Bitmap art=null;if(md!=null){art=md.getBitmap(MediaMetadata.METADATA_KEY_ALBUM_ART);if(art==null)art=md.getBitmap(MediaMetadata.METADATA_KEY_ART);}art=scaled(art);alarm(c,playing);for(int id:ids){boolean large=expanded(m.getAppWidgetOptions(id));RemoteViews v=new RemoteViews(c.getPackageName(),large?R.layout.widget_music_large:R.layout.widget_music_small);v.setTextViewText(R.id.wm_title,title);v.setTextViewText(R.id.wm_artist,artist);v.setTextViewText(R.id.wm_play,playing?"Ⅱ":"▶");v.setImageViewBitmap(R.id.wm_wave,wave(playing,large));if(art!=null){v.setImageViewBitmap(R.id.wm_bg_art,art);if(large)v.setImageViewBitmap(R.id.wm_art,art);}if(large){long sec=ps==null?0:Math.max(0,ps.getPosition()/1000),dur=md==null?0:Math.max(0,md.getLong(MediaMetadata.METADATA_KEY_DURATION)/1000);v.setTextViewText(R.id.wm_elapsed,String.format(Locale.US,"%d:%02d / %d:%02d",sec/60,sec%60,dur/60,dur%60));}v.setOnClickPendingIntent(R.id.wm_prev,action(c,PREV,141));v.setOnClickPendingIntent(R.id.wm_play,action(c,TOGGLE,142));v.setOnClickPendingIntent(R.id.wm_next,action(c,NEXT,143));v.setOnClickPendingIntent(R.id.wm_root,PendingIntent.getActivity(c,144,new Intent(c,MainActivity.class).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK),PendingIntent.FLAG_IMMUTABLE|PendingIntent.FLAG_UPDATE_CURRENT));m.updateAppWidget(id,v);}}
+           @Override public void onUpdate(Context c,AppWidgetManager m,int[] ids){update(c,m,ids);}
+           @Override public void onAppWidgetOptionsChanged(Context c,AppWidgetManager m,int id,Bundle b){update(c,m,new int[]{id});}
+           @Override public void onReceive(Context c,Intent i){super.onReceive(c,i);String a=i.getAction();if(TICK.equals(a)){updateAll(c);return;}if(!PREV.equals(a)&&!NEXT.equals(a)&&!TOGGLE.equals(a))return;MediaController mc=media(c);if(mc==null)return;MediaController.TransportControls t=mc.getTransportControls();if(PREV.equals(a))t.skipToPrevious();else if(NEXT.equals(a))t.skipToNext();else{PlaybackState p=mc.getPlaybackState();if(p!=null&&p.getState()==PlaybackState.STATE_PLAYING)t.pause();else t.play();}updateAll(c);}
+          }
+          HALO_V9_END
+          mkdir -p 'app/src/main/java/app/halo/music'
+          cat > 'app/src/main/java/app/halo/music/HaloWeatherWidget.java' <<'HALO_V9_END'
+          package app.halo.music;
+          import android.app.*;import android.appwidget.*;import android.content.*;import android.graphics.*;import android.os.Bundle;import android.widget.*;import org.json.*;import java.net.*;import java.io.*;import java.nio.charset.StandardCharsets;
+          public class HaloWeatherWidget extends AppWidgetProvider {
+           static final String PREFS="halo-weather";
+           static boolean expanded(Bundle b){return b!=null&&(b.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_WIDTH,0)>=245||b.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_HEIGHT,0)>=150);}
+           public static void setLocation(Context c,String name,double lat,double lon){if(!Double.isFinite(lat)||!Double.isFinite(lon)||Math.abs(lat)>90||Math.abs(lon)>180)return;c.getSharedPreferences(PREFS,0).edit().putString("city",name).putString("lat",""+lat).putString("lon",""+lon).apply();updateAll(c);}
+           public static void updateAll(Context c){AppWidgetManager m=AppWidgetManager.getInstance(c);int[] ids=m.getAppWidgetIds(new ComponentName(c,HaloWeatherWidget.class));if(ids.length>0)refresh(c,m,ids);}
+           static Bitmap sky(boolean daylight,boolean rain,double temp,boolean large){int w=large?520:350,h=large?230:150;Bitmap b=Bitmap.createBitmap(w,h,Bitmap.Config.ARGB_8888);Canvas c=new Canvas(b);Paint p=new Paint(3);p.setShader(new LinearGradient(0,0,0,h,daylight?0xFF34597D:0xFF131B36,daylight?0xFF20384B:0xFF101728,Shader.TileMode.CLAMP));c.drawRect(0,0,w,h,p);p.setShader(null);float cx=w*.76f,cy=h*.2f;if(daylight){p.setShader(new RadialGradient(cx,cy,58,new int[]{0x77FFEAC2,0x00FFEAC2},null,Shader.TileMode.CLAMP));c.drawCircle(cx,cy,58,p);p.setShader(null);p.setColor(0xFFFFF4D9);c.drawCircle(cx,cy,10,p);}else{for(int k=0;k<72;k++){int x=(k*47)%w,y=5+(k*29)%(h/2);p.setColor(0x88EEF4FF);c.drawCircle(x,y,k%9==0?1.5f:.65f,p);}p.setColor(0xFFECEEF4);c.drawCircle(cx,cy,10,p);p.setColor(0xFF18203A);c.drawCircle(cx+4,cy-2,9,p);}
+           p.setColor(0x35E6EFFC);for(int i=0;i<3;i++){Path cloud=new Path();float x=w*(.22f+i*.22f),y=h*(.22f+i*.055f),s=1+i*.18f;cloud.moveTo(x-28*s,y+4*s);cloud.cubicTo(x-33*s,y-8*s,x-19*s,y-16*s,x-9*s,y-10*s);cloud.cubicTo(x-5*s,y-23*s,x+9*s,y-20*s,x+15*s,y-11*s);cloud.cubicTo(x+30*s,y-12*s,x+35*s,y-3*s,x+33*s,y+5*s);cloud.close();c.drawPath(cloud,p);}
+           if(rain){p.setColor(0x66A9D7F4);for(int i=0;i<32;i++){float x=(i*41)%w,y=h*.32f+(i*17)%(h/2);p.setStrokeWidth(1f);c.drawLine(x,y,x-3,y+13,p);}}
+           Path line=new Path();for(int x=0;x<=w;x+=5){float f=x/(float)w;float y=h*.66f-(float)Math.sin(f*3.2f)*h*.08f-f*h*.06f;if(x==0)line.moveTo(x,y);else line.lineTo(x,y);}p.setColor(0xEEF4F8FF);p.setStrokeWidth(3);p.setStyle(Paint.Style.STROKE);c.drawPath(line,p);p.setStyle(Paint.Style.FILL);float dotX=w*.51f,dotY=h*.66f-(float)Math.sin(.51f*3.2f)*h*.08f-.51f*h*.06f;p.setColor(Color.WHITE);c.drawCircle(dotX,dotY,5,p);p.setTypeface(Typeface.DEFAULT_BOLD);p.setTextSize(20);c.drawText(Math.round(temp)+"°",dotX-14,dotY-14,p);p.setTextSize(15);p.setTypeface(Typeface.DEFAULT);p.setColor(0xC5E2EEFF);String[] t={"15:00","18:00","21:00","00:00","03:00"};for(int j=0;j<5;j++)c.drawText(t[j],(j+.2f)*w/5,h-9,p);return b;}
+           static void refresh(Context c,AppWidgetManager m,int[] ids){new Thread(()->{android.content.SharedPreferences sp=c.getSharedPreferences(PREFS,0);String city=sp.getString("city","Melbourne"),lat=sp.getString("lat","-37.8136"),lon=sp.getString("lon","144.9631");String label="Weather unavailable",time="--:--",rainText="Rain —",meta="";double temp=0;boolean day=false,rain=false;try{URL url=new URL("https://api.open-meteo.com/v1/forecast?latitude="+lat+"&longitude="+lon+"&current=temperature_2m,weather_code,is_day,apparent_temperature,wind_speed_10m&hourly=precipitation_probability&forecast_days=1&timezone=auto");HttpURLConnection h=(HttpURLConnection)url.openConnection();h.setConnectTimeout(7000);h.setReadTimeout(7000);try(InputStream in=h.getInputStream();ByteArrayOutputStream out=new ByteArrayOutputStream()){byte[] buf=new byte[4096];int n;while((n=in.read(buf))!=-1)out.write(buf,0,n);JSONObject all=new JSONObject(new String(out.toByteArray(),StandardCharsets.UTF_8)),cur=all.getJSONObject("current");int code=cur.optInt("weather_code",0);temp=cur.optDouble("temperature_2m",0);day=cur.optInt("is_day",0)==1;rain=code>=51&&code<=99;label=code>=95?"Thunderstorm":code>=61?"Rain":code>=51?"Drizzle":code>=45?"Fog":code>=3?"Cloudy":code>=1?"Partly cloudy":"Clear sky";String at=cur.optString("time","");time=at.length()>=16?at.substring(11,16):"--:--";JSONObject hourly=all.optJSONObject("hourly");int pop=0;if(hourly!=null){JSONArray hours=hourly.optJSONArray("time"),chances=hourly.optJSONArray("precipitation_probability");if(hours!=null&&chances!=null){int ix=0;for(int k=0;k<hours.length();k++)if(hours.optString(k).startsWith(at.substring(0,Math.min(13,at.length())))){ix=k;break;}pop=chances.optInt(ix,0);}}rainText="Rain "+pop+"%";meta="Feels "+Math.round(cur.optDouble("apparent_temperature",temp))+"° · Wind "+Math.round(cur.optDouble("wind_speed_10m",0))+" km/h";}finally{h.disconnect();}}catch(Exception ignored){}
+           for(int id:ids){boolean big=expanded(m.getAppWidgetOptions(id));RemoteViews v=new RemoteViews(c.getPackageName(),big?R.layout.widget_weather_large:R.layout.widget_weather_small);v.setTextViewText(R.id.ww_city,city);v.setTextViewText(R.id.ww_temp,Math.round(temp)+"°");v.setTextViewText(R.id.ww_desc,label);v.setTextViewText(R.id.ww_hour,time);v.setTextViewText(R.id.ww_rain,rainText);if(big)v.setTextViewText(R.id.ww_meta,meta);v.setImageViewBitmap(R.id.ww_scene,sky(day,rain,temp,big));v.setOnClickPendingIntent(R.id.ww_root,PendingIntent.getActivity(c,185,new Intent(c,MainActivity.class).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK),PendingIntent.FLAG_IMMUTABLE|PendingIntent.FLAG_UPDATE_CURRENT));m.updateAppWidget(id,v);}}).start();}
+           @Override public void onUpdate(Context c,AppWidgetManager m,int[] ids){refresh(c,m,ids);}
+           @Override public void onAppWidgetOptionsChanged(Context c,AppWidgetManager m,int id,Bundle options){refresh(c,m,new int[]{id});}
+          }
+          HALO_V9_END
+          mkdir -p 'app/src/main/res/layout'
+          cat > 'app/src/main/res/layout/widget_music_small.xml' <<'HALO_V9_END'
+          <?xml version="1.0" encoding="utf-8"?>
+          <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android" android:id="@+id/wm_root" android:layout_width="match_parent" android:layout_height="match_parent" android:padding="12dp" android:background="@drawable/widget_bg">
+           <ImageView android:id="@+id/wm_bg_art" android:layout_width="match_parent" android:layout_height="match_parent" android:scaleType="centerCrop" android:alpha="0.17" android:src="@mipmap/ic_launcher"/>
+           <LinearLayout android:layout_width="match_parent" android:layout_height="match_parent" android:orientation="vertical">
+           <TextView android:id="@+id/wm_title" android:layout_width="match_parent" android:layout_height="wrap_content" android:singleLine="true" android:ellipsize="end" android:text="Now playing" android:textColor="#F7FBFF" android:textStyle="bold" android:textSize="15sp"/>
+           <TextView android:id="@+id/wm_artist" android:layout_width="match_parent" android:layout_height="wrap_content" android:singleLine="true" android:ellipsize="end" android:text="HALO · Music" android:textColor="#B7C8E0" android:textSize="11sp"/>
+           <ImageView android:id="@+id/wm_wave" android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1" android:contentDescription="Soundwave" android:src="@drawable/widget_wave_preview"/>
+           <LinearLayout android:layout_width="match_parent" android:layout_height="36dp" android:orientation="horizontal">
+           <TextView android:id="@+id/wm_prev" android:layout_width="0dp" android:layout_weight="1" android:layout_height="match_parent" android:gravity="center" android:text="❮❮" android:textSize="18sp" android:textColor="#D3E4F7"/>
+           <TextView android:id="@+id/wm_play" android:layout_width="0dp" android:layout_weight="1" android:layout_height="match_parent" android:gravity="center" android:text="▶" android:textSize="25sp" android:textColor="#A4EAFF"/>
+           <TextView android:id="@+id/wm_next" android:layout_width="0dp" android:layout_weight="1" android:layout_height="match_parent" android:gravity="center" android:text="❯❯" android:textSize="18sp" android:textColor="#D3E4F7"/>
+           </LinearLayout></LinearLayout>
+          </FrameLayout>
+          HALO_V9_END
+          mkdir -p 'app/src/main/res/layout'
+          cat > 'app/src/main/res/layout/widget_music_large.xml' <<'HALO_V9_END'
+          <?xml version="1.0" encoding="utf-8"?>
+          <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android" android:id="@+id/wm_root" android:layout_width="match_parent" android:layout_height="match_parent" android:padding="14dp" android:background="@drawable/widget_bg">
+           <ImageView android:id="@+id/wm_bg_art" android:layout_width="match_parent" android:layout_height="match_parent" android:scaleType="centerCrop" android:alpha="0.16" android:src="@mipmap/ic_launcher"/>
+           <LinearLayout android:layout_width="match_parent" android:layout_height="match_parent" android:orientation="horizontal">
+           <LinearLayout android:layout_width="0dp" android:layout_weight="1" android:layout_height="match_parent" android:orientation="vertical">
+           <TextView android:id="@+id/wm_title" android:layout_width="match_parent" android:layout_height="wrap_content" android:singleLine="true" android:ellipsize="end" android:text="Now playing" android:textColor="#F7FBFF" android:textStyle="bold" android:textSize="17sp"/>
+           <TextView android:id="@+id/wm_artist" android:layout_width="match_parent" android:layout_height="wrap_content" android:singleLine="true" android:ellipsize="end" android:text="HALO · Music" android:textColor="#B7C8E0" android:textSize="12sp"/>
+           <TextView android:id="@+id/wm_elapsed" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="0:00 / 0:00" android:textColor="#99B5D0" android:textSize="10sp"/>
+           <ImageView android:id="@+id/wm_wave" android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1" android:contentDescription="Soundwave" android:src="@drawable/widget_wave_preview"/>
+           <LinearLayout android:layout_width="match_parent" android:layout_height="40dp" android:orientation="horizontal">
+           <TextView android:id="@+id/wm_prev" android:layout_width="0dp" android:layout_weight="1" android:layout_height="match_parent" android:gravity="center" android:text="❮❮" android:textSize="20sp" android:textColor="#D3E4F7"/>
+           <TextView android:id="@+id/wm_play" android:layout_width="0dp" android:layout_weight="1" android:layout_height="match_parent" android:gravity="center" android:text="▶" android:textSize="25sp" android:textColor="#A4EAFF"/>
+           <TextView android:id="@+id/wm_next" android:layout_width="0dp" android:layout_weight="1" android:layout_height="match_parent" android:gravity="center" android:text="❯❯" android:textSize="20sp" android:textColor="#D3E4F7"/>
+           </LinearLayout></LinearLayout>
+           <ImageView android:id="@+id/wm_art" android:layout_width="86dp" android:layout_height="86dp" android:layout_marginStart="9dp" android:scaleType="centerCrop" android:contentDescription="Album art" android:src="@mipmap/ic_launcher"/>
+           </LinearLayout>
+          </FrameLayout>
+          HALO_V9_END
+          mkdir -p 'app/src/main/res/layout'
+          cat > 'app/src/main/res/layout/widget_weather_small.xml' <<'HALO_V9_END'
+          <?xml version="1.0" encoding="utf-8"?>
+          <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android" android:id="@+id/ww_root" android:layout_width="match_parent" android:layout_height="match_parent" android:padding="12dp" android:background="@drawable/widget_bg">
+           <ImageView android:id="@+id/ww_scene" android:layout_width="match_parent" android:layout_height="match_parent" android:alpha="0.86" android:contentDescription="Journey through time" android:src="@drawable/widget_sky_preview"/>
+           <LinearLayout android:layout_width="match_parent" android:layout_height="match_parent" android:orientation="vertical">
+           <TextView android:id="@+id/ww_city" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Melbourne" android:textColor="#D8E8F7" android:textSize="12sp"/>
+           <TextView android:id="@+id/ww_temp" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="11°" android:textColor="#FFFFFF" android:textSize="27sp" android:textStyle="bold"/>
+           <TextView android:id="@+id/ww_desc" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Clear night" android:textColor="#BFD2E6" android:textSize="11sp"/>
+           <LinearLayout android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1" android:orientation="horizontal" android:gravity="bottom">
+           <TextView android:id="@+id/ww_hour" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="21:00" android:textColor="#F4F9FF" android:textSize="11sp"/>
+           <TextView android:id="@+id/ww_rain" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginStart="13dp" android:text="Rain 20%" android:textColor="#92DCEE" android:textSize="11sp"/>
+           </LinearLayout></LinearLayout>
+          </FrameLayout>
+          HALO_V9_END
+          mkdir -p 'app/src/main/res/layout'
+          cat > 'app/src/main/res/layout/widget_weather_large.xml' <<'HALO_V9_END'
+          <?xml version="1.0" encoding="utf-8"?>
+          <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android" android:id="@+id/ww_root" android:layout_width="match_parent" android:layout_height="match_parent" android:padding="14dp" android:background="@drawable/widget_bg">
+           <ImageView android:id="@+id/ww_scene" android:layout_width="match_parent" android:layout_height="match_parent" android:alpha="0.88" android:contentDescription="Journey through time" android:src="@drawable/widget_sky_preview"/>
+           <LinearLayout android:layout_width="match_parent" android:layout_height="match_parent" android:orientation="vertical">
+           <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal">
+           <LinearLayout android:layout_width="0dp" android:layout_weight="1" android:layout_height="wrap_content" android:orientation="vertical">
+           <TextView android:id="@+id/ww_city" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Melbourne" android:textColor="#D8E8F7" android:textSize="12sp"/>
+           <TextView android:id="@+id/ww_temp" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="11°" android:textColor="#FFFFFF" android:textSize="32sp" android:textStyle="bold"/>
+           <TextView android:id="@+id/ww_desc" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Clear night" android:textColor="#BFD2E6" android:textSize="11sp"/>
+           </LinearLayout>
+           <TextView android:id="@+id/ww_rain" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Rain 20%" android:textColor="#92DCEE" android:textSize="11sp"/>
+           </LinearLayout>
+           <TextView android:id="@+id/ww_hour" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="12dp" android:text="21:00" android:textColor="#F4F9FF" android:textSize="11sp"/>
+           <TextView android:id="@+id/ww_meta" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="3dp" android:text="Feels 11° · Wind 3 km/h" android:textColor="#A9BFD5" android:textSize="10sp"/>
+           </LinearLayout>
+          </FrameLayout>
+          HALO_V9_END
+          mkdir -p 'app/src/main/res/xml'
+          cat > 'app/src/main/res/xml/music_widget_info.xml' <<'HALO_V9_END'
+          <?xml version="1.0" encoding="utf-8"?>
+          <appwidget-provider xmlns:android="http://schemas.android.com/apk/res/android" android:minWidth="180dp" android:minHeight="110dp" android:minResizeWidth="180dp" android:minResizeHeight="110dp" android:targetCellWidth="3" android:targetCellHeight="2" android:updatePeriodMillis="1800000" android:initialLayout="@layout/widget_music_small" android:previewImage="@drawable/widget_wave_preview" android:previewLayout="@layout/widget_music_large" android:resizeMode="horizontal|vertical" android:widgetCategory="home_screen"/>
+          HALO_V9_END
+          mkdir -p 'app/src/main/res/xml'
+          cat > 'app/src/main/res/xml/weather_widget_info.xml' <<'HALO_V9_END'
+          <?xml version="1.0" encoding="utf-8"?>
+          <appwidget-provider xmlns:android="http://schemas.android.com/apk/res/android" android:minWidth="180dp" android:minHeight="110dp" android:minResizeWidth="180dp" android:minResizeHeight="110dp" android:targetCellWidth="3" android:targetCellHeight="2" android:updatePeriodMillis="1800000" android:initialLayout="@layout/widget_weather_small" android:previewImage="@drawable/widget_sky_preview" android:previewLayout="@layout/widget_weather_large" android:resizeMode="horizontal|vertical" android:widgetCategory="home_screen"/>
+          HALO_V9_END
+          mkdir -p 'app/src/main/res/drawable'
+          cat > 'app/src/main/res/drawable/widget_wave_preview.xml' <<'HALO_V9_END'
+          <?xml version="1.0" encoding="utf-8"?>
+          <vector xmlns:android="http://schemas.android.com/apk/res/android" android:width="250dp" android:height="60dp" android:viewportWidth="250" android:viewportHeight="60">
+          <path android:strokeColor="#88D4FFF4" android:strokeWidth="5" android:strokeLineCap="round" android:pathData="M 23,26 L23,34 M 38,20 L38,40 M 53,14 L53,46 M 68,24 L68,36 M 83,9 L83,51 M 98,18 L98,42 M 113,3 L113,57 M 128,20 L128,40 M 143,11 L143,49 M 158,22 L158,38 M 173,15 L173,45 M 188,24 L188,36 M 203,20 L203,40 M 218,27 L218,33" />
+          </vector>
+          HALO_V9_END
+          mkdir -p 'app/src/main/res/drawable'
+          cat > 'app/src/main/res/drawable/widget_sky_preview.xml' <<'HALO_V9_END'
+          <?xml version="1.0" encoding="utf-8"?>
+          <vector xmlns:android="http://schemas.android.com/apk/res/android" android:width="320dp" android:height="140dp" android:viewportWidth="320" android:viewportHeight="140">
+          <path android:fillColor="#13203B" android:pathData="M0,0 L320,0 L320,140 L0,140 Z"/>
+          <path android:fillColor="#B5DDE7" android:fillAlpha=".18" android:pathData="M0,90 C50,65 95,87 145,76 C190,60 235,95 320,58 L320,140 L0,140 Z"/>
+          <path android:fillColor="#F5F2E9" android:pathData="M270,23 A13,13 0,1 1,244,23 A13,13 0,1 1,270,23"/>
+          <path android:fillColor="#13203B" android:pathData="M277,15 A13,13 0,1 1,251,15 A13,13 0,1 1,277,15"/>
+          <path android:strokeColor="#EAF5FF" android:strokeWidth="2.5" android:fillColor="#00000000" android:pathData="M0,96 C65,74 98,80 145,91 C218,112 261,70 320,90"/>
+          <path android:fillColor="#FFFFFF" android:pathData="M160,87 A5,5 0,1 1,150,87 A5,5 0,1 1,160,87"/>
+          </vector>
+          HALO_V9_END
+          mkdir -p 'app/src/main/res/drawable'
+          cat > 'app/src/main/res/drawable/widget_bg.xml' <<'HALO_V9_END'
+          <?xml version="1.0" encoding="utf-8"?>
+          <shape xmlns:android="http://schemas.android.com/apk/res/android"><corners android:radius="22dp"/><gradient android:startColor="#F0283550" android:endColor="#F0101725" android:angle="315"/><stroke android:width="1dp" android:color="#55D1E8FF"/></shape>
+          HALO_V9_END
       - name: Install Android SDK
         run: |
           SDKMGR=$(find /usr/local/lib/android/sdk/cmdline-tools -name sdkmanager -type f | head -n 1)
@@ -975,6 +1120,6 @@ jobs:
       - name: Save APK
         uses: actions/upload-artifact@v4
         with:
-          name: HALO-Android-8.0
+          name: HALO-Android-9.0
           path: app/build/outputs/apk/debug/app-debug.apk
           if-no-files-found: error
