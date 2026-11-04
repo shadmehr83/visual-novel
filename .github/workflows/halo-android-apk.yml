@@ -1,4 +1,4 @@
-name: Build HALO Android v9
+name: Build HALO Android v9.1
 on:
   push:
     branches: [halo-android-build]
@@ -33,7 +33,7 @@ jobs:
           mkdir -p 'app'
           cat > 'app/build.gradle' <<'HALO_FILE_END'
           plugins { id 'com.android.application' }
-          android { namespace 'app.halo.music'; compileSdk 35; defaultConfig { applicationId 'app.halo.music'; minSdk 26; targetSdk 35; versionCode 9; versionName '9.0' }; compileOptions { sourceCompatibility JavaVersion.VERSION_17; targetCompatibility JavaVersion.VERSION_17 } }
+          android { namespace 'app.halo.music'; compileSdk 35; defaultConfig { applicationId 'app.halo.music'; minSdk 26; targetSdk 35; versionCode 10; versionName '9.1' }; compileOptions { sourceCompatibility JavaVersion.VERSION_17; targetCompatibility JavaVersion.VERSION_17 } }
           dependencies { implementation 'androidx.browser:browser:1.8.0' }
           HALO_FILE_END
           mkdir -p 'app/src/main'
@@ -201,9 +201,9 @@ jobs:
                   fileParams.setMargins(dp(10),0,dp(10),dp(5));
                   root.addView(localFile,fileParams);
           musicBrowser=new Button(this);
-          musicBrowser.setText("Open music browser inside HALO");
+          musicBrowser.setText("YouTube Music · secure in-app Chrome");
           musicBrowser.setAllCaps(false);
-          musicBrowser.setOnClickListener(v->openInsideMusicBrowser("https://music.youtube.com/"));
+          musicBrowser.setOnClickListener(v->openSecureBrowser("https://music.youtube.com/"));
           LinearLayout.LayoutParams browserParams=new LinearLayout.LayoutParams(-1,dp(44));
           browserParams.setMargins(dp(10),0,dp(10),dp(5));
           root.addView(musicBrowser,browserParams);
@@ -343,10 +343,18 @@ jobs:
                  musicBrowserPanel.setVisibility(View.VISIBLE);
                  web.setVisibility(View.GONE);
               }
+              private boolean requiresSecureBrowser(String host){
+                  if(host==null)return false;
+                  String h=host.toLowerCase(java.util.Locale.ROOT);
+                  return h.equals("music.youtube.com")||h.equals("youtube.com")||h.endsWith(".youtube.com")||
+                         h.equals("google.com")||h.endsWith(".google.com")||
+                         h.equals("spotify.com")||h.endsWith(".spotify.com");
+              }
               private void openInsideMusicBrowser(String address){
                  try{
                     Uri uri=Uri.parse(address==null?"https://music.youtube.com/":address);
                     if(!"https".equalsIgnoreCase(uri.getScheme()))return;
+                    if(requiresSecureBrowser(uri.getHost())){openSecureBrowser(uri.toString());return;}
                     WebView browser=new WebView(this);
                     WebSettings settings=browser.getSettings();
                     settings.setJavaScriptEnabled(true);
@@ -360,6 +368,9 @@ jobs:
                     browser.setWebViewClient(new WebViewClient(){
                         @Override public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest req){
                             String scheme=req.getUrl().getScheme();
+                            if(req.isForMainFrame()&&requiresSecureBrowser(req.getUrl().getHost())){
+                                openSecureBrowser(req.getUrl().toString());return true;
+                            }
                             if("http".equalsIgnoreCase(scheme)||"https".equalsIgnoreCase(scheme))return false;
                             return true;
                         }
@@ -393,7 +404,9 @@ jobs:
                  try{
                      Uri u=Uri.parse(url==null?"https://music.youtube.com/":url);
                      if(!"https".equalsIgnoreCase(u.getScheme()))return;
-                     new CustomTabsIntent.Builder().setShowTitle(true).setInitialActivityHeightPx(dp(610)).build().launchUrl(this,u);
+                     CustomTabsIntent tab=new CustomTabsIntent.Builder().setShowTitle(true).setInitialActivityHeightPx(dp(610)).build();
+                     try{tab.intent.setPackage("com.android.chrome");tab.launchUrl(this,u);}
+                     catch(Exception noChrome){new CustomTabsIntent.Builder().setShowTitle(true).build().launchUrl(this,u);}
                  }catch(Exception e){try{startActivity(new Intent(Intent.ACTION_VIEW,Uri.parse("https://music.youtube.com/")));}catch(Exception ignored){}}
               }
           private void openNotificationSettings() {
@@ -1120,6 +1133,6 @@ jobs:
       - name: Save APK
         uses: actions/upload-artifact@v4
         with:
-          name: HALO-Android-9.0
+          name: HALO-Android-9.1
           path: app/build/outputs/apk/debug/app-debug.apk
           if-no-files-found: error
