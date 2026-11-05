@@ -33,7 +33,13 @@ export function FlowEditor({
   onDrill,
   onOriginal,
   runtime,
+  onEffects,
+  editingView,
 }: {
+  // Scene and sub-scene effects (by Claude): pick one for the effects controls, or preview it
+  // filling the window with the controls beside it.
+  onEffects?: (scene: string, view: string | null, preview: boolean) => void;
+  editingView?: string | null;
   // The playthrough in progress, so AI-adapted lines can be highlighted on the map.
   runtime?: Runtime | null;
   project: Project;
@@ -526,6 +532,8 @@ export function FlowEditor({
                       scene={scene}
                       update={updateScene}
                       onOpen={(id) => onOriginal(scene.id, id)}
+                      editing={editingView}
+                      onEffects={onEffects && ((view, preview) => onEffects(scene.id, view, preview))}
                     />
                     <AssetPicker
                       project={project}
@@ -545,6 +553,15 @@ export function FlowEditor({
                     <button onClick={() => onOriginal(scene.id)}>
                       Edit background & effects
                     </button>
+                    {onEffects && (
+                      <button
+                        aria-label={"Preview and effects of " + scene.title}
+                        data-help="Fill this window with the scene preview. Show controls puts the effects controls beside it; leave them hidden when your controls are on another screen."
+                        onClick={() => onEffects(scene.id, null, true)}
+                      >
+                        Preview & effects
+                      </button>
+                    )}
                   </>
                 ) : (
                   <>

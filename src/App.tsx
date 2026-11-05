@@ -337,6 +337,7 @@ export default function App() {
   const [inspector, setInspector] = useState("Atmosphere");
   const [bottom, setBottom] = useState("Dialogue");
   const [regionEditor, setRegionEditor] = useState<RegionEditor | null>(null);
+  const [viewOverride, setViewOverride] = useState<{ scene: string; node: string; view: string | null } | null>(null);
   const [hideDialogue, setHideDialogue] = useState(false);
   const [customReply, setCustomReply] = useState("");
   const [maskMode, setMaskMode] = useState(false);
@@ -381,8 +382,8 @@ export default function App() {
     loaded, project, setProject, sceneId, nodeId,
     onSelect: (sid, nid) => { setSceneId(sid); setNodeId(nid); },
     // Drawing an area or the rain mask shows, and can be edited, in every linked window.
-    tools: { regionEditor, maskMode },
-    onTools: (t) => { setRegionEditor(t.regionEditor); setMaskMode(t.maskMode); },
+    tools: { regionEditor, maskMode, view: viewOverride },
+    onTools: (t) => { setRegionEditor(t.regionEditor); setMaskMode(t.maskMode); setViewOverride(t.view ?? null); },
   });
   const controlWindow = screen === "controls";
   // Preview screen: this window shows only the scene preview, filling the screen. A preview
@@ -390,6 +391,17 @@ export default function App() {
   // (previewHost) so no panel, split or zoom of the studio can squeeze it.
   const [previewScreen, setPreviewScreen] = useState(screen === "preview");
   const [previewHost, setPreviewHost] = useState<HTMLDivElement | null>(null);
+  // Controls beside the preview screen: closed unless opened, and remembered for this kind of
+  // window, so a preview on a second screen stays clean while the controls sit on the other one.
+  const drawerKey = "stillframe-preview-controls" + (screen ? "-" + screen : "");
+  const [previewControls, setPreviewControlsState] = useState(() => { try { return localStorage.getItem(drawerKey) === "1"; } catch { return false; } });
+  const setPreviewControls = (on: boolean) => { setPreviewControlsState(on); try { localStorage.setItem(drawerKey, on ? "1" : "0"); } catch { /* private window */ } };
+  const [controlsHost, setControlsHost] = useState<HTMLDivElement | null>(null);
+  function showControls(aside: React.ReactElement) {
+    return previewScreen && previewControls && controlsHost
+      ? createPortal(aside, controlsHost)
+      : <DockPanel id="controls">{aside}</DockPanel>;
+  }
   function showPreview(section: React.ReactElement) {
     return previewScreen && previewHost
       ? createPortal(section, previewHost)
@@ -622,9 +634,12 @@ export default function App() {
   }, [status]);
   const baseSelected =
     project.scenes.find((s) => s.id === (playing && authorPlay ? runtime?.scene : sceneId)) || project.scenes[0];
-  const activeViewId = baseSelected.nodes.find(n => n.id === (playing ? runtime?.node : nodeId))?.view;
+  // Sub-scene effects (by Claude): a sub-scene picked in the sub-scene list is edited and shown
+  // even when no dialogue uses it. The choice holds while the same dialogue stays selected.
+  const viewChoice = !playing && viewOverride && viewOverride.scene === baseSelected.id && viewOverride.node === nodeId ? viewOverride : null;
+  const activeViewId = viewChoice ? viewChoice.view ?? undefined : baseSelected.nodes.find(n => n.id === (playing ? runtime?.node : nodeId))?.view;
   const activeView = baseSelected.subscenes?.find(v => v.id === activeViewId);
-  const selected = activeView ? { ...baseSelected, effects: sceneView(baseSelected, playing ? runtime?.node : nodeId).effects, audio: activeView.audio || [] } : baseSelected;
+  const selected = activeView ? { ...baseSelected, effects: sceneView(baseSelected, playing ? runtime?.node : nodeId, activeView.id).effects, audio: activeView.audio || [] } : baseSelected;
   const scene =
     playing && runtime
       ? project.scenes.find((s) => s.id === runtime.scene) || selected
@@ -673,6 +688,20 @@ export default function App() {
       setRedo(source.slice(0, -1));
     }
     setProject(last);
+  }
+  // Edit a scene's or sub-scene's effects (view null = the main scene). With preview, the scene
+  // fills this window, with the controls beside it when they are switched on.
+  function editSceneEffects(sid: string, view: string | null, preview = false) {
+    const target = project.scenes.find((s) => s.id === sid);
+    if (!target) return;
+    setPlaying(false);
+    const node = sid === baseSelected.id ? nodeId : target.nodes[0].id;
+    if (sid !== baseSelected.id) selectScene(sid);
+    setViewOverride({ scene: sid, node, view });
+    setRegionEditor(null);
+    setMaskMode(false);
+    setEffectPanel("All");
+    if (preview) setPreviewScreen(true);
   }
   function selectScene(id: string) {
     if (playing) setRuntime((r) => (r ? enter(project, r, id) : r));
@@ -837,7 +866,8 @@ export default function App() {
           else navigate(action);
         }} />
         : <FlowEditor key={side + ":" + selected.id} runtime={playing ? runtime : null} project={project} mode={side} sceneId={selected.id} nodeId={nodeId} edit={edit}
-          onSelect={chooseSharedDialogue} onDrill={sid => {selectScene(sid);chooseSecondWorkspace("dialogues");}} onOriginal={openEditor} />}
+          onSelect={chooseSharedDialogue} onDrill={sid => {selectScene(sid);chooseSecondWorkspace("dialogues");}} onOriginal={openEditor}
+          onEffects={editSceneEffects} editingView={activeViewId ?? null} />}
     </div>;
   };
   function showOriginal(scene: string, node?: string) {
@@ -1211,7 +1241,8 @@ export default function App() {
                       </button>
                     ))}
                   </div>
-                  <SubsceneList scene={baseSelected} update={fn => edit(p => fn(p.scenes.find(s=>s.id===baseSelected.id)!))} onOpen={(id) => { setPlaying(false); setNodeId(id); setEffectPanel("All"); }} />
+                  <SubsceneList scene={baseSelected} update={fn => edit(p => fn(p.scenes.find(s=>s.id===baseSelected.id)!))} onOpen={(id) => { setPlaying(false); setNodeId(id); setEffectPanel("All"); }}
+                    editing={activeViewId ?? null} onEffects={(v, preview) => editSceneEffects(baseSelected.id, v, preview)} />
                   <div className="story-note">
                     <span className="section-label">{chapterForScene(project,scene.id)?.title||"OPENING CHAPTER"}</span>
                     <p>
@@ -1556,6 +1587,7 @@ export default function App() {
                   <div className="preview-screen-bar" data-no-advance>
                     <SyncBadge sync={sync} screen={screen ?? "preview"} />
                     {!sync.linked && <button onClick={() => void openStudioWindow("controls")} data-help="Open the studio controls in a second window, on your other screen when the browser allows. Both windows edit the same project live.">Open control window</button>}
+                    <button aria-pressed={previewControls} onClick={() => setPreviewControls(!previewControls)} data-help="Show or hide the effects and scene controls beside the preview. Leave them hidden when the controls are open on your other screen.">{previewControls ? "Hide controls" : "Show controls"}</button>
                     <button onClick={() => setPreviewScreen(false)} data-help="Show the full studio in this window again, with every panel. The linked windows stay linked.">Show full studio</button>
                   </div>
                 )}
@@ -1564,6 +1596,7 @@ export default function App() {
                   <div>
                     <span className="eyebrow">{scene.subtitle}</span>
                     <h1>{scene.title}</h1><ChapterBadge project={project} scene={scene.id} />
+                    {!playing && activeView && <span className="subscene-chip" data-no-advance>Sub-scene · {activeView.title}{viewChoice && <button onClick={() => setViewOverride(null)} aria-label="Back to this dialogue's scene" data-help="Stop editing this sub-scene and show the scene the selected dialogue uses.">×</button>}</span>}
                   </div>
                   <div className="preview-tools">
                     {!playing && (
@@ -1696,6 +1729,7 @@ export default function App() {
                         })
                       }
                       previewTick={cameraPreview}
+                      viewId={playing ? undefined : activeViewId ?? null}
                       regionEditor={editingLocked ? null : regionEditor}
                       onRegion={changeSelectedRegion}
                     >
@@ -2465,7 +2499,7 @@ export default function App() {
               </section>
               </DockPanel>
             </main>
-            <DockPanel id="controls">
+            {showControls(
             <aside
               className="inspector ui-pane"
               data-panel={effectPanel}
@@ -2483,6 +2517,15 @@ export default function App() {
               <div className="effects-dock" data-panel={effectPanel} data-inspector={inspector}>
                 {workspace.splitDocks && <ResizeHandle label="Resize effects and properties split" className="effects-split-resize" value={workspace.controlsWidth*2*workspace.effectsFraction/100} min={workspace.controlsWidth*2*.2} max={workspace.controlsWidth*2*.8} onChange={n=>setWorkspace(w=>({...w,effectsFraction:Math.max(20,Math.min(80,n/(w.controlsWidth*2)*100))}))} />}
                 <h3 className="dock-title">Effects & interactions</h3>
+                {!playing && (activeView || (baseSelected.subscenes?.length ?? 0) > 0) && (
+                  <label className="effects-target">
+                    Editing effects of
+                    <select aria-label="Edit effects of" value={activeViewId ?? ""} onChange={(ev) => editSceneEffects(baseSelected.id, ev.target.value || null)}>
+                      <option value="">{baseSelected.title} (main scene)</option>
+                      {baseSelected.subscenes?.map((v) => <option key={v.id} value={v.id}>Sub-scene · {v.title}</option>)}
+                    </select>
+                  </label>
+                )}
                 <div className="panel-layout">
                   <label>
                     Controls placement
@@ -3178,8 +3221,8 @@ export default function App() {
               <div className="inspector-foot">
                 <span className="live-dot" /> NON-DESTRUCTIVE EDITING
               </div>
-            </aside>
-            </DockPanel>
+            </aside>,
+            )}
           </div>
   );
   if (!loaded)
@@ -3393,12 +3436,19 @@ export default function App() {
                 chooseMainWorkspace("dialogues");
               }}
               onOriginal={showOriginal}
+              onEffects={editSceneEffects}
+              editingView={activeViewId ?? null}
             />
           </div>
         )
         } />
+        {/* The preview screen opened from another workspace (the advanced story map): the scene editor
+            is kept out of sight so its preview, and the controls when shown, can fill the window. */}
+        {previewScreen && !(view === "editor" || playing || (workspace.splitWorkspace && workspace.secondWorkspace === "editor")) && <div className="preview-screen-source" hidden>{editorContent}</div>}
         </DockSurface>
-        {previewScreen && <div className="preview-screen-host" ref={setPreviewHost} />}
+        {previewScreen && <div className="preview-screen-host" ref={setPreviewHost}>
+          {previewControls && <div className="preview-controls-drawer" ref={setControlsHost} />}
+        </div>}
         <footer className="app-footer">
           <span>
             <span className="live-dot" /> All yours. Stored locally.

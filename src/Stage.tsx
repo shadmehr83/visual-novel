@@ -33,7 +33,10 @@ export function Stage({
   fillViewport = false,
   gifFrozenTime,
   onGifPosition,
+  viewId,
 }: {
+  // A sub-scene to show instead of the dialogue's own (null = the main scene).
+  viewId?: string | null;
   project: Project;
   scene: Scene;
   maskMode: boolean;
@@ -55,7 +58,7 @@ export function Stage({
   onPose?: (dx: number, dy: number, angle?: number) => void;
 }) {
   const baseScene = scene;
-  scene = useMemo(() => sceneView(baseScene, nodeId), [baseScene, nodeId]);
+  scene = useMemo(() => sceneView(baseScene, nodeId, viewId), [baseScene, nodeId, viewId]);
   const poseDrag = useRef<{x:number;y:number} | null>(null);
   const stroke = useRef<{
     canvas: HTMLCanvasElement;
@@ -965,10 +968,14 @@ export function Stage({
       </svg>
       {regionEditor && ["pose","rotate"].includes(regionEditor.mode) && <div className="mask-hint" style={{pointerEvents:"none"}}>Drag on the scene to {regionEditor.mode === "rotate" ? "tilt the selected patch around its pivot" : "move the selected patch"}. Saves a pose for this dialogue.</div>}
       {pointTarget && !wandError && !wandBusy && (
-        <div className="mask-hint point-hint" data-points-held={pointsHeld || undefined} style={{ pointerEvents: "none" }}>
-          {pointsHeld
-            ? "Adding points is paused · drag a point to move it · right-click to add points again"
-            : "Click to add a point · drag a point to move it · right-click to stop adding points"}
+        // A small tag in the top corner; the full help opens only while the pointer is on it.
+        <div className="point-hint" data-points-held={pointsHeld || undefined} data-no-advance>
+          <b>{pointsHeld ? "Moving points" : "Adding points"}</b>
+          <span>
+            {pointsHeld
+              ? "Drag a point to move it · right-click the scene to add points again"
+              : "Click to add a point · drag a point to move it · right-click the scene to only move points"}
+          </span>
         </div>
       )}
       {onPlaceLight && <div className="mask-hint" style={{ pointerEvents: "none" }}>Click the scene to place the light centre.</div>}

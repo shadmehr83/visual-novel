@@ -4,6 +4,13 @@ Every change in this list was written by Claude (Anthropic) at the request of th
 
 > **Where this lives:** branch `claude` on GitHub (the hosted Claude version). Versions follow Stillframe 3 (3.x) and end in `-claude`. `main` is the original line and is untouched. The local Stillframe 3 studio (`npm run stillframe3`, localhost:5174) runs the same code from the local branch `claude-v3`, which is never pushed.
 
+## Stillframe 3.9 — sub-scene effects, preview with controls beside it (2026-11-05, engine 3.9.0-claude)
+
+- **Sub-scene effects** (`src/App.tsx`, `src/SubsceneList.tsx`): `viewOverride` (`{scene, node, view}`) picks the sub-scene the effects controls edit and the preview shows, even when no dialogue uses it; it holds while the same dialogue stays selected. `sceneView(scene, node, viewId)` and the Stage's new `viewId` prop show it. *Edit effects* / *Preview* buttons on each sub-scene (library and Scenes advanced), an *Editing effects of* menu at the top of Effects & interactions, and a *Sub-scene* tag on the preview (× returns to the dialogue's own scene). The choice is shared with linked windows through the tool sync.
+- **Preview with controls** : *Preview & effects* on the selected scene in Scenes advanced, and *Preview* on a sub-scene, open the preview screen. Its bar has *Show controls*, which portals the controls aside into `.preview-controls-drawer` beside the preview (closed by default; remembered per kind of window in `stillframe-preview-controls[-screen]`). When the preview screen opens from another workspace, the scene editor renders hidden (`.preview-screen-source`) so its preview and controls can be shown.
+- **Hint**: the point-drawing hint is a small tag in the stage's top-right corner; the full help shows on hover.
+- The sub-scene list scrolls on its own (up to 45% of the window) so every sub-scene can be reached.
+
 ## Stillframe 3.8 — reshape areas by moving their points, from any linked window (2026-11-05, engine 3.8.0-claude)
 
 - **Move points** (`src/Stage.tsx`): while drawing an area with points (`regionEditor.mode === "polygon"`) or the rain mask, pressing on a point (within about 12 screen pixels) drags it; the change is saved once on release, so one drag is one undo step. Picking up a point never adds a new point on top of it.

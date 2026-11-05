@@ -1,4 +1,4 @@
-export const ENGINE_VERSION = "3.8.0-claude";
+export const ENGINE_VERSION = "3.9.0-claude";
 export type ReleaseFeature = {
   name: string;
   description: string;
@@ -22,7 +22,12 @@ const f = (
   action?: string,
 ): ReleaseFeature => ({ name, description, steps: path.split(" → "), action });
 export const releases: Release[] = [
- {version:"3.8.0-claude",name:"Reshape areas by moving their points, from any linked window",by:"Claude",date:"2026-11-05",timestamp:"2026-11-05T08:38:36Z",features:[
+ {version:"3.9.0-claude",name:"Sub-scene effects, preview with controls beside it",by:"Claude",date:"2026-11-05",timestamp:"2026-11-05T09:05:52Z",features:[
+ f("Edit a sub-scene's effects", "Each sub-scene in the sub-scene list (story library and Scenes advanced) has Edit effects: the effects controls, the preview and any linked preview window switch to that sub-scene, even when no dialogue uses it yet. Nothing opens or enlarges, so it suits a preview already open on another screen. The Effects & interactions panel also has an Editing effects of menu to switch between the main scene and its sub-scenes, and the preview shows a Sub-scene tag (× goes back).", "Story library → sub-scenes → Edit effects", "editor"),
+ f("Preview with controls beside it", "Preview (on a sub-scene) and Preview & effects (on a selected scene in Scenes advanced) fill this window with the scene. Show controls puts the effects and scene controls beside the preview; it stays closed until you open it, and each kind of window remembers your choice. Show full studio goes back where you were.", "Scenes advanced → Preview & effects → Show controls", "workspace"),
+ f("Smaller drawing hint", "The point-drawing hint is now a small Adding points / Moving points tag in the top corner of the scene; hover it for the full help, so it never covers your points.", "Effects → Draw region → hint in the top corner", "editor")
+ ]},
+ {version:"3.8.0-claude",name:"Reshape areas by moving their points, from any linked window",by:"Claude",commit:"e19974d",date:"2026-11-05",timestamp:"2026-11-05T08:38:36Z",features:[
  f("Move area points", "While drawing an area with points (rain, light, motion or a character patch) or the rain mask, drag any existing point to a new place to reshape the area. Picking up a point never adds a new one.", "Effects → Draw region → drag a point on the scene", "editor"),
  f("Pause adding points", "Right-click the scene while drawing to stop adding points, so left clicks only pick up and move the points you already have (they get a white ring). Right-click again to add points again. A hint at the top of the scene says which it is.", "Effects → Draw region → right-click the scene", "editor"),
  f("Draw in the preview window", "The area you are drawing, and the rain mask, now show in every linked window, including the preview window on your big screen. Add and move points there; the control window shows each change straight away. Finishing in one window finishes in all of them.", "View → Open preview window (preview only) → Draw region in the control window", "workspace")

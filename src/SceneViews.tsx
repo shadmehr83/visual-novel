@@ -3,10 +3,10 @@ import type { Project, Scene } from "./model";
 import { readImage } from "./storage";
 import { useState } from "react";
 import { AssetPicker } from "./AssetPicker";
-export function sceneView(scene: Scene, nodeId?: string): Scene {
-  const view = scene.subscenes?.find(
-    (v) => v.id === scene.nodes.find((n) => n.id === nodeId)?.view,
-  );
+// viewId picks a sub-scene directly (null = the main scene); otherwise the dialogue's own one shows.
+export function sceneView(scene: Scene, nodeId?: string, viewId?: string | null): Scene {
+  const id = viewId !== undefined ? viewId : scene.nodes.find((n) => n.id === nodeId)?.view;
+  const view = id ? scene.subscenes?.find((v) => v.id === id) : undefined;
   return view
     ? {
         ...scene,
