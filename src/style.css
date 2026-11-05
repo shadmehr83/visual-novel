@@ -2215,7 +2215,7 @@ body:has(.exported-game),body:has(.player-title){margin:0;overflow:hidden;backgr
 .sync-flash{animation:sync-flash .9s ease-out}
 @keyframes sync-flash{0%{box-shadow:0 0 0 0 #4fae7dcc;transform:scale(1.7)}100%{box-shadow:0 0 0 8px #4fae7d00;transform:scale(1)}}
 .preview-screen-host{position:fixed;inset:0;z-index:180;display:flex;background:#0d1015}
-.preview-screen-host>.preview-area{flex:1;position:relative!important;inset:auto!important;margin:0!important;max-width:none!important;width:auto!important;height:auto!important;min-height:0!important;border:0!important;border-radius:0!important;padding:50px 16px 16px!important;background:#0d1015!important;display:flex;flex-direction:column;overflow:hidden;transform:none!important}
+.preview-screen-host>.preview-area{flex:1;position:relative!important;inset:auto!important;margin:0!important;max-width:none!important;width:auto!important;height:auto!important;min-height:0!important;border:0!important;border-radius:0!important;padding:50px 16px 16px!important;background:#0d1015!important;display:flex;flex-direction:column;overflow:hidden auto;overscroll-behavior:contain;transform:none!important}
 .preview-screen-host>.preview-area>.preview-window-bar{display:none}
 .preview-screen-host .stage-frame{flex:1;min-height:0;max-height:none;display:flex;align-items:center;justify-content:center}
 html[data-screen="preview"] :is(.app>header,.studio-navigation,.rail){visibility:hidden}
@@ -2243,8 +2243,9 @@ html[data-screen="preview"] :is(.app>header,.studio-navigation,.rail){visibility
 .subscene-chip{display:inline-flex;align-items:center;gap:4px;margin-left:8px;padding:2px 8px;border-radius:999px;border:1px solid var(--accent);color:var(--accent);font-size:11px;vertical-align:middle}
 .subscene-chip button{border:0;background:none;color:inherit;cursor:pointer;padding:0 2px;font-size:13px;line-height:1}
 .effects-target{display:grid;gap:4px;margin:0 0 10px;font-size:11px}
-.preview-controls-drawer{order:2;flex:0 0 min(420px,40vw);height:100%;overflow:auto;border-left:1px solid #ffffff26;background:var(--panel,#f4f2ec)}
-.preview-controls-drawer>.inspector{position:static!important;left:auto!important;top:auto!important;width:100%!important;max-width:none!important;height:auto!important;min-height:100%;display:block!important;transform:none!important;margin:0!important}
+.preview-controls-drawer{order:2;flex:0 0 min(420px,40vw);height:100%;overflow:hidden;border-left:1px solid #ffffff26;background:var(--panel,#f4f2ec)}
+/* The controls scroll themselves inside the drawer: they keep overscroll-behavior:contain, so a drawer-level scroll never received the wheel or two-finger scroll. */
+.preview-controls-drawer>.inspector{position:static!important;left:auto!important;top:auto!important;width:100%!important;max-width:none!important;height:100%!important;max-height:none!important;min-height:0!important;overflow-y:auto!important;display:block!important;transform:none!important;margin:0!important}
 .preview-controls-drawer .controls-resize,.preview-controls-drawer .top-dock-resize,.preview-controls-drawer .effects-split-resize{display:none}
 .preview-screen-bar button[aria-pressed=true]{border-color:var(--accent);color:var(--accent)}
 /* Area tools on the scene (by Claude): one compact bar in the top-right corner of the scene. */

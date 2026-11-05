@@ -690,6 +690,24 @@ export default function App() {
     }
     setProject(last);
   }
+  // Keyboard undo (by Claude): Ctrl+Z undoes, Ctrl+Y or Ctrl+Shift+Z redoes (Cmd on a Mac), in
+  // every window. While typing in a text field the field's own text undo is used instead.
+  const historyKey = useRef({ history, locked: editingLocked });
+  historyKey.current = { history, locked: editingLocked };
+  useEffect(() => {
+    const onKey = (event: KeyboardEvent) => {
+      if (!(event.ctrlKey || event.metaKey) || event.altKey) return;
+      const key = event.key.toLowerCase();
+      if (key !== "z" && key !== "y") return;
+      const target = event.target instanceof Element ? event.target : null;
+      if (target?.closest("textarea,[contenteditable=true],input:not([type=range]):not([type=checkbox]):not([type=radio]):not([type=button]):not([type=color])")) return;
+      event.preventDefault();
+      if (historyKey.current.locked) return;
+      historyKey.current.history(key === "z" && !event.shiftKey);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, []);
   // Edit a scene's or sub-scene's effects (view null = the main scene). With preview, the scene
   // fills this window, with the controls beside it when they are switched on.
   function editSceneEffects(sid: string, view: string | null, preview = false) {

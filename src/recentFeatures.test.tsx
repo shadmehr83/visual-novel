@@ -9,7 +9,7 @@ import { RecentFeatures } from "./RecentFeatures";
 // New-feature marks (by Claude): recent controls are marked with their version; the game and older controls stay unmarked.
 it("marks recent controls, but not inside the game or from older releases", async () => {
   document.body.innerHTML = `<details><summary>Export &amp; share</summary></details>
-    <label><select aria-label="Open preview window (preview only)"></select> Open preview window (preview only)</label>
+    <label><select aria-label="Show controls"></select> Show controls</label>
     <label><input type="checkbox" aria-label="Timed decision"> Timed decision</label>
     <div class="stage-frame"><button aria-label="Timer dialogue range">◐</button></div>
     <button>✦ Ask Claude</button>`;
@@ -17,8 +17,8 @@ it("marks recent controls, but not inside the game or from older releases", asyn
   await new Promise((r) => setTimeout(r, 200));
   const [inGame, older] = document.querySelectorAll<HTMLElement>("button");
   const [timer, decision] = document.querySelectorAll<HTMLElement>("label");
-  expect(document.querySelector<HTMLElement>("select")!.dataset.recent).toBe("3.7.0-claude");
-  expect(timer.dataset.new).toBe("v3.7.0");
+  expect(document.querySelector<HTMLElement>("select")!.dataset.recent).toBe("3.9.0-claude");
+  expect(timer.dataset.new).toBe("v3.9.0");
   // Export & share (3.1.0) and Timed decision (2.30.0) are older than the five latest releases by time.
   expect(document.querySelector<HTMLElement>("summary")!.dataset.new).toBeUndefined();
   expect(decision.dataset.new).toBeUndefined();

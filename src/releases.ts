@@ -1,4 +1,4 @@
-export const ENGINE_VERSION = "3.10.1-claude";
+export const ENGINE_VERSION = "3.10.2-claude";
 export type ReleaseFeature = {
   name: string;
   description: string;
@@ -22,7 +22,11 @@ const f = (
   action?: string,
 ): ReleaseFeature => ({ name, description, steps: path.split(" → "), action });
 export const releases: Release[] = [
- {version:"3.10.1-claude",name:"Linked windows: no more jumping back to the main scene",by:"Claude",date:"2026-11-05",timestamp:"2026-11-05T09:48:16Z",features:[
+ {version:"3.10.2-claude",name:"Scrolling beside the preview, Ctrl+Z undo",by:"Claude",date:"2026-11-05",timestamp:"2026-11-05T10:04:27Z",features:[
+ f("Scroll the controls beside the preview", "Two-finger (touchpad) and mouse-wheel scrolling work again in the controls shown with Show controls on the preview screen and in the preview window. The preview screen also scrolls when what is under the scene is taller than the window.", "Preview screen → Show controls → scroll", "workspace"),
+ f("Ctrl+Z undo", "Ctrl+Z undoes and Ctrl+Y (or Ctrl+Shift+Z) redoes, in every studio window, the same as the Undo and Redo buttons: one point, brush stroke or change at a time. While you type in a text box, Ctrl+Z undoes the typing instead.", "Any studio window → Ctrl+Z / Ctrl+Y", "editor")
+ ]},
+ {version:"3.10.1-claude",name:"Linked windows: no more jumping back to the main scene",by:"Claude",commit:"51cc166",date:"2026-11-05",timestamp:"2026-11-05T09:48:16Z",features:[
  f("Sub-scene stays put with linked windows", "A studio window left open from before an update could switch every linked window back to the main scene the moment you picked a sub-scene or started an effect. Windows now only link with windows running the same version, and a missing sub-scene in a message never means the main scene.", "View → Open preview window / control window", "workspace"),
  f("Reload warning for old windows", "The Linked badge now says when another studio window is out of date (\"1 older window not linked, reload it\"), and a window that is itself out of date shows Out of date with a Reload this window button. Reloading keeps your work.", "Top bar → Linked badge", "workspace")
  ]},

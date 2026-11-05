@@ -4,6 +4,11 @@ Every change in this list was written by Claude (Anthropic) at the request of th
 
 > **Where this lives:** branch `claude` on GitHub (the hosted Claude version). Versions follow Stillframe 3 (3.x) and end in `-claude`. `main` is the original line and is untouched. The local Stillframe 3 studio (`npm run stillframe3`, localhost:5174) runs the same code from the local branch `claude-v3`, which is never pushed.
 
+## Stillframe 3.10.2 — scrolling beside the preview, Ctrl+Z undo (2026-11-05, engine 3.10.2-claude)
+
+- **Scroll fix** (`src/style.css`): `.inspector` has `overflow-y:auto; overscroll-behavior:contain`. In the preview-screen drawer it was stretched to its full content height, so it had nothing to scroll itself and `contain` stopped the wheel / two-finger scroll from reaching the drawer. The inspector now fills the drawer's height and scrolls itself (the drawer no longer scrolls). The preview screen's preview area scrolls (`overflow:hidden auto`) when its content is taller than the window.
+- **Keyboard undo** (`src/App.tsx`): a window-level keydown handler maps Ctrl/Cmd+Z to `history(true)` and Ctrl/Cmd+Y or Ctrl/Cmd+Shift+Z to `history(false)`, skipped in text fields (their own text undo) and while the story is playing locked. There was no keyboard undo before.
+
 ## Stillframe 3.10.1 — linked windows: no more jumping back to the main scene (2026-11-05, engine 3.10.1-claude)
 
 - **Cause:** a studio window left open from before 3.9 (not reloaded after the update) is still linked and sends tool changes without the sub-scene field. `onTools` read the missing field as *main scene* (`t.view ?? null`), so picking a sub-scene or starting an effect in that window switched every linked window back to the main scene.
