@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import type { Project } from "./model";
+import { ENGINE_VERSION, releases } from "./releases";
 // Linked windows (by Claude): studio windows open at the same address (for example the main
 // studio on one screen and a control window on another) share every edit and the selected
 // dialogue live, through a BroadcastChannel in this browser. Only artwork and sound that changed
@@ -7,14 +8,20 @@ import type { Project } from "./model";
 // Different addresses (localhost:5173 and :5174) are separate studios with separate storage.
 
 type Media = [key: string, data: string][];
-type Message =
+// Every message carries the studio version. Windows only link with windows running the same
+// version: a window left open from before an update would otherwise send messages in an older
+// shape (for example tool changes without the sub-scene, which dropped the others back to the
+// main scene). Such windows are reported instead, so they can be reloaded.
+type Message = { v?: string } & (
   | { type: "hello"; from: string }
   | { type: "bye"; from: string }
   | { type: "here"; from: string }
   | { type: "beat"; from: string }
   | { type: "project"; from: string; project: Project; media: Media; full: boolean; at: number }
   | { type: "select"; from: string; sceneId: string; nodeId: string }
-  | { type: "tools"; from: string; tools: unknown; at: number };
+  | { type: "tools"; from: string; tools: unknown; at: number });
+// A version this window does not know is newer than it; a known one other than its own is older.
+const isNewer = (v: string | undefined) => !!v && v !== ENGINE_VERSION && !releases.some((r) => r.version === v);
 
 const mediaOf = (p: Project): Media => [
   ...p.assets.map((a) => ["image:" + a.id, a.data] as [string, string]),
@@ -68,6 +75,8 @@ export function useWindowSync<Tools = null>({ loaded, project, setProject, scene
   const toolsAt = useRef(0);
   const remoteTools = useRef<Tools | null>(null);
   const [peers, setPeers] = useState<string[]>([]);
+  // Windows running another version: not linked, listed so they can be reloaded.
+  const [others, setOthers] = useState<Record<string, { v: string; at: number }>>({});
   // When an edit last went out or came in, and which way, for the "synced" signal.
   const [activity, setActivity] = useState<{ at: number; way: "sent" | "received" } | null>(null);
   // When this window last made a change (or took one): older changes never replace newer ones.
@@ -77,7 +86,7 @@ export function useWindowSync<Tools = null>({ loaded, project, setProject, scene
   const linked = useRef(0);
   linked.current = peers.length;
 
-  const post = (msg: Message) => channel.current?.postMessage(msg);
+  const post = (msg: Message) => channel.current?.postMessage({ ...msg, v: ENGINE_VERSION });
   const sendProject = (p: Project, full: boolean) => {
     const media: Media = [];
     for (const [k, v] of mediaOf(p)) if (full || sent.current.get(k) !== v) { media.push([k, v]); sent.current.set(k, v); }
@@ -91,6 +100,15 @@ export function useWindowSync<Tools = null>({ loaded, project, setProject, scene
     channel.current = ch;
     ch.onmessage = ({ data: msg }: MessageEvent<Message>) => {
       if (!msg || msg.from === me) return;
+      if (msg.v !== ENGINE_VERSION) {
+        // No version at all: a window from before versions were sent, so an older one.
+        const v = msg.v || "";
+        setOthers((o) => {
+          if (msg.type === "bye") { const { [msg.from]: _gone, ...rest } = o; return rest; }
+          return { ...o, [msg.from]: { v, at: Date.now() } };
+        });
+        return;
+      }
       const known = seen.current.has(msg.from);
       seen.current.set(msg.from, Date.now());
       if (msg.type !== "bye") setPeers((p) => (p.includes(msg.from) ? p : [...p, msg.from]));
@@ -140,6 +158,10 @@ export function useWindowSync<Tools = null>({ loaded, project, setProject, scene
       const gone = [...seen.current].filter(([, at]) => at < quiet).map(([id]) => id);
       gone.forEach((id) => seen.current.delete(id));
       if (gone.length) setPeers((p) => p.filter((x) => !gone.includes(x)));
+      setOthers((o) => {
+        const kept = Object.entries(o).filter(([, w]) => w.at >= quiet);
+        return kept.length === Object.keys(o).length ? o : Object.fromEntries(kept);
+      });
     }, 5000);
     return () => {
       clearInterval(beat);
@@ -179,7 +201,9 @@ export function useWindowSync<Tools = null>({ loaded, project, setProject, scene
     return () => clearTimeout(timer);
   }, [nextToolsKey, loaded]);
 
-  return { remote, linked: peers.length, activity, remoteTools };
+  const versions = Object.values(others).map((w) => w.v);
+  const outdated = { self: versions.some(isNewer), others: versions.filter((v) => !isNewer(v)).length };
+  return { remote, linked: peers.length, activity, remoteTools, outdated };
 }
 
 // Opens a linked control window or preview-only window, on another screen when the browser can

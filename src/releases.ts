@@ -1,4 +1,4 @@
-export const ENGINE_VERSION = "3.10.0-claude";
+export const ENGINE_VERSION = "3.10.1-claude";
 export type ReleaseFeature = {
   name: string;
   description: string;
@@ -22,7 +22,11 @@ const f = (
   action?: string,
 ): ReleaseFeature => ({ name, description, steps: path.split(" → "), action });
 export const releases: Release[] = [
- {version:"3.10.0-claude",name:"Area tools on the scene: brush, eraser, undo and Done",by:"Claude",date:"2026-11-05",timestamp:"2026-11-05T09:26:03Z",features:[
+ {version:"3.10.1-claude",name:"Linked windows: no more jumping back to the main scene",by:"Claude",date:"2026-11-05",timestamp:"2026-11-05T09:48:16Z",features:[
+ f("Sub-scene stays put with linked windows", "A studio window left open from before an update could switch every linked window back to the main scene the moment you picked a sub-scene or started an effect. Windows now only link with windows running the same version, and a missing sub-scene in a message never means the main scene.", "View → Open preview window / control window", "workspace"),
+ f("Reload warning for old windows", "The Linked badge now says when another studio window is out of date (\"1 older window not linked, reload it\"), and a window that is itself out of date shows Out of date with a Reload this window button. Reloading keeps your work.", "Top bar → Linked badge", "workspace")
+ ]},
+ {version:"3.10.0-claude",name:"Area tools on the scene: brush, eraser, undo and Done",by:"Claude",commit:"feb9716",date:"2026-11-05",timestamp:"2026-11-05T09:26:03Z",features:[
  f("Area tools on the scene", "While you draw or paint an area, a small bar in the top corner of the scene switches between Points, Wand, Edges, Brush and Eraser, sets the brush size, undoes the last point or stroke, and finishes with Done. It shows wherever the scene does, including the preview window and the preview screen.", "Effects → Draw region → toolbar on the scene", "editor"),
  f("Eraser and undo for painted areas", "Eraser paints parts out of an area, so you can keep what you want and remove a mistake. Undo takes back one stroke, point or selection at a time. Remove last point now only appears for areas drawn with points, so it never wipes a painted area.", "Effects → zone → Eraser", "editor"),
  f("Sub-scene stays selected", "A sub-scene picked with Edit effects stays selected while you move through the scene's dialogue, draw and add effects, until you pick another scene or go back with × or the Editing effects of menu.", "Story library → sub-scenes → Edit effects", "editor"),

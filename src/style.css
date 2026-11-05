@@ -2263,3 +2263,6 @@ html[data-screen="preview"] :is(.app>header,.studio-navigation,.rail){visibility
 .zone-tool-row[data-editing]{outline:1px solid var(--accent);border-radius:8px;padding:6px}
 .zone-tool-row button[aria-pressed=true]{border-color:var(--accent);color:var(--accent)}
 .zone-editing-note{font-size:11px;margin:0 0 6px;color:var(--accent)}
+/* Windows on another version (by Claude) */
+.linked-windows .reload-window{margin-left:8px;padding:2px 8px;border-radius:6px;border:1px solid currentColor;background:none;color:inherit;font:inherit;cursor:pointer}
+.linked-windows .stale-windows{color:#e0a83a;display:inline!important}

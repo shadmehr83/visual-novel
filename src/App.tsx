@@ -383,7 +383,7 @@ export default function App() {
     onSelect: (sid, nid) => { setSceneId(sid); setNodeId(nid); },
     // Drawing an area or the rain mask shows, and can be edited, in every linked window.
     tools: { regionEditor, maskMode, view: viewOverride },
-    onTools: (t) => { setRegionEditor(t.regionEditor); setMaskMode(t.maskMode); setViewOverride(t.view ?? null); },
+    onTools: (t) => { setRegionEditor(t.regionEditor ?? null); setMaskMode(!!t.maskMode); if (t.view !== undefined) setViewOverride(t.view); },
   });
   const controlWindow = screen === "controls";
   // Preview screen: this window shows only the scene preview, filling the screen. A preview

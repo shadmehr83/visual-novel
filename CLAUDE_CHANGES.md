@@ -4,6 +4,14 @@ Every change in this list was written by Claude (Anthropic) at the request of th
 
 > **Where this lives:** branch `claude` on GitHub (the hosted Claude version). Versions follow Stillframe 3 (3.x) and end in `-claude`. `main` is the original line and is untouched. The local Stillframe 3 studio (`npm run stillframe3`, localhost:5174) runs the same code from the local branch `claude-v3`, which is never pushed.
 
+## Stillframe 3.10.1 — linked windows: no more jumping back to the main scene (2026-11-05, engine 3.10.1-claude)
+
+- **Cause:** a studio window left open from before 3.9 (not reloaded after the update) is still linked and sends tool changes without the sub-scene field. `onTools` read the missing field as *main scene* (`t.view ?? null`), so picking a sub-scene or starting an effect in that window switched every linked window back to the main scene.
+- **Version-gated linking** (`src/windowSync.ts`): every message carries `v: ENGINE_VERSION`. Messages from a window on another version (or with no version) are ignored and the window is listed in `outdated` (`self` when a peer runs a version this window does not know, so this one is older; `others` for older peers), dropped after the usual quiet spell or on goodbye.
+- **Defensive tools** (`src/App.tsx`): a tool message without `view` leaves the sub-scene choice as it is.
+- **Badge** (`src/SyncBadge.tsx`): *N older windows not linked, reload them*, or *Out of date, not linked* with a *Reload this window* button.
+- Tests: `src/windowSync.test.tsx` (an unversioned window does not link or change the tool choice; a newer one marks this window out of date).
+
 ## Stillframe 3.10 — area tools on the scene: brush, eraser, undo and Done (2026-11-05, engine 3.10.0-claude)
 
 - **Scene toolbar** (`src/Stage.tsx`): with the new `onTool` / `onUndo` props, the Stage shows a compact *Area tools* bar in its top-right corner while an area or the rain mask is being edited: Points / Wand / Edges / Brush / Eraser (plus Pivot / Move / Tilt for character patches), brush size, wand reach, Undo (the studio's undo, one point or stroke per step), Done, and a hover help. It replaces the 3.9 hint tag in the studio and shows in linked preview windows and the preview screen. The old *Selection tools* bar below the preview stays.

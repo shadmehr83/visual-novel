@@ -68,3 +68,22 @@ it("shows the area being drawn in every linked window, and a new window does not
   a.unmount();
   b.unmount();
 });
+it("does not link with a window left open from another version, and says which one to reload", async () => {
+  const base = demo();
+  const [project, setProject] = [base, (_: Project) => {}];
+  let tools: { view: string | null } = { view: "monitor" };
+  const a = renderHook(() => useWindowSync({ loaded: true, project, setProject, sceneId: "s", nodeId: "n", onSelect: () => {}, tools, onTools: (t) => { tools = t; } }));
+  const old = new BroadcastChannel("stillframe-studio-windows");
+  // A window opened before an update sends messages without a version, here a tool change
+  // without the sub-scene. It must not change this window, and it is reported as older.
+  old.postMessage({ type: "hello", from: "old" });
+  old.postMessage({ type: "tools", from: "old", tools: { regionEditor: null, maskMode: false }, at: Date.now() + 1000 });
+  await waitFor(() => expect(a.result.current.outdated.others).toBe(1));
+  expect(a.result.current.linked).toBe(0);
+  expect(tools.view).toBe("monitor");
+  // A newer window means this one is the out-of-date one.
+  old.postMessage({ type: "beat", from: "newer", v: "99.0.0-claude" });
+  await waitFor(() => expect(a.result.current.outdated.self).toBe(true));
+  old.close();
+  a.unmount();
+});
