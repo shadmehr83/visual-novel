@@ -69,6 +69,17 @@ export function Stage({
     y: number;
   } | null>(null);
   const [wandError, setWandError] = useState("");
+  const [pointsHeld, setPointsHeld] = useState(false);
+  const [dragPoints, setDragPoints] = useState<{ x: number; y: number }[] | null>(null);
+  const [nearPoint, setNearPoint] = useState(false);
+  const pointDrag = useRef<{ index: number; moved: boolean; points: { x: number; y: number }[] } | null>(null);
+  const skipClick = useRef(false);
+  const pointKey = (regionEditor?.mode === "polygon" ? regionEditor.kind + ":" + regionEditor.id : "") + (maskMode ? ":mask" : "");
+  useEffect(() => {
+    setPointsHeld(false);
+    setDragPoints(null);
+    pointDrag.current = null;
+  }, [pointKey]);
   const [wandBusy, setWandBusy] = useState(false);
   const paused = usePaused();
   const pausedRef = useRef(paused);
@@ -217,6 +228,25 @@ export function Stage({
       ),
     };
   }
+  // Moving points (by Claude): a point of a drawn area (or of the rain mask) can be dragged to a
+  // new place. Right-clicking the scene pauses adding points, so left clicks only pick up points;
+  // right-clicking again goes back to adding them.
+  const pointTarget: "region" | "mask" | null =
+    regionEditor?.mode === "polygon" && storedRegion ? "region" : maskMode && !regionEditor ? "mask" : null;
+  const editablePoints = pointTarget === "region" ? storedRegion!.points : pointTarget === "mask" ? e.mask : null;
+  const shownPoints = (pointTarget && dragPoints) || editablePoints || [];
+  // The nearest point within about 12 screen pixels of the pointer, or -1.
+  function pointIndexAt(clientX: number, clientY: number) {
+    if (!editablePoints?.length || !svg.current) return -1;
+    const p = pointAt(clientX, clientY);
+    const reach = 12 / (svg.current.getScreenCTM()?.a || 1) / (asset ? scene.scale : 1);
+    let best = -1, bestDistance = reach;
+    editablePoints.forEach((q, i) => {
+      const d = Math.hypot(q.x - p.x, q.y - p.y);
+      if (d <= bestDistance) { best = i; bestDistance = d; }
+    });
+    return best;
+  }
   function paint(clientX: number, clientY: number) {
     if (!stroke.current || !regionEditor) return;
     const p = pointAt(clientX, clientY);
@@ -260,9 +290,22 @@ export function Stage({
         data-background-asset={asset?.id || scene.art}
         data-light-level={lightLevel}
         data-global-light-level={globalLevel}
-        style={{ touchAction: regionEditor ? "none" : undefined }}
+        style={{
+          touchAction: regionEditor || maskMode ? "none" : undefined,
+          cursor: dragPoints ? "grabbing" : pointTarget && nearPoint ? "grab" : undefined,
+        }}
         onPointerDown={(event) => {
           if((regionEditor?.mode === "pose" || regionEditor?.mode === "rotate")) {event.preventDefault();event.currentTarget.setPointerCapture(event.pointerId);poseDrag.current=pointAt(event.clientX,event.clientY);return;}
+          if (event.button === 0 && pointTarget && editablePoints) {
+            const index = pointIndexAt(event.clientX, event.clientY);
+            if (index >= 0) {
+              event.preventDefault();
+              event.currentTarget.setPointerCapture(event.pointerId);
+              pointDrag.current = { index, moved: false, points: editablePoints.map((p) => ({ ...p })) };
+              setDragPoints(pointDrag.current.points);
+              return;
+            }
+          }
           if (
             !storedRegion ||
             !regionEditor ||
@@ -281,6 +324,15 @@ export function Stage({
           paint(event.clientX, event.clientY);
         }}
         onPointerMove={(event) => {
+          const drag = pointDrag.current;
+          if (drag) {
+            const p = pointAt(event.clientX, event.clientY);
+            drag.points = drag.points.map((q, i) => (i === drag.index ? p : q));
+            drag.moved = true;
+            setDragPoints(drag.points);
+            return;
+          }
+          if (pointTarget) setNearPoint(pointIndexAt(event.clientX, event.clientY) >= 0);
           if (regionEditor && ["brush", "erase"].includes(regionEditor.mode)) {
             setBrushCursor(pointAt(event.clientX, event.clientY));
             paint(event.clientX, event.clientY);
@@ -290,6 +342,18 @@ export function Stage({
           if (!stroke.current) setBrushCursor(null);
         }}
         onPointerUp={(event) => {
+          const drag = pointDrag.current;
+          if (drag) {
+            pointDrag.current = null;
+            // Picking up a point never adds a new one on top of it.
+            skipClick.current = true;
+            setDragPoints(null);
+            if (drag.moved) {
+              if (pointTarget === "region" && storedRegion) onRegion?.({ ...storedRegion, path: undefined, points: drag.points });
+              else if (pointTarget === "mask") onMask(drag.points);
+            }
+            return;
+          }
           if(poseDrag.current){const p=pointAt(event.clientX,event.clientY);const j=scene.joints?.find(j=>j.id===regionEditor?.id);if(regionEditor?.mode === "rotate" && j){const a=Math.atan2(poseDrag.current.y-j.pivotY,poseDrag.current.x-j.pivotX);const b=Math.atan2(p.y-j.pivotY,p.x-j.pivotX);const delta=Math.atan2(Math.sin(b-a),Math.cos(b-a))*180/Math.PI;onPose?.(0,0,Math.max(-15,Math.min(15,delta)));}else onPose?.(p.x-poseDrag.current.x,p.y-poseDrag.current.y);poseDrag.current=null;return;}
           if (!stroke.current) return;
           try {
@@ -303,14 +367,26 @@ export function Stage({
           }
         }}
         onPointerCancel={() => {
+          pointDrag.current = null;
+          setDragPoints(null);
           poseDrag.current=null;
           stroke.current = null;
           setStrokePreview(null);
+        }}
+        onContextMenu={(event) => {
+          if (!pointTarget) return;
+          event.preventDefault();
+          setPointsHeld((held) => !held);
         }}
         onClick={async (event) => {
           // Author tools consume this gesture before React can re-enable the
           // document-level story click shortcut after a one-shot placement.
           if (onPlaceLight || regionEditor || maskMode) event.stopPropagation();
+          if (skipClick.current) {
+            skipClick.current = false;
+            return;
+          }
+          if (pointTarget && pointsHeld) return;
           if (onPlaceLight) {
             const p = new DOMPoint(
               event.clientX,
@@ -819,7 +895,7 @@ export function Stage({
               <path d={activeRegion.path} fill="#ffc8a7" fillOpacity=".25" />
             ) : (
               <polygon
-                points={activeRegion.points
+                points={(pointTarget === "region" ? shownPoints : activeRegion.points)
                   .map((p) => `${p.x},${p.y}`)
                   .join(" ")}
                 fill="#ffc8a7"
@@ -827,8 +903,9 @@ export function Stage({
                 stroke="#ffc8a7"
               />
             )}
-            {activeRegion.points.map((p, i) => (
-              <circle key={i} cx={p.x} cy={p.y} r="5" fill="#ffc8a7" />
+            {(pointTarget === "region" ? shownPoints : activeRegion.points).map((p, i) => (
+              <circle key={i} data-region-point={i} cx={p.x} cy={p.y} r={pointsHeld ? 7 : 5} fill="#ffc8a7"
+                stroke={pointsHeld ? "#fff" : "none"} strokeWidth="2" vectorEffect="non-scaling-stroke" />
             ))}
           </g>
         )}
@@ -871,14 +948,15 @@ export function Stage({
         {maskMode && (
           <g transform={transform}>
             <polygon
-              points={points}
+              points={shownPoints.map((p) => `${p.x},${p.y}`).join(" ")}
               fill="#e3b19b"
               fillOpacity=".18"
               stroke="#ffc8a7"
               strokeDasharray="5 4"
             />
-            {e.mask.map((p, i) => (
-              <circle key={i} cx={p.x} cy={p.y} r="6" fill="#ffc8a7">
+            {shownPoints.map((p, i) => (
+              <circle key={i} cx={p.x} cy={p.y} r={pointsHeld ? 7 : 6} fill="#ffc8a7"
+                stroke={pointsHeld ? "#fff" : "none"} strokeWidth="2" vectorEffect="non-scaling-stroke">
                 <title>Mask vertex {i + 1}</title>
               </circle>
             ))}
@@ -886,6 +964,13 @@ export function Stage({
         )}
       </svg>
       {regionEditor && ["pose","rotate"].includes(regionEditor.mode) && <div className="mask-hint" style={{pointerEvents:"none"}}>Drag on the scene to {regionEditor.mode === "rotate" ? "tilt the selected patch around its pivot" : "move the selected patch"}. Saves a pose for this dialogue.</div>}
+      {pointTarget && !wandError && !wandBusy && (
+        <div className="mask-hint point-hint" data-points-held={pointsHeld || undefined} style={{ pointerEvents: "none" }}>
+          {pointsHeld
+            ? "Adding points is paused · drag a point to move it · right-click to add points again"
+            : "Click to add a point · drag a point to move it · right-click to stop adding points"}
+        </div>
+      )}
       {onPlaceLight && <div className="mask-hint" style={{ pointerEvents: "none" }}>Click the scene to place the light centre.</div>}
       {wandError && (
         <div className="mask-hint" role="alert">

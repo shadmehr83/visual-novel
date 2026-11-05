@@ -46,3 +46,25 @@ it("keeps a separate panel layout for control and preview windows", async () => 
   // A minimised panel keeps its saved size and position.
   expect(dockPanelSchema.parse({ mode: "home", x: 1, y: 2, width: 850, height: 580, min: true }).min).toBe(true);
 });
+it("shows the area being drawn in every linked window, and a new window does not switch it off", async () => {
+  function useTools(start: Project) {
+    const [project, setProject] = useState(start);
+    const [tools, setTools] = useState<{ region: string | null }>({ region: null });
+    const sync = useWindowSync({ loaded: true, project, setProject, sceneId: "s", nodeId: "n", onSelect: () => {}, tools, onTools: setTools });
+    return { tools, setTools, sync };
+  }
+  const base = demo();
+  const a = renderHook(() => useTools(base));
+  await new Promise((r) => setTimeout(r, 20));
+  act(() => a.result.current.setTools({ region: "window-glow" }));
+  // A window opened afterwards takes the tool in use instead of clearing it.
+  const b = renderHook(() => useTools(structuredClone(base)));
+  await waitFor(() => expect(b.result.current.tools.region).toBe("window-glow"));
+  await new Promise((r) => setTimeout(r, 150));
+  expect(a.result.current.tools.region).toBe("window-glow");
+  // Finishing in either window finishes in both.
+  act(() => b.result.current.setTools({ region: null }));
+  await waitFor(() => expect(a.result.current.tools.region).toBe(null));
+  a.unmount();
+  b.unmount();
+});

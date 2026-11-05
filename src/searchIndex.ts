@@ -51,6 +51,7 @@ const defs:[string,string,string,string?][]=[
  ['Open control window (second screen)','Open the studio in a second, linked window on your other monitor. Edits and the selected dialogue show in both windows live. Locally, localhost:5175 opens it for Stillframe 3.','workspace','dual screen second monitor two windows linked control panel sync'],
  ['Preview screen (this window)','Let the scene preview fill this window while you edit in the control window on another screen.','workspace','full screen preview monitor dual screen big preview'],
  ['Open preview window (preview only)','Open a third linked window that shows only the scene preview, for the screen where you watch the game.','workspace','preview only window third screen monitor dual screen watch game'],
+ ['Move region points','While drawing an area, drag a point to reshape it; right-click the scene to stop adding points and only move them.','effect:Rain','drag move adjust reshape vertex vertices points polygon region area resize right click pause'],
  ['Minimise Scene preview','Fold the scene preview (or any panel) into a slim bar; click the bar to show it again.','workspace','minimise minimize hide collapse close preview panel restore'],
  ['Save and publish project','Export the full project with embedded artwork or use the configured publisher.','save','backup github sync json export'],
  ['Restore artwork','Recover missing published artwork and outfit cards while retaining custom project edits.','restore-artwork','missing empty folders images recovery'],

@@ -380,6 +380,9 @@ export default function App() {
   const sync = useWindowSync({
     loaded, project, setProject, sceneId, nodeId,
     onSelect: (sid, nid) => { setSceneId(sid); setNodeId(nid); },
+    // Drawing an area or the rain mask shows, and can be edited, in every linked window.
+    tools: { regionEditor, maskMode },
+    onTools: (t) => { setRegionEditor(t.regionEditor); setMaskMode(t.maskMode); },
   });
   const controlWindow = screen === "controls";
   // Preview screen: this window shows only the scene preview, filling the screen. A preview
@@ -777,7 +780,8 @@ export default function App() {
           ? e.lights?.find((l) => l.id === regionEditor.id)?.region
           : e.motionZones?.find((w) => w.id === regionEditor?.id)?.region;
   useEffect(() => {
-    if (regionEditor && !selectedRegion) setRegionEditor(null);
+    // A tool chosen in a linked window may arrive just before the area it edits does.
+    if (regionEditor && !selectedRegion && regionEditor !== sync.remoteTools.current?.regionEditor) setRegionEditor(null);
   }, [regionEditor, selectedRegion]);
   const changeSelectedRegion = (region: import("./model").Region) =>
     updateScene((s) => {
@@ -1889,12 +1893,6 @@ export default function App() {
                             )}
                           </div>
                         )}
-                      {maskMode && (
-                        <div className="mask-hint">
-                          Click to add a vertex · use the inspector to remove
-                          the last point
-                        </div>
-                      )}
                     </Stage>
                   </SceneTransition>
                 </div>

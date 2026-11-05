@@ -4,6 +4,13 @@ Every change in this list was written by Claude (Anthropic) at the request of th
 
 > **Where this lives:** branch `claude` on GitHub (the hosted Claude version). Versions follow Stillframe 3 (3.x) and end in `-claude`. `main` is the original line and is untouched. The local Stillframe 3 studio (`npm run stillframe3`, localhost:5174) runs the same code from the local branch `claude-v3`, which is never pushed.
 
+## Stillframe 3.8 — reshape areas by moving their points, from any linked window (2026-11-05, engine 3.8.0-claude)
+
+- **Move points** (`src/Stage.tsx`): while drawing an area with points (`regionEditor.mode === "polygon"`) or the rain mask, pressing on a point (within about 12 screen pixels) drags it; the change is saved once on release, so one drag is one undo step. Picking up a point never adds a new point on top of it.
+- **Pause adding points:** right-clicking the scene while drawing toggles a paused state in which left clicks only pick up points (points get a white ring). A hint at the top of the scene says which state it is in. The old mask hint in `App.tsx` is replaced by this one.
+- **Drawing in linked windows** (`src/windowSync.ts`): `useWindowSync` takes `tools` / `onTools` and shares the scene tool in use (`regionEditor`, `maskMode`) with a `tools` message. Each choice carries its time, so a window that just opened never switches the others' tool off. The tool goes out shortly after the edit that goes with it, and `App.tsx` does not drop a tool taken from another window while the area it edits is still on its way. The preview window now shows the area being drawn and accepts clicks and drags on it.
+- Tests: `src/windowSync.test.tsx` (tool shared, kept when a window opens, finished in both).
+
 ## Stillframe 3.7 — two screens: preview window, minimise and sync status (2026-11-04, engine 3.7.0-claude)
 
 - **Preview-only window:** View → Open preview window (preview only) opens `?screen=preview` (title *Preview · …*), a linked window that starts as the preview screen. `openControlWindow` became `openStudioWindow("controls" | "preview")` in `src/windowSync.ts`; each kind reuses its own named window.

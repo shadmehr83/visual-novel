@@ -1,4 +1,4 @@
-export const ENGINE_VERSION = "3.7.0-claude";
+export const ENGINE_VERSION = "3.8.0-claude";
 export type ReleaseFeature = {
   name: string;
   description: string;
@@ -22,7 +22,12 @@ const f = (
   action?: string,
 ): ReleaseFeature => ({ name, description, steps: path.split(" → "), action });
 export const releases: Release[] = [
- {version:"3.7.0-claude",name:"Two screens: preview window, minimise and sync status",by:"Claude",date:"2026-11-04",timestamp:"2026-11-04T04:59:17Z",features:[
+ {version:"3.8.0-claude",name:"Reshape areas by moving their points, from any linked window",by:"Claude",date:"2026-11-05",timestamp:"2026-11-05T08:38:36Z",features:[
+ f("Move area points", "While drawing an area with points (rain, light, motion or a character patch) or the rain mask, drag any existing point to a new place to reshape the area. Picking up a point never adds a new one.", "Effects → Draw region → drag a point on the scene", "editor"),
+ f("Pause adding points", "Right-click the scene while drawing to stop adding points, so left clicks only pick up and move the points you already have (they get a white ring). Right-click again to add points again. A hint at the top of the scene says which it is.", "Effects → Draw region → right-click the scene", "editor"),
+ f("Draw in the preview window", "The area you are drawing, and the rain mask, now show in every linked window, including the preview window on your big screen. Add and move points there; the control window shows each change straight away. Finishing in one window finishes in all of them.", "View → Open preview window (preview only) → Draw region in the control window", "workspace")
+ ]},
+ {version:"3.7.0-claude",name:"Two screens: preview window, minimise and sync status",by:"Claude",commit:"3ea9d06",date:"2026-11-04",timestamp:"2026-11-04T04:59:17Z",features:[
  f("Preview-only window", "View → Open preview window (preview only) opens a third linked window that shows just the scene preview, filling it, for the screen where you watch the game. Edits from the studio and the control window show in it straight away. Show full studio turns it into a normal studio window.", "View → Open preview window (preview only)", "workspace"),
  f("Minimise any panel", "The new – button on a panel title bar (Scene preview, Story library, Dialogue editor, Controls) folds the panel into a slim bar so the others get the room. Click the bar to bring it back where it was. Each linked window keeps its own arrangement, so hiding the preview in the control window leaves the main window as it is.", "Scene preview title bar → Minimise", "workspace"),
  f("Sync status", "The Linked badge next to the save status now says which window this is (control or preview window) and flashes each time a change is sent (↑) or received (↓), with how long ago. A control or preview window that is not linked says so, for example when it was opened in an Incognito window.", "Top bar → Linked badge", "workspace"),

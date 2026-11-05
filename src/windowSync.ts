@@ -13,7 +13,8 @@ type Message =
   | { type: "here"; from: string }
   | { type: "beat"; from: string }
   | { type: "project"; from: string; project: Project; media: Media; full: boolean; at: number }
-  | { type: "select"; from: string; sceneId: string; nodeId: string };
+  | { type: "select"; from: string; sceneId: string; nodeId: string }
+  | { type: "tools"; from: string; tools: unknown; at: number };
 
 const mediaOf = (p: Project): Media => [
   ...p.assets.map((a) => ["image:" + a.id, a.data] as [string, string]),
@@ -40,13 +41,17 @@ function rebuild(msg: Extract<Message, { type: "project" }>, current: Project): 
   return missing ? null : next;
 }
 
-export function useWindowSync({ loaded, project, setProject, sceneId, nodeId, onSelect }: {
+export function useWindowSync<Tools = null>({ loaded, project, setProject, sceneId, nodeId, onSelect, tools = null as Tools, onTools }: {
   loaded: boolean;
   project: Project;
   setProject: (p: Project) => void;
   sceneId: string;
   nodeId: string;
   onSelect: (sceneId: string, nodeId: string) => void;
+  // The scene tool in use (drawing an area, placing a light), so a region being drawn in one
+  // window shows, and can be edited, in every linked window.
+  tools?: Tools;
+  onTools?: (tools: Tools) => void;
 }) {
   // This window's id, so it ignores its own messages.
   const [me] = useState(() => Math.random().toString(36).slice(2));
@@ -55,8 +60,13 @@ export function useWindowSync({ loaded, project, setProject, sceneId, nodeId, on
   const remote = useRef<Project | null>(null);
   const sent = useRef(new Map<string, string>());
   const lastSelect = useRef("");
-  const latest = useRef({ project, sceneId, nodeId, setProject, onSelect });
-  latest.current = { project, sceneId, nodeId, setProject, onSelect };
+  const latest = useRef({ project, sceneId, nodeId, setProject, onSelect, tools, onTools });
+  latest.current = { project, sceneId, nodeId, setProject, onSelect, tools, onTools };
+  // The tool state last sent or taken, and when it was last chosen: an older choice never
+  // replaces a newer one, so a window that just opened does not switch the others' tool off.
+  const toolsKey = useRef(JSON.stringify(tools));
+  const toolsAt = useRef(0);
+  const remoteTools = useRef<Tools | null>(null);
   const [peers, setPeers] = useState<string[]>([]);
   // When an edit last went out or came in, and which way, for the "synced" signal.
   const [activity, setActivity] = useState<{ at: number; way: "sent" | "received" } | null>(null);
@@ -91,6 +101,7 @@ export function useWindowSync({ loaded, project, setProject, sceneId, nodeId, on
         post({ type: "here", from: me });
         sendProject(latest.current.project, true);
         post({ type: "select", from: me, sceneId: latest.current.sceneId, nodeId: latest.current.nodeId });
+        if (toolsAt.current) post({ type: "tools", from: me, tools: latest.current.tools, at: toolsAt.current });
       }
       if (msg.type === "bye") {
         seen.current.delete(msg.from);
@@ -105,6 +116,13 @@ export function useWindowSync({ loaded, project, setProject, sceneId, nodeId, on
         lastEdit.current = msg.at;
         latest.current.setProject(next);
         setActivity({ at: Date.now(), way: "received" });
+      }
+      if (msg.type === "tools") {
+        if (msg.at <= toolsAt.current) return;
+        toolsAt.current = msg.at;
+        toolsKey.current = JSON.stringify(msg.tools);
+        remoteTools.current = msg.tools as Tools;
+        latest.current.onTools?.(msg.tools as Tools);
       }
       if (msg.type === "select") {
         lastSelect.current = msg.sceneId + "/" + msg.nodeId;
@@ -151,7 +169,17 @@ export function useWindowSync({ loaded, project, setProject, sceneId, nodeId, on
     post({ type: "select", from: me, sceneId, nodeId });
   }, [sceneId, nodeId, loaded, peers.length]);
 
-  return { remote, linked: peers.length, activity };
+  const nextToolsKey = JSON.stringify(tools);
+  useEffect(() => {
+    if (!loaded || nextToolsKey === toolsKey.current) return;
+    toolsKey.current = nextToolsKey;
+    toolsAt.current = Date.now();
+    // After the edit that goes with it (an area that was just added), so the other window has it.
+    const timer = setTimeout(() => post({ type: "tools", from: me, tools: latest.current.tools, at: toolsAt.current }), 60);
+    return () => clearTimeout(timer);
+  }, [nextToolsKey, loaded]);
+
+  return { remote, linked: peers.length, activity, remoteTools };
 }
 
 // Opens a linked control window or preview-only window, on another screen when the browser can
