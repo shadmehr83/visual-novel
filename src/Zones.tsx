@@ -38,24 +38,42 @@ export function Zones({
     region: Region,
     change: (r: Region) => void,
   ) {
+    const editing = editor?.kind === kind && editor.id === id;
+    const pick = (mode: RegionEditor["mode"]) =>
+      setEditor({ kind, id, mode, tolerance, radius: editor?.radius || 25 });
     return (
-      <div>
+      <div className="zone-tool-row" data-editing={editing || undefined}>
+        {editing && (
+          <p className="zone-editing-note">
+            Editing this area on the scene: use the toolbar at the top of the
+            scene to switch tools, undo a stroke or finish.
+          </p>
+        )}
         <button
-          onClick={() => setEditor({ kind, id, mode: "polygon", tolerance })}
+          aria-pressed={editing && editor.mode === "polygon"}
+          onClick={() => pick("polygon")}
         >
           Draw region
         </button>
         <button
-          onClick={() => setEditor({ kind, id, mode: "wand", tolerance })}
+          aria-pressed={editing && editor.mode === "wand"}
+          onClick={() => pick("wand")}
         >
           Magic wand
         </button>
         <button
-          onClick={() =>
-            setEditor({ kind, id, mode: "brush", tolerance, radius: 25 })
-          }
+          aria-pressed={editing && editor.mode === "brush"}
+          onClick={() => pick("brush")}
         >
-          Edit selection / brush
+          Brush
+        </button>
+        <button
+          aria-pressed={editing && editor.mode === "erase"}
+          disabled={!region.path && region.points.length < 3}
+          data-help="Paint over parts of the area to take them out of it."
+          onClick={() => pick("erase")}
+        >
+          Eraser
         </button>
         <button
           disabled={!region.path && region.points.length < 3}
@@ -87,17 +105,20 @@ export function Zones({
             </button>
           </>
         )}
-        <button
-          onClick={() =>
-            change({
-              ...region,
-              path: undefined,
-              points: region.points.slice(0, -1),
-            })
-          }
-        >
-          Remove point
-        </button>
+        {!region.path && (
+          <button
+            disabled={!region.points.length}
+            onClick={() =>
+              change({
+                ...region,
+                path: undefined,
+                points: region.points.slice(0, -1),
+              })
+            }
+          >
+            Remove last point
+          </button>
+        )}
         <button
           onClick={() => change({ ...region, path: undefined, points: [] })}
         >
@@ -105,9 +126,15 @@ export function Zones({
         </button>
         <small>
           {region.path
-            ? "Auto-selected region"
+            ? "Painted / auto-selected area"
             : `${region.points.length} points`}
+          {region.boundary ? " · boundary locked" : ""}
         </small>
+        {editing && (
+          <button className="primary" onClick={() => setEditor(null)}>
+            Done
+          </button>
+        )}
       </div>
     );
   }
@@ -201,7 +228,9 @@ export function Zones({
               Enabled
             </label>
             {tools("rain", r.id, r, (v) =>
-              patchRain(i, (r) => Object.assign(r, v)),
+              update((s) => {
+                s.effects.rainZones![i] = v;
+              }),
             )}
             <button
               onClick={() => {

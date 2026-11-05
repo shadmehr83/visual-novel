@@ -2247,3 +2247,19 @@ html[data-screen="preview"] :is(.app>header,.studio-navigation,.rail){visibility
 .preview-controls-drawer>.inspector{position:static!important;left:auto!important;top:auto!important;width:100%!important;max-width:none!important;height:auto!important;min-height:100%;display:block!important;transform:none!important;margin:0!important}
 .preview-controls-drawer .controls-resize,.preview-controls-drawer .top-dock-resize,.preview-controls-drawer .effects-split-resize{display:none}
 .preview-screen-bar button[aria-pressed=true]{border-color:var(--accent);color:var(--accent)}
+/* Area tools on the scene (by Claude): one compact bar in the top-right corner of the scene. */
+.stage-tools{position:absolute;top:6px;right:8px;z-index:7;max-width:calc(100% - 16px);display:flex;flex-wrap:wrap;justify-content:flex-end;align-items:center;gap:4px;padding:4px;border-radius:10px;background:#1c222ee6;color:#e8e9e4;font-size:11px;line-height:1.2;box-shadow:0 2px 10px #0006}
+.stage-tools button,.stage-tools select{font:inherit;padding:3px 8px;border-radius:6px;border:1px solid #ffffff30;background:#ffffff10;color:inherit;cursor:pointer}
+.stage-tools button:disabled{opacity:.4;cursor:default}
+.stage-tools button[aria-pressed=true]{background:var(--accent);border-color:var(--accent);color:#1c222e}
+.stage-tools-modes{display:inline-flex;gap:2px;flex-wrap:wrap}
+.stage-tools-size{display:inline-flex;align-items:center;gap:4px}
+.stage-tools-size input{width:80px}
+.stage-tools .stage-tools-done{background:var(--accent);border-color:var(--accent);color:#1c222e;font-weight:600}
+.stage-tools-help{position:relative;cursor:help;padding:0 4px;opacity:.75}
+.stage-tools-help>span{display:none;position:absolute;right:0;top:calc(100% + 8px);width:min(320px,60vw);padding:6px 9px;border-radius:8px;background:#1c222ef2;color:#e8e9e4;font-size:11px;text-align:left}
+.stage-tools-help:hover>span{display:block}
+.stage-tools-state{color:#fff;outline:1px solid var(--accent);border-radius:6px;padding:2px 6px}
+.zone-tool-row[data-editing]{outline:1px solid var(--accent);border-radius:8px;padding:6px}
+.zone-tool-row button[aria-pressed=true]{border-color:var(--accent);color:var(--accent)}
+.zone-editing-note{font-size:11px;margin:0 0 6px;color:var(--accent)}

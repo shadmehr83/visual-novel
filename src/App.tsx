@@ -337,7 +337,7 @@ export default function App() {
   const [inspector, setInspector] = useState("Atmosphere");
   const [bottom, setBottom] = useState("Dialogue");
   const [regionEditor, setRegionEditor] = useState<RegionEditor | null>(null);
-  const [viewOverride, setViewOverride] = useState<{ scene: string; node: string; view: string | null } | null>(null);
+  const [viewOverride, setViewOverride] = useState<{ scene: string; view: string | null } | null>(null);
   const [hideDialogue, setHideDialogue] = useState(false);
   const [customReply, setCustomReply] = useState("");
   const [maskMode, setMaskMode] = useState(false);
@@ -635,8 +635,9 @@ export default function App() {
   const baseSelected =
     project.scenes.find((s) => s.id === (playing && authorPlay ? runtime?.scene : sceneId)) || project.scenes[0];
   // Sub-scene effects (by Claude): a sub-scene picked in the sub-scene list is edited and shown
-  // even when no dialogue uses it. The choice holds while the same dialogue stays selected.
-  const viewChoice = !playing && viewOverride && viewOverride.scene === baseSelected.id && viewOverride.node === nodeId ? viewOverride : null;
+  // even when no dialogue uses it. The choice stays while you work in this scene (moving through
+  // its dialogue, drawing, adding effects) until you pick another scene or go back with × or the menu.
+  const viewChoice = !playing && viewOverride && viewOverride.scene === baseSelected.id ? viewOverride : null;
   const activeViewId = viewChoice ? viewChoice.view ?? undefined : baseSelected.nodes.find(n => n.id === (playing ? runtime?.node : nodeId))?.view;
   const activeView = baseSelected.subscenes?.find(v => v.id === activeViewId);
   const selected = activeView ? { ...baseSelected, effects: sceneView(baseSelected, playing ? runtime?.node : nodeId, activeView.id).effects, audio: activeView.audio || [] } : baseSelected;
@@ -695,9 +696,8 @@ export default function App() {
     const target = project.scenes.find((s) => s.id === sid);
     if (!target) return;
     setPlaying(false);
-    const node = sid === baseSelected.id ? nodeId : target.nodes[0].id;
     if (sid !== baseSelected.id) selectScene(sid);
-    setViewOverride({ scene: sid, node, view });
+    setViewOverride({ scene: sid, view });
     setRegionEditor(null);
     setMaskMode(false);
     setEffectPanel("All");
@@ -708,6 +708,7 @@ export default function App() {
     setPlacingLight(null);
     setSceneId(id);
     setNodeId(project.scenes.find((s) => s.id === id)!.nodes[0].id);
+    setViewOverride(null);
     setMaskMode(false);
     setRegionEditor(null);
   }
@@ -1241,7 +1242,7 @@ export default function App() {
                       </button>
                     ))}
                   </div>
-                  <SubsceneList scene={baseSelected} update={fn => edit(p => fn(p.scenes.find(s=>s.id===baseSelected.id)!))} onOpen={(id) => { setPlaying(false); setNodeId(id); setEffectPanel("All"); }}
+                  <SubsceneList scene={baseSelected} update={fn => edit(p => fn(p.scenes.find(s=>s.id===baseSelected.id)!))} onOpen={(id) => { setPlaying(false); setNodeId(id); setViewOverride(null); setEffectPanel("All"); }}
                     editing={activeViewId ?? null} onEffects={(v, preview) => editSceneEffects(baseSelected.id, v, preview)} />
                   <div className="story-note">
                     <span className="section-label">{chapterForScene(project,scene.id)?.title||"OPENING CHAPTER"}</span>
@@ -1597,6 +1598,7 @@ export default function App() {
                     <span className="eyebrow">{scene.subtitle}</span>
                     <h1>{scene.title}</h1><ChapterBadge project={project} scene={scene.id} />
                     {!playing && activeView && <span className="subscene-chip" data-no-advance>Sub-scene · {activeView.title}{viewChoice && <button onClick={() => setViewOverride(null)} aria-label="Back to this dialogue's scene" data-help="Stop editing this sub-scene and show the scene the selected dialogue uses.">×</button>}</span>}
+                    {!playing && viewChoice && !activeView && <span className="subscene-chip" data-no-advance>Main scene<button onClick={() => setViewOverride(null)} aria-label="Back to this dialogue's scene" data-help="Show the scene the selected dialogue uses again.">×</button></span>}
                   </div>
                   <div className="preview-tools">
                     {!playing && (
@@ -1732,6 +1734,8 @@ export default function App() {
                       viewId={playing ? undefined : activeViewId ?? null}
                       regionEditor={editingLocked ? null : regionEditor}
                       onRegion={changeSelectedRegion}
+                      onTool={editingLocked ? undefined : (next) => { setRegionEditor(next); if (!next) setMaskMode(false); }}
+                      onUndo={undo.length ? () => history(true) : undefined}
                     >
 
                       {playing && runtime && node.qte && (

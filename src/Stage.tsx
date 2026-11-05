@@ -34,7 +34,13 @@ export function Stage({
   gifFrozenTime,
   onGifPosition,
   viewId,
+  onTool,
+  onUndo,
 }: {
+  // Area tools on the scene itself (by Claude): switch tool, undo and finish without leaving the
+  // scene, so they also work in the preview window and the preview screen.
+  onTool?: (editor: RegionEditor | null) => void;
+  onUndo?: () => void;
   // A sub-scene to show instead of the dialogue's own (null = the main scene).
   viewId?: string | null;
   project: Project;
@@ -967,7 +973,58 @@ export function Stage({
         )}
       </svg>
       {regionEditor && ["pose","rotate"].includes(regionEditor.mode) && <div className="mask-hint" style={{pointerEvents:"none"}}>Drag on the scene to {regionEditor.mode === "rotate" ? "tilt the selected patch around its pivot" : "move the selected patch"}. Saves a pose for this dialogue.</div>}
-      {pointTarget && !wandError && !wandBusy && (
+      {onTool && (regionEditor || maskMode) && (
+        <div className="stage-tools" data-no-advance role="toolbar" aria-label="Area tools"
+          onClick={(event) => event.stopPropagation()} onPointerDown={(event) => event.stopPropagation()}>
+          {regionEditor && (
+            <span className="stage-tools-modes">
+              {([
+                ["polygon", "Points"], ["wand", "Wand"], ["edge", "Edges"], ["brush", "Brush"], ["erase", "Eraser"],
+                ...(regionEditor.kind === "joint" ? [["pivot", "Pivot"], ["pose", "Move"], ["rotate", "Tilt"]] as const : []),
+              ] as const).map(([mode, label]) => (
+                <button key={mode} aria-pressed={regionEditor.mode === mode} onClick={() => onTool({ ...regionEditor, mode })}
+                  data-help={mode === "erase" ? "Paint over parts of the area to take them out." : mode === "brush" ? "Paint to add to the area." : undefined}>
+                  {label}
+                </button>
+              ))}
+            </span>
+          )}
+          {regionEditor && ["brush", "erase"].includes(regionEditor.mode) && (
+            <label className="stage-tools-size">
+              Size
+              <input type="range" aria-label="Brush size" min="4" max="120" value={regionEditor.radius || 25}
+                onChange={(event) => onTool({ ...regionEditor, radius: +event.target.value })} />
+            </label>
+          )}
+          {regionEditor && ["wand", "edge"].includes(regionEditor.mode) && (
+            <select aria-label="Wand reach" value={regionEditor.tolerance} onChange={(event) => onTool({ ...regionEditor, tolerance: +event.target.value })}>
+              <option value="25">Strict</option>
+              <option value="45">Balanced</option>
+              <option value="90">Broad</option>
+            </select>
+          )}
+          <button disabled={!onUndo} onClick={() => onUndo?.()} aria-label="Undo last change" data-help="Undo the last point, stroke or selection (Ctrl+Z).">Undo</button>
+          <button className="stage-tools-done" onClick={() => onTool(null)}>Done</button>
+          <span className="stage-tools-help">
+            <b>?</b>
+            <span>
+              {pointTarget
+                ? pointsHeld
+                  ? "Moving points: drag a point to move it · right-click the scene to add points again"
+                  : "Adding points: click to add · drag a point to move it · right-click the scene to only move points"
+                : regionEditor?.mode === "erase"
+                  ? "Eraser: paint over parts of the area to remove them · Undo takes back a stroke"
+                  : regionEditor?.mode === "brush"
+                    ? "Brush: paint to add to the area · Eraser removes · Undo takes back a stroke"
+                    : regionEditor && ["wand", "edge"].includes(regionEditor.mode)
+                      ? "Click a colour in the scene to select connected parts · Brush and Eraser fix the edges"
+                      : "Drag on the scene to adjust · Done when finished"}
+            </span>
+          </span>
+          {pointTarget && pointsHeld && <span className="stage-tools-state">Moving points</span>}
+        </div>
+      )}
+      {!onTool && pointTarget && !wandError && !wandBusy && (
         // A small tag in the top corner; the full help opens only while the pointer is on it.
         <div className="point-hint" data-points-held={pointsHeld || undefined} data-no-advance>
           <b>{pointsHeld ? "Moving points" : "Adding points"}</b>

@@ -1,4 +1,4 @@
-export const ENGINE_VERSION = "3.9.0-claude";
+export const ENGINE_VERSION = "3.10.0-claude";
 export type ReleaseFeature = {
   name: string;
   description: string;
@@ -22,7 +22,13 @@ const f = (
   action?: string,
 ): ReleaseFeature => ({ name, description, steps: path.split(" → "), action });
 export const releases: Release[] = [
- {version:"3.9.0-claude",name:"Sub-scene effects, preview with controls beside it",by:"Claude",date:"2026-11-05",timestamp:"2026-11-05T09:05:52Z",features:[
+ {version:"3.10.0-claude",name:"Area tools on the scene: brush, eraser, undo and Done",by:"Claude",date:"2026-11-05",timestamp:"2026-11-05T09:26:03Z",features:[
+ f("Area tools on the scene", "While you draw or paint an area, a small bar in the top corner of the scene switches between Points, Wand, Edges, Brush and Eraser, sets the brush size, undoes the last point or stroke, and finishes with Done. It shows wherever the scene does, including the preview window and the preview screen.", "Effects → Draw region → toolbar on the scene", "editor"),
+ f("Eraser and undo for painted areas", "Eraser paints parts out of an area, so you can keep what you want and remove a mistake. Undo takes back one stroke, point or selection at a time. Remove last point now only appears for areas drawn with points, so it never wipes a painted area.", "Effects → zone → Eraser", "editor"),
+ f("Sub-scene stays selected", "A sub-scene picked with Edit effects stays selected while you move through the scene's dialogue, draw and add effects, until you pick another scene or go back with × or the Editing effects of menu.", "Story library → sub-scenes → Edit effects", "editor"),
+ f("Unlock boundary works", "Unlock boundary on a rain zone now really removes the locked boundary. Zones show when their boundary is locked, and the zone being edited is outlined with its own Done button.", "Effects → Rain → zone → Unlock boundary", "editor")
+ ]},
+ {version:"3.9.0-claude",name:"Sub-scene effects, preview with controls beside it",by:"Claude",commit:"e099826",date:"2026-11-05",timestamp:"2026-11-05T09:05:52Z",features:[
  f("Edit a sub-scene's effects", "Each sub-scene in the sub-scene list (story library and Scenes advanced) has Edit effects: the effects controls, the preview and any linked preview window switch to that sub-scene, even when no dialogue uses it yet. Nothing opens or enlarges, so it suits a preview already open on another screen. The Effects & interactions panel also has an Editing effects of menu to switch between the main scene and its sub-scenes, and the preview shows a Sub-scene tag (× goes back).", "Story library → sub-scenes → Edit effects", "editor"),
  f("Preview with controls beside it", "Preview (on a sub-scene) and Preview & effects (on a selected scene in Scenes advanced) fill this window with the scene. Show controls puts the effects and scene controls beside the preview; it stays closed until you open it, and each kind of window remembers your choice. Show full studio goes back where you were.", "Scenes advanced → Preview & effects → Show controls", "workspace"),
  f("Smaller drawing hint", "The point-drawing hint is now a small Adding points / Moving points tag in the top corner of the scene; hover it for the full help, so it never covers your points.", "Effects → Draw region → hint in the top corner", "editor")

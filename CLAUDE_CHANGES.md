@@ -4,6 +4,13 @@ Every change in this list was written by Claude (Anthropic) at the request of th
 
 > **Where this lives:** branch `claude` on GitHub (the hosted Claude version). Versions follow Stillframe 3 (3.x) and end in `-claude`. `main` is the original line and is untouched. The local Stillframe 3 studio (`npm run stillframe3`, localhost:5174) runs the same code from the local branch `claude-v3`, which is never pushed.
 
+## Stillframe 3.10 — area tools on the scene: brush, eraser, undo and Done (2026-11-05, engine 3.10.0-claude)
+
+- **Scene toolbar** (`src/Stage.tsx`): with the new `onTool` / `onUndo` props, the Stage shows a compact *Area tools* bar in its top-right corner while an area or the rain mask is being edited: Points / Wand / Edges / Brush / Eraser (plus Pivot / Move / Tilt for character patches), brush size, wand reach, Undo (the studio's undo, one point or stroke per step), Done, and a hover help. It replaces the 3.9 hint tag in the studio and shows in linked preview windows and the preview screen. The old *Selection tools* bar below the preview stays.
+- **Zone buttons** (`src/Zones.tsx`): Brush and Eraser buttons (was *Edit selection / brush*); *Remove last point* only for areas drawn with points (it used to wipe a painted area); the zone being edited is outlined with a note and a Done button; the summary says when the boundary is locked.
+- **Unlock boundary fix:** rain zones were merged with `Object.assign`, so a removed `boundary` stayed. They are now replaced whole.
+- **Sub-scene choice** (`src/App.tsx`): `viewOverride` is now `{scene, view}` and holds while you stay in that scene (moving through dialogue, drawing, adding effects). Picking another scene, a dialogue from the sub-scene list, × or the *Editing effects of* menu ends it. In 3.9 it was tied to the selected dialogue, so any move to another dialogue (for example clicking the preview, also from a linked window) dropped back to the main scene.
+
 ## Stillframe 3.9 — sub-scene effects, preview with controls beside it (2026-11-05, engine 3.9.0-claude)
 
 - **Sub-scene effects** (`src/App.tsx`, `src/SubsceneList.tsx`): `viewOverride` (`{scene, node, view}`) picks the sub-scene the effects controls edit and the preview shows, even when no dialogue uses it; it holds while the same dialogue stays selected. `sceneView(scene, node, viewId)` and the Stage's new `viewId` prop show it. *Edit effects* / *Preview* buttons on each sub-scene (library and Scenes advanced), an *Editing effects of* menu at the top of Effects & interactions, and a *Sub-scene* tag on the preview (× returns to the dialogue's own scene). The choice is shared with linked windows through the tool sync.
