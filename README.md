@@ -2,7 +2,7 @@
 
 A working local-first visual novel authoring web app built from the supplied **Visual Novel Studio Technical Build Specification**. React 19, TypeScript, Vite, Zod, IndexedDB (`idb`), and native SVG compositing. No AI key or backend is needed.
 
-Current release: **2.9.0 — Phone controls made clear**. [Open the Cloudflare studio](https://visual-novel-8b9.pages.dev/?release=2.9.0). See [Quick phone switches and shared images](docs/PHONE_QUICK_CONTROLS.md). See [Window docking and studio search](docs/WINDOW_DOCKING_AND_SEARCH.md). See [Split workspaces and artwork folders](docs/SPLIT_WORKSPACES_AND_ART_LIBRARY.md). All current artwork is available as ordinary files in the [artwork library](artwork/README.md), including archived image-generation originals.
+**Latest version: Stillframe 3** ([open the studio](https://visual-novel-8b9.pages.dev/)). The exact release is `ENGINE_VERSION` in `src/releases.ts`. To run it on your computer: `npm ci`, then `npm run stillframe3`, and open http://localhost:5174/. Switch between the Stillframe 3 and classic designs, and light and dark, in **Settings → Studio design**. [AGENTS.md](AGENTS.md) has the full directions for people and AI assistants. See [Quick phone switches and shared images](docs/PHONE_QUICK_CONTROLS.md). See [Window docking and studio search](docs/WINDOW_DOCKING_AND_SEARCH.md). See [Split workspaces and artwork folders](docs/SPLIT_WORKSPACES_AND_ART_LIBRARY.md). All current artwork is available as ordinary files in the [artwork library](artwork/README.md), including archived image-generation originals.
 
 ## Run
 

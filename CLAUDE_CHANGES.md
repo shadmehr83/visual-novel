@@ -4,6 +4,13 @@ Every change in this list was written by Claude (Anthropic) at the request of th
 
 > **Where this lives:** branch `claude` on GitHub (the hosted Claude version). Versions follow Stillframe 3 (3.x) and end in `-claude`. `main` is the original line and is untouched. The local Stillframe 3 studio (`npm run stillframe3`, localhost:5174) runs the same code from the local branch `claude-v3`, which is never pushed.
 
+## Latest-version directions and main update (2026-11-08, engine 3.10.2-claude)
+
+- **Directions** (`AGENTS.md`, `README.md`): a *Latest version: Stillframe 3* section says where the release number is, which branch holds it, how to open or run it, how to switch design and light/dark, and how projects move between addresses, so any person or AI assistant can open the right version. The README's old "Current release 2.9.0" line is replaced. No code changed.
+- **Main:** at the owner's request `main` was fast-forwarded to this line, with its history intact.
+- **Upgrade check:** a project and panel layout saved by the previous `main` site (2.21.1) opened in 3.10.2 at the same address with the story, sizes and theme kept. Both designs, light and dark, popped-out and minimised panels (kept after a reload) were checked. `/play` and `/admin` load.
+- **Known:** the Playwright specs tried here (docking, customization, author play) fail on the previous `main` too, because the *Continue your story* start-up prompt covers the page; GitHub's checks on `main` were already failing.
+
 ## Stillframe 3.10.2 — scrolling beside the preview, Ctrl+Z undo (2026-11-05, engine 3.10.2-claude)
 
 - **Scroll fix** (`src/style.css`): `.inspector` has `overflow-y:auto; overscroll-behavior:contain`. In the preview-screen drawer it was stretched to its full content height, so it had nothing to scroll itself and `contain` stopped the wheel / two-finger scroll from reaching the drawer. The inspector now fills the drawer's height and scrolls itself (the drawer no longer scrolls). The preview screen's preview area scrolls (`overflow:hidden auto`) when its content is taller than the window.
